@@ -55,6 +55,7 @@
                 <div>
                     <label for="data_nascimento" class="block text-sm font-medium text-yellow-400 mb-2">Data de Nascimento</label>
                     <input type="text" id="data_nascimento" name="data_nascimento" placeholder="DD/MM/AAAA" maxlength="10" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-300">
+                    <p class="text-xs text-gray-500 text-left mt-1">Digite apenas os números.</p>
                 </div>
                 <button id="analisarBtn" class="w-full bg-[#D4AF37] text-black font-bold py-3 px-4 rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-yellow-500/20">
                     Analisar
@@ -101,7 +102,8 @@
         const dataNascimentoInput = document.getElementById('data_nascimento');
         
         dataNascimentoInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
+            let value = e.target.value.replace(/[^\d\/]/g, ''); // Permite números e /
+            value = value.replace(/(\/)/g, ''); // Remove / para reformatar
             if (value.length > 2) {
                 value = `${value.slice(0, 2)}/${value.slice(2)}`;
             }
@@ -112,10 +114,17 @@
         });
 
         function aplicarMascaraTelefone(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-            value = value.replace(/(\d)(\d{4})$/, '$1-$2');
-            e.target.value = value.slice(0, 15); // Limita o tamanho para (XX) XXXXX-XXXX
+            let value = e.target.value.replace(/[^\d\+\(\)\s\-]/g, ''); // Permite números e caracteres de telefone
+            let digitsOnly = value.replace(/\D/g, '');
+
+            if (value.startsWith('+') || digitsOnly.length > 11) {
+                 // Mantém números internacionais com + e dígitos
+                 e.target.value = '+' + digitsOnly;
+            } else { // Máscara brasileira (XX) XXXXX-XXXX
+                let maskedValue = digitsOnly.replace(/^(\d{2})(\d)/g, '($1) $2');
+                maskedValue = maskedValue.replace(/(\d)(\d{4})$/, '$1-$2');
+                e.target.value = maskedValue.slice(0, 15);
+            }
         }
 
         // ========================================================================
@@ -175,7 +184,7 @@
         // ========================================================================
         // |          FUNÇÃO PARA GERAR O SVG DO TRIÂNGULO (RESPONSIVO)           |
         // ========================================================================
-        function gerarTrianguloSVG(n, l, q) {
+        function gerarTrianguloSVG(n, l, q, arcanoRegenteNum) {
             const FONT_SIZE = 14;
             const LETTER_SPACING = 25;
             const LINE_HEIGHT = 30;
@@ -188,7 +197,8 @@
                 nome: `font-family: 'Cinzel', serif; font-size: ${FONT_SIZE + 4}px; fill: #D4AF37; font-weight: bold;`,
                 equivalente: `font-family: 'Inter', sans-serif; font-size: ${FONT_SIZE}px; fill: #a0a0a0;`,
                 reduzido: `font-family: 'Inter', sans-serif; font-size: ${FONT_SIZE}px; fill: #a0a0a0;`,
-                bloqueio: `font-family: 'Inter', sans-serif; font-size: ${FONT_SIZE}px; fill: #FF6B6B; font-weight: bold; text-shadow: 0 0 5px #FF6B6B;`
+                bloqueio: `font-family: 'Inter', sans-serif; font-size: ${FONT_SIZE}px; fill: #FF6B6B; font-weight: bold; text-shadow: 0 0 5px #FF6B6B;`,
+                arcano: `font-family: 'Inter', sans-serif; font-size: ${FONT_SIZE}px; fill: #c084fc; font-weight: bold; text-shadow: 0 0 5px #c084fc;`
             };
             
             const largura = (letras.length - 1) * LETTER_SPACING + MARGIN * 2;
@@ -224,7 +234,14 @@
 
                     if (!encontrouSequencia) {
                         const num = linha[charIndex];
-                        const estiloTspan = indiceLinha === 0 ? styles.equivalente : styles.reduzido;
+                        let estiloTspan;
+
+                        if (indiceLinha === l.length - 1 && num === arcanoRegenteNum) {
+                            estiloTspan = styles.arcano;
+                        } else {
+                            estiloTspan = indiceLinha === 0 ? styles.equivalente : styles.reduzido;
+                        }
+                        
                         const xPos = MARGIN + (charIndex * LETTER_SPACING) + (indiceLinha * LETTER_SPACING / 2);
                         const yPos = MARGIN + (indiceLinha + 1) * LINE_HEIGHT;
                         conteudoSVG += `<text x="${xPos}" y="${yPos}" style="${estiloTspan}" text-anchor="middle">${num}</text>`;
@@ -279,6 +296,7 @@
         const handleAnalysis = () => {
             const nomeCompleto = nomeCompletoInput.value;
             const dataNascimento = dataNascimentoInput.value;
+            const dataLimpa = dataNascimento.replace(/\D/g, '');
             const resultadoDiv = document.getElementById('resultado');
             const loadingDiv = document.getElementById('loading');
             
@@ -288,10 +306,15 @@
                 showError("Por favor, preencha seu nome completo e data de nascimento.");
                 return;
             }
+            
+            if (dataLimpa.length !== 8) {
+                showError("A data de nascimento deve ter 8 dígitos (DDMMAAAA).");
+                return;
+            }
 
             const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
             if (!dateRegex.test(dataNascimento)) {
-                showError("Por favor, insira a data de nascimento no formato DD/MM/AAAA.");
+                showError("Por favor, insira uma data de nascimento válida.");
                 return;
             }
             
@@ -300,7 +323,7 @@
             setTimeout(() => {
                 try {
                     const triangulo = calcularTrianguloDaVida(nomeCompleto);
-                    const svg = gerarTrianguloSVG(nomeCompleto, triangulo.linhasTriangulo, triangulo.sequencias);
+                    const svg = gerarTrianguloSVG(nomeCompleto, triangulo.linhasTriangulo, triangulo.sequencias, triangulo.arcanoRegente);
                     
                     document.getElementById('svgContainer').innerHTML = svg;
                     
@@ -361,7 +384,10 @@
                             <input type="text" id="lead_nome" placeholder="Seu primeiro nome" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
                             <input type="text" id="lead_sobrenome" placeholder="Seu sobrenome" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
                             <input type="email" id="lead_email" placeholder="Seu melhor e-mail" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                            <input type="tel" id="lead_telefone" placeholder="Seu telefone (Opcional)" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                            <div>
+                                <input type="tel" id="lead_telefone" placeholder="Seu celular com DDD (Opcional)" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                <p class="text-xs text-gray-500 text-left mt-1">Digite apenas números com DDD. Para números internacionais, inclua o código do país (+55).</p>
+                            </div>
                             <button id="submitLeadBtn" class="w-full bg-[#D4AF37] text-black font-bold py-2 px-4 rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105">Quero ser avisado!</button>
                         </div>
                     `;
@@ -376,8 +402,12 @@
                         const leadNome = document.getElementById('lead_nome').value;
                         const leadSobrenome = document.getElementById('lead_sobrenome').value;
                         const leadEmail = document.getElementById('lead_email').value;
-                        const leadTelefone = document.getElementById('lead_telefone').value;
+                        const leadTelefoneInput = document.getElementById('lead_telefone');
+                        const leadTelefone = leadTelefoneInput.value;
                         
+                        // Limpa o telefone para envio e validação
+                        const telefoneLimpo = leadTelefone.replace(/\D/g, '');
+
                         if (!leadNome || !leadSobrenome || !leadEmail) {
                             showError("Por favor, preencha seu nome, sobrenome e e-mail para continuar.");
                             return;
@@ -386,6 +416,11 @@
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (!emailRegex.test(leadEmail)) {
                             showError("Por favor, insira um e-mail válido.");
+                            return;
+                        }
+
+                        if (leadTelefone && (telefoneLimpo.length < 10 || telefoneLimpo.length > 15)) {
+                            showError("Por favor, insira um número de celular válido com DDD.");
                             return;
                         }
 
@@ -399,7 +434,7 @@
                             nome: leadNome,
                             sobrenome: leadSobrenome,
                             email: leadEmail,
-                            telefone: leadTelefone
+                            telefone: telefoneLimpo // Envia apenas os números
                         };
 
                         try {
