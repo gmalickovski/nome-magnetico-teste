@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nome Magnético - Análise Rápida</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        /* Custom scrollbar for a better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #D4AF37;
+            border-radius: 10px;
+            border: 2px solid #1a1a1a;
+        }
+        /* Glassmorphism effect for the results */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-black text-gray-200 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-2xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="font-cinzel text-4xl md:text-5xl font-bold text-[#D4AF37] tracking-wider">
+                Nome Magnético
+            </h1>
+            <p class="text-gray-400 mt-2 text-lg">Descubra os segredos do seu nome e data de nascimento.</p>
+        </header>
+
+        <main class="bg-[#111111] p-6 md:p-8 rounded-2xl shadow-2xl shadow-yellow-500/10 border border-yellow-500/20">
+            <div class="space-y-6">
+                <div>
+                    <label for="nome_completo" class="block text-sm font-medium text-yellow-400 mb-2">Nome Completo</label>
+                    <input type="text" id="nome_completo" name="nome_completo" placeholder="Digite seu nome completo" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-300">
+                </div>
+                <div>
+                    <label for="data_nascimento" class="block text-sm font-medium text-yellow-400 mb-2">Data de Nascimento</label>
+                    <input type="text" id="data_nascimento" name="data_nascimento" placeholder="DD/MM/AAAA" maxlength="10" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-300">
+                </div>
+                <button id="analisarBtn" class="w-full bg-[#D4AF37] text-black font-bold py-3 px-4 rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-yellow-500/20">
+                    Analisar
+                </button>
+            </div>
+        </main>
+        
+        <!-- Area de Resultado -->
+        <div id="loading" class="text-center mt-8 text-yellow-400 hidden">
+            <svg class="animate-spin h-8 w-8 text-yellow-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-2">Calculando seu universo interior...</p>
+        </div>
+
+        <div id="resultado" class="mt-8 hidden glass-effect p-6 md:p-8 rounded-2xl">
+            <!-- SVG do Triangulo sera inserido aqui -->
+            <div id="svgContainer" class="w-full mb-6 flex justify-center"></div>
+            
+            <!-- Textos explicativos serao inseridos aqui -->
+            <div id="textoContainer" class="space-y-6"></div>
+        </div>
+        
+        <!-- Modal de Erro -->
+        <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50">
+            <div class="bg-[#111111] rounded-2xl p-8 max-w-sm w-full text-center border border-red-500/50 shadow-lg shadow-red-500/20">
+                <h3 class="font-cinzel text-2xl text-red-500 mb-4">Atenção</h3>
+                <p id="errorMessage" class="text-gray-300 mb-6"></p>
+                <button onclick="document.getElementById('errorModal').classList.add('hidden')" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-500 transition duration-300">
+                    Fechar
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ========================================================================
+        // |                  FUNÇÕES DE MÁSCARA DE INPUT                         |
+        // ========================================================================
+
+        const nomeCompletoInput = document.getElementById('nome_completo');
+        const dataNascimentoInput = document.getElementById('data_nascimento');
+        
+        dataNascimentoInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 2) {
+                value = `${value.slice(0, 2)}/${value.slice(2)}`;
+            }
+            if (value.length > 5) {
+                value = `${value.slice(0, 5)}/${value.slice(5, 9)}`;
+            }
+            e.target.value = value;
+        });
+
+        function aplicarMascaraTelefone(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+            value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+            e.target.value = value.slice(0, 15); // Limita o tamanho para (XX) XXXXX-XXXX
+        }
+
+        // ========================================================================
+        // |                  FUNÇÕES DE CÁLCULO NUMEROLÓGICO                     |
+        // ========================================================================
+        
+        const tabelaConversao = { 'A': 1, 'I': 1, 'Q': 1, 'J': 1, 'Y': 1, 'B': 2, 'K': 2, 'R': 2, 'C': 3, 'G': 3, 'L': 3, 'S': 3, 'D': 4, 'M': 4, 'T': 4, 'X': 4, 'E': 5, 'H': 5, 'N': 5, 'U': 6, 'V': 6, 'W': 6, 'O': 7, 'Z': 7, 'F': 8, 'P': 8 };
+        
+        function calcularValor(l) {
+            const d = l.normalize('NFD');
+            const e = d.charAt(0).toUpperCase();
+            if (e === 'Ç') return 6;
+            let t = tabelaConversao[e] || 0;
+            if (d.length > 1) {
+                const a = d.charAt(1);
+                switch (a) {
+                    case '́': case '\u0301': t += 2; break;
+                    case '̃': case '\u0303': t += 3; break;
+                    case '̀': case '\u0300': t *= 3; break;
+                }
+            }
+            return t;
+        }
+
+        function reduzirNumero(n, p = false) {
+            if (n === undefined || n === null) return 0;
+            n = parseInt(n);
+            while (n > 9 && !(p && (n === 11 || n === 22))) {
+                n = String(n).split('').reduce((c, d) => c + parseInt(d, 10), 0);
+            }
+            return n;
+        }
+
+        function calcularTrianguloDaVida(n) {
+            const o = n.replace(/\s+/g, "").toUpperCase();
+            if (!o) return { linhasTriangulo: [], arcanos: [], arcanoRegente: null, sequencias: [] };
+            let t = o.split('').map(l => calcularValor(l));
+            const i = [t];
+            const r = [];
+            for (let k = 0; k < t.length - 1; k++) r.push(parseInt(`${t[k]}${t[k+1]}`));
+            let e = t;
+            while (e.length > 1) {
+                const s = [];
+                for (let j = 0; j < e.length - 1; j++) s.push(reduzirNumero(e[j] + e[j + 1]));
+                i.push(s);
+                e = s;
+            }
+            const c = new Set;
+            i.forEach(l => {
+                const s = l.join('');
+                const m = s.match(/(\d)\1{2,}/g) || [];
+                m.forEach(q => c.add(q));
+            });
+            return { linhasTriangulo: i, arcanos: [...new Set(r)], arcanoRegente: e[0] || null, sequencias: Array.from(c) };
+        }
+
+        // ========================================================================
+        // |          FUNÇÃO PARA GERAR O SVG DO TRIÂNGULO (RESPONSIVO)           |
+        // ========================================================================
+        function gerarTrianguloSVG(n, l, q) {
+            const FONT_SIZE = 14;
+            const LETTER_SPACING = 25;
+            const LINE_HEIGHT = 30;
+            const MARGIN = 40;
+
+            const nomeLimpo = n.replace(/\s+/g, "").toUpperCase();
+            const letras = nomeLimpo.split("");
+
+            const styles = {
+                nome: `font-family: 'Cinzel', serif; font-size: ${FONT_SIZE + 4}px; fill: #D4AF37; font-weight: bold;`,
+                equivalente: `font-family: 'Inter', sans-serif; font-size: ${FONT_SIZE}px; fill: #a0a0a0;`,
+                reduzido: `font-family: 'Inter', sans-serif; font-size: ${FONT_SIZE}px; fill: #a0a0a0;`,
+                bloqueio: `font-family: 'Inter', sans-serif; font-size: ${FONT_SIZE}px; fill: #FF6B6B; font-weight: bold; text-shadow: 0 0 5px #FF6B6B;`
+            };
+            
+            const largura = (letras.length - 1) * LETTER_SPACING + MARGIN * 2;
+            const altura = (l.length) * LINE_HEIGHT + MARGIN * 2;
+
+            let conteudoSVG = "";
+
+            letras.forEach((letra, i) => {
+                const xPos = MARGIN + (i * LETTER_SPACING);
+                const yPos = MARGIN;
+                conteudoSVG += `<text x="${xPos}" y="${yPos}" style="${styles.nome}" text-anchor="middle">${letra}</text>`;
+            });
+
+            l.forEach((linha, indiceLinha) => {
+                const linhaString = linha.join('');
+                let charIndex = 0;
+
+                while (charIndex < linha.length) {
+                    let encontrouSequencia = false;
+                    for (const sequencia of q) {
+                        if (linhaString.substring(charIndex).startsWith(sequencia)) {
+                            const numerosSequencia = sequencia.split('');
+                            numerosSequencia.forEach((num, seqIndex) => {
+                                const xPos = MARGIN + ((charIndex + seqIndex) * LETTER_SPACING) + (indiceLinha * LETTER_SPACING / 2);
+                                const yPos = MARGIN + (indiceLinha + 1) * LINE_HEIGHT;
+                                conteudoSVG += `<text x="${xPos}" y="${yPos}" style="${styles.bloqueio}" text-anchor="middle">${num}</text>`;
+                            });
+                            charIndex += sequencia.length;
+                            encontrouSequencia = true;
+                            break;
+                        }
+                    }
+
+                    if (!encontrouSequencia) {
+                        const num = linha[charIndex];
+                        const estiloTspan = indiceLinha === 0 ? styles.equivalente : styles.reduzido;
+                        const xPos = MARGIN + (charIndex * LETTER_SPACING) + (indiceLinha * LETTER_SPACING / 2);
+                        const yPos = MARGIN + (indiceLinha + 1) * LINE_HEIGHT;
+                        conteudoSVG += `<text x="${xPos}" y="${yPos}" style="${estiloTspan}" text-anchor="middle">${num}</text>`;
+                        charIndex++;
+                    }
+                }
+            });
+
+            // SVG agora usa viewBox para ser responsivo
+            const svgFinal = `<svg viewBox="0 0 ${largura} ${altura}" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: ${largura}px; display: block; margin: 0 auto;">
+                ${conteudoSVG}
+            </svg>`;
+
+            return svgFinal.replace(/\n\s*/g, '');
+        }
+
+        // ========================================================================
+        // |                  TEXTOS EXPLICATIVOS E LÓGICA DA PÁGINA              |
+        // ========================================================================
+        
+        const textosBloqueios = {
+            '111': { titulo: "Bloqueio de Iniciação (111)", texto: "Indica dificuldade em iniciar projetos e afirmar sua individualidade. Pode haver uma tendência à dependência ou à falta de confiança. O antídoto é desenvolver a coragem, a autonomia e acreditar no seu potencial de liderança." },
+            '222': { titulo: "Bloqueio de Associação (222)", texto: "Reflete desafios em parcerias e relacionamentos. Pode haver sensibilidade excessiva, timidez ou dificuldade em cooperar. O antídoto é cultivar a diplomacia, a paciência e buscar o equilíbrio entre dar e receber." },
+            '333': { titulo: "Bloqueio de Expressão (333)", texto: "Aponta para uma dificuldade em comunicar seus sentimentos e ideias. Pode levar à superficialidade ou à dispersão de energia. O antídoto é focar na sua criatividade, expressar-se com autenticidade e otimismo." },
+            '444': { titulo: "Bloqueio de Estruturação (444)", texto: "Indica dificuldades no trabalho e na disciplina, com consequências na vida material. Pode haver rigidez ou desorganização. O antídoto é desenvolver métodos, ter foco, disciplina e ser persistente em seus objetivos." },
+            '555': { titulo: "Bloqueio de Liberdade (555)", texto: "Sinaliza um uso inadequado da liberdade, podendo levar à impulsividade, irresponsabilidade ou excessos. O antídoto é buscar o equilíbrio, usar sua versatilidade com sabedoria e canalizar sua energia para mudanças construtivas." },
+            '666': { titulo: "Bloqueio de Harmonia (666)", texto: "Mostra desafios nos âmbitos familiar e social. Pode haver uma tendência a ser controlador, ciumento ou a se anular pelos outros. O antídoto é praticar o amor com equilíbrio, assumir responsabilidades sem sacrifício excessivo e buscar a harmonia interna." },
+            '777': { titulo: "Bloqueio de Conexão Espiritual (777)", texto: "Indica uma tendência ao isolamento, ao ceticismo excessivo ou à dificuldade em confiar na sua intuição e fé. O antídoto é buscar o autoconhecimento, meditar e equilibrar a razão com a espiritualidade." },
+            '888': { titulo: "Bloqueio de Poder e Abundância (888)", texto: "Reflete dificuldades em lidar com dinheiro, poder e autoridade. Pode levar à ganância ou, no extremo oposto, ao medo do sucesso material. O antídoto é buscar a justiça, o equilíbrio entre o material e o espiritual e usar seu poder para o bem comum." },
+            '999': { titulo: "Bloqueio de Compaixão Universal (999)", texto: "Aponta para dificuldades em praticar o desapego, o perdão e a compaixão. Pode haver uma tendência ao egoísmo ou a guardar ressentimentos. O antídoto é desenvolver a generosidade, a empatia e compreender que o fim de um ciclo é o começo de outro." },
+        };
+
+        const textosArcanos = {
+            1: { titulo: "Arcano Regente 1: O Mago", texto: "Seu caminho é regido pela iniciativa, poder de vontade e habilidade de manifestar seus desejos. Você tem o poder de transformar ideias em realidade. A chave é usar seus talentos com sabedoria e foco." },
+            2: { titulo: "Arcano Regente 2: A Papisa", texto: "Sua jornada é guiada pela intuição, sabedoria interior e paciência. Você possui uma profunda conexão com o subconsciente. A chave é confiar em sua voz interior e buscar o conhecimento." },
+            3: { titulo: "Arcano Regente 3: A Imperatriz", texto: "Seu destino é marcado pela criatividade, abundância e expressão. Você tem o dom de nutrir e dar vida a projetos e relacionamentos. A chave é expressar sua criatividade e cuidar do que ama." },
+            4: { titulo: "Arcano Regente 4: O Imperador", texto: "Seu caminho é o da estrutura, da ordem e da liderança. Você tem a capacidade de construir bases sólidas e seguras para o futuro. A chave é usar sua autoridade com disciplina e responsabilidade." },
+            5: { titulo: "Arcano Regente 5: O Papa", texto: "Sua jornada é guiada pela busca de conhecimento, espiritualidade e propósito. Você atua como uma ponte entre o material e o divino. A chave é compartilhar sua sabedoria e seguir suas convicções." },
+            6: { titulo: "Arcano Regente 6: Os Enamorados", texto: "Seu destino envolve escolhas importantes, relacionamentos e harmonia. Você está constantemente aprendendo através de suas uniões e decisões. A chave é fazer escolhas alinhadas com seu coração e seus valores." },
+            7: { titulo: "Arcano Regente 7: O Carro", texto: "Seu caminho é de vitória, determinação e superação. Você tem a força para dirigir sua vida na direção que deseja, superando obstáculos. A chave é manter o controle e a direção, equilibrando as forças opostas." },
+            8: { titulo: "Arcano Regente 8: A Justiça", texto: "Sua jornada é regida pelo equilíbrio, pela verdade e pela lei de causa e efeito. Suas ações, boas ou más, retornarão para você. A chave é agir com integridade, imparcialidade e responsabilidade." },
+            9: { titulo: "Arcano Regente 9: O Eremita", texto: "Seu caminho é de introspecção, sabedoria e busca interior. Você precisa de momentos de solidão para encontrar suas próprias respostas. A chave é iluminar seu próprio caminho com a luz do seu conhecimento interior." },
+        };
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').classList.remove('hidden');
+        }
+
+        const analisarBtn = document.getElementById('analisarBtn');
+
+        const handleAnalysis = () => {
+            const nomeCompleto = nomeCompletoInput.value;
+            const dataNascimento = dataNascimentoInput.value;
+            const resultadoDiv = document.getElementById('resultado');
+            const loadingDiv = document.getElementById('loading');
+            
+            resultadoDiv.classList.add('hidden');
+
+            if (!nomeCompleto || !dataNascimento) {
+                showError("Por favor, preencha seu nome completo e data de nascimento.");
+                return;
+            }
+
+            const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+            if (!dateRegex.test(dataNascimento)) {
+                showError("Por favor, insira a data de nascimento no formato DD/MM/AAAA.");
+                return;
+            }
+            
+            loadingDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    const triangulo = calcularTrianguloDaVida(nomeCompleto);
+                    const svg = gerarTrianguloSVG(nomeCompleto, triangulo.linhasTriangulo, triangulo.sequencias);
+                    
+                    document.getElementById('svgContainer').innerHTML = svg;
+                    
+                    const textoContainer = document.getElementById('textoContainer');
+                    textoContainer.innerHTML = '';
+
+                    // Adicionar textos dos bloqueios
+                    if (triangulo.sequencias.length > 0) {
+                        const bloqueiosTitle = document.createElement('h2');
+                        bloqueiosTitle.className = 'font-cinzel text-2xl font-bold text-yellow-400 border-b-2 border-yellow-500/30 pb-2';
+                        bloqueiosTitle.textContent = 'Suas Sequências de Bloqueio';
+                        textoContainer.appendChild(bloqueiosTitle);
+
+                        triangulo.sequencias.forEach(seq => {
+                            const info = textosBloqueios[seq];
+                            if (info) {
+                                const div = document.createElement('div');
+                                const h3 = document.createElement('h3');
+                                h3.className = 'font-bold text-lg text-red-400';
+                                h3.textContent = info.titulo;
+                                const p = document.createElement('p');
+                                p.className = 'text-gray-300';
+                                p.textContent = info.texto;
+                                div.appendChild(h3);
+                                div.appendChild(p);
+                                textoContainer.appendChild(div);
+                            }
+                        });
+                    } else {
+                         const semBloqueios = document.createElement('div');
+                         semBloqueios.innerHTML = `
+                            <h2 class="font-cinzel text-2xl font-bold text-yellow-400 border-b-2 border-yellow-500/30 pb-2">Análise de Sequências</h2>
+                            <p class="text-gray-300 mt-4">Parabéns! Seu nome não apresenta sequências de bloqueio evidentes. Isso indica um fluxo energético mais livre para você manifestar seus talentos.</p>
+                         `;
+                         textoContainer.appendChild(semBloqueios);
+                    }
+
+                    // Adicionar texto do arcano regente
+                    if (triangulo.arcanoRegente && textosArcanos[triangulo.arcanoRegente]) {
+                        const infoArcano = textosArcanos[triangulo.arcanoRegente];
+                        const divArcano = document.createElement('div');
+                        divArcano.innerHTML = `
+                            <h2 class="font-cinzel text-2xl font-bold text-yellow-400 border-b-2 border-yellow-500/30 pb-2 mt-8">Seu Arcano Regente</h2>
+                            <h3 class="font-bold text-lg text-purple-400 mt-4">${infoArcano.titulo}</h3>
+                            <p class="text-gray-300">${infoArcano.texto}</p>
+                        `;
+                        textoContainer.appendChild(divArcano);
+                    }
+                    
+                    // Adicionar formulário de captura
+                    const ctaForm = document.createElement('div');
+                    ctaForm.id = 'ctaFormContainer';
+                    ctaForm.className = 'mt-8 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-center transition-all duration-500';
+                    ctaForm.innerHTML = `
+                        <p class="font-bold text-yellow-300 text-xl mb-2">Quer desvendar seu potencial completo?</p>
+                        <p class="text-gray-300 mb-4">Seja o primeiro a saber sobre o relançamento do <strong class="font-cinzel">Nome Magnético</strong> e receba conteúdos exclusivos. Deixe seus dados abaixo!</p>
+                        <div class="space-y-4 mt-4">
+                            <input type="text" id="lead_nome" placeholder="Seu primeiro nome" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                            <input type="text" id="lead_sobrenome" placeholder="Seu sobrenome" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                            <input type="email" id="lead_email" placeholder="Seu melhor e-mail" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                            <input type="tel" id="lead_telefone" placeholder="Seu telefone (Opcional)" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                            <button id="submitLeadBtn" class="w-full bg-[#D4AF37] text-black font-bold py-2 px-4 rounded-lg hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105">Quero ser avisado!</button>
+                        </div>
+                    `;
+                    textoContainer.appendChild(ctaForm);
+                    
+                    // Adiciona a máscara de telefone ao novo campo
+                    document.getElementById('lead_telefone').addEventListener('input', aplicarMascaraTelefone);
+                    
+                    // Adiciona o listener para o botão de envio do lead
+                    document.getElementById('submitLeadBtn').addEventListener('click', async () => {
+                        const submitButton = document.getElementById('submitLeadBtn');
+                        const leadNome = document.getElementById('lead_nome').value;
+                        const leadSobrenome = document.getElementById('lead_sobrenome').value;
+                        const leadEmail = document.getElementById('lead_email').value;
+                        const leadTelefone = document.getElementById('lead_telefone').value;
+                        
+                        if (!leadNome || !leadSobrenome || !leadEmail) {
+                            showError("Por favor, preencha seu nome, sobrenome e e-mail para continuar.");
+                            return;
+                        }
+                        
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(leadEmail)) {
+                            showError("Por favor, insira um e-mail válido.");
+                            return;
+                        }
+
+                        // Feedback visual para o usuário
+                        submitButton.disabled = true;
+                        submitButton.textContent = 'Enviando...';
+                        submitButton.classList.add('opacity-50');
+
+                        const webhookUrl = 'https://n8n.studiomlk.com.br/webhook/nome-magnetico-teste';
+                        const data = {
+                            nome: leadNome,
+                            sobrenome: leadSobrenome,
+                            email: leadEmail,
+                            telefone: leadTelefone
+                        };
+
+                        try {
+                            const response = await fetch(webhookUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(data),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Falha no envio dos dados.');
+                            }
+
+                            const formContainer = document.getElementById('ctaFormContainer');
+                            formContainer.innerHTML = `
+                                <div class="text-center py-4">
+                                    <svg class="w-12 h-12 text-green-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <p class="font-bold text-green-300 text-xl">Obrigado!</p>
+                                    <p class="text-gray-300 mt-2">Você está na nossa lista VIP e será notificado em primeira mão sobre o relançamento do <strong class="font-cinzel">Nome Magnético</strong>!</p>
+                                </div>
+                            `;
+
+                        } catch (error) {
+                            console.error('Erro ao enviar para o webhook:', error);
+                            showError('Não foi possível registrar seu interesse. Por favor, tente novamente mais tarde.');
+                            // Reabilita o botão em caso de erro
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Quero ser avisado!';
+                            submitButton.classList.remove('opacity-50');
+                        }
+                    });
+
+
+                    loadingDiv.classList.add('hidden');
+                    resultadoDiv.classList.remove('hidden');
+                    resultadoDiv.scrollIntoView({ behavior: 'smooth' });
+
+                } catch (error) {
+                    console.error("Erro no cálculo:", error);
+                    loadingDiv.classList.add('hidden');
+                    showError("Ocorreu um erro ao processar sua análise. Por favor, tente novamente.");
+                }
+            }, 1500); // Simula um tempo de carregamento
+        };
+
+        analisarBtn.addEventListener('click', handleAnalysis);
+
+        [nomeCompletoInput, dataNascimentoInput].forEach(input => {
+            input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    analisarBtn.click();
+                }
+            });
+        });
+
+    </script>
+
+    <!-- Script de Rastreamento Mautic -->
+    <script>
+        (function(w,d,t,u,n,a,m){w['MauticTrackingObject']=n;
+            w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)},a=d.createElement(t),
+            m=d.getElementsByTagName(t)[0];a.async=1;a.src=u;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://mautic.claudiadelanni.com/mtc.js','mt');
+
+        mt('send', 'pageview');
+    </script>
+    <!-- Fim do Script Mautic -->
+
+</body>
+</html>
