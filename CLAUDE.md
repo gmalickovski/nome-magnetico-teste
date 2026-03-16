@@ -121,10 +121,40 @@ F P       = 8
 4. **Missão/Impressão**: apenas consoantes
 5. **Personalidade**: primeiro nome apenas
 
-### Bloqueios (sequências no Triângulo da Vida)
+### Os 4 Triângulos Numerológicos
+Cada análise calcula TODOS os 4 triângulos (não apenas o Triângulo da Vida):
+
+| Triângulo | Modificador da linha base | Dimensão revelada |
+|-----------|--------------------------|-------------------|
+| **Vida** (básico) | valor da letra apenas | Aspectos gerais |
+| **Pessoal** | letra + dia de nascimento (reduzido) | Vida íntima, reações internas |
+| **Social** | letra + mês de nascimento (reduzido) | Influências externas, percepção do mundo |
+| **Destino** | letra + (dia+mês reduzidos) | Resultados, missão, previsões |
+
+Bloqueios são detectados em **todos os 4 triângulos** e consolidados. Cada bloqueio inclui `aspectoSaude`.
+
+### Bloqueios (sequências repetidas ≥3 em qualquer triângulo)
 111=Iniciação, 222=Associação, 333=Expressão, 444=Estruturação,
 555=Liberdade, 666=Harmonia, 777=Conexão Espiritual,
 888=Poder e Abundância, 999=Compaixão Universal
+
+Cada bloqueio tem: `codigo`, `titulo`, `descricao`, `aspectoSaude`, `triangulos[]`
+
+### Lições Cármicas e Tendências Ocultas
+- **Lições Cármicas**: números 1–8 **ausentes** no nome → qualidades a desenvolver nesta encarnação
+- **Tendências Ocultas**: número que aparece **≥4 vezes** no nome → excesso daquela qualidade
+- Funções: `detectarLicoesCarmicas(nome)`, `detectarTendenciasOcultas(nome)`, `mapearFrequencias(nome)`
+- Módulo: `src/backend/numerology/karmic.ts`
+
+### Harmonização de Nomes
+Compatibilidade Expressão × Destino:
+- `total`: mesma vibração após redução
+- `complementar`: somam 9, 11 ou 22
+- `aceitavel`: diferença de 1
+- `incompativel`: demais casos
+- Critérios da assinatura: legibilidade, inclinação levemente ascendente, sem traços cortantes, estética equilibrada
+- **SEM radiestesia/pêndulo** — apenas critérios objetivos formais
+- Módulo: `src/backend/numerology/harmonization.ts`
 
 ---
 
@@ -134,9 +164,31 @@ F P       = 8
 type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa'
 ```
 
-- Produto principal: `nome_magnetico` (análise pessoal)
-- Produtos futuros: `nome_bebe` (nome para bebê), `nome_empresa` (nome empresarial)
-- Modelo: pagamento único por ciclo de 30 dias (não recorrente)
+### `nome_magnetico` — Análise Pessoal (produto principal)
+- Analisa nome de nascimento + data de nascimento
+- Calcula 5 números + 4 triângulos + bloqueios + lições cármicas + tendências ocultas
+- Sugere variações do nome sem bloqueios e compatíveis com Expressão × Destino
+- Gera guia de implementação da nova assinatura
+- Módulo: `src/backend/ai/brain.ts` (funções: `generateAnalysis`, `generateSuggestions`, `generateGuide`)
+
+### `nome_bebe` — Nome para Bebê
+- Input: sobrenome da família + data de nascimento do bebê + lista de nomes candidatos
+- Para cada candidato: calcula 4 triângulos + detecta bloqueios + verifica compatibilidade Expressão × Destino do bebê + lições cármicas
+- Rankeia por score 0–100 e aponta o melhor nome
+- Módulo: `src/backend/numerology/products/nome-bebe.ts`
+- Prompt IA: `src/backend/ai/prompts/baby-prompt.ts`
+- Brain: `generateBabyAnalysis(params, userId, analysisId)`
+
+### `nome_empresa` — Nome Empresarial
+- Input: nome do sócio principal + data de nascimento do sócio + data de fundação (opcional) + nomes candidatos
+- Analisa compatibilidade com Destino do sócio E Destino da empresa (data de fundação)
+- Penalidade extra por tendência oculta do 8 (excesso de materialismo)
+- Módulo: `src/backend/numerology/products/nome-empresa.ts`
+- Prompt IA: `src/backend/ai/prompts/company-prompt.ts`
+- Brain: `generateCompanyAnalysis(params, userId, analysisId)`
+
+### Modelo de negócio
+Pagamento único por ciclo de 30 dias (não recorrente)
 
 ---
 
@@ -149,13 +201,19 @@ type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa'
 
 ### Tabelas principais
 - `profiles` — perfis (role, nome, email)
-- `subscriptions` — acesso (stripe_session_id, starts_at, ends_at, is_active computed)
-- `analyses` — análises completas (status: pending/processing/complete/error)
+- `subscriptions` — acesso (stripe_session_id, starts_at, ends_at, is_active computed); campo `metadata JSONB` para produtos específicos
+- `analyses` — análises completas (status: pending/processing/complete/error); campos expandidos: `triangulo_vida`, `triangulo_pessoal`, `triangulo_social`, `triangulo_destino`, `licoes_carmicas`, `tendencias_ocultas`, `frequencias_numeros`, `nome_harmonizado`, `expressao_harmonizada`
 - `magnetic_names` — nomes sugeridos com scores
+- `baby_name_inputs` — dados específicos do produto nome_bebe (sobrenome_familia, data_nascimento_bebe, nomes_candidatos[])
+- `company_name_inputs` — dados específicos do produto nome_empresa (nome_socio_principal, data_fundacao, nomes_candidatos[])
 - `ai_config` — configuração de IA editável em runtime
 - `ai_usage` — log de uso (loop guard)
 - `support_tickets` + `support_messages` — suporte
 - `faq_categories` + `faq_items` — FAQ editável
+
+### Migrations aplicadas
+- `001_nome_magnetico.sql` — schema base completo
+- `002_expand_analyses.sql` — expansão para 4 triângulos, lições cármicas, tendências ocultas, produtos nome_bebe e nome_empresa
 
 ---
 
@@ -180,6 +238,17 @@ O n8n recebe o evento e o Resend envia o email. Templates ficam no n8n.
 
 ---
 
+## Componentes App Disponíveis (src/frontend/components/app/)
+
+- `TriangleVisualization` — visualiza os 4 triângulos com abas e bloqueios expandíveis
+- `KarmicLessons` — exibe lições cármicas com cards expansíveis por número
+- `HiddenTendencies` — exibe tendências ocultas + barra de frequências 1–8
+- `SignatureEvaluation` — critérios objetivos da assinatura (sem radiestesia)
+- `BabyNameForm` — formulário completo para produto nome_bebe
+- `CompanyNameForm` — formulário completo para produto nome_empresa
+
+---
+
 ## Regras Gerais para Agentes
 
 1. **NUNCA** nomear arquivos ou variáveis com "astro" (é o framework, não o produto)
@@ -191,4 +260,6 @@ O n8n recebe o evento e o Resend envia o email. Templates ficam no n8n.
 7. **SEMPRE** checar subscription ativa antes de processar análise
 8. **NUNCA** chamar IA sem passar pelo LoopGuard
 9. Ao criar página nova → consultar Paper MCP para layout antes de codar
-10. Ao criar componente novo → verificar se existe em `src/frontend/components/ui/`
+10. Ao criar componente novo → verificar se existe em `src/frontend/components/ui/` ou `src/frontend/components/app/`
+11. **NUNCA** mencionar radiestesia, pêndulo ou técnicas radiestésicas — o projeto usa APENAS critérios formais objetivos
+12. Análise SEMPRE usa os 4 triângulos (não só o Triângulo da Vida) — importar `calcularTodosTriangulos` de `triangle.ts`

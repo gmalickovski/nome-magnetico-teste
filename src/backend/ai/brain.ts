@@ -9,18 +9,21 @@ import { SYSTEM_KABBALISTIC } from './prompts/system-kabbalistic';
 import { buildAnalysisPrompt, type AnalysisPromptParams } from './prompts/analysis-prompt';
 import { buildSuggestionsPrompt, type SuggestionsPromptParams } from './prompts/suggestions-prompt';
 import { buildGuidePrompt, type GuidePromptParams } from './prompts/guide-prompt';
+import { buildBabyAnalysisPrompt, type BabyPromptParams } from './prompts/baby-prompt';
+import { buildCompanyAnalysisPrompt, type CompanyPromptParams } from './prompts/company-prompt';
 import { getModel } from './config/models';
 
-/**
- * Gera a análise numerológica completa (sem streaming).
- */
-export async function generateAnalysis(
-  params: AnalysisPromptParams,
+// ================================================================
+// HELPER INTERNO
+// ================================================================
+
+async function runWithGuard(
+  buildPrompt: () => string,
+  task: 'analysis' | 'suggestions' | 'guide',
   userId: string | null,
   analysisId: string | null
 ): Promise<string> {
   const guard = new LoopGuard();
-  const task = 'analysis';
   const provider = await getActiveProvider(task);
   const model = getModel(provider, task);
 
@@ -28,7 +31,7 @@ export async function generateAnalysis(
     guard.canAttempt(attempt);
 
     try {
-      const userPrompt = buildAnalysisPrompt(params);
+      const userPrompt = buildPrompt();
       const response = await callAI(SYSTEM_KABBALISTIC, userPrompt, task, provider);
 
       guard.recordResponse(response.content, response.tokensInput + response.tokensOutput);
@@ -48,16 +51,28 @@ export async function generateAnalysis(
       return response.content;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-
       if (message.includes('Loop Guard')) throw err;
-
       console.warn(`[Brain] Tentativa ${attempt} falhou: ${message}`);
-
-      if (attempt === 3) throw new Error(`Análise falhou após 3 tentativas: ${message}`);
+      if (attempt === 3) throw new Error(`${task} falhou após 3 tentativas: ${message}`);
     }
   }
 
-  throw new Error('Brain: análise não concluída');
+  throw new Error(`Brain: ${task} não concluído`);
+}
+
+// ================================================================
+// NOME MAGNÉTICO PESSOAL
+// ================================================================
+
+/**
+ * Gera a análise numerológica completa (sem streaming).
+ */
+export async function generateAnalysis(
+  params: AnalysisPromptParams,
+  userId: string | null,
+  analysisId: string | null
+): Promise<string> {
+  return runWithGuard(() => buildAnalysisPrompt(params), 'analysis', userId, analysisId);
 }
 
 /**
@@ -105,41 +120,7 @@ export async function generateSuggestions(
   userId: string | null,
   analysisId: string | null
 ): Promise<string> {
-  const guard = new LoopGuard();
-  const task = 'suggestions';
-  const provider = await getActiveProvider(task);
-  const model = getModel(provider, task);
-
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    guard.canAttempt(attempt);
-
-    try {
-      const userPrompt = buildSuggestionsPrompt(params);
-      const response = await callAI(SYSTEM_KABBALISTIC, userPrompt, task, provider);
-
-      guard.recordResponse(response.content, response.tokensInput + response.tokensOutput);
-
-      await logAIUsage({
-        userId,
-        analysisId,
-        provider,
-        model,
-        task,
-        tokensInput: response.tokensInput,
-        tokensOutput: response.tokensOutput,
-        attemptNumber: attempt,
-        similarToPrevious: false,
-      });
-
-      return response.content;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (message.includes('Loop Guard')) throw err;
-      if (attempt === 3) throw new Error(`Sugestões falharam após 3 tentativas: ${message}`);
-    }
-  }
-
-  throw new Error('Brain: sugestões não concluídas');
+  return runWithGuard(() => buildSuggestionsPrompt(params), 'suggestions', userId, analysisId);
 }
 
 /**
@@ -150,39 +131,35 @@ export async function generateGuide(
   userId: string | null,
   analysisId: string | null
 ): Promise<string> {
-  const guard = new LoopGuard();
-  const task = 'guide';
-  const provider = await getActiveProvider(task);
-  const model = getModel(provider, task);
+  return runWithGuard(() => buildGuidePrompt(params), 'guide', userId, analysisId);
+}
 
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    guard.canAttempt(attempt);
+// ================================================================
+// NOME DO BEBÊ
+// ================================================================
 
-    try {
-      const userPrompt = buildGuidePrompt(params);
-      const response = await callAI(SYSTEM_KABBALISTIC, userPrompt, task, provider);
+/**
+ * Gera análise IA para seleção de nome de bebê.
+ */
+export async function generateBabyAnalysis(
+  params: BabyPromptParams,
+  userId: string | null,
+  analysisId: string | null
+): Promise<string> {
+  return runWithGuard(() => buildBabyAnalysisPrompt(params), 'analysis', userId, analysisId);
+}
 
-      guard.recordResponse(response.content, response.tokensInput + response.tokensOutput);
+// ================================================================
+// NOME DE EMPRESA
+// ================================================================
 
-      await logAIUsage({
-        userId,
-        analysisId,
-        provider,
-        model,
-        task,
-        tokensInput: response.tokensInput,
-        tokensOutput: response.tokensOutput,
-        attemptNumber: attempt,
-        similarToPrevious: false,
-      });
-
-      return response.content;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (message.includes('Loop Guard')) throw err;
-      if (attempt === 3) throw new Error(`Guia falhou após 3 tentativas: ${message}`);
-    }
-  }
-
-  throw new Error('Brain: guia não concluído');
+/**
+ * Gera análise IA para seleção de nome empresarial.
+ */
+export async function generateCompanyAnalysis(
+  params: CompanyPromptParams,
+  userId: string | null,
+  analysisId: string | null
+): Promise<string> {
+  return runWithGuard(() => buildCompanyAnalysisPrompt(params), 'analysis', userId, analysisId);
 }
