@@ -2,13 +2,12 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { createUserClient } from '../../backend/db/supabase';
 import { hasActiveSubscription } from '../../backend/db/subscriptions';
-import { createAnalysis, updateAnalysis } from '../../backend/db/analyses';
-import { calcularTrianguloDaVida, detectarBloqueios } from '../../backend/numerology/triangle';
+import { createAnalysis, updateAnalysis, saveMagneticNames } from '../../backend/db/analyses';
+import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from '../../backend/numerology/triangle';
 import { calcularCincoNumeros } from '../../backend/numerology/numbers';
+import { detectarLicoesCarmicas, detectarTendenciasOcultas, mapearFrequencias } from '../../backend/numerology/karmic';
 import { gerarNomesMagneticos } from '../../backend/numerology/suggestions';
-import { saveMagneticNames } from '../../backend/db/analyses';
 import { generateAnalysis, generateSuggestions } from '../../backend/ai/brain';
-import { buildSuggestionsPrompt } from '../../backend/ai/prompts/suggestions-prompt';
 import type { ProductType } from '../../backend/payments/stripe';
 
 const schema = z.object({
@@ -70,54 +69,80 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     try {
       await updateAnalysis(analysis.id, { status: 'processing' });
 
-      // Calcular numerologia
-      const triangulo = calcularTrianguloDaVida(nome_completo);
-      const bloqueios = detectarBloqueios(triangulo.sequencias);
+      // Calcular todos os 4 triângulos
+      const todosTriangulos = calcularTodosTriangulos(nome_completo, data_nascimento);
+      const bloqueios = detectarBloqueios(todosTriangulos);
+      const sequenciasNegativas = todasSequenciasNegativas(todosTriangulos);
       const cincoNumeros = calcularCincoNumeros(nome_completo, data_nascimento);
 
+      // Lições cármicas e tendências ocultas
+      const licoesCarmicas = detectarLicoesCarmicas(nome_completo);
+      const tendenciasOcultas = detectarTendenciasOcultas(nome_completo);
+      const frequenciasNumeros = mapearFrequencias(nome_completo);
+
+      const arcanoRegente = todosTriangulos.vida.arcanoRegente;
+
+      // Salvar dados numerológicos calculados
       await updateAnalysis(analysis.id, {
         numero_expressao: cincoNumeros.expressao,
         numero_destino: cincoNumeros.destino,
         numero_motivacao: cincoNumeros.motivacao,
         numero_missao: cincoNumeros.missao,
         numero_personalidade: cincoNumeros.personalidade,
-        arcano_regente: triangulo.arcanoRegente,
+        arcano_regente: arcanoRegente,
         bloqueios: bloqueios as unknown[],
-        triangulo_da_vida: triangulo as unknown,
+        triangulo_vida: todosTriangulos.vida as unknown,
+        triangulo_pessoal: todosTriangulos.pessoal as unknown,
+        triangulo_social: todosTriangulos.social as unknown,
+        triangulo_destino: todosTriangulos.destino as unknown,
+        licoes_carmicas: licoesCarmicas as unknown[],
+        tendencias_ocultas: tendenciasOcultas as unknown[],
+        frequencias_numeros: frequenciasNumeros as unknown,
       });
 
-      // Gerar análise IA
+      // Gerar análise IA completa (todos os 4 triângulos + karmic + tendências)
       const analiseTexto = await generateAnalysis(
-        { nomeCompleto: nome_completo, dataNascimento: data_nascimento, cincoNumeros, arcanoRegente: triangulo.arcanoRegente, bloqueios },
+        {
+          nomeCompleto: nome_completo,
+          dataNascimento: data_nascimento,
+          cincoNumeros,
+          arcanoRegente,
+          todosTriangulos,
+          bloqueios,
+          licoesCarmicas,
+          tendenciasOcultas,
+        },
         user.id,
         analysis.id
       );
 
-      // Gerar variações de nomes magnéticos
-      const variacoes = gerarNomesMagneticos(
-        nome_completo,
-        cincoNumeros.expressao,
-        cincoNumeros.destino,
-        8
-      );
+      // Gerar variações de nomes magnéticos (apenas para produto nome_magnetico)
+      if (product_type === 'nome_magnetico') {
+        const variacoes = gerarNomesMagneticos(
+          nome_completo,
+          cincoNumeros.expressao,
+          cincoNumeros.destino,
+          8
+        );
 
-      // Gerar descrição IA das sugestões
-      await generateSuggestions(
-        { nomeCompleto: nome_completo, cincoNumeros, variacoesCandidatas: variacoes },
-        user.id,
-        analysis.id
-      );
+        // Gerar descrição IA das sugestões
+        await generateSuggestions(
+          { nomeCompleto: nome_completo, cincoNumeros, variacoesCandidatas: variacoes },
+          user.id,
+          analysis.id
+        );
 
-      // Salvar nomes magnéticos
-      await saveMagneticNames(analysis.id, user.id, variacoes.map(v => ({
-        nomeSugerido: v.nome,
-        numeroExpressao: v.numerosExpressao,
-        motivacao: v.motivacao,
-        missao: v.missao,
-        temBloqueio: v.temBloqueio,
-        score: v.score,
-        justificativa: v.justificativa,
-      })));
+        // Salvar nomes magnéticos
+        await saveMagneticNames(analysis.id, user.id, variacoes.map(v => ({
+          nomeSugerido: v.nome,
+          numeroExpressao: v.numerosExpressao,
+          motivacao: v.motivacao,
+          missao: v.missao,
+          temBloqueio: v.temBloqueio,
+          score: v.score,
+          justificativa: v.justificativa,
+        })));
+      }
 
       await updateAnalysis(analysis.id, {
         analise_texto: analiseTexto,
