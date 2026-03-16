@@ -19,6 +19,10 @@ pnpm-debug.log*
 .env.local
 .env.production
 
+# arquivos de chaves secretas (nunca commitar)
+secretkey-*.txt
+secretkey-*.tx
+
 # macOS-specific files
 .DS_Store
 

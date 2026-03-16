@@ -26,8 +26,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // Verificar sessão para rotas protegidas
-  const accessToken = context.cookies.get('sb-access-token')?.value;
-  const refreshToken = context.cookies.get('sb-refresh-token')?.value;
+  // Cookie nomeado com o storageKey isolado do app (evita colisão com outros
+  // apps na mesma instância Supabase, ex: Sincro em localhost).
+  // O storageKey 'nome-magnetico-auth' é configurado em supabase-browser.ts.
+  const accessToken =
+    context.cookies.get('nome-magnetico-auth-access-token')?.value ??
+    context.cookies.get('sb-access-token')?.value;
+  const refreshToken =
+    context.cookies.get('nome-magnetico-auth-refresh-token')?.value ??
+    context.cookies.get('sb-refresh-token')?.value;
 
   if (!accessToken) {
     if (pathname.startsWith('/app') || pathname.startsWith('/admin')) {
@@ -42,6 +49,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     if (error || !user) {
       // Token inválido — limpar cookies e redirecionar
+      context.cookies.delete('nome-magnetico-auth-access-token', { path: '/' });
+      context.cookies.delete('nome-magnetico-auth-refresh-token', { path: '/' });
       context.cookies.delete('sb-access-token', { path: '/' });
       context.cookies.delete('sb-refresh-token', { path: '/' });
 

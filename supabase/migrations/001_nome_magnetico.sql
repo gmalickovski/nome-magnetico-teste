@@ -1,6 +1,7 @@
 -- ================================================================
 -- Nome Magnético — Schema completo
 -- Migration: 001_nome_magnetico
+-- Idempotente: pode ser re-executado sem erros
 -- ================================================================
 
 -- Criar schema dedicado
@@ -21,12 +22,15 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.profiles (
 -- RLS
 ALTER TABLE nome_magnetico.profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "profiles_select_own" ON nome_magnetico.profiles;
 CREATE POLICY "profiles_select_own" ON nome_magnetico.profiles
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "profiles_update_own" ON nome_magnetico.profiles;
 CREATE POLICY "profiles_update_own" ON nome_magnetico.profiles
   FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "profiles_admin_all" ON nome_magnetico.profiles;
 CREATE POLICY "profiles_admin_all" ON nome_magnetico.profiles
   FOR ALL USING (
     EXISTS (
@@ -49,7 +53,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION nome_magnetico.handle_new_user();
 
@@ -81,12 +86,15 @@ $$ LANGUAGE plpgsql STABLE;
 -- RLS
 ALTER TABLE nome_magnetico.subscriptions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "subscriptions_select_own" ON nome_magnetico.subscriptions;
 CREATE POLICY "subscriptions_select_own" ON nome_magnetico.subscriptions
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "subscriptions_service_insert" ON nome_magnetico.subscriptions;
 CREATE POLICY "subscriptions_service_insert" ON nome_magnetico.subscriptions
   FOR INSERT WITH CHECK (TRUE); -- service role only via RLS bypass
 
+DROP POLICY IF EXISTS "subscriptions_admin_all" ON nome_magnetico.subscriptions;
 CREATE POLICY "subscriptions_admin_all" ON nome_magnetico.subscriptions
   FOR ALL USING (
     EXISTS (
@@ -135,15 +143,19 @@ CREATE INDEX IF NOT EXISTS analyses_created_at_idx ON nome_magnetico.analyses(cr
 -- RLS
 ALTER TABLE nome_magnetico.analyses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "analyses_select_own" ON nome_magnetico.analyses;
 CREATE POLICY "analyses_select_own" ON nome_magnetico.analyses
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "analyses_insert_own" ON nome_magnetico.analyses;
 CREATE POLICY "analyses_insert_own" ON nome_magnetico.analyses
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "analyses_update_own" ON nome_magnetico.analyses;
 CREATE POLICY "analyses_update_own" ON nome_magnetico.analyses
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "analyses_admin_all" ON nome_magnetico.analyses;
 CREATE POLICY "analyses_admin_all" ON nome_magnetico.analyses
   FOR ALL USING (
     EXISTS (
@@ -172,9 +184,11 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.magnetic_names (
 -- RLS
 ALTER TABLE nome_magnetico.magnetic_names ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "magnetic_names_select_own" ON nome_magnetico.magnetic_names;
 CREATE POLICY "magnetic_names_select_own" ON nome_magnetico.magnetic_names
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "magnetic_names_service_insert" ON nome_magnetico.magnetic_names;
 CREATE POLICY "magnetic_names_service_insert" ON nome_magnetico.magnetic_names
   FOR INSERT WITH CHECK (TRUE);
 
@@ -204,6 +218,7 @@ ON CONFLICT DO NOTHING;
 -- RLS — só admin gerencia
 ALTER TABLE nome_magnetico.ai_config ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "ai_config_admin_all" ON nome_magnetico.ai_config;
 CREATE POLICY "ai_config_admin_all" ON nome_magnetico.ai_config
   FOR ALL USING (
     EXISTS (
@@ -212,6 +227,7 @@ CREATE POLICY "ai_config_admin_all" ON nome_magnetico.ai_config
     )
   );
 
+DROP POLICY IF EXISTS "ai_config_select_service" ON nome_magnetico.ai_config;
 CREATE POLICY "ai_config_select_service" ON nome_magnetico.ai_config
   FOR SELECT USING (TRUE); -- leitura pública para o backend
 
@@ -240,6 +256,7 @@ CREATE INDEX IF NOT EXISTS ai_usage_analysis_id ON nome_magnetico.ai_usage(analy
 -- RLS
 ALTER TABLE nome_magnetico.ai_usage ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "ai_usage_service_all" ON nome_magnetico.ai_usage;
 CREATE POLICY "ai_usage_service_all" ON nome_magnetico.ai_usage
   FOR ALL USING (TRUE); -- service role only
 
@@ -262,12 +279,15 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.support_tickets (
 -- RLS
 ALTER TABLE nome_magnetico.support_tickets ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "tickets_select_own" ON nome_magnetico.support_tickets;
 CREATE POLICY "tickets_select_own" ON nome_magnetico.support_tickets
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "tickets_insert_own" ON nome_magnetico.support_tickets;
 CREATE POLICY "tickets_insert_own" ON nome_magnetico.support_tickets
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "tickets_admin_all" ON nome_magnetico.support_tickets;
 CREATE POLICY "tickets_admin_all" ON nome_magnetico.support_tickets
   FOR ALL USING (
     EXISTS (
@@ -291,6 +311,7 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.support_messages (
 -- RLS
 ALTER TABLE nome_magnetico.support_messages ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "messages_select_ticket_owner" ON nome_magnetico.support_messages;
 CREATE POLICY "messages_select_ticket_owner" ON nome_magnetico.support_messages
   FOR SELECT USING (
     EXISTS (
@@ -299,6 +320,7 @@ CREATE POLICY "messages_select_ticket_owner" ON nome_magnetico.support_messages
     )
   );
 
+DROP POLICY IF EXISTS "messages_insert_ticket_owner" ON nome_magnetico.support_messages;
 CREATE POLICY "messages_insert_ticket_owner" ON nome_magnetico.support_messages
   FOR INSERT WITH CHECK (
     auth.uid() = author_id AND
@@ -308,6 +330,7 @@ CREATE POLICY "messages_insert_ticket_owner" ON nome_magnetico.support_messages
     )
   );
 
+DROP POLICY IF EXISTS "messages_admin_all" ON nome_magnetico.support_messages;
 CREATE POLICY "messages_admin_all" ON nome_magnetico.support_messages
   FOR ALL USING (
     EXISTS (
@@ -331,9 +354,11 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.faq_categories (
 -- RLS — público para leitura, admin para escrita
 ALTER TABLE nome_magnetico.faq_categories ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "faq_categories_public_select" ON nome_magnetico.faq_categories;
 CREATE POLICY "faq_categories_public_select" ON nome_magnetico.faq_categories
   FOR SELECT USING (is_active = TRUE);
 
+DROP POLICY IF EXISTS "faq_categories_admin_all" ON nome_magnetico.faq_categories;
 CREATE POLICY "faq_categories_admin_all" ON nome_magnetico.faq_categories
   FOR ALL USING (
     EXISTS (
@@ -359,9 +384,11 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.faq_items (
 -- RLS
 ALTER TABLE nome_magnetico.faq_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "faq_items_public_select" ON nome_magnetico.faq_items;
 CREATE POLICY "faq_items_public_select" ON nome_magnetico.faq_items
   FOR SELECT USING (is_active = TRUE);
 
+DROP POLICY IF EXISTS "faq_items_admin_all" ON nome_magnetico.faq_items;
 CREATE POLICY "faq_items_admin_all" ON nome_magnetico.faq_items
   FOR ALL USING (
     EXISTS (
@@ -383,7 +410,6 @@ ON CONFLICT (slug) DO NOTHING;
 -- ================================================================
 -- RATE LIMIT helpers (para uso no backend)
 -- ================================================================
--- Função para verificar rate limit por IP no teste-bloqueio
 CREATE OR REPLACE FUNCTION nome_magnetico.check_rate_limit_ip(
   p_ip TEXT,
   p_limit INTEGER DEFAULT 3,

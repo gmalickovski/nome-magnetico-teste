@@ -32,12 +32,20 @@ export function SignupForm() {
     });
 
     if (err) {
-      setError(err.message === 'User already registered'
-        ? 'Este email já está cadastrado'
-        : err.message);
+      if (err.message === 'User already registered') {
+        // Usuário já existe em auth.users (possivelmente via outro app na
+        // mesma instância Supabase, ex: Sincro). Redirecionar para login.
+        console.log('[SignupForm] email já existe em auth.users — redirecionando para login');
+        window.location.href = '/auth/login?msg=conta-existente';
+        return;
+      }
+      console.error('[SignupForm] erro no signUp:', err.message);
+      setError(err.message);
       setLoading(false);
       return;
     }
+
+    console.log('[SignupForm] cadastro bem-sucedido — aguardando confirmação de email');
 
     setSuccess(true);
     setLoading(false);

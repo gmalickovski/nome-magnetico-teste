@@ -9,6 +9,13 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const params = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search)
+    : new URLSearchParams();
+  const infoMsg = params.get('msg') === 'conta-existente'
+    ? 'Você já tem uma conta. Faça login para continuar.'
+    : '';
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -27,9 +34,24 @@ export function LoginForm() {
       return;
     }
 
+    // Garantir que o usuário tem perfil neste app (necessário para usuários
+    // que já existiam em auth.users via outro app, ex: Sincro).
+    // Passa o token no header porque a sessão fica em localStorage (não em cookie).
+    const { data: { session } } = await supabaseBrowser.auth.getSession();
+    console.log('[LoginForm] sessão obtida após login:', session ? `token=${session.access_token.slice(0, 20)}...` : 'null');
+
+    const epRes = await fetch('/api/auth/ensure-profile', {
+      method: 'POST',
+      headers: session?.access_token
+        ? { Authorization: `Bearer ${session.access_token}` }
+        : {},
+    });
+    const epData = await epRes.json();
+    console.log('[LoginForm] ensure-profile status:', epRes.status, epData);
+
     // Redirecionar para o app ou para onde veio
-    const params = new URLSearchParams(window.location.search);
-    window.location.href = params.get('redirect') ?? '/app';
+    const searchParams = new URLSearchParams(window.location.search);
+    window.location.href = searchParams.get('redirect') ?? '/app';
   }
 
   return (
@@ -37,6 +59,12 @@ export function LoginForm() {
       <h2 className="font-cinzel text-2xl font-bold text-white text-center mb-6">
         Entrar
       </h2>
+
+      {infoMsg && (
+        <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl p-3 text-[#D4AF37] text-sm mb-6">
+          {infoMsg}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input

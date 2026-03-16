@@ -17,6 +17,9 @@ export const supabaseBrowser = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
+    // storageKey isolado para evitar colisão de sessão com outros apps
+    // que rodem na mesma instância Supabase (ex: Sincro em localhost)
+    storageKey: 'nome-magnetico-auth',
   },
 });
 
