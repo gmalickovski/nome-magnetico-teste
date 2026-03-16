@@ -190,8 +190,7 @@ Card para tendências ocultas:
 
 ### 5.4 `src/frontend/components/app/SignatureEvaluation.tsx` ← NOVO
 Componente para avaliação da assinatura:
-- Critérios objetivos (checklist visual)
-- Instrução de uso do pêndulo (radiestésico) — texto educativo
+- Critérios objetivos (checklist visual): legibilidade, inclinação ascendente, sem traços cortando letras
 
 ### 5.5 Questionários específicos por produto
 - `src/frontend/components/app/BabyNameForm.tsx` ← NOVO
