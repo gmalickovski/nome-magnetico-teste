@@ -4,9 +4,23 @@ export interface Profile {
   id: string;
   email: string;
   nome: string | null;
+  phone: string | null;
+  avatar_url: string | null;
   role: 'user' | 'admin';
+  app_source: string;
+  last_login_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Perfil + status do plano ativo — resultado da view user_status */
+export interface UserStatus extends Profile {
+  subscription_id: string | null;
+  product_type: string | null;
+  subscription_starts_at: string | null;
+  subscription_ends_at: string | null;
+  amount_paid: number | null;
+  has_active_plan: boolean;
 }
 
 export async function getProfile(userId: string): Promise<Profile | null> {
@@ -21,9 +35,22 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   return data as Profile;
 }
 
+/** Retorna perfil + status do plano em uma única query (via view user_status). */
+export async function getUserStatus(userId: string): Promise<UserStatus | null> {
+  const { data, error } = await supabase
+    .schema('nome_magnetico')
+    .from('user_status')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error) return null;
+  return data as UserStatus;
+}
+
 export async function updateProfile(
   userId: string,
-  updates: Partial<Pick<Profile, 'nome'>>
+  updates: Partial<Pick<Profile, 'nome' | 'phone' | 'avatar_url'>>
 ): Promise<Profile | null> {
   const { data, error } = await supabase
     .schema('nome_magnetico')
@@ -38,21 +65,56 @@ export async function updateProfile(
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {
-  const profile = await getProfile(userId);
-  return profile?.role === 'admin';
+  const { data } = await supabase
+    .schema('nome_magnetico')
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  return data?.role === 'admin';
 }
 
-export async function listUsers(page = 1, perPage = 20) {
+/**
+ * Lista usuários para o painel admin.
+ * Inclui status do plano (has_active_plan) via view user_status.
+ */
+export async function listUsers(page = 1, perPage = 20, filters?: {
+  role?: 'user' | 'admin';
+  hasActivePlan?: boolean;
+}) {
   const from = (page - 1) * perPage;
   const to = from + perPage - 1;
 
-  const { data, error, count } = await supabase
+  let query = supabase
     .schema('nome_magnetico')
-    .from('profiles')
+    .from('user_status')
     .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to);
 
+  if (filters?.role) {
+    query = query.eq('role', filters.role);
+  }
+  if (filters?.hasActivePlan !== undefined) {
+    query = query.eq('has_active_plan', filters.hasActivePlan);
+  }
+
+  const { data, error, count } = await query;
   if (error) throw error;
-  return { users: (data ?? []) as Profile[], total: count ?? 0 };
+  return { users: (data ?? []) as UserStatus[], total: count ?? 0 };
+}
+
+/** Promove ou rebaixa um usuário (apenas service role). */
+export async function setUserRole(
+  userId: string,
+  role: 'user' | 'admin'
+): Promise<boolean> {
+  const { error } = await supabase
+    .schema('nome_magnetico')
+    .from('profiles')
+    .update({ role, updated_at: new Date().toISOString() })
+    .eq('id', userId);
+
+  return !error;
 }
