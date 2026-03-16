@@ -1,0 +1,89 @@
+import Stripe from 'stripe';
+
+const stripeSecretKey = import.meta.env.STRIPE_SECRET_KEY;
+
+if (!stripeSecretKey) {
+  throw new Error('STRIPE_SECRET_KEY é obrigatório');
+}
+
+export const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: '2024-11-20.acacia',
+});
+
+export type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa';
+
+const PRICE_IDS: Record<ProductType, string> = {
+  nome_magnetico: import.meta.env.STRIPE_PRICE_NOME_MAGNETICO ?? '',
+  nome_bebe: import.meta.env.STRIPE_PRICE_NOME_BEBE ?? '',
+  nome_empresa: import.meta.env.STRIPE_PRICE_NOME_EMPRESA ?? '',
+};
+
+const PRODUCT_NAMES: Record<ProductType, string> = {
+  nome_magnetico: 'Nome Magnético',
+  nome_bebe: 'Nome do Bebê',
+  nome_empresa: 'Nome Empresarial',
+};
+
+export interface CreateCheckoutParams {
+  userId: string;
+  userEmail: string;
+  productType: ProductType;
+  successUrl: string;
+  cancelUrl: string;
+}
+
+/**
+ * Cria uma sessão de checkout no Stripe.
+ */
+export async function createCheckoutSession(
+  params: CreateCheckoutParams
+): Promise<Stripe.Checkout.Session> {
+  const priceId = PRICE_IDS[params.productType];
+
+  if (!priceId) {
+    throw new Error(`Price ID não configurado para o produto: ${params.productType}`);
+  }
+
+  return stripe.checkout.sessions.create({
+    mode: 'payment',
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+    customer_email: params.userEmail,
+    metadata: {
+      user_id: params.userId,
+      product_type: params.productType,
+    },
+    success_url: params.successUrl,
+    cancel_url: params.cancelUrl,
+    locale: 'pt-BR',
+    payment_intent_data: {
+      metadata: {
+        user_id: params.userId,
+        product_type: params.productType,
+      },
+    },
+  });
+}
+
+/**
+ * Verifica e constrói o evento do webhook Stripe.
+ */
+export function constructWebhookEvent(
+  payload: string | Buffer,
+  signature: string
+): Stripe.Event {
+  const webhookSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    throw new Error('STRIPE_WEBHOOK_SECRET é obrigatório');
+  }
+
+  return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+}
+
+export { PRODUCT_NAMES };

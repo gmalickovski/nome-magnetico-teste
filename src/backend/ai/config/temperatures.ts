@@ -1,0 +1,25 @@
+import type { AITask } from './models';
+
+export interface TaskConfig {
+  temperature: number;
+  maxTokens: number;
+}
+
+export const TASK_CONFIG: Record<AITask, TaskConfig> = {
+  analysis: {
+    temperature: 0.7,
+    maxTokens: 4096,
+  },
+  suggestions: {
+    temperature: 0.8,
+    maxTokens: 2048,
+  },
+  guide: {
+    temperature: 0.6,
+    maxTokens: 3000,
+  },
+};
+
+export function getTaskConfig(task: AITask): TaskConfig {
+  return TASK_CONFIG[task];
+}

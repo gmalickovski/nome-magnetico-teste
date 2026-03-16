@@ -1,0 +1,130 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { hasActiveSubscription } from '../../backend/db/subscriptions';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/auth/login');
+
+const hasAccess = await hasActiveSubscription(user.id, 'nome_magnetico');
+if (!hasAccess) return Astro.redirect('/comprar');
+---
+
+<AppLayout title="Nova Análise">
+  <div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+      <h1 class="font-cinzel text-3xl font-bold text-white mb-2">Nova Análise</h1>
+      <p class="text-gray-400">Preencha seus dados para iniciar a análise numerológica cabalística completa.</p>
+    </div>
+
+    <form id="analysisForm" class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-8 space-y-6">
+      <div>
+        <label class="block text-sm font-medium text-yellow-400 mb-2">
+          Nome Completo <span class="text-red-400">*</span>
+        </label>
+        <input
+          type="text"
+          id="nome_completo"
+          name="nome_completo"
+          placeholder="Seu nome completo de nascimento"
+          required
+          class="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-transparent transition duration-300 placeholder-gray-500"
+        />
+        <p class="text-gray-600 text-xs mt-1">Use o nome como consta na certidão de nascimento.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-yellow-400 mb-2">
+          Data de Nascimento <span class="text-red-400">*</span>
+        </label>
+        <input
+          type="text"
+          id="data_nascimento"
+          name="data_nascimento"
+          placeholder="DD/MM/AAAA"
+          maxlength="10"
+          required
+          class="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-transparent transition duration-300 placeholder-gray-500"
+        />
+      </div>
+
+      <div id="errorMsg" class="hidden bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm"></div>
+
+      <button
+        type="submit"
+        id="submitBtn"
+        class="w-full bg-[#D4AF37] text-black font-bold py-4 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-[1.01] shadow-lg shadow-yellow-500/20 text-lg"
+      >
+        Iniciar Análise Completa
+      </button>
+
+      <p class="text-center text-gray-600 text-xs">
+        A análise leva cerca de 1-2 minutos para ser processada pela IA.
+      </p>
+    </form>
+  </div>
+
+  <script>
+    // Máscara de data
+    const dataInput = document.getElementById('data_nascimento') as HTMLInputElement;
+    dataInput?.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      let value = target.value.replace(/[^\d/]/g, '');
+      value = value.replace(/\//g, '');
+      if (value.length > 2) value = `${value.slice(0, 2)}/${value.slice(2)}`;
+      if (value.length > 5) value = `${value.slice(0, 5)}/${value.slice(5, 9)}`;
+      target.value = value;
+    });
+
+    // Submit
+    const form = document.getElementById('analysisForm') as HTMLFormElement;
+    const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+    const errorMsg = document.getElementById('errorMsg') as HTMLDivElement;
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.add('hidden');
+
+      const nome = (document.getElementById('nome_completo') as HTMLInputElement).value.trim();
+      const data = (document.getElementById('data_nascimento') as HTMLInputElement).value;
+
+      if (!nome || nome.length < 2) {
+        errorMsg.textContent = 'Informe seu nome completo';
+        errorMsg.classList.remove('hidden');
+        return;
+      }
+      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(data)) {
+        errorMsg.textContent = 'Data no formato DD/MM/AAAA';
+        errorMsg.classList.remove('hidden');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Iniciando análise...';
+
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome_completo: nome, data_nascimento: data, product_type: 'nome_magnetico' }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          errorMsg.textContent = result.error ?? 'Erro ao iniciar análise';
+          errorMsg.classList.remove('hidden');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Iniciar Análise Completa';
+          return;
+        }
+
+        window.location.href = `/app/resultado/${result.analysisId}`;
+      } catch {
+        errorMsg.textContent = 'Erro de conexão. Tente novamente.';
+        errorMsg.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Iniciar Análise Completa';
+      }
+    });
+  </script>
+</AppLayout>

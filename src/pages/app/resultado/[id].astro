@@ -1,0 +1,160 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { getAnalysis, getMagneticNames } from '../../../backend/db/analyses';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/auth/login');
+
+const { id } = Astro.params;
+if (!id) return Astro.redirect('/app');
+
+const [analysis, magneticNames] = await Promise.all([
+  getAnalysis(id),
+  getMagneticNames(id),
+]);
+
+if (!analysis || analysis.user_id !== user.id) {
+  return Astro.redirect('/app');
+}
+---
+
+<AppLayout title="Resultado da Análise">
+  <div class="max-w-4xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex items-start justify-between">
+      <div>
+        <h1 class="font-cinzel text-3xl font-bold text-white mb-1">
+          {analysis.nome_completo.split(' ')[0]}
+        </h1>
+        <p class="text-gray-400">{analysis.nome_completo}</p>
+      </div>
+      <div class={`px-3 py-1.5 rounded-full text-sm font-medium ${
+        analysis.status === 'complete' ? 'bg-emerald-500/20 text-emerald-400' :
+        analysis.status === 'error' ? 'bg-red-500/20 text-red-400' :
+        'bg-yellow-500/20 text-yellow-400'
+      }`}>
+        {analysis.status === 'complete' ? '✓ Concluída' :
+         analysis.status === 'error' ? '✕ Erro' :
+         '⟳ Processando...'}
+      </div>
+    </div>
+
+    {analysis.status === 'processing' || analysis.status === 'pending' ? (
+      <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-12 text-center">
+        <div class="inline-block w-12 h-12 border-4 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mb-6"></div>
+        <h3 class="font-cinzel text-xl font-bold text-white mb-2">Analisando seu nome...</h3>
+        <p class="text-gray-400">A IA está calculando sua análise numerológica completa. Isso pode levar 1-2 minutos.</p>
+        <p class="text-gray-600 text-sm mt-4">Esta página atualiza automaticamente.</p>
+      </div>
+    ) : analysis.status === 'error' ? (
+      <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
+        <h3 class="font-cinzel text-xl font-bold text-red-400 mb-2">Erro na Análise</h3>
+        <p class="text-gray-400 mb-4">{analysis.error_message ?? 'Ocorreu um erro inesperado.'}</p>
+        <a href="/app/questionario" class="inline-block bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-colors">
+          Tentar Novamente
+        </a>
+      </div>
+    ) : (
+      <>
+        <!-- 5 Números -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {[
+            { label: 'Expressão', value: analysis.numero_expressao },
+            { label: 'Destino', value: analysis.numero_destino },
+            { label: 'Motivação', value: analysis.numero_motivacao },
+            { label: 'Missão', value: analysis.numero_missao },
+            { label: 'Personalidade', value: analysis.numero_personalidade },
+          ].map(n => (
+            <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-4 text-center">
+              <div class="font-cinzel text-3xl font-bold text-[#D4AF37] mb-1">{n.value ?? '?'}</div>
+              <div class="text-gray-500 text-xs">{n.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Bloqueios -->
+        {Array.isArray(analysis.bloqueios) && analysis.bloqueios.length > 0 && (
+          <div>
+            <h2 class="font-cinzel text-xl font-bold text-red-400 mb-4">
+              ⚠ Bloqueios Detectados ({analysis.bloqueios.length})
+            </h2>
+            <div class="space-y-3">
+              {(analysis.bloqueios as Array<{titulo: string; descricao: string; codigo: string}>).map(b => (
+                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-5">
+                  <h3 class="font-bold text-red-400 mb-1">{b.titulo}</h3>
+                  <p class="text-gray-400 text-sm leading-relaxed">{b.descricao}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Análise IA -->
+        {analysis.analise_texto && (
+          <div>
+            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Análise Completa</h2>
+            <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 md:p-8">
+              <div class="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed whitespace-pre-wrap">
+                {analysis.analise_texto}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <!-- Nomes Magnéticos -->
+        {magneticNames.length > 0 && (
+          <div>
+            <h2 class="font-cinzel text-xl font-bold text-white mb-4">
+              ✨ Seus Nomes Magnéticos
+            </h2>
+            <div class="grid md:grid-cols-3 gap-4">
+              {magneticNames.slice(0, 3).map((name, idx) => (
+                <div class={`bg-white/5 border rounded-2xl p-5 ${
+                  idx === 0
+                    ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5'
+                    : 'border-white/10'
+                }`}>
+                  {idx === 0 && (
+                    <div class="text-xs text-[#D4AF37] font-bold mb-2 uppercase tracking-wider">⭐ Recomendado</div>
+                  )}
+                  <div class="font-cinzel text-lg font-bold text-white mb-2">{name.nome_sugerido}</div>
+                  <div class="flex gap-3 text-xs text-gray-500 mb-3">
+                    <span>Expr.: {name.numero_expressao}</span>
+                    <span>Mot.: {name.numero_motivacao}</span>
+                    <span>Score: {name.score}/100</span>
+                  </div>
+                  {name.justificativa && (
+                    <p class="text-gray-500 text-xs leading-relaxed">{name.justificativa}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Ações -->
+        <div class="flex flex-wrap gap-4">
+          <a
+            href={`/api/generate-pdf?id=${analysis.id}`}
+            class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-gray-300 font-medium px-5 py-2.5 rounded-xl hover:bg-white/15 transition-colors"
+          >
+            📄 Baixar PDF
+          </a>
+          <a
+            href="/app/questionario"
+            class="inline-flex items-center gap-2 border border-[#D4AF37]/30 text-[#D4AF37] font-medium px-5 py-2.5 rounded-xl hover:bg-[#D4AF37]/10 transition-colors"
+          >
+            + Nova Análise
+          </a>
+        </div>
+      </>
+    )}
+  </div>
+
+  {(analysis.status === 'processing' || analysis.status === 'pending') && (
+    <script>
+      // Atualizar página a cada 5 segundos enquanto processando
+      setTimeout(() => window.location.reload(), 5000);
+    </script>
+  )}
+</AppLayout>

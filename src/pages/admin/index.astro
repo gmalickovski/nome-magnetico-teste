@@ -1,0 +1,70 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../backend/db/supabase';
+
+// Métricas básicas
+const [
+  { count: totalUsers },
+  { count: totalAnalyses },
+  { count: totalSubscriptions },
+  { count: pendingTickets },
+] = await Promise.all([
+  supabase.schema('nome_magnetico').from('profiles').select('*', { count: 'exact', head: true }),
+  supabase.schema('nome_magnetico').from('analyses').select('*', { count: 'exact', head: true }),
+  supabase.schema('nome_magnetico').from('subscriptions').select('*', { count: 'exact', head: true }).gt('ends_at', new Date().toISOString()),
+  supabase.schema('nome_magnetico').from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+]);
+
+const metrics = [
+  { label: 'Usuários Totais', value: totalUsers ?? 0, icon: '👥' },
+  { label: 'Análises Realizadas', value: totalAnalyses ?? 0, icon: '📊' },
+  { label: 'Assinaturas Ativas', value: totalSubscriptions ?? 0, icon: '✅' },
+  { label: 'Tickets Abertos', value: pendingTickets ?? 0, icon: '🎫' },
+];
+---
+
+<AdminLayout title="Dashboard">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+    {metrics.map(m => (
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+        <div class="text-3xl mb-2">{m.icon}</div>
+        <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{m.value}</div>
+        <div class="text-gray-500 text-sm mt-1">{m.label}</div>
+      </div>
+    ))}
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+      <h3 class="font-cinzel text-lg font-bold text-gray-100 mb-4">Ações Rápidas</h3>
+      <div class="space-y-2">
+        <a href="/admin/usuarios" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
+          👥 Gerenciar Usuários
+        </a>
+        <a href="/admin/ia" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
+          🤖 Configurar IA
+        </a>
+        <a href="/admin/suporte" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
+          🎫 Ver Tickets ({pendingTickets ?? 0} abertos)
+        </a>
+        <a href="/admin/faq" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
+          ❓ Editar FAQ
+        </a>
+      </div>
+    </div>
+
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+      <h3 class="font-cinzel text-lg font-bold text-gray-100 mb-4">Status do Sistema</h3>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-400 text-sm">Supabase</span>
+          <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded-full">Online</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-gray-400 text-sm">APP_ENV</span>
+          <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-0.5 rounded-full">{import.meta.env.APP_ENV}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>

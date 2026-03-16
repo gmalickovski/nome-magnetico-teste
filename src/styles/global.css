@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================
+   FONTES
+   ============================================= */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+
+/* =============================================
+   BASE
+   ============================================= */
+@layer base {
+  html {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[#1a1a1a] text-gray-200;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+  }
+
+  /* Scrollbar customizada */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #D4AF37;
+    border-radius: 10px;
+    border: 2px solid #1a1a1a;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #E8C84A;
+  }
+}
+
+/* =============================================
+   COMPONENTES
+   ============================================= */
+@layer components {
+  /* Glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+  }
+
+  .glass-dark {
+    background: rgba(17, 17, 17, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+  }
+
+  /* Card gold border */
+  .card-gold {
+    @apply rounded-2xl;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .card-gold:hover {
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+    transform: scale(1.02);
+  }
+
+  /* Botão primário gold */
+  .btn-primary {
+    @apply bg-[#D4AF37] text-black font-bold rounded-xl px-6 py-3;
+    @apply hover:bg-yellow-300 transition-all duration-300;
+    @apply hover:scale-105 shadow-lg;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+  }
+
+  /* Botão secundário outline */
+  .btn-secondary {
+    @apply border border-[#D4AF37] text-[#D4AF37] font-medium rounded-xl px-6 py-3;
+    @apply hover:bg-[#D4AF37] hover:text-black transition-all duration-300;
+  }
+
+  /* Input dark */
+  .input-dark {
+    @apply w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white;
+    @apply focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent;
+    @apply transition duration-300 placeholder-gray-500;
+  }
+
+  /* Texto gold */
+  .text-gold {
+    color: #D4AF37;
+  }
+
+  /* Divider gold */
+  .divider-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  /* Gradient text gold */
+  .gradient-text {
+    background: linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Section pattern */
+  .section-dark {
+    @apply py-16 md:py-24;
+    background: #1a1a1a;
+  }
+
+  .section-darker {
+    @apply py-16 md:py-24;
+    background: #111111;
+  }
+}
+
+/* =============================================
+   ANIMAÇÕES
+   ============================================= */
+@layer utilities {
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 5px rgba(212, 175, 55, 0.2);
+    }
+    to {
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.6), 0 0 40px rgba(212, 175, 55, 0.3);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* Bloqueio highlight */
+  .bloqueio-text {
+    color: #FF6B6B;
+    text-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+  }
+
+  /* Spiritual/arcano highlight */
+  .spiritual-text {
+    color: #c084fc;
+    text-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+  }
+}

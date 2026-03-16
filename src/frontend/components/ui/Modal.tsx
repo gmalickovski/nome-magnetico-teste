@@ -1,0 +1,74 @@
+import React, { useEffect } from 'react';
+
+interface ModalProps {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function Modal({ open, onClose, title, children, className = '' }: ModalProps) {
+  // Fechar com ESC
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (open) document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [open, onClose]);
+
+  // Travar scroll do body
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      aria-modal="true"
+      role="dialog"
+    >
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Card */}
+      <div
+        className={`
+          relative z-10 w-full max-w-lg
+          bg-[#111111] rounded-2xl
+          border border-[#D4AF37]/20
+          shadow-2xl shadow-black/50
+          animate-slide-up
+          ${className}
+        `}
+      >
+        {title && (
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/10">
+            <h3 className="font-cinzel text-xl font-bold text-[#D4AF37]">{title}</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-300 transition-colors p-1"
+              aria-label="Fechar"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+        <div className="p-6">{children}</div>
+      </div>
+    </div>
+  );
+}

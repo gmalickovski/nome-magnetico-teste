@@ -1,0 +1,20 @@
+---
+import LandingLayout from '../layouts/LandingLayout.astro';
+import { LandingHeader } from '../frontend/components/landing/LandingHeader';
+import { HeroSection } from '../frontend/components/landing/HeroSection';
+import { HowItWorksSection } from '../frontend/components/landing/HowItWorksSection';
+import { TesteBloqueio } from '../frontend/components/landing/TesteBloqueio';
+import { PricingSection } from '../frontend/components/landing/PricingSection';
+import { FAQSection } from '../frontend/components/landing/FAQSection';
+import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+---
+
+<LandingLayout>
+  <LandingHeader client:load />
+  <HeroSection client:load />
+  <HowItWorksSection client:visible />
+  <TesteBloqueio client:visible />
+  <PricingSection client:visible />
+  <FAQSection client:visible />
+  <LandingFooter client:visible />
+</LandingLayout>

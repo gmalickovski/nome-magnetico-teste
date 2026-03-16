@@ -1,0 +1,61 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+// Verificar sessão server-side
+const accessToken = Astro.cookies.get('sb-access-token')?.value;
+const refreshToken = Astro.cookies.get('sb-refresh-token')?.value;
+
+if (!accessToken || !refreshToken) {
+  return Astro.redirect('/auth/login?redirect=' + encodeURIComponent(Astro.url.pathname));
+}
+---
+
+<BaseLayout title={title} description={description} noIndex={true}>
+  <div class="min-h-screen bg-[#1a1a1a]">
+    <!-- Header do app -->
+    <header class="border-b border-[#D4AF37]/20 bg-[#111111]/80 backdrop-blur-md sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="/app" class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider">
+          Nome Magnético
+        </a>
+        <nav class="flex items-center gap-6">
+          <a href="/app" class="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
+            Início
+          </a>
+          <a href="/app/questionario" class="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
+            Nova Análise
+          </a>
+          <a href="/suporte" class="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
+            Suporte
+          </a>
+          <button
+            id="logoutBtn"
+            class="text-gray-500 hover:text-red-400 transition-colors text-sm"
+          >
+            Sair
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <slot />
+    </main>
+  </div>
+
+  <script>
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+      const { supabaseBrowser } = await import('../frontend/lib/supabase-browser');
+      await supabaseBrowser.auth.signOut();
+      window.location.href = '/auth/login';
+    });
+  </script>
+</BaseLayout>

@@ -1,0 +1,26 @@
+---
+import LandingLayout from '../layouts/LandingLayout.astro';
+import { PricingSection } from '../frontend/components/landing/PricingSection';
+import { FAQSection } from '../frontend/components/landing/FAQSection';
+import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+---
+
+<LandingLayout title="Escolha seu Plano">
+  <div class="min-h-screen bg-[#111111]">
+    <!-- Header simples -->
+    <header class="border-b border-[#D4AF37]/20 py-5 px-4">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <a href="/" class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider">
+          Nome Magnético
+        </a>
+        <a href="/auth/login" class="text-gray-400 hover:text-gray-200 text-sm transition-colors">
+          Já tenho conta
+        </a>
+      </div>
+    </header>
+
+    <PricingSection client:load />
+    <FAQSection client:visible />
+    <LandingFooter client:visible />
+  </div>
+</LandingLayout>

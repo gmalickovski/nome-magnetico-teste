@@ -1,0 +1,82 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { supabase } from '../backend/db/supabase';
+
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+
+// Verificar sessão e role admin
+const accessToken = Astro.cookies.get('sb-access-token')?.value;
+
+if (!accessToken) {
+  return Astro.redirect('/auth/login');
+}
+
+const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+
+if (error || !user) {
+  return Astro.redirect('/auth/login');
+}
+
+const { data: profile } = await supabase
+  .schema('nome_magnetico')
+  .from('profiles')
+  .select('role')
+  .eq('id', user.id)
+  .single();
+
+if (profile?.role !== 'admin') {
+  return Astro.redirect('/app');
+}
+
+const adminNavItems = [
+  { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/usuarios', label: 'Usuários' },
+  { href: '/admin/assinaturas', label: 'Assinaturas' },
+  { href: '/admin/ia', label: 'Config. IA' },
+  { href: '/admin/suporte', label: 'Suporte' },
+  { href: '/admin/faq', label: 'FAQ' },
+];
+---
+
+<BaseLayout title={`Admin — ${title}`} noIndex={true}>
+  <div class="min-h-screen bg-[#111111] flex">
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-[#D4AF37]/20 bg-[#0a0a0a] flex-shrink-0">
+      <div class="p-6">
+        <h1 class="font-cinzel text-lg font-bold text-[#D4AF37]">Nome Magnético</h1>
+        <p class="text-xs text-gray-500 mt-1">Painel Administrativo</p>
+      </div>
+      <nav class="px-3 pb-6">
+        {adminNavItems.map(item => (
+          <a
+            href={item.href}
+            class={`flex items-center px-3 py-2 rounded-xl text-sm transition-colors mb-1 ${
+              Astro.url.pathname === item.href
+                ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20'
+                : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
+            }`}
+          >
+            {item.label}
+          </a>
+        ))}
+        <div class="mt-6 pt-6 border-t border-white/10">
+          <a href="/app" class="flex items-center px-3 py-2 rounded-xl text-sm text-gray-500 hover:text-gray-300 transition-colors">
+            ← Voltar ao App
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main class="flex-1 overflow-auto">
+      <div class="p-8">
+        <h2 class="font-cinzel text-2xl font-bold text-gray-100 mb-6">{title}</h2>
+        <slot />
+      </div>
+    </main>
+  </div>
+</BaseLayout>

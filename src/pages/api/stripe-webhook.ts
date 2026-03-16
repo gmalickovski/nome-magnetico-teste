@@ -1,0 +1,106 @@
+import type { APIRoute } from 'astro';
+import { constructWebhookEvent } from '../../backend/payments/stripe';
+import { createSubscription } from '../../backend/db/subscriptions';
+import { getProfile } from '../../backend/db/users';
+import { notify } from '../../backend/notifications/notify';
+import type { ProductType } from '../../backend/payments/stripe';
+
+export const POST: APIRoute = async ({ request }) => {
+  const signature = request.headers.get('stripe-signature');
+  if (!signature) {
+    return new Response('Assinatura ausente', { status: 400 });
+  }
+
+  const body = await request.text();
+
+  let event;
+  try {
+    event = constructWebhookEvent(body, signature);
+  } catch (err) {
+    console.error('[stripe-webhook] Assinatura inválida:', err);
+    return new Response('Assinatura inválida', { status: 400 });
+  }
+
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as {
+          metadata?: { user_id?: string; product_type?: string };
+          id: string;
+          payment_intent?: string | { id: string } | null;
+          amount_total?: number | null;
+          currency?: string;
+          customer_email?: string;
+        };
+
+        const userId = session.metadata?.user_id;
+        const productType = session.metadata?.product_type as ProductType;
+
+        if (!userId || !productType) {
+          console.error('[stripe-webhook] Metadados ausentes na sessão');
+          break;
+        }
+
+        // Criar subscription
+        const paymentIntentId =
+          typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : session.payment_intent?.id;
+
+        await createSubscription({
+          userId,
+          productType,
+          stripeSessionId: session.id,
+          stripePaymentIntentId: paymentIntentId,
+          amountPaid: session.amount_total ?? undefined,
+          currency: session.currency ?? 'brl',
+        });
+
+        // Notificar usuário
+        const profile = await getProfile(userId);
+        if (profile) {
+          await notify('payment.confirmed', {
+            email: profile.email,
+            firstName: profile.nome ?? profile.email.split('@')[0],
+            accessUrl: `${import.meta.env.APP_URL}/app`,
+            productName: productType,
+          });
+        }
+
+        // Notificar admin
+        await notify('admin.new_payment', {
+          userId,
+          productType,
+          amount: session.amount_total,
+        });
+
+        break;
+      }
+
+      case 'payment_intent.payment_failed': {
+        const pi = event.data.object as {
+          metadata?: { user_id?: string };
+        };
+        const userId = pi.metadata?.user_id;
+        if (userId) {
+          const profile = await getProfile(userId);
+          if (profile) {
+            await notify('payment.failed', {
+              email: profile.email,
+              firstName: profile.nome ?? profile.email.split('@')[0],
+            });
+          }
+        }
+        break;
+      }
+    }
+  } catch (err) {
+    console.error('[stripe-webhook] Erro ao processar evento:', event.type, err);
+    // Retornar 200 para o Stripe não reenviar — logar o erro internamente
+  }
+
+  return new Response(JSON.stringify({ received: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
