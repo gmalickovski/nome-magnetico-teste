@@ -1,21 +1,106 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { supabase } from '../../backend/db/supabase';
+import { getMonthlyUsageStats } from '../../backend/ai/usage-stats';
+import AIConfigEditor from '../../frontend/components/admin/AIConfigEditor';
 
-const { data: configs } = await supabase
-  .schema('nome_magnetico')
-  .from('ai_config')
-  .select('*')
-  .order('task');
+const [{ data: configs }, stats] = await Promise.all([
+  supabase.schema('nome_magnetico').from('ai_config').select('*').order('task'),
+  getMonthlyUsageStats(),
+]);
+
+const usageCards = [
+  {
+    icon: '📊',
+    label: 'Requisições este mês',
+    value: stats.totalRequests.toLocaleString('pt-BR'),
+  },
+  {
+    icon: '🔤',
+    label: 'Tokens totais este mês',
+    value: stats.totalTokens.toLocaleString('pt-BR'),
+  },
+  {
+    icon: '💵',
+    label: 'Custo estimado (USD)',
+    value: `$${stats.estimatedCostUsd.toFixed(4)}`,
+  },
+  {
+    icon: '📈',
+    label: 'Custo médio por requisição',
+    value: stats.totalRequests > 0 ? `$${stats.avgCostPerRequest.toFixed(6)}` : '—',
+  },
+];
 ---
 
 <AdminLayout title="Configuração de IA">
-  <div class="space-y-6">
+  <div class="space-y-8">
     <p class="text-gray-400">
       Configure qual provedor e modelo de IA será usado para cada tarefa. As mudanças entram em vigor imediatamente.
     </p>
 
+    <!-- Cards de uso mensal -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {usageCards.map(card => (
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
+          <div class="text-2xl mb-2">{card.icon}</div>
+          <div class="font-cinzel text-xl font-bold text-[#D4AF37]">{card.value}</div>
+          <div class="text-gray-500 text-xs mt-1">{card.label}</div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Breakdown por provedor (se houver dados) -->
+    {stats.byProvider.length > 0 && (
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <div class="px-5 py-3 border-b border-white/10">
+          <h3 class="text-sm font-medium text-gray-300">Uso por Provedor — Mês Atual</h3>
+        </div>
+        <table class="w-full text-sm">
+          <thead class="border-b border-white/10">
+            <tr>
+              <th class="text-left px-5 py-3 text-gray-400 font-medium">Provedor</th>
+              <th class="text-right px-5 py-3 text-gray-400 font-medium">Requisições</th>
+              <th class="text-right px-5 py-3 text-gray-400 font-medium">Tokens Input</th>
+              <th class="text-right px-5 py-3 text-gray-400 font-medium">Tokens Output</th>
+              <th class="text-right px-5 py-3 text-gray-400 font-medium">Custo (USD)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stats.byProvider.map(row => (
+              <tr class="border-b border-white/5 hover:bg-white/3">
+                <td class="px-5 py-3">
+                  <span class={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    row.provider === 'groq' ? 'bg-orange-500/20 text-orange-400' :
+                    row.provider === 'claude' ? 'bg-purple-500/20 text-purple-400' :
+                    'bg-blue-500/20 text-blue-400'
+                  }`}>{row.provider}</span>
+                </td>
+                <td class="px-5 py-3 text-gray-400 text-right">{row.requests.toLocaleString('pt-BR')}</td>
+                <td class="px-5 py-3 text-gray-400 text-right">{row.tokensInput.toLocaleString('pt-BR')}</td>
+                <td class="px-5 py-3 text-gray-400 text-right">{row.tokensOutput.toLocaleString('pt-BR')}</td>
+                <td class="px-5 py-3 text-[#D4AF37] text-right font-mono text-xs">${row.estimatedCostUsd.toFixed(4)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+
+    <!-- Editor de configuração -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+      <h3 class="font-cinzel text-lg font-bold text-gray-100 mb-6">Editor de Configuração</h3>
+      <AIConfigEditor
+        currentConfigs={configs ?? []}
+        client:load
+      />
+    </div>
+
+    <!-- Tabela de configuração atual (readonly reference) -->
     <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+      <div class="px-5 py-3 border-b border-white/10">
+        <h3 class="text-sm font-medium text-gray-300">Configuração Atual no Banco</h3>
+      </div>
       <table class="w-full text-sm">
         <thead class="border-b border-white/10">
           <tr>
@@ -50,11 +135,6 @@ const { data: configs } = await supabase
           ))}
         </tbody>
       </table>
-    </div>
-
-    <div class="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl p-4 text-sm text-gray-400">
-      <strong class="text-[#D4AF37]">Dica:</strong> Para alterar a configuração, edite diretamente na tabela <code class="text-gray-300">nome_magnetico.ai_config</code> no Supabase Dashboard.
-      Em breve haverá interface de edição aqui.
     </div>
   </div>
 </AdminLayout>

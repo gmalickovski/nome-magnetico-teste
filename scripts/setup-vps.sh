@@ -6,7 +6,7 @@
 
 set -e
 
-APP_DIR="/var/www/nomemagnetico"
+APP_DIR="/var/www/webapp/nome-magnetico"
 NODE_VERSION="20"
 
 echo "================================================="
@@ -34,7 +34,7 @@ npm install -g pm2
 echo "-> Criando diretório raiz da aplicação em ${APP_DIR}..."
 mkdir -p ${APP_DIR}
 chown -R $USER:$USER ${APP_DIR}
-chmod -R 755 /var/www/nomemagnetico
+chmod -R 755 /var/www/webapp/nome-magnetico
 
 # 6. PM2 Startup (Garante que o app inicie com o servidor)
 echo "-> Configurando PM2 para inicializar com o servidor..."

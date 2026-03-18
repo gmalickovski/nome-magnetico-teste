@@ -18,12 +18,12 @@ nano /root/setup-vps.sh
 ```bash
 bash /root/setup-vps.sh
 ```
-Esse comando garantirá que seu servidor tem o Node.js v20, o PM2 global, ferramentas Nginx e criará as pastas estruturais de hospedagem permanentemente em `/var/www/nomemagnetico`.
+Esse comando garantirá que seu servidor tem o Node.js v20, o PM2 global, ferramentas Nginx e criará as pastas estruturais de hospedagem permanentemente em `/var/www/webapp/nome-magnetico`.
 
 ### 1.1 Variáveis de Ambiente na VPS
 Com o diretório base criado e pronto, não esqueça de criar o arquivo `.env` definitivo do servidor (as chaves que acessarão seu Banco Supabase, Stripe etc):
 ```bash
-nano /var/www/nomemagnetico/.env
+nano /var/www/webapp/nome-magnetico/.env
 ```
 
 ## Passo 2: Configurar os "Secrets" do GitHub Actions
@@ -56,7 +56,7 @@ Para publicar de vez na internet o servidor Astro e mascará-lo profissionalment
 Dentro da pasta que é recebida pelo GitHub Actions, criamos o arquivo `scripts/nginx.conf`. Você apenas entra no SSH da VPS e copia para configurar os diretórios web do servidor local Nginx:
 
 ```bash
-cp /var/www/nomemagnetico/scripts/nginx.conf /etc/nginx/sites-available/nomemagnetico.com.br
+cp /var/www/webapp/nome-magnetico/scripts/nginx.conf /etc/nginx/sites-available/nomemagnetico.com.br
 ```
 
 Ative a configuração e verifique a recarga:

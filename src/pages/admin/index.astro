@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { supabase } from '../../backend/db/supabase';
+import { getMonthlyUsageStats } from '../../backend/ai/usage-stats';
 
 // Métricas básicas
 const [
@@ -8,11 +9,13 @@ const [
   { count: totalAnalyses },
   { count: totalSubscriptions },
   { count: pendingTickets },
+  aiStats,
 ] = await Promise.all([
   supabase.schema('nome_magnetico').from('profiles').select('*', { count: 'exact', head: true }),
   supabase.schema('nome_magnetico').from('analyses').select('*', { count: 'exact', head: true }),
   supabase.schema('nome_magnetico').from('subscriptions').select('*', { count: 'exact', head: true }).gt('ends_at', new Date().toISOString()),
   supabase.schema('nome_magnetico').from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+  getMonthlyUsageStats(),
 ]);
 
 const metrics = [
@@ -20,11 +23,12 @@ const metrics = [
   { label: 'Análises Realizadas', value: totalAnalyses ?? 0, icon: '📊' },
   { label: 'Assinaturas Ativas', value: totalSubscriptions ?? 0, icon: '✅' },
   { label: 'Tickets Abertos', value: pendingTickets ?? 0, icon: '🎫' },
+  { label: 'Custo IA / Mês', value: `$${aiStats.estimatedCostUsd.toFixed(4)}`, icon: '💵' },
 ];
 ---
 
 <AdminLayout title="Dashboard">
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-8">
     {metrics.map(m => (
       <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
         <div class="text-3xl mb-2">{m.icon}</div>

@@ -31,7 +31,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_HOST: "103.199.185.152"
           REMOTE_USER: "root"
-          TARGET: "/var/www/nomemagnetico"
+          TARGET: "/var/www/webapp/nome-magnetico"
           SOURCE: "dist/"
           # Vamos enviar o package.json e ecosystem também para o servidor ter a config
           ARGS: "-rltgoDzvO"
@@ -44,7 +44,7 @@ jobs:
           username: "root"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/nomemagnetico
+            cd /var/www/webapp/nome-magnetico
             # Instalar apenas dependências de produção para rodar as APIs SSR
             npm install --omit=dev
             
