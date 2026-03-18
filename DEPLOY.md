@@ -1,87 +1,76 @@
 # 🚀 Manual de Deploy: Nome Magnético na VPS
 
-Este é o guia completo para inicializar a sua máquina virtual (VPS) com Ubuntu/Debian e configurar o deploy contínuo através do GitHub Actions. 
+Este é o guia completo atualizado para inicializar a sua máquina virtual (VPS) com Ubuntu/Debian e manter o deploy contínuo através do GitHub Actions. 
 
-## Passo 1: Preparar a VPS
+## Passo 1: Preparar a VPS pela Primeira Vez
 
-Conecte-se na sua VPS via SSH como root (ou usuário com privilégios de sudoer).
+Conecte-se na sua VPS via SSH como root.
 
 ```bash
-ssh root@seu_ip_da_vps
+ssh root@103.199.185.152
 ```
 
-Se o git não estiver instalado, instale-o ou envie o script `scripts/setup-vps.sh` para sua VPS. Você pode criar o arquivo direto nela:
+Caso seja um servidor virgem, copie e cole o instanciador `setup-vps.sh` da sua pasta `scripts/` direto nele:
 ```bash
 nano /root/setup-vps.sh
 ```
-Cole o conteúdo de `scripts/setup-vps.sh`, salve e execute:
+*(Cole o conteúdo)*, depois salve e execute:
 ```bash
 bash /root/setup-vps.sh
 ```
-Esse comando garantirá que seu servidor tem o Node.js v20, o PM2 global, e criará as pastas estruturais de hospedagem em `/var/www/nomemagnetico`.
+Esse comando garantirá que seu servidor tem o Node.js v20, o PM2 global, ferramentas Nginx e criará as pastas estruturais de hospedagem permanentemente em `/var/www/nomemagnetico`.
 
 ### 1.1 Variáveis de Ambiente na VPS
-Crie o arquivo `.env` dentro da pasta onde o código vai rodar na VPS com suas credenciais do banco de dados (Supabase, Resend, Stripe, etc).
+Com o diretório base criado e pronto, não esqueça de criar o arquivo `.env` definitivo do servidor (as chaves que acessarão seu Banco Supabase, Stripe etc):
 ```bash
 nano /var/www/nomemagnetico/.env
 ```
-*(Preencha as variáveis cruciais listadas no ambiente de produção do seu projeto.)*
 
-## Passo 2: Configurar Repositório Git e GitHub
-Você precisa que esse painel já esteja dentro de um repositório no GitHub.
+## Passo 2: Configurar os "Secrets" do GitHub Actions
 
-Se ainda não fez o commit base na sua máquina local de desenvolvimento:
-```bash
-git init
-git add .
-git commit -m "feat: first commit"
-git branch -M main
-git remote add origin https://github.com/SEU-USUARIO/nome-magnetico.git
-git push -u origin main
-```
+Para o script `.github/workflows/deploy.yml` que acabamos de configurar rodar 100% funcional na internet conectando na sua máquina, vá ao painel de configurações para guardar as informações de forma criptografada.
 
-## Passo 3: Configurar os "Secrets" do GitHub Actions
+1. Acesse o Repositório no Github pelo seu navegador.
+2. Vá na aba **Settings** > **Secrets and variables** > **Actions**.
+3. Escolha **New repository secret**.
 
-Para a pipeline funcionar, o GitHub Actions precisa se logar na sua VPS. Entre no repositório do Github pelo navegador:
+- **Name**: `SSH_PRIVATE_KEY`
+- **Secret**: Insira todo o conteúdo bruto daquela sua chave (desde o `-----BEGIN OPENSSH PRIVATE KEY-----` até a última letra do `END OPENSSH...`).
 
-1. Vá na aba **Settings** > **Secrets and variables** > **Actions** do seu Repositório.
-2. Adicione **New repository secret** exatamente com as chaves abaixo (3 chaves):
+*Nota: Host, IPs, Caminhos e Configuração NPM já estão parametrizadas e preenchidas (hardcoded) no próprio arquivo Action, então a pipeline irá sempre atirar diretamente para `103.199.185.152` usando o portão `root`.*
 
-- 
+## Passo 3: O Fluxo de Deploy
 
-
-## Passo 4: Fazer o Primeiro Deploy
-
-Agora que a pipeline (`.github/workflows/deploy.yml`) existe e as chaves estão conectadas, cada vez que fizer um Push para a branch `main`:
-
+Sempre que a sua aplicação rodar e a branch `main` receber códigos novos (via comandos como os listados abaixo)
 ```bash
 git add .
-git commit -m "chore: test deploy pipeline to vps"
+git commit -m "Nova feature gerada"
 git push origin main
 ```
+Uma nuvem do GitHub pegará a ação para compilação (Build) completa e instalará os arquivos em produção, incluindo a reativação do PM2 invisível ao público debaixo do Node de Produção SSR.
 
-Isso ativará a rotina. Vá até a aba "Actions" no GitHub, abra o Workflow e veja os passos sendo executados: instalação de Node 20, compilação de CSS e Código Astro, espelhamento do `dist/` para a VPS através do **Rsync** e por fim um acesso remoto recarregando a aplicação com **PM2**.
+## Passo 4: Configurar Nginx e SSL (HTTPS)
 
-Se rodou sem erros, seu site está no ar sob a porta configurada (`4321` por padrão).
+Para publicar de vez na internet o servidor Astro e mascará-lo profissionalmente no Google:
 
-## Passo 5: Configurar Nginx e SSL (HTTPS)
-
-Dentro da pasta `scripts/` existe o arquivo `nginx.conf` pronto. Copie este arquivo para o Nginx da sua VPS:
+Dentro da pasta que é recebida pelo GitHub Actions, criamos o arquivo `scripts/nginx.conf`. Você apenas entra no SSH da VPS e copia para configurar os diretórios web do servidor local Nginx:
 
 ```bash
-cp /var/www/nomemagnetico/scripts/nginx.conf /etc/nginx/sites-available/nomemagnetico
+cp /var/www/nomemagnetico/scripts/nginx.conf /etc/nginx/sites-available/nomemagnetico.com.br
 ```
 
-Ative a configuração e reinicie o servidor web:
+Ative a configuração e verifique a recarga:
 ```bash
-ln -s /etc/nginx/sites-available/nomemagnetico /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/nomemagnetico.com.br /etc/nginx/sites-enabled/
 systemctl reload nginx
 ```
 
-### Instalar SSL (Certificado de Segurança HTTPS grátis)
-Uma vez que o domínio (`nomemagnetico.com.br` e `www.nomemagnetico.com.br`) estiver apontado para o IP da sua VPS no Registro.br ou Cloudflare, rode na VPS:
+### Instalar Certificado SSL (HTTPS Seguros e Grátis)
+Sabendo que o seu Registro `.com.br` já direciona a Tabela A ao IP `103.199.185.152`, podemos autenticar e ganhar o cadeadinho nos navegadores rodando um software grátis de certificado global:
+
 ```bash
 sudo apt install python3-certbot-nginx -y
 sudo certbot --nginx -d nomemagnetico.com.br -d www.nomemagnetico.com.br
 ```
-O Certbot cuidará sozinho de reescrever seu arquivo do Nginx incluindo o certificado SSL!
+
+Dê apenas os simples 'Enter' ou 'Yes' se perguntarem seu e-mail, e ao fim o software reescreverá o NGINX fechando o ambiente web do Nome Magnético em tráfego criptografado SSL 443!
