@@ -1,26 +1,60 @@
 ---
 import LandingLayout from '../layouts/LandingLayout.astro';
-import { PricingSection } from '../frontend/components/landing/PricingSection';
+import { ProductsSection } from '../frontend/components/landing/ProductsSection';
 import { FAQSection } from '../frontend/components/landing/FAQSection';
 import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+import { CheckoutFlow } from '../frontend/components/purchase/CheckoutFlow';
+import { hasActiveSubscription } from '../backend/db/subscriptions';
+import { createUserClient } from '../backend/db/supabase';
+
+const user = Astro.locals.user;
+
+// Admin: redirecionar direto para o app
+if (user) {
+  try {
+    const client = createUserClient(Astro.locals.accessToken);
+    const { data: profile } = await client.schema('nome_magnetico')
+      .from('profiles').select('role').eq('id', user.id).single();
+    if (profile?.role === 'admin') return Astro.redirect('/app');
+  } catch {}
+}
+
+const produto = Astro.url.searchParams.get('produto') ?? '';
+const produtosValidos = ['nome_magnetico', 'nome_bebe', 'nome_empresa'] as const;
+type ProductType = typeof produtosValidos[number];
+const productType: ProductType | null = (produtosValidos as readonly string[]).includes(produto)
+  ? (produto as ProductType)
+  : null;
+
+let isOwned = false;
+if (user && productType) {
+  isOwned = await hasActiveSubscription(user.id, productType);
+}
 ---
 
 <LandingLayout title="Escolha seu Plano">
-  <div class="min-h-screen bg-[#111111]">
-    <!-- Header simples -->
-    <header class="border-b border-[#D4AF37]/20 py-5 px-4">
-      <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <a href="/" class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider">
-          Nome Magnético
-        </a>
-        <a href="/auth/login" class="text-gray-400 hover:text-gray-200 text-sm transition-colors">
-          Já tenho conta
-        </a>
-      </div>
-    </header>
-
-    <PricingSection client:load />
-    <FAQSection client:visible />
-    <LandingFooter client:visible />
-  </div>
+  {productType ? (
+    <CheckoutFlow
+      client:load
+      productType={productType}
+      isLoggedIn={!!user}
+      isOwned={isOwned}
+    />
+  ) : (
+    <div class="min-h-screen bg-[#111111]">
+      <header class="border-b border-[#D4AF37]/20 py-5 px-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+          <a href="/" class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider">
+            Nome Magnético
+          </a>
+          <a href="/auth/login" class="text-gray-400 hover:text-gray-200 text-sm transition-colors">
+            Já tenho conta
+          </a>
+        </div>
+      </header>
+      <ProductsSection client:visible />
+      <FAQSection client:visible />
+      <LandingFooter client:visible />
+    </div>
+  )}
 </LandingLayout>

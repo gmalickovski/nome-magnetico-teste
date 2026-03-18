@@ -1,5 +1,5 @@
 /**
- * KarmicLessons — exibe as lições cármicas do nome.
+ * KarmicLessons — exibe as lições kármics do nome.
  * Lições = números de 1 a 8 ausentes no nome.
  */
 
@@ -69,7 +69,7 @@ export default function KarmicLessons({ licoes, nomeCompleto }: Props) {
         <div className="text-4xl">✨</div>
         <h3 className="text-lg font-semibold text-gold">Energia Completa</h3>
         <p className="text-gray-300 text-sm leading-relaxed max-w-md mx-auto">
-          {primeiroNome} não possui lições cármicas — todos os números de 1 a 8 estão presentes
+          {primeiroNome} não possui lições kármics — todos os números de 1 a 8 estão presentes
           no nome. Isso indica uma energia numerológica completa e equilibrada nesta encarnação.
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function KarmicLessons({ licoes, nomeCompleto }: Props) {
     <div className="space-y-4">
       <div className="glass rounded-xl p-4">
         <p className="text-sm text-gray-400 leading-relaxed">
-          <strong className="text-gold">{licoes.length} lição(ões) cármica(s)</strong> — números ausentes de 1 a 8 no nome de {primeiroNome}.
+          <strong className="text-gold">{licoes.length} lição(ões) kármic(s)</strong> — números ausentes de 1 a 8 no nome de {primeiroNome}.
           Cada ausência indica uma qualidade a ser desenvolvida nesta encarnação.
         </p>
       </div>

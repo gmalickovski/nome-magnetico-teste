@@ -17,7 +17,16 @@ export interface Analysis {
   arcano_regente: number | null;
   bloqueios: unknown[];
   triangulo_da_vida: unknown | null;
+  triangulo_vida: unknown | null;
+  triangulo_pessoal: unknown | null;
+  triangulo_social: unknown | null;
+  triangulo_destino: unknown | null;
+  licoes_carmicas: unknown[] | null;
+  tendencias_ocultas: unknown[] | null;
+  debitos_carmicos: unknown[] | null;
+  frequencias_numeros: unknown | null;
   analise_texto: string | null;
+  score: number | null;
   status: AnalysisStatus;
   error_message: string | null;
   created_at: string;
@@ -39,6 +48,15 @@ export interface MagneticName {
   created_at: string;
 }
 
+function toISODate(date: string): string {
+  // Converte DD/MM/YYYY → YYYY-MM-DD se necessário
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+    const [d, m, y] = date.split('/');
+    return `${y}-${m}-${d}`;
+  }
+  return date;
+}
+
 export async function createAnalysis(params: {
   userId: string;
   productType: ProductType;
@@ -52,7 +70,7 @@ export async function createAnalysis(params: {
       user_id: params.userId,
       product_type: params.productType,
       nome_completo: params.nomeCompleto,
-      data_nascimento: params.dataNascimento,
+      data_nascimento: toISODate(params.dataNascimento),
       status: 'pending',
     })
     .select()

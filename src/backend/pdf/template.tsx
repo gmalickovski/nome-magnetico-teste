@@ -2,12 +2,94 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { COLORS, pdfStyles } from './styles';
 import type { Analysis, MagneticName } from '../db/analyses';
+import { formatAnalysisText } from '../../utils/textFormatter';
 
 interface PDFTemplateProps {
   analysis: Analysis;
   magneticNames: MagneticName[];
   theme?: 'dark' | 'light';
 }
+
+// ─── HELPER: Renderizador Simples de Markdown para React-PDF ───────────────
+function renderMarkdownPiece(text: string, baseStyle: any, boldStyle: any): React.ReactNode[] {
+  // Separa o texto pelo negrito: "Algo **importante** aqui" -> ["Algo ", "importante", " aqui"]
+  const parts = text.split(/\*\*([^*]+)\*\*/g);
+  return parts.map((part, i) => {
+    // Índices ímpares são o conteúdo que estava dentro de ** **
+    if (i % 2 === 1) {
+      return (
+        <Text key={i} style={{ ...baseStyle, ...boldStyle }}>
+          {part}
+        </Text>
+      );
+    }
+    // Índices pares são texto normal
+    return <Text key={i} style={baseStyle}>{part}</Text>;
+  });
+}
+
+function RenderMarkdownChunks({ text, styles }: { text: string; styles: any }) {
+  if (!text) return null;
+  // Separa por duplas quebras (blocos/parágrafos)
+  const blocks = text.split(/\n\s*\n/);
+
+  return (
+    <View style={{ gap: 10 }}>
+      {blocks.map((block, idx) => {
+        const trimmed = block.trim();
+        if (!trimmed) return null;
+
+        // É um Header?
+        const matchHeader = trimmed.match(/^(#{1,6})\s+(.*)$/);
+        if (matchHeader) {
+          const level = matchHeader[1].length;
+          const content = matchHeader[2];
+          // Headers ganham cor Dourada/Destaque
+          const headerStyle = {
+            ...styles.sectionTitle,
+            fontSize: level === 1 ? 16 : level === 2 ? 14 : 12,
+            color: level >= 3 ? '#c084fc' : styles.title.color, // H3+ roxo, H1/H2 dourado
+            marginTop: idx === 0 ? 0 : 16, // Espaçamento antes do título
+            marginBottom: 4,               // Espaçamento depois
+          };
+          return (
+            <Text key={idx} style={headerStyle}>
+              {content}
+            </Text>
+          );
+        }
+
+        // Se for lista
+        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+          const listItems = trimmed.split('\n');
+          return (
+            <View key={idx} style={{ marginTop: 4, marginBottom: 8, paddingLeft: 10 }}>
+              {listItems.map((item, i) => {
+                const liText = item.replace(/^[-*]\s+/, '');
+                return (
+                  <View key={i} style={{ flexDirection: 'row', marginBottom: 4 }}>
+                    <Text style={{ ...styles.body, marginRight: 6 }}>•</Text>
+                    <Text style={{ ...styles.body, flex: 1, lineHeight: 1.5 }}>
+                      {renderMarkdownPiece(liText, styles.body, { fontFamily: 'Helvetica-Bold', color: styles.title.color })}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          );
+        }
+
+        // Parágrafo comum
+        return (
+          <Text key={idx} style={{ ...styles.body, lineHeight: 1.6, textAlign: 'justify', marginBottom: 6 }}>
+            {renderMarkdownPiece(trimmed, styles.body, { fontFamily: 'Helvetica-Bold', color: styles.title.color })}
+          </Text>
+        );
+      })}
+    </View>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemplateProps) {
   const isDark = theme === 'dark';
@@ -35,16 +117,34 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
       backgroundColor: isDark ? 'rgba(255,107,107,0.1)' : '#fff0f0',
       borderLeftWidth: 3, borderLeftColor: COLORS.error,
     },
-    magneticCard: {
+    debitCard: {
       padding: 12, marginBottom: 8, borderRadius: 6,
-      backgroundColor: isDark ? 'rgba(212,175,55,0.08)' : '#fffbea',
-      borderWidth: 1, borderColor: COLORS.border,
+      backgroundColor: isDark ? 'rgba(192,132,252,0.1)' : '#faf5ff',
+      borderLeftWidth: 3, borderLeftColor: '#c084fc',
+    },
+    karmicCard: {
+      padding: 12, marginBottom: 8, borderRadius: 6,
+      backgroundColor: isDark ? 'rgba(56,189,248,0.05)' : '#f0f9ff',
+      borderLeftWidth: 3, borderLeftColor: '#38bdf8',
+    },
+    hiddenCard: {
+      padding: 12, marginBottom: 8, borderRadius: 6,
+      backgroundColor: isDark ? 'rgba(167,139,250,0.1)' : '#f5f3ff',
+      borderLeftWidth: 3, borderLeftColor: '#a78bfa',
     },
     footer: { ...pdfStyles.footer },
     footerText: { ...pdfStyles.footerText, color: textSecondary },
   });
 
   const bloqueios = (analysis.bloqueios ?? []) as Array<{ titulo: string; descricao: string; codigo: string }>;
+  const licoesRaw = (analysis as any).licoes_carmicas as Array<{ numero: number; titulo: string; descricao: string }> | null;
+  const tendenciasRaw = (analysis as any).tendencias_ocultas as Array<{ numero: number; titulo: string; descricao: string; frequencia: number }> | null;
+  const debitosRaw = (analysis as any).debitos_carmicos as Array<{ numero: number; titulo: string; descricao: string }> | null;
+
+  const hasLicoes = Array.isArray(licoesRaw) && licoesRaw.length > 0;
+  const hasTendencias = Array.isArray(tendenciasRaw) && tendenciasRaw.length > 0;
+  const hasDebitos = Array.isArray(debitosRaw) && debitosRaw.length > 0;
+
   const primeiroNome = analysis.nome_completo.split(' ')[0] ?? analysis.nome_completo;
 
   return (
@@ -123,10 +223,9 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
       {/* Página 3 — Análise IA */}
       {analysis.analise_texto && (
         <Page size="A4" style={styles.page}>
-          <Text style={styles.sectionTitle}>Análise Numerológica Completa</Text>
-          <Text style={{ ...styles.body, fontSize: 10, lineHeight: 1.7 }}>
-            {analysis.analise_texto.slice(0, 2000)}
-          </Text>
+          <Text style={{ ...styles.sectionTitle, marginBottom: 20 }}>Análise Numerológica Completa</Text>
+          <RenderMarkdownChunks text={formatAnalysisText(analysis.analise_texto)} styles={styles} />
+          
           <View style={styles.footer}>
             <Text style={styles.footerText}>Nome Magnético — {analysis.nome_completo}</Text>
             <Text style={styles.footerText}>Página 3</Text>
@@ -134,37 +233,59 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
         </Page>
       )}
 
-      {/* Página 4 — Nomes Magnéticos */}
-      {magneticNames.length > 0 && (
+      {/* Página 4 — Fatores Kármicos e Ocultos */}
+      {(hasLicoes || hasTendencias || hasDebitos) && (
         <Page size="A4" style={styles.page}>
-          <Text style={styles.sectionTitle}>✨ Seus Nomes Magnéticos</Text>
-          <Text style={styles.body}>
-            Estas variações do seu nome foram calculadas para eliminar os bloqueios energéticos e potencializar sua vibração.
-          </Text>
-          {magneticNames.slice(0, 3).map((name, idx) => (
-            <View key={name.id} style={styles.magneticCard}>
-              {idx === 0 && (
-                <Text style={{ fontSize: 9, color: COLORS.gold, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
-                  ★ RECOMENDADO
-                </Text>
-              )}
-              <Text style={{ fontSize: 14, color: COLORS.gold, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
-                {name.nome_sugerido}
-              </Text>
-              <Text style={{ fontSize: 9, color: textSecondary, marginBottom: 4 }}>
-                Expressão: {name.numero_expressao} · Motivação: {name.numero_motivacao} · Score: {name.score}/100
-              </Text>
-              {name.justificativa && (
-                <Text style={{ fontSize: 9, color: textSecondary }}>{name.justificativa}</Text>
-              )}
+          
+          {hasDebitos && (
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ ...styles.sectionTitle, color: '#c084fc', marginTop: 10 }}>Débitos Kármicos</Text>
+              {debitosRaw!.map((d, i) => (
+                <View key={i} style={styles.debitCard}>
+                  <Text style={{ fontSize: 11, color: '#c084fc', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                    {d.numero} — {d.titulo}
+                  </Text>
+                  <Text style={{ ...styles.body, fontSize: 10 }}>{d.descricao}</Text>
+                </View>
+              ))}
             </View>
-          ))}
+          )}
+
+          {hasLicoes && (
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ ...styles.sectionTitle, color: '#38bdf8', marginTop: 10 }}>Lições Kármicas</Text>
+              {licoesRaw!.map((l, i) => (
+                <View key={i} style={styles.karmicCard}>
+                  <Text style={{ fontSize: 11, color: '#38bdf8', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                    {l.titulo}
+                  </Text>
+                  <Text style={{ ...styles.body, fontSize: 10 }}>{l.descricao}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {hasTendencias && (
+             <View style={{ marginBottom: 20 }}>
+              <Text style={{ ...styles.sectionTitle, color: '#a78bfa', marginTop: 10 }}>Tendências Ocultas</Text>
+              {tendenciasRaw!.map((t, i) => (
+                <View key={i} style={styles.hiddenCard}>
+                  <Text style={{ fontSize: 11, color: '#a78bfa', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                    {t.titulo} (Frequência: {t.frequencia}x)
+                  </Text>
+                  <Text style={{ ...styles.body, fontSize: 10 }}>{t.descricao}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
           <View style={styles.footer}>
             <Text style={styles.footerText}>Nome Magnético — {analysis.nome_completo}</Text>
             <Text style={styles.footerText}>Página 4</Text>
           </View>
         </Page>
       )}
+
     </Document>
   );
 }

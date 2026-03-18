@@ -53,5 +53,13 @@ Divida em 4 semanas:
 ### 5. Como Lidar com Resistências
 Orientação para quando pessoas ao redor resistirem à mudança de nome.
 
-Seja encorajador, prático e mágico — este é um momento de transformação real na vida desta pessoa!`;
+Seja encorajador, prático e mágico — este é um momento de transformação real na vida desta pessoa!
+
+REGRAS OBRIGATÓRIAS DE FORMATAÇÃO:
+1. NUNCA use títulos em letras MAIÚSCULAS. Use sempre Hash Headers (## ou ###).
+2. Seções principais com "## 🔑 [número]. [Título]" (ou outro emoticon relevante).
+3. Use segunda pessoa: "você", "seu", "sua" — fale diretamente com a pessoa pelo nome.
+4. SEMPRE duplo espaçamento entre parágrafos.
+5. Parágrafos com no máximo 4 linhas.
+6. Use **negrito** para destacar palavras-chave e práticas importantes.`;
 }

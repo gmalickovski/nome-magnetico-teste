@@ -164,21 +164,19 @@ function construirTriangulo(
   };
 }
 
-/**
- * Calcula o valor de uma letra reduzido a 1 dígito (para uso nas linhas base dos triângulos).
- */
-function valorLetraReduzido(letra: string): number {
-  return reduzirNumero(calcularValor(letra), false);
-}
-
 // ----------------------------------------------------------------
-// 1. Triângulo da Vida (Básico) — só o valor de cada letra
+// 1. Triângulo da Vida (Básico) — só o valor de cada letra (sem pré-redução)
 // ----------------------------------------------------------------
 export function calcularTrianguloVida(nome: string): Triangulo {
   const nomeLimpo = nome.replace(/\s+/g, '').toUpperCase();
   if (!nomeLimpo) return construirTriangulo('vida', []);
 
-  const linhaBase = nomeLimpo.split('').map(l => valorLetraReduzido(l));
+  // Usa calcularValor direto (sem reduzir), igual ao formula.js e n8n
+  // Filtra letras sem valor (espaços remanescentes, pontuação)
+  const linhaBase = nomeLimpo
+    .split('')
+    .map(l => calcularValor(l))
+    .filter(v => v > 0);
   return construirTriangulo('vida', linhaBase);
 }
 
@@ -196,7 +194,9 @@ export function calcularTrianguloPessoal(nome: string, dataNascimento: string): 
 
   const linhaBase = nomeLimpo
     .split('')
-    .map(l => reduzirNumero(valorLetraReduzido(l) + diaReduzido, false));
+    .map(l => calcularValor(l))
+    .filter(v => v > 0)
+    .map(v => reduzirNumero(v + diaReduzido, false));
 
   return construirTriangulo('pessoal', linhaBase);
 }
@@ -214,7 +214,9 @@ export function calcularTrianguloSocial(nome: string, dataNascimento: string): T
 
   const linhaBase = nomeLimpo
     .split('')
-    .map(l => reduzirNumero(valorLetraReduzido(l) + mesReduzido, false));
+    .map(l => calcularValor(l))
+    .filter(v => v > 0)
+    .map(v => reduzirNumero(v + mesReduzido, false));
 
   return construirTriangulo('social', linhaBase);
 }
@@ -236,7 +238,9 @@ export function calcularTrianguloDestino(nome: string, dataNascimento: string): 
 
   const linhaBase = nomeLimpo
     .split('')
-    .map(l => reduzirNumero(valorLetraReduzido(l) + modificador, false));
+    .map(l => calcularValor(l))
+    .filter(v => v > 0)
+    .map(v => reduzirNumero(v + modificador, false));
 
   return construirTriangulo('destino', linhaBase);
 }

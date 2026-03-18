@@ -2,7 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { listUsers } from '../../backend/db/users';
 
-const page = parseInt(Astro.url.searchParams.get('page') ?? '1');
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
 const { users, total } = await listUsers(page, 20);
 const totalPages = Math.ceil(total / 20);
 ---
@@ -22,20 +22,24 @@ const totalPages = Math.ceil(total / 20);
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
-            <tr class="border-b border-white/5 hover:bg-white/3">
-              <td class="px-5 py-3 text-gray-200">{user.email}</td>
-              <td class="px-5 py-3 text-gray-400">{user.nome ?? '—'}</td>
-              <td class="px-5 py-3">
-                <span class={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                  user.role === 'admin' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : 'bg-gray-500/20 text-gray-400'
-                }`}>{user.role}</span>
-              </td>
-              <td class="px-5 py-3 text-gray-500 text-xs">
-                {new Date(user.created_at).toLocaleDateString('pt-BR')}
-              </td>
-            </tr>
-          ))}
+          {users.map(user => {
+            const nomeDisplay = user.nome || '—';
+            const roleClass = user.role === 'admin'
+              ? 'px-2 py-0.5 rounded-full text-xs font-medium bg-[#D4AF37]/20 text-[#D4AF37]'
+              : 'px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400';
+            return (
+              <tr class="border-b border-white/5 hover:bg-white/3">
+                <td class="px-5 py-3 text-gray-200">{user.email}</td>
+                <td class="px-5 py-3 text-gray-400">{nomeDisplay}</td>
+                <td class="px-5 py-3">
+                  <span class={roleClass}>{user.role}</span>
+                </td>
+                <td class="px-5 py-3 text-gray-500 text-xs">
+                  {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

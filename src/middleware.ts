@@ -60,6 +60,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return next();
     }
 
+    // Verificar isolamento de app via app_metadata.apps
+    // Bloqueia apenas usuários explicitamente taggeados para outros apps.
+    // Usuários sem a chave 'apps' (criados antes do sistema de tags) passam.
+    const apps = user.app_metadata?.apps as string[] | undefined;
+    if (apps !== undefined && !apps.includes('nome_magnetico')) {
+      context.cookies.delete('nome-magnetico-auth-access-token', { path: '/' });
+      context.cookies.delete('nome-magnetico-auth-refresh-token', { path: '/' });
+      context.cookies.delete('sb-access-token', { path: '/' });
+      context.cookies.delete('sb-refresh-token', { path: '/' });
+      if (pathname.startsWith('/app') || pathname.startsWith('/admin')) {
+        return context.redirect('/auth/login?msg=sem-acesso');
+      }
+      return next();
+    }
+
     // Injetar usuário no contexto
     context.locals.user = user;
     context.locals.accessToken = accessToken;

@@ -140,8 +140,8 @@ Bloqueios são detectados em **todos os 4 triângulos** e consolidados. Cada blo
 
 Cada bloqueio tem: `codigo`, `titulo`, `descricao`, `aspectoSaude`, `triangulos[]`
 
-### Lições Cármicas e Tendências Ocultas
-- **Lições Cármicas**: números 1–8 **ausentes** no nome → qualidades a desenvolver nesta encarnação
+### Lições Kármics e Tendências Ocultas
+- **Lições Kármics**: números 1–8 **ausentes** no nome → qualidades a desenvolver nesta encarnação
 - **Tendências Ocultas**: número que aparece **≥4 vezes** no nome → excesso daquela qualidade
 - Funções: `detectarLicoesCarmicas(nome)`, `detectarTendenciasOcultas(nome)`, `mapearFrequencias(nome)`
 - Módulo: `src/backend/numerology/karmic.ts`
@@ -166,14 +166,14 @@ type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa'
 
 ### `nome_magnetico` — Análise Pessoal (produto principal)
 - Analisa nome de nascimento + data de nascimento
-- Calcula 5 números + 4 triângulos + bloqueios + lições cármicas + tendências ocultas
+- Calcula 5 números + 4 triângulos + bloqueios + lições kármics + tendências ocultas
 - Sugere variações do nome sem bloqueios e compatíveis com Expressão × Destino
 - Gera guia de implementação da nova assinatura
 - Módulo: `src/backend/ai/brain.ts` (funções: `generateAnalysis`, `generateSuggestions`, `generateGuide`)
 
 ### `nome_bebe` — Nome para Bebê
 - Input: sobrenome da família + data de nascimento do bebê + lista de nomes candidatos
-- Para cada candidato: calcula 4 triângulos + detecta bloqueios + verifica compatibilidade Expressão × Destino do bebê + lições cármicas
+- Para cada candidato: calcula 4 triângulos + detecta bloqueios + verifica compatibilidade Expressão × Destino do bebê + lições kármics
 - Rankeia por score 0–100 e aponta o melhor nome
 - Módulo: `src/backend/numerology/products/nome-bebe.ts`
 - Prompt IA: `src/backend/ai/prompts/baby-prompt.ts`
@@ -213,7 +213,7 @@ Pagamento único por ciclo de 30 dias (não recorrente)
 
 ### Migrations aplicadas
 - `001_nome_magnetico.sql` — schema base completo
-- `002_expand_analyses.sql` — expansão para 4 triângulos, lições cármicas, tendências ocultas, produtos nome_bebe e nome_empresa
+- `002_expand_analyses.sql` — expansão para 4 triângulos, lições kármics, tendências ocultas, produtos nome_bebe e nome_empresa
 
 ---
 
@@ -241,7 +241,7 @@ O n8n recebe o evento e o Resend envia o email. Templates ficam no n8n.
 ## Componentes App Disponíveis (src/frontend/components/app/)
 
 - `TriangleVisualization` — visualiza os 4 triângulos com abas e bloqueios expandíveis
-- `KarmicLessons` — exibe lições cármicas com cards expansíveis por número
+- `KarmicLessons` — exibe lições kármics com cards expansíveis por número
 - `HiddenTendencies` — exibe tendências ocultas + barra de frequências 1–8
 - `SignatureEvaluation` — critérios objetivos da assinatura (sem radiestesia)
 - `BabyNameForm` — formulário completo para produto nome_bebe

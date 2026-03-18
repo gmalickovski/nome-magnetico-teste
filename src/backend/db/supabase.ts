@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import fetch from 'cross-fetch';
 
 const supabaseUrl = import.meta.env.SUPABASE_URL;
 const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -17,6 +18,9 @@ export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     autoRefreshToken: false,
     persistSession: false,
   },
+  global: {
+    fetch: fetch,
+  },
 });
 
 /**
@@ -29,6 +33,7 @@ export function createUserClient(accessToken: string) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      fetch: fetch,
     },
     auth: {
       autoRefreshToken: false,

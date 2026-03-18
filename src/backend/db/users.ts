@@ -5,6 +5,8 @@ export interface Profile {
   email: string;
   nome: string | null;
   phone: string | null;
+  birth_name: string | null;
+  birth_date: string | null;
   avatar_url: string | null;
   role: 'user' | 'admin';
   app_source: string;
@@ -50,7 +52,7 @@ export async function getUserStatus(userId: string): Promise<UserStatus | null> 
 
 export async function updateProfile(
   userId: string,
-  updates: Partial<Pick<Profile, 'nome' | 'phone' | 'avatar_url'>>
+  updates: Partial<Pick<Profile, 'nome' | 'phone' | 'avatar_url' | 'birth_name' | 'birth_date'>>
 ): Promise<Profile | null> {
   const { data, error } = await supabase
     .schema('nome_magnetico')

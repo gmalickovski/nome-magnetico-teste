@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.baby_name_inputs (
 
 ALTER TABLE nome_magnetico.baby_name_inputs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "baby_inputs_own" ON nome_magnetico.baby_name_inputs;
 CREATE POLICY "baby_inputs_own" ON nome_magnetico.baby_name_inputs
   FOR ALL USING (auth.uid() = user_id);
 
@@ -87,6 +88,7 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.company_name_inputs (
 
 ALTER TABLE nome_magnetico.company_name_inputs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "company_inputs_own" ON nome_magnetico.company_name_inputs;
 CREATE POLICY "company_inputs_own" ON nome_magnetico.company_name_inputs
   FOR ALL USING (auth.uid() = user_id);
 

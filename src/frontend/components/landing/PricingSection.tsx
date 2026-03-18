@@ -1,47 +1,86 @@
 import React from 'react';
 
-const plans = [
+interface Plan {
+  id: string;
+  name: string;
+  subtitle: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  cta: string;
+  popular: boolean;
+}
+
+const plans: Plan[] = [
   {
     id: 'nome_magnetico',
-    name: 'Nome Magnético',
+    name: 'Nome Social',
     subtitle: 'Análise Pessoal',
     price: 'R$ 97',
     period: 'acesso por 30 dias',
-    description: 'Análise completa do seu nome de nascimento com IA cabalística.',
+    description: 'Análise completa do seu nome de nascimento com os 4 triângulos cabalísticos e IA especializada.',
     features: [
-      '5 números completos + interpretação',
-      'Triângulo da Vida detalhado',
+      '5 números principais + interpretação',
+      '4 triângulos cabalísticos detalhados',
+      'Lições kármics e tendências ocultas',
+      'Débitos kármicos detectados',
       'Análise de bloqueios energéticos',
-      '3 Nomes Magnéticos personalizados',
+      '3 variações do nome personalizadas',
       'Guia de implementação (30 dias)',
-      'Afirmações e rituais de ativação',
       'PDF para download (dark + light)',
       'Suporte por 30 dias',
     ],
-    cta: 'Quero Meu Nome Magnético',
+    cta: 'Quero Meu Nome Social',
     popular: true,
   },
   {
     id: 'nome_bebe',
-    name: 'Nome do Bebê',
-    subtitle: 'Em breve',
+    name: 'Nome de Bebê',
+    subtitle: 'Para seu filho',
     price: 'R$ 147',
     period: 'acesso por 30 dias',
-    description: 'Encontre o nome perfeito para o seu bebê — sem bloqueios e alinhado ao destino.',
+    description: 'Encontre o nome perfeito para o seu bebê — sem bloqueios e alinhado ao destino da família.',
     features: [
       'Análise de múltiplos nomes candidatos',
       'Compatibilidade com sobrenome da família',
-      'Alinhamento com data de nascimento prevista',
-      'Ranking de nomes por harmonia',
-      'Relatório para os pais',
+      'Alinhamento com data de nascimento',
+      '4 triângulos cabalísticos por candidato',
+      'Ranking com score 0–100 por harmonia',
+      'Relatório completo para os pais',
+      'PDF para download',
+      'Suporte por 30 dias',
     ],
-    cta: 'Lista de Espera',
+    cta: 'Analisar Nome do Bebê',
     popular: false,
-    comingSoon: true,
+  },
+  {
+    id: 'nome_empresa',
+    name: 'Nome Empresarial',
+    subtitle: 'Para sua empresa',
+    price: 'R$ 197',
+    period: 'acesso por 30 dias',
+    description: 'Avalie nomes empresariais pela compatibilidade com o fundador e o destino da empresa.',
+    features: [
+      'Análise de múltiplos nomes candidatos',
+      'Compatibilidade com destino do fundador',
+      'Análise da data de fundação',
+      'Alerta de tendência oculta do 8',
+      'Ranking com score 0–100',
+      'Relatório estratégico completo',
+      'PDF para download',
+      'Suporte por 30 dias',
+    ],
+    cta: 'Analisar Minha Empresa',
+    popular: false,
   },
 ];
 
-export function PricingSection() {
+interface PricingSectionProps {
+  highlight?: string;
+}
+
+export function PricingSection({ highlight }: PricingSectionProps) {
   return (
     <section id="precos" className="py-20 md:py-32 bg-[#1a1a1a]">
       <div className="max-w-5xl mx-auto px-4">
@@ -59,24 +98,27 @@ export function PricingSection() {
         </div>
 
         {/* Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-          {plans.map(plan => (
+        <div className="grid md:grid-cols-3 gap-8">
+          {plans.map(plan => {
+            const isHighlighted = highlight ? plan.id === highlight : plan.popular;
+            return (
             <div
               key={plan.id}
-              className={`relative rounded-2xl p-8 ${
-                plan.popular
+              id={`plano-${plan.id}`}
+              className={`relative rounded-2xl p-8 flex flex-col ${
+                isHighlighted
                   ? 'bg-white/5 border-2 border-[#D4AF37]/50 shadow-xl shadow-yellow-500/10'
-                  : 'bg-white/3 border border-white/10'
-              } ${plan.comingSoon ? 'opacity-70' : ''}`}
+                  : 'bg-white/3 border border-white/10 hover:border-[#D4AF37]/30 hover:bg-white/5'
+              } transition-all duration-300`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-black text-xs font-bold px-4 py-1.5 rounded-full">
                   MAIS POPULAR
                 </div>
               )}
-              {plan.comingSoon && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-full">
-                  EM BREVE
+              {highlight && plan.id === highlight && !plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-black text-xs font-bold px-4 py-1.5 rounded-full">
+                  SELECIONADO
                 </div>
               )}
 
@@ -94,7 +136,7 @@ export function PricingSection() {
 
               <p className="text-gray-400 text-sm mb-6 leading-relaxed">{plan.description}</p>
 
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map(feature => (
                   <li key={feature} className="flex items-start gap-2 text-sm text-gray-300">
                     <svg className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,17 +148,18 @@ export function PricingSection() {
               </ul>
 
               <a
-                href={plan.comingSoon ? '#' : '/comprar'}
+                href={`/comprar?produto=${plan.id}`}
                 className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-300 ${
-                  plan.popular
+                  isHighlighted
                     ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
-                    : 'border border-white/20 text-gray-300 hover:border-white/40 hover:text-white'
-                } ${plan.comingSoon ? 'cursor-not-allowed opacity-60' : ''}`}
+                    : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
+                }`}
               >
                 {plan.cta}
               </a>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Garantia */}

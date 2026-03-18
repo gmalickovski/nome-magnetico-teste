@@ -7,15 +7,16 @@
  *    - Calcular os 4 triângulos
  *    - Verificar sequências negativas
  *    - Calcular compatibilidade Expressão × Destino
- *    - Verificar lições cármicas
+ *    - Verificar lições kármics
  * 3. Rankear por score total.
  */
 
 import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from '../triangle';
 import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao } from '../numbers';
-import { detectarLicoesCarmicas, detectarTendenciasOcultas } from '../karmic';
+import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../karmic';
 import { avaliarCompatibilidade } from '../harmonization';
-import type { LicaoCarmica, TendenciaOculta } from '../karmic';
+import { calcularScore } from '../score';
+import type { LicaoCarmica, TendenciaOculta, DebitoCarmicoInfo } from '../karmic';
 import type { Bloqueio } from '../triangle';
 
 export interface AnaliseNomeBebe {
@@ -30,6 +31,7 @@ export interface AnaliseNomeBebe {
   sequenciasNegativas: string[];
   licoesCarmicas: LicaoCarmica[];
   tendenciasOcultas: TendenciaOculta[];
+  debitosCarmicos: DebitoCarmicoInfo[];
   compatibilidade: 'total' | 'complementar' | 'aceitavel' | 'incompativel';
   score: number;
   justificativa: string[];
@@ -61,50 +63,46 @@ export function analisarNomeBebe(
   const destino = calcularDestino(dataNascimento);
   const licoes = detectarLicoesCarmicas(nomeCompleto);
   const tendencias = detectarTendenciasOcultas(nomeCompleto);
+  const debitos = calcularDebitosCarmicos(dataNascimento, destino, motivacao, expressao);
   const compatibilidade = avaliarCompatibilidade(expressao, destino);
 
-  let score = 100;
+  const score = calcularScore({
+    bloqueios: bloqueios.length,
+    licoesCarmicas: licoes.length,
+    tendenciasOcultas: tendencias.length,
+    debitosCarmicos: debitos.length,
+    compatibilidade,
+  });
+
   const justificativa: string[] = [];
 
-  // Penalidade por bloqueios
   if (bloqueios.length === 0) {
-    score += 15;
     justificativa.push('✓ Sem bloqueios em nenhum dos 4 triângulos');
   } else {
-    score -= bloqueios.length * 20;
     justificativa.push(`✗ ${bloqueios.length} bloqueio(s): ${bloqueios.map(b => b.codigo).join(', ')}`);
   }
 
-  // Bônus por compatibilidade Expressão × Destino
   switch (compatibilidade) {
     case 'total':
-      score += 20;
       justificativa.push(`✓ Expressão (${expressao}) totalmente harmônica com Destino (${destino})`);
       break;
     case 'complementar':
-      score += 12;
       justificativa.push(`✓ Expressão (${expressao}) complementar ao Destino (${destino})`);
       break;
     case 'aceitavel':
-      score += 5;
       justificativa.push(`~ Expressão (${expressao}) aceitável para o Destino (${destino})`);
       break;
     case 'incompativel':
-      score -= 10;
       justificativa.push(`✗ Expressão (${expressao}) pouco compatível com Destino (${destino})`);
       break;
   }
 
-  // Penalidade por lições cármicas em excesso
-  if (licoes.length > 3) {
-    score -= (licoes.length - 3) * 5;
-    justificativa.push(`~ ${licoes.length} lições cármicas — muitos aprendizados simultâneos`);
-  } else if (licoes.length === 0) {
-    score += 5;
-    justificativa.push('✓ Sem lições cármicas — energia completa neste nome');
+  if (licoes.length > 0) {
+    justificativa.push(`~ ${licoes.length} lição(ões) kármica(s)`);
   }
-
-  score = Math.max(0, Math.min(100, score));
+  if (debitos.length > 0) {
+    justificativa.push(`✗ ${debitos.length} débito(s) kármico(s): ${debitos.map(d => d.numero).join(', ')}`);
+  }
 
   return {
     nomeCompleto,
@@ -118,6 +116,7 @@ export function analisarNomeBebe(
     sequenciasNegativas: sequencias,
     licoesCarmicas: licoes,
     tendenciasOcultas: tendencias,
+    debitosCarmicos: debitos,
     compatibilidade,
     score,
     justificativa,

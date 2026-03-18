@@ -1,0 +1,209 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { getUserAnalyses } from '../../../backend/db/analyses';
+import { getProfile } from '../../../backend/db/users';
+import { calcularScore } from '../../../backend/numerology/score';
+import { avaliarCompatibilidade } from '../../../backend/numerology/harmonization';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/auth/login');
+
+const profile = await getProfile(user.id);
+const profileName = profile?.nome?.trim().toLowerCase() || '';
+
+const analyses = await getUserAnalyses(user.id);
+
+const productIcon: Record<string, string> = {
+  nome_magnetico: '✨',
+  nome_bebe: '👶',
+  nome_empresa: '🏢',
+};
+const productLabel: Record<string, string> = {
+  nome_magnetico: 'Nome Social',
+  nome_bebe: 'Nome de Bebê',
+  nome_empresa: 'Nome Empresarial',
+};
+
+// Pre-resolver classes de status para evitar template literals no map
+function statusClass(status: string) {
+  if (status === 'complete') return 'text-xs px-2.5 py-1 rounded-full font-medium bg-emerald-500/20 text-emerald-400 flex-shrink-0';
+  if (status === 'error')    return 'text-xs px-2.5 py-1 rounded-full font-medium bg-red-500/20 text-red-400 flex-shrink-0';
+  return 'text-xs px-2.5 py-1 rounded-full font-medium bg-yellow-500/20 text-yellow-400 flex-shrink-0';
+}
+function statusLabel(status: string) {
+  if (status === 'complete')   return 'Completa';
+  if (status === 'error')      return 'Erro';
+  if (status === 'processing') return 'Processando';
+  return 'Pendente';
+}
+
+const analysesWithMeta = analyses.map(a => {
+  const isOriginal = a.nome_completo.trim().toLowerCase() === profileName;
+
+  let score: number | null = null;
+  if (!isOriginal && a.status === 'complete') {
+    if (a.score != null) {
+      score = a.score;
+    } else if (a.numero_expressao && a.numero_destino) {
+      const compat = avaliarCompatibilidade(a.numero_expressao, a.numero_destino);
+      score = calcularScore({
+        bloqueios: Array.isArray(a.bloqueios) ? a.bloqueios.length : 0,
+        licoesCarmicas: Array.isArray(a.licoes_carmicas) ? a.licoes_carmicas.length : 0,
+        tendenciasOcultas: Array.isArray(a.tendencias_ocultas) ? a.tendencias_ocultas.length : 0,
+        debitosCarmicos: Array.isArray(a.debitos_carmicos) ? a.debitos_carmicos.length : 0,
+        compatibilidade: compat,
+      });
+    }
+  }
+
+  return {
+    ...a,
+    isOriginal,
+    score,
+    icon: productIcon[a.product_type ?? 'nome_magnetico'] ?? '✨',
+    productName: productLabel[a.product_type ?? 'nome_magnetico'] ?? 'Análise',
+    dateFormatted: new Date(a.created_at).toLocaleDateString('pt-BR'),
+    statusCls: statusClass(a.status),
+    statusLbl: statusLabel(a.status),
+  };
+});
+
+const uniqueProducts = [...new Set(analysesWithMeta.map(a => a.product_type ?? 'nome_magnetico'))];
+const hasMultipleProducts = uniqueProducts.length > 1;
+---
+
+<AppLayout title="Minhas Análises">
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="font-cinzel text-3xl font-bold text-white mb-1">Minhas Análises</h1>
+        <p class="text-gray-400 text-sm">{analyses.length} análise{analyses.length !== 1 ? 's' : ''} no total</p>
+      </div>
+      <a
+        href="/app"
+        class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105"
+      >
+        + Nova Análise
+      </a>
+    </div>
+
+    {hasMultipleProducts && (
+      <div class="flex items-center gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide">
+        <button class="filter-btn px-5 py-2 rounded-xl text-sm font-bold bg-[#D4AF37] text-black hover:bg-yellow-300 transition-colors" data-filter="all">Todos</button>
+        {uniqueProducts.map(pt => (
+          <button class="filter-btn px-5 py-2 rounded-xl text-sm font-medium bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors" data-filter={pt}>
+            {productLabel[pt] ?? pt}
+          </button>
+        ))}
+      </div>
+    )}
+
+    {analysesWithMeta.length === 0 ? (
+      <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-12 text-center">
+        <div class="text-5xl mb-4">✨</div>
+        <h3 class="font-cinzel text-xl font-bold text-white mb-2">Nenhuma análise ainda</h3>
+        <p class="text-gray-400 mb-6">Inicie sua primeira análise numerológica.</p>
+        <a
+          href="/app"
+          class="inline-block bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-colors"
+        >
+          Começar Agora
+        </a>
+      </div>
+    ) : (
+      <div class="space-y-3" id="analysis-list">
+        {analysesWithMeta.map(analysis => (
+          <div 
+            class="analysis-card flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-5 py-4 hover:border-[#D4AF37]/30 transition-all duration-200"
+            data-product={analysis.product_type ?? 'nome_magnetico'}
+          >
+            <span class="text-2xl flex-shrink-0">{analysis.icon}</span>
+            <a
+              href={'/app/resultado/' + analysis.id}
+              class="flex-1 flex items-center justify-between min-w-0"
+            >
+              <div class="min-w-0">
+                <div class="flex items-center flex-wrap gap-2 mb-1">
+                  <p class="text-gray-200 font-medium truncate">{analysis.nome_completo}</p>
+                  {analysis.isOriginal && (
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-bold border border-blue-500/30 whitespace-nowrap">
+                      ★ Nome Original
+                    </span>
+                  )}
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-gray-400 whitespace-nowrap">
+                    {analysis.productName}
+                  </span>
+                </div>
+                <div class="flex items-center gap-3 text-sm">
+                  <span class="text-gray-500">{analysis.dateFormatted}</span>
+                  {!analysis.isOriginal && analysis.score !== null && (
+                    <span class={`font-bold ${analysis.score >= 80 ? 'text-emerald-400' : analysis.score >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                      {analysis.score}% Compatível
+                    </span>
+                  )}
+                </div>
+              </div>
+              <span class={analysis.statusCls}>{analysis.statusLbl}</span>
+            </a>
+            <button
+              data-delete-id={analysis.id}
+              class="delete-analysis flex-shrink-0 p-2 text-gray-600 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
+              title="Excluir análise"
+            >
+              🗑
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <script>
+    // Filtro por tipo de produto
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.analysis-card');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Atualizar estilos dos botões
+        filterBtns.forEach(b => {
+          b.classList.remove('bg-[#D4AF37]', 'text-black', 'font-bold');
+          b.classList.add('bg-white/5', 'text-gray-400', 'font-medium');
+        });
+        btn.classList.remove('bg-white/5', 'text-gray-400', 'font-medium');
+        btn.classList.add('bg-[#D4AF37]', 'text-black', 'font-bold');
+
+        const filter = (btn as HTMLElement).dataset.filter;
+
+        // Filtrar cards
+        cards.forEach(card => {
+          const product = (card as HTMLElement).dataset.product;
+          if (filter === 'all' || product === filter) {
+            (card as HTMLElement).style.display = 'flex';
+          } else {
+            (card as HTMLElement).style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Deleção
+    document.querySelectorAll('.delete-analysis').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = (btn as HTMLElement).dataset.deleteId;
+        if (!id || !confirm('Excluir esta análise? Esta ação não pode ser desfeita.')) return;
+        const res = await fetch('/api/delete-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        });
+        if (res.ok) {
+          (btn as HTMLElement).closest('div.flex')?.remove();
+        } else {
+          alert('Erro ao excluir. Tente novamente.');
+        }
+      });
+    });
+  </script>
+</AppLayout>

@@ -1,16 +1,12 @@
 import type { APIRoute } from 'astro';
-import { createUserClient } from '../../backend/db/supabase';
 import { getAnalysis, getMagneticNames } from '../../backend/db/analyses';
+import { renderToBuffer } from '@react-pdf/renderer';
+import React from 'react';
+import { AnalysePDF } from '../../frontend/components/pdf/AnalysePDF';
 
-export const GET: APIRoute = async ({ url, cookies }) => {
-  const accessToken = cookies.get('sb-access-token')?.value;
-  if (!accessToken) {
-    return new Response('Autenticação necessária', { status: 401 });
-  }
-
-  const client = createUserClient(accessToken);
-  const { data: { user }, error } = await client.auth.getUser();
-  if (error || !user) return new Response('Sessão inválida', { status: 401 });
+export const GET: APIRoute = async ({ url, locals }) => {
+  const user = locals.user;
+  if (!user) return new Response('Autenticação necessária', { status: 401 });
 
   const analysisId = url.searchParams.get('id');
   if (!analysisId) return new Response('ID ausente', { status: 400 });
@@ -25,16 +21,21 @@ export const GET: APIRoute = async ({ url, cookies }) => {
   }
 
   const magneticNames = await getMagneticNames(analysisId);
+  const firstName = analysis.nome_completo.split(' ')[0];
 
-  // Por ora retorna JSON da análise — integrar @react-pdf/renderer na FASE 10
-  return new Response(
-    JSON.stringify({ analysis, magneticNames }),
-    {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="nome-magnetico-${analysis.nome_completo.split(' ')[0]}.json"`,
-      },
-    }
+  const pdfBuffer = await renderToBuffer(
+    React.createElement(AnalysePDF, {
+      analysis: analysis as any,
+      magneticNames,
+      userName: firstName,
+    }) as any
   );
+
+  return new Response(new Uint8Array(pdfBuffer), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="nome-magnetico-${firstName}.pdf"`,
+    },
+  });
 };

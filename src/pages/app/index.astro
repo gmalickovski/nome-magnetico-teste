@@ -1,18 +1,63 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
-import { supabase } from '../../backend/db/supabase';
-import { getUserAnalyses } from '../../backend/db/analyses';
-import { hasActiveSubscription } from '../../backend/db/subscriptions';
+import { hasActiveSubscription, hasAnySubscription } from '../../backend/db/subscriptions';
+import { createUserClient } from '../../backend/db/supabase';
+import { OnboardingNomeSocialModal } from '../../frontend/components/app/OnboardingNomeSocialModal';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
 
-const [analyses, hasAccess] = await Promise.all([
-  getUserAnalyses(user.id, 'nome_magnetico'),
-  hasActiveSubscription(user.id, 'nome_magnetico'),
-]);
+// Verificar admin e dados
+let isAdmin = false;
+let profileData: any = null;
+try {
+  const client = createUserClient(Astro.locals.accessToken);
+  const { data: profile } = await client.schema('nome_magnetico')
+    .from('profiles').select('nome, role, birth_name, birth_date').eq('id', user.id).single();
+  isAdmin = profile?.role === 'admin';
+  profileData = profile;
+} catch {}
 
-const recentAnalyses = analyses.slice(0, 5);
+// Admin: acesso total sem verificar subscriptions
+const [hasNomeSocial, hasNomeBebe, hasNomeEmpresa] = isAdmin
+  ? [true, true, true]
+  : await Promise.all([
+      hasActiveSubscription(user.id, 'nome_magnetico'),
+      hasActiveSubscription(user.id, 'nome_bebe'),
+      hasActiveSubscription(user.id, 'nome_empresa'),
+    ]);
+
+const hasAnyAccess = hasNomeSocial || hasNomeBebe || hasNomeEmpresa;
+
+// Detectar estado expirado (já comprou antes, mas nenhuma ativa)
+const isExpired = !isAdmin && !hasAnyAccess && await hasAnySubscription(user.id);
+
+const products = [
+  {
+    id: 'nome_magnetico',
+    icon: '✨',
+    name: 'Nome Social',
+    description: 'Análise pessoal com 4 triângulos, lições kármics e sugestões de nome.',
+    href: '/app/analise/nome-social',
+    hasAccess: hasNomeSocial,
+  },
+  {
+    id: 'nome_bebe',
+    icon: '👶',
+    name: 'Nome de Bebê',
+    description: 'Encontre o nome ideal para seu filho com compatibilidade familiar.',
+    href: '/app/analise/nome-bebe',
+    hasAccess: hasNomeBebe,
+  },
+  {
+    id: 'nome_empresa',
+    icon: '🏢',
+    name: 'Nome Empresarial',
+    description: 'Avalie nomes de empresa alinhados ao destino do fundador.',
+    href: '/app/analise/nome-empresa',
+    hasAccess: hasNomeEmpresa,
+  },
+];
 ---
 
 <AppLayout title="Meu Painel">
@@ -20,93 +65,129 @@ const recentAnalyses = analyses.slice(0, 5);
     <!-- Boas-vindas -->
     <div>
       <h1 class="font-cinzel text-3xl font-bold text-white mb-1">
-        Bem-vindo de volta
+        Bem-vindo, {profileData?.nome ? profileData.nome.split(' ')[0] : 'Iniciante'}!
       </h1>
-      <p class="text-gray-400">{user.email}</p>
+      <p class="text-gray-400">{isAdmin ? 'Acesso Administrativo Habilitado' : 'Acesse seus produtos e siga a sua jornada.'}</p>
     </div>
 
-    {!hasAccess && (
-      <div class="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <!-- Banner: Expirado -->
+    {isExpired && (
+      <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
-          <h3 class="font-cinzel text-lg font-bold text-[#D4AF37] mb-1">
-            Você não possui acesso ativo
+          <h3 class="font-cinzel text-lg font-bold text-red-400 mb-1">
+            Seu acesso expirou
           </h3>
-          <p class="text-gray-400 text-sm">Adquira o Nome Magnético para realizar sua análise completa.</p>
+          <p class="text-gray-400 text-sm">Renove para continuar realizando análises numerológicas completas.</p>
         </div>
         <a
           href="/comprar"
           class="flex-shrink-0 bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105"
         >
-          Ver Planos
+          Renovar Acesso
         </a>
       </div>
     )}
 
-    {hasAccess && (
-      <div class="grid md:grid-cols-2 gap-6">
-        <!-- Nova análise -->
-        <a
-          href="/app/questionario"
-          class="group bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 hover:border-[#D4AF37]/40 hover:bg-white/8 transition-all duration-300 hover:scale-[1.02]"
-        >
-          <div class="text-4xl mb-4">✨</div>
-          <h3 class="font-cinzel text-xl font-bold text-white mb-2 group-hover:text-[#D4AF37] transition-colors">
-            Nova Análise
+    <!-- Banner: Novo usuário (nunca comprou) -->
+    {!isAdmin && !hasAnyAccess && !isExpired && (
+      <div class="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <h3 class="font-cinzel text-lg font-bold text-[#D4AF37] mb-1">
+            Comece sua jornada numerológica
           </h3>
-          <p class="text-gray-400 text-sm">
-            Inicie uma nova análise do seu nome ou de outro nome.
-          </p>
-        </a>
-
-        <!-- Histórico -->
-        <a
-          href="#historico"
-          class="group bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]"
-        >
-          <div class="text-4xl mb-4">📋</div>
-          <h3 class="font-cinzel text-xl font-bold text-white mb-2">
-            Histórico
-          </h3>
-          <p class="text-gray-400 text-sm">
-            {analyses.length > 0
-              ? `${analyses.length} análise(s) realizadas`
-              : 'Nenhuma análise ainda'}
-          </p>
-        </a>
-      </div>
-    )}
-
-    <!-- Histórico de análises -->
-    {recentAnalyses.length > 0 && (
-      <div id="historico">
-        <h2 class="font-cinzel text-xl font-bold text-gray-100 mb-4">Análises Recentes</h2>
-        <div class="space-y-3">
-          {recentAnalyses.map(analysis => (
-            <a
-              href={`/app/resultado/${analysis.id}`}
-              class="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-5 py-4 hover:border-[#D4AF37]/30 hover:bg-white/8 transition-all duration-200"
-            >
-              <div>
-                <p class="text-gray-200 font-medium">{analysis.nome_completo}</p>
-                <p class="text-gray-500 text-sm">
-                  {new Date(analysis.created_at).toLocaleDateString('pt-BR')}
-                </p>
-              </div>
-              <span class={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                analysis.status === 'complete'
-                  ? 'bg-emerald-500/20 text-emerald-400'
-                  : analysis.status === 'error'
-                  ? 'bg-red-500/20 text-red-400'
-                  : 'bg-yellow-500/20 text-yellow-400'
-              }`}>
-                {analysis.status === 'complete' ? 'Completa' :
-                 analysis.status === 'error' ? 'Erro' :
-                 analysis.status === 'processing' ? 'Processando' : 'Pendente'}
-              </span>
-            </a>
-          ))}
+          <p class="text-gray-400 text-sm">Adquira um dos produtos para realizar sua análise cabalística completa.</p>
         </div>
+        <a
+          href="/comprar"
+          class="flex-shrink-0 bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105"
+        >
+          Ver Produtos
+        </a>
       </div>
     )}
+
+    <!-- Produtos -->
+    <div>
+      <h2 class="font-cinzel text-xl font-bold text-gray-100 mb-4">Seus Produtos</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        {products.map(product => (
+          product.hasAccess ? (
+            <div
+              data-product-id={product.id}
+              data-href={product.href}
+              class="product-card group bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 hover:border-[#D4AF37]/40 hover:bg-white/8 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+            >
+              <div class="text-4xl mb-4">{product.icon}</div>
+              <h3 class="font-cinzel text-xl font-bold text-white mb-2 group-hover:text-[#D4AF37] transition-colors">
+                {product.name}
+              </h3>
+              <p class="text-gray-400 text-sm">{product.description}</p>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-[#D4AF37] text-sm font-medium">Iniciar análise →</span>
+                {isAdmin && (
+                  <span class="text-xs bg-purple-500/20 border border-purple-500/30 text-purple-400 px-2 py-0.5 rounded-full">Admin</span>
+                )}
+              </div>
+            </div>
+          ) : isExpired ? (
+            <div class="bg-white/3 border border-white/10 rounded-2xl p-6 relative">
+              <div class="absolute top-3 right-3 text-gray-600 text-lg">🔒</div>
+              <div class="text-4xl mb-4 opacity-40">{product.icon}</div>
+              <h3 class="font-cinzel text-xl font-bold text-gray-500 mb-2">
+                {product.name}
+              </h3>
+              <p class="text-gray-600 text-sm">{product.description}</p>
+              <a
+                href={'/comprar?produto=' + product.id}
+                class="mt-4 inline-block bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-bold px-4 py-2 rounded-lg hover:bg-red-500/20 transition-all duration-300"
+              >
+                Renovar
+              </a>
+            </div>
+          ) : (
+            <div class="bg-white/3 border border-white/10 rounded-2xl p-6">
+              <div class="text-4xl mb-4 opacity-50">{product.icon}</div>
+              <h3 class="font-cinzel text-xl font-bold text-gray-500 mb-2">
+                {product.name}
+              </h3>
+              <p class="text-gray-600 text-sm">{product.description}</p>
+              <a
+                href={'/comprar?produto=' + product.id}
+                class="mt-4 inline-block bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-sm font-bold px-4 py-2 rounded-lg hover:bg-[#D4AF37]/20 transition-all duration-300"
+              >
+                Adquirir
+              </a>
+            </div>
+          )
+        ))}
+      </div>
+    </div>
+
   </div>
+  
+  <OnboardingNomeSocialModal 
+    client:load 
+    nomeSalvo={profileData?.birth_name || ''} 
+    dataSalva={profileData?.birth_date || ''} 
+  />
+
+  <script define:vars={{ needsOnboarding: !profileData?.birth_name || !profileData?.birth_date }}>
+    const cards = document.querySelectorAll('.product-card');
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-product-id');
+        const href = card.getAttribute('data-href');
+        
+        if (id !== 'nome_magnetico') {
+          if (href) window.location.href = href;
+        } else {
+          if (needsOnboarding) {
+            document.dispatchEvent(new CustomEvent('openNomeSocialModal'));
+          } else {
+            window.location.href = '/app/analise/nome-social';
+          }
+        }
+      });
+    });
+  </script>
 </AppLayout>

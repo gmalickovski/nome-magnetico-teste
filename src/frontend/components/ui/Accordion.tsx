@@ -4,6 +4,7 @@ interface AccordionItem {
   id: string;
   question: string;
   answer: string;
+  answerHtml?: string;
 }
 
 interface AccordionProps {
@@ -42,8 +43,15 @@ export function Accordion({ items, className = '' }: AccordionProps) {
               openId === item.id ? 'max-h-96' : 'max-h-0'
             }`}
           >
-            <div className="px-5 pb-4 text-gray-400 text-sm leading-relaxed border-t border-white/5 pt-3">
-              {item.answer}
+            <div className="px-5 pb-4 border-t border-white/5 pt-3">
+              {item.answerHtml ? (
+                <div
+                  className="prose prose-invert prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: item.answerHtml }}
+                />
+              ) : (
+                <p className="text-gray-400 text-sm leading-relaxed">{item.answer}</p>
+              )}
             </div>
           </div>
         </div>

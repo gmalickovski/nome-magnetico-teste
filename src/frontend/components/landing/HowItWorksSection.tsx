@@ -10,9 +10,9 @@ const steps = [
   },
   {
     number: '02',
-    title: 'Calculamos o Triângulo da Vida',
+    title: 'Calculamos os 4 Triângulos Cabalísticos',
     description:
-      'Nossa engine converte cada letra em vibrações numéricas e constrói o Triângulo da Vida, detectando sequências de bloqueio.',
+      'Nossa engine converte cada letra em vibrações numéricas e constrói os 4 triângulos cabalísticos (Vida, Pessoal, Social e Destino), detectando sequências de bloqueio em cada dimensão.',
     icon: '🔢',
   },
   {
@@ -24,9 +24,9 @@ const steps = [
   },
   {
     number: '04',
-    title: 'Receba seu Nome Magnético',
+    title: 'Receba seu Nome Ideal',
     description:
-      'Sugerimos variações do seu nome que eliminam os bloqueios, compatíveis com seus números de Expressão e Destino.',
+      'Sugerimos variações do nome que eliminam os bloqueios, compatíveis com os números de Expressão e Destino — para você, seu bebê ou sua empresa.',
     icon: '✨',
   },
 ];
@@ -44,8 +44,8 @@ export function HowItWorksSection() {
             Como Funciona
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Em minutos, você terá uma análise completa da energia do seu nome e
-            sugestões personalizadas de nomes sem bloqueios.
+            Em minutos, você terá uma análise completa da energia do nome — seja pessoal,
+            de bebê ou empresarial — com sugestões personalizadas sem bloqueios.
           </p>
         </div>
 

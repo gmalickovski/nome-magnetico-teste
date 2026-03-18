@@ -19,9 +19,15 @@ const PRICE_IDS: Record<ProductType, string> = {
 };
 
 const PRODUCT_NAMES: Record<ProductType, string> = {
-  nome_magnetico: 'Nome Magnético',
-  nome_bebe: 'Nome do Bebê',
+  nome_magnetico: 'Nome Social',
+  nome_bebe: 'Nome de Bebê',
   nome_empresa: 'Nome Empresarial',
+};
+
+const PRODUCT_CUSTOM_TEXT: Record<ProductType, { submit: { message: string } }> = {
+  nome_magnetico: { submit: { message: 'Você receberá acesso por 30 dias após o pagamento.' } },
+  nome_bebe: { submit: { message: 'Acesso por 30 dias. Analise quantos nomes candidatos quiser.' } },
+  nome_empresa: { submit: { message: 'Acesso por 30 dias. Avalie nomes de empresa sem limite.' } },
 };
 
 export interface CreateCheckoutParams {
@@ -57,7 +63,9 @@ export async function createCheckoutSession(
     metadata: {
       user_id: params.userId,
       product_type: params.productType,
+      access_duration_days: '30',
     },
+    custom_text: PRODUCT_CUSTOM_TEXT[params.productType],
     success_url: params.successUrl,
     cancel_url: params.cancelUrl,
     locale: 'pt-BR',

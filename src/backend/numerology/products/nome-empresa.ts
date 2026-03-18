@@ -9,15 +9,16 @@
  *    - Verificar sequências negativas
  *    - Calcular compatibilidade Expressão × Destino do sócio
  *    - Calcular compatibilidade Expressão × Destino da empresa (se tiver data)
- *    - Verificar lições cármicas e tendências ocultas
+ *    - Verificar lições kármics e tendências ocultas
  * 4. Rankear por score total.
  */
 
 import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from '../triangle';
 import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao } from '../numbers';
-import { detectarLicoesCarmicas, detectarTendenciasOcultas } from '../karmic';
+import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../karmic';
 import { avaliarCompatibilidade } from '../harmonization';
-import type { LicaoCarmica, TendenciaOculta } from '../karmic';
+import { calcularScore } from '../score';
+import type { LicaoCarmica, TendenciaOculta, DebitoCarmicoInfo } from '../karmic';
 import type { Bloqueio } from '../triangle';
 
 export interface AnaliseNomeEmpresa {
@@ -32,6 +33,7 @@ export interface AnaliseNomeEmpresa {
   sequenciasNegativas: string[];
   licoesCarmicas: LicaoCarmica[];
   tendenciasOcultas: TendenciaOculta[];
+  debitosCarmicos: DebitoCarmicoInfo[];
   compatibilidadeSocio: 'total' | 'complementar' | 'aceitavel' | 'incompativel';
   compatibilidadeEmpresa: 'total' | 'complementar' | 'aceitavel' | 'incompativel' | null;
   score: number;
@@ -70,86 +72,46 @@ export function analisarNomeEmpresa(
   const destinoEmpresa = dataFundacao ? calcularDestino(dataFundacao) : null;
   const licoes = detectarLicoesCarmicas(nomeEmpresa);
   const tendencias = detectarTendenciasOcultas(nomeEmpresa);
+  const debitos = calcularDebitosCarmicos(dataNascimentoSocio, destinoSocio, motivacao, expressao);
   const compatibilidadeSocio = avaliarCompatibilidade(expressao, destinoSocio);
   const compatibilidadeEmpresa = destinoEmpresa !== null
     ? avaliarCompatibilidade(expressao, destinoEmpresa)
     : null;
 
-  let score = 100;
+  const score = calcularScore({
+    bloqueios: bloqueios.length,
+    licoesCarmicas: licoes.length,
+    tendenciasOcultas: tendencias.length,
+    debitosCarmicos: debitos.length,
+    compatibilidade: compatibilidadeSocio,
+    compatibilidadeSecundaria: compatibilidadeEmpresa ?? undefined,
+  });
+
   const justificativa: string[] = [];
 
-  // Penalidade por bloqueios
   if (bloqueios.length === 0) {
-    score += 15;
     justificativa.push('✓ Sem bloqueios em nenhum dos 4 triângulos');
   } else {
-    score -= bloqueios.length * 20;
     justificativa.push(`✗ ${bloqueios.length} bloqueio(s): ${bloqueios.map(b => b.codigo).join(', ')}`);
   }
 
-  // Bônus por compatibilidade com o sócio principal
-  switch (compatibilidadeSocio) {
-    case 'total':
-      score += 20;
-      justificativa.push(`✓ Expressão (${expressao}) totalmente harmônica com Destino do sócio (${destinoSocio})`);
-      break;
-    case 'complementar':
-      score += 12;
-      justificativa.push(`✓ Expressão (${expressao}) complementar ao Destino do sócio (${destinoSocio})`);
-      break;
-    case 'aceitavel':
-      score += 5;
-      justificativa.push(`~ Expressão (${expressao}) aceitável para o Destino do sócio (${destinoSocio})`);
-      break;
-    case 'incompativel':
-      score -= 10;
-      justificativa.push(`✗ Expressão (${expressao}) pouco compatível com Destino do sócio (${destinoSocio})`);
-      break;
-  }
-
-  // Bônus adicional por compatibilidade com o Destino da empresa (data de fundação)
+  justificativa.push(`Compatibilidade sócio: ${compatibilidadeSocio} (Destino ${destinoSocio})`);
   if (compatibilidadeEmpresa !== null && destinoEmpresa !== null) {
-    switch (compatibilidadeEmpresa) {
-      case 'total':
-        score += 10;
-        justificativa.push(`✓ Expressão (${expressao}) harmônica com Destino da empresa (${destinoEmpresa})`);
-        break;
-      case 'complementar':
-        score += 6;
-        justificativa.push(`✓ Expressão (${expressao}) complementar ao Destino da empresa (${destinoEmpresa})`);
-        break;
-      case 'aceitavel':
-        score += 2;
-        justificativa.push(`~ Expressão (${expressao}) aceitável para Destino da empresa (${destinoEmpresa})`);
-        break;
-      case 'incompativel':
-        score -= 5;
-        justificativa.push(`✗ Expressão (${expressao}) pouco compatível com Destino da empresa (${destinoEmpresa})`);
-        break;
-    }
+    justificativa.push(`Compatibilidade empresa: ${compatibilidadeEmpresa} (Destino ${destinoEmpresa})`);
   }
-
-  // Bônus: missão (consoantes) como número de força da empresa
-  // Missão impar é preferível para empresas de serviço; par para produto/estrutura
   justificativa.push(`~ Missão empresarial: ${missao} — número de expressão estrutural`);
 
-  // Penalidade por lições cármicas em excesso (empresa com muitos desafios)
-  if (licoes.length > 3) {
-    score -= (licoes.length - 3) * 5;
-    justificativa.push(`~ ${licoes.length} lições cármicas — muitos desafios simultâneos para o negócio`);
-  } else if (licoes.length === 0) {
-    score += 5;
-    justificativa.push('✓ Sem lições cármicas — energia completa neste nome empresarial');
+  if (licoes.length > 0) {
+    justificativa.push(`~ ${licoes.length} lição(ões) kármica(s)`);
+  }
+  if (debitos.length > 0) {
+    justificativa.push(`✗ ${debitos.length} débito(s) kármico(s): ${debitos.map(d => d.numero).join(', ')}`);
   }
 
-  // Tendências ocultas: para empresa, número 8 em excesso é desfavorável (materialismo)
   const tendencia8 = tendencias.find(t => t.numero === 8);
   if (tendencia8) {
-    score -= 5;
     justificativa.push(`~ Tendência oculta ao excesso do 8 (${tendencia8.frequencia}×) — risco de materialismo excessivo`);
   }
-
-  score = Math.max(0, Math.min(100, score));
 
   return {
     nomeEmpresa,
@@ -163,6 +125,7 @@ export function analisarNomeEmpresa(
     sequenciasNegativas: sequencias,
     licoesCarmicas: licoes,
     tendenciasOcultas: tendencias,
+    debitosCarmicos: debitos,
     compatibilidadeSocio,
     compatibilidadeEmpresa,
     score,

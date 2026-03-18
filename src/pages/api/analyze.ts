@@ -5,9 +5,11 @@ import { hasActiveSubscription } from '../../backend/db/subscriptions';
 import { createAnalysis, updateAnalysis, saveMagneticNames } from '../../backend/db/analyses';
 import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from '../../backend/numerology/triangle';
 import { calcularCincoNumeros } from '../../backend/numerology/numbers';
-import { detectarLicoesCarmicas, detectarTendenciasOcultas, mapearFrequencias } from '../../backend/numerology/karmic';
+import { detectarLicoesCarmicas, detectarTendenciasOcultas, mapearFrequencias, calcularDebitosCarmicos } from '../../backend/numerology/karmic';
 import { gerarNomesMagneticos } from '../../backend/numerology/suggestions';
 import { generateAnalysis, generateSuggestions } from '../../backend/ai/brain';
+import { calcularScore } from '../../backend/numerology/score';
+import { avaliarCompatibilidade } from '../../backend/numerology/harmonization';
 import type { ProductType } from '../../backend/payments/stripe';
 
 const schema = z.object({
@@ -16,21 +18,17 @@ const schema = z.object({
   product_type: z.enum(['nome_magnetico', 'nome_bebe', 'nome_empresa']).default('nome_magnetico'),
 });
 
-export const POST: APIRoute = async ({ request, cookies }) => {
-  const accessToken = cookies.get('sb-access-token')?.value;
-  if (!accessToken) {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const user = (locals as any).user;
+  const accessToken = (locals as any).accessToken;
+
+  if (!user || !accessToken) {
     return new Response(JSON.stringify({ error: 'Autenticação necessária' }), {
       status: 401, headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  const client = createUserClient(accessToken);
-  const { data: { user }, error: authError } = await client.auth.getUser();
-  if (authError || !user) {
-    return new Response(JSON.stringify({ error: 'Sessão inválida' }), {
-      status: 401, headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  const supabase = createUserClient(accessToken);
 
   let body: unknown;
   try { body = await request.json(); } catch {
@@ -47,6 +45,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   const { nome_completo, data_nascimento, product_type } = parsed.data;
+
+  const { data: profile } = await supabase
+    .schema('nome_magnetico')
+    .from('profiles')
+    .select('gender')
+    .eq('id', user.id)
+    .single();
+
+  const gender = profile?.gender || 'Neutro';
 
   // Verificar subscription
   const hasAccess = await hasActiveSubscription(user.id, product_type as ProductType);
@@ -75,12 +82,28 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       const sequenciasNegativas = todasSequenciasNegativas(todosTriangulos);
       const cincoNumeros = calcularCincoNumeros(nome_completo, data_nascimento);
 
-      // Lições cármicas e tendências ocultas
+      // Lições kármics, tendências ocultas e débitos kármicos
       const licoesCarmicas = detectarLicoesCarmicas(nome_completo);
       const tendenciasOcultas = detectarTendenciasOcultas(nome_completo);
       const frequenciasNumeros = mapearFrequencias(nome_completo);
+      const debitosCarmicos = calcularDebitosCarmicos(
+        data_nascimento,
+        cincoNumeros.destino,
+        cincoNumeros.motivacao,
+        cincoNumeros.expressao
+      );
 
       const arcanoRegente = todosTriangulos.vida.arcanoRegente;
+
+      // Score unificado
+      const compatibilidade = avaliarCompatibilidade(cincoNumeros.expressao, cincoNumeros.destino);
+      const score = calcularScore({
+        bloqueios: bloqueios.length,
+        licoesCarmicas: licoesCarmicas.length,
+        tendenciasOcultas: tendenciasOcultas.length,
+        debitosCarmicos: debitosCarmicos.length,
+        compatibilidade,
+      });
 
       // Salvar dados numerológicos calculados
       await updateAnalysis(analysis.id, {
@@ -97,7 +120,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         triangulo_destino: todosTriangulos.destino as unknown,
         licoes_carmicas: licoesCarmicas as unknown[],
         tendencias_ocultas: tendenciasOcultas as unknown[],
+        debitos_carmicos: debitosCarmicos as unknown[],
         frequencias_numeros: frequenciasNumeros as unknown,
+        score,
       });
 
       // Gerar análise IA completa (todos os 4 triângulos + karmic + tendências)
@@ -111,6 +136,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           bloqueios,
           licoesCarmicas,
           tendenciasOcultas,
+          debitosCarmicos,
+          gender,
         },
         user.id,
         analysis.id
@@ -122,12 +149,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           nome_completo,
           cincoNumeros.expressao,
           cincoNumeros.destino,
+          gender,
+          data_nascimento,
           8
         );
 
         // Gerar descrição IA das sugestões
         await generateSuggestions(
-          { nomeCompleto: nome_completo, cincoNumeros, variacoesCandidatas: variacoes },
+          { nomeCompleto: nome_completo, cincoNumeros, variacoesCandidatas: variacoes, gender },
           user.id,
           analysis.id
         );

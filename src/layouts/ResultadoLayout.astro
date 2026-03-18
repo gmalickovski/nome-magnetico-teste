@@ -1,0 +1,58 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { supabase } from '../backend/db/supabase';
+
+export interface Props {
+  title: string;
+  analysisId: string;
+  showActions?: boolean;
+}
+
+const { title, analysisId, showActions = true } = Astro.props;
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/auth/login?redirect=' + encodeURIComponent(Astro.url.pathname));
+}
+
+
+const pdfHref = '/api/generate-pdf?id=' + analysisId;
+---
+
+<BaseLayout title={title} noIndex={true}>
+  <div class="min-h-screen bg-[#1a1a1a]">
+    <!-- Header do resultado — sem menu, apenas botões contextuais -->
+    <header class="border-b border-[#D4AF37]/20 bg-[#111111]/80 backdrop-blur-md sticky top-0 z-40">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="/app" class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider hover:opacity-80 transition-opacity">
+          Nome Magnético
+        </a>
+        {showActions && (
+          <div class="flex items-center gap-3">
+            <a
+              href="/app/analises"
+              class="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#D4AF37] transition-colors"
+            >
+              ← Minhas Análises
+            </a>
+            <a
+              href={pdfHref}
+              class="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 text-gray-300 text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/15 transition-colors"
+            >
+              📄 Baixar PDF
+            </a>
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <main class="max-w-4xl mx-auto px-4 py-8">
+      <slot />
+    </main>
+  </div>
+
+  <script>
+    // Logout disponível via URL direta se necessário
+  </script>
+</BaseLayout>

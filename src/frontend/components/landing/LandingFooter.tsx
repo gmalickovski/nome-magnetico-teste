@@ -34,14 +34,20 @@ export function LandingFooter() {
             <ul className="space-y-2">
               <li><a href="/privacidade" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Política de Privacidade</a></li>
               <li><a href="/termos" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Termos de Uso</a></li>
+              <li><a href="/reembolso" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Política de Reembolso</a></li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-600 text-sm">
-            &copy; {new Date().getFullYear()} Nome Magnético. Todos os direitos reservados.
-          </p>
+          <div className="text-center md:text-left">
+            <p className="text-gray-600 text-sm">
+              &copy; {new Date().getFullYear()} Nome Magnético. Todos os direitos reservados.
+            </p>
+            <p className="text-gray-700 text-xs mt-1">
+              Studio MLK — CNPJ 63.865.049/0001-27 — Estrada São Caetano, 4952 — Branquinha, Viamão/RS — CEP 94463-100
+            </p>
+          </div>
           <p className="text-gray-700 text-xs">
             Numerologia cabalística — fins educacionais e de autoconhecimento.
           </p>

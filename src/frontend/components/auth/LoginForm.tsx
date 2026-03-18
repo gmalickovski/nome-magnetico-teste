@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { supabaseBrowser } from '../../lib/supabase-browser';
@@ -9,19 +9,23 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const params = typeof window !== 'undefined'
-    ? new URLSearchParams(window.location.search)
-    : new URLSearchParams();
-  const infoMsg = params.get('msg') === 'conta-existente'
-    ? 'Você já tem uma conta. Faça login para continuar.'
-    : '';
+  const [infoMsg, setInfoMsg] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('msg') === 'conta-existente') {
+      setInfoMsg('Use seu email e senha para entrar.');
+    } else if (params.get('msg') === 'sem-acesso') {
+      setInfoMsg('Este email não está cadastrado no Nome Magnético. Crie uma conta para começar.');
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    const { error: err } = await supabaseBrowser.auth.signInWithPassword({
+    const { data: signInData, error: err } = await supabaseBrowser.auth.signInWithPassword({
       email,
       password,
     });
@@ -30,6 +34,16 @@ export function LoginForm() {
       setError(err.message === 'Invalid login credentials'
         ? 'Email ou senha incorretos'
         : err.message);
+      setLoading(false);
+      return;
+    }
+
+    // Verificar isolamento de app: usuário deve ter a tag 'nome_magnetico'
+    // em app_metadata.apps (escrito via service role no cadastro).
+    const apps = signInData.user?.app_metadata?.apps as string[] | undefined;
+    if (apps !== undefined && !apps.includes('nome_magnetico')) {
+      await supabaseBrowser.auth.signOut();
+      setError('Este email não está cadastrado no Nome Magnético. Crie uma conta para começar.');
       setLoading(false);
       return;
     }
@@ -48,6 +62,30 @@ export function LoginForm() {
     });
     const epData = await epRes.json();
     console.log('[LoginForm] ensure-profile status:', epRes.status, epData);
+
+    // Admin bypassa o fluxo de compra
+    if (epData?.profile?.role === 'admin') {
+      if (session) {
+        document.cookie = `nome-magnetico-auth-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+        document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+      }
+      window.location.href = '/app';
+      return;
+    }
+
+    // Setar cookies para que o middleware SSR encontre o token
+    if (session) {
+      document.cookie = `nome-magnetico-auth-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+      document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+    }
+
+    // Verificar produto pendente no localStorage (fluxo de compra)
+    const pendingProduct = localStorage.getItem('nome_magnetico_pending_product');
+    if (pendingProduct) {
+      localStorage.removeItem('nome_magnetico_pending_product');
+      window.location.href = `/comprar?produto=${pendingProduct}`;
+      return;
+    }
 
     // Redirecionar para o app ou para onde veio
     const searchParams = new URLSearchParams(window.location.search);

@@ -1,0 +1,20 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { LandingHeader } from '../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <LandingHeader client:load />
+  <main class="max-w-3xl mx-auto px-4 py-16 text-gray-300">
+    <slot />
+  </main>
+  <LandingFooter client:load />
+</BaseLayout>

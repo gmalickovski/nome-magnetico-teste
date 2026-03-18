@@ -1,7 +1,13 @@
 import React from 'react';
 import { Accordion } from '../ui/Accordion';
 
-const faqItems = [
+export interface FaqItemProps {
+  id: string;
+  pergunta: string;
+  answerHtml: string;
+}
+
+const fallbackItems = [
   {
     id: '1',
     question: 'O que é a numerologia cabalística?',
@@ -40,7 +46,20 @@ const faqItems = [
   },
 ];
 
-export function FAQSection() {
+interface FAQSectionProps {
+  items?: FaqItemProps[];
+}
+
+export function FAQSection({ items }: FAQSectionProps) {
+  const accordionItems = items && items.length > 0
+    ? items.map(item => ({
+        id: item.id,
+        question: item.pergunta,
+        answer: '',
+        answerHtml: item.answerHtml,
+      }))
+    : fallbackItems;
+
   return (
     <section id="faq" className="py-20 md:py-32 bg-[#111111]">
       <div className="max-w-3xl mx-auto px-4">
@@ -53,7 +72,7 @@ export function FAQSection() {
           </h2>
         </div>
 
-        <Accordion items={faqItems} />
+        <Accordion items={accordionItems} />
 
         <div className="text-center mt-10">
           <p className="text-gray-400 text-sm">

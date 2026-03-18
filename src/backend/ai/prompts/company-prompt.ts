@@ -28,8 +28,11 @@ export function buildCompanyAnalysisPrompt(params: CompanyPromptParams): string 
       const compatEmpresaInfo = a.compatibilidadeEmpresa
         ? ` | Compat. empresa: ${a.compatibilidadeEmpresa}`
         : '';
+      const debitoInfo = a.debitosCarmicos.length === 0
+        ? '✓ Sem débitos kármicos'
+        : `⚠ Débitos: ${a.debitosCarmicos.map(d => d.numero).join(', ')}`;
       return `${rank} **${a.nomeEmpresa}** | Expressão: ${a.expressao} | Compat. sócio: ${a.compatibilidadeSocio}${compatEmpresaInfo} | Score: ${a.score}/100
-   ${bloqueioInfo}
+   ${bloqueioInfo} | ${debitoInfo}
    ${a.justificativa.slice(0, 2).join(' | ')}`;
     })
     .join('\n\n');
@@ -70,6 +73,7 @@ ${destinoEmpresa !== null ? `\nComo o Destino da empresa (${destinoEmpresa}) se 
 Explique por que este nome foi eleito o mais harmonioso para este negócio:
 - Relação entre a Expressão do nome e o Destino do sócio
 - Ausência (ou mínimo) de bloqueios que possam prejudicar o negócio
+- Os débitos kármicos presentes (ou ausentes) e o que isso implica para o negócio
 - Como a energia deste nome potencializa o ramo de atividade${ramoAtividade ? ` (${ramoAtividade})` : ''}
 
 ### 3. Análise dos Top 3 Candidatos
@@ -86,6 +90,12 @@ Com base na numerologia, que tipo de posicionamento, valores e diferenciais este
 
 ### 6. Próximos Passos
 Orientações práticas para ativar a energia do nome escolhido (lançamento, registro, comunicação visual, data ideal de abertura se não definida).
+
+REGRAS ESTRITAS DE FORMATAÇÃO:
+1. Você DEVE usar estruturação Markdown rigorosa.
+2. NUNCA use títulos apenas com letras maiúsculas (ex: "PERFIL GERAL"). Use SEMPRE Hash Headers (ex: "## 1. O Destino", "### Análise").
+3. Use negrito (**) livremente para destacar conceitos, dicas e trechos cruciais no meio do texto.
+4. SEMPRE adicione DUPLO ESPAÇAMENTO (duas quebras de linha) entre um parágrafo e outro, ou entre um título e um parágrafo. O texto final deve ser perfeitamente escaneável, arejado e elegante.
 
 Escreva com autoridade, clareza e uma pitada de entusiasmo empreendedor — este é um momento decisivo para o negócio!`;
 }

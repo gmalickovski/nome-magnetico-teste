@@ -8,16 +8,8 @@ export interface Props {
 
 const { title } = Astro.props;
 
-// Verificar sessão e role admin
-const accessToken = Astro.cookies.get('sb-access-token')?.value;
-
-if (!accessToken) {
-  return Astro.redirect('/auth/login');
-}
-
-const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-
-if (error || !user) {
+const user = Astro.locals.user;
+if (!user) {
   return Astro.redirect('/auth/login');
 }
 

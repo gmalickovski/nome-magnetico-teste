@@ -5,10 +5,11 @@ export interface SuggestionsPromptParams {
   nomeCompleto: string;
   cincoNumeros: CincoNumeros;
   variacoesCandidatas: VariacaoNome[];
+  gender: string;
 }
 
 export function buildSuggestionsPrompt(params: SuggestionsPromptParams): string {
-  const { nomeCompleto, cincoNumeros, variacoesCandidatas } = params;
+  const { nomeCompleto, cincoNumeros, variacoesCandidatas, gender } = params;
 
   const candidatasTexto = variacoesCandidatas
     .slice(0, 8)
@@ -27,6 +28,12 @@ export function buildSuggestionsPrompt(params: SuggestionsPromptParams): string 
 ## Candidatas a Nomes Magnéticos (sem bloqueios)
 
 ${candidatasTexto}
+
+---
+
+## Gênero / Sexo
+**Gênero Identificado:** ${gender}
+Adapte os pronomes e descrições dos nomes de acordo com o gênero acima. Certifique-se de que os textos de justificativa não troquem o sexo da pessoa.
 
 ---
 
@@ -49,5 +56,13 @@ Orientação prática — em quais contextos usar este nome para maximizar sua v
 **Energia predominante:**
 A qualidade energética principal que este nome projeta ao mundo.
 
-Seja entusiasta e inspirador — estes são nomes que podem transformar a vida da pessoa!`;
+Seja entusiasta e inspirador — estes são nomes que podem transformar a vida da pessoa!
+
+REGRAS OBRIGATÓRIAS DE FORMATAÇÃO:
+1. NUNCA use títulos em letras MAIÚSCULAS. Use sempre Hash Headers (## ou ###).
+2. Cada nome selecionado deve ter heading "### ✨ Nome: [nome completo]" (ou outro emoticon).
+3. Use segunda pessoa: "você", "seu", "sua" — fale diretamente com a pessoa.
+4. SEMPRE duplo espaçamento entre parágrafos.
+5. Parágrafos com no máximo 4 linhas.
+6. Use **negrito** para destacar os nomes e números importantes.`;
 }

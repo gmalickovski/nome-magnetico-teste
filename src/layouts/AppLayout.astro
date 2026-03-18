@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { createUserClient } from '../backend/db/supabase';
 
 export interface Props {
   title: string;
@@ -8,13 +9,37 @@ export interface Props {
 
 const { title, description } = Astro.props;
 
-// Verificar sessão server-side
-const accessToken = Astro.cookies.get('sb-access-token')?.value;
-const refreshToken = Astro.cookies.get('sb-refresh-token')?.value;
-
-if (!accessToken || !refreshToken) {
+const user = Astro.locals.user;
+if (!user) {
   return Astro.redirect('/auth/login?redirect=' + encodeURIComponent(Astro.url.pathname));
 }
+
+// Verificar perfil e subscriptions ativas
+let isAdmin = false;
+let hasAnyActive = false;
+try {
+  const client = createUserClient(Astro.locals.accessToken);
+  const [profileRes, subsRes] = await Promise.all([
+    client
+      .schema('nome_magnetico')
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single(),
+    client
+      .schema('nome_magnetico')
+      .from('subscriptions')
+      .select('product_type')
+      .eq('user_id', user.id)
+      .gt('ends_at', new Date().toISOString()),
+  ]);
+  isAdmin = profileRes.data?.role === 'admin';
+  hasAnyActive = (subsRes.data?.length ?? 0) > 0;
+} catch { /* silencioso */ }
+
+const pathname = Astro.url.pathname;
+const isActive = (path: string) =>
+  pathname === path || pathname.startsWith(path + '/');
 ---
 
 <BaseLayout title={title} description={description} noIndex={true}>
@@ -22,19 +47,38 @@ if (!accessToken || !refreshToken) {
     <!-- Header do app -->
     <header class="border-b border-[#D4AF37]/20 bg-[#111111]/80 backdrop-blur-md sticky top-0 z-40">
       <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <a href="/app" class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider">
+        <a href="/app" class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider hover:opacity-80 transition-opacity">
           Nome Magnético
         </a>
         <nav class="flex items-center gap-6">
-          <a href="/app" class="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
+          <a
+            href="/app"
+            class={'text-sm transition-colors ' + (isActive('/app') && !isActive('/app/analise') && !isActive('/app/resultado') && !isActive('/app/analises') ? 'text-[#D4AF37] border-b border-[#D4AF37] pb-0.5' : 'text-gray-400 hover:text-[#D4AF37]')}
+          >
             Início
           </a>
-          <a href="/app/questionario" class="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
-            Nova Análise
-          </a>
-          <a href="/suporte" class="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
+          {(isAdmin || hasAnyActive) && (
+            <a
+              href="/app/analises"
+              class={'text-sm transition-colors ' + (isActive('/app/analises') || isActive('/app/resultado') ? 'text-[#D4AF37] border-b border-[#D4AF37] pb-0.5' : 'text-gray-400 hover:text-[#D4AF37]')}
+            >
+              Análises
+            </a>
+          )}
+          <a
+            href="/suporte"
+            class={'text-sm transition-colors ' + (isActive('/suporte') ? 'text-[#D4AF37] border-b border-[#D4AF37] pb-0.5' : 'text-gray-400 hover:text-[#D4AF37]')}
+          >
             Suporte
           </a>
+          {isAdmin && (
+            <a
+              href="/admin"
+              class={'text-sm transition-colors ' + (isActive('/admin') ? 'text-purple-400 border-b border-purple-400 pb-0.5' : 'text-purple-500 hover:text-purple-400')}
+            >
+              Admin
+            </a>
+          )}
           <button
             id="logoutBtn"
             class="text-gray-500 hover:text-red-400 transition-colors text-sm"
@@ -55,6 +99,9 @@ if (!accessToken || !refreshToken) {
     document.getElementById('logoutBtn')?.addEventListener('click', async () => {
       const { supabaseBrowser } = await import('../frontend/lib/supabase-browser');
       await supabaseBrowser.auth.signOut();
+      // Limpar cookies de auth
+      document.cookie = 'nome-magnetico-auth-access-token=; path=/; max-age=0';
+      document.cookie = 'nome-magnetico-auth-refresh-token=; path=/; max-age=0';
       window.location.href = '/auth/login';
     });
   </script>

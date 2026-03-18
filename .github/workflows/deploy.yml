@@ -1,0 +1,57 @@
+name: Deploy Astro para VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependências e Build
+        run: |
+          npm ci
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy via RSYNC para a VPS
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: "103.199.185.152"
+          REMOTE_USER: "root"
+          TARGET: "/var/www/nomemagnetico"
+          SOURCE: "dist/"
+          # Vamos enviar o package.json e ecosystem também para o servidor ter a config
+          ARGS: "-rltgoDzvO"
+          EXCLUDE: "/node_modules/, /.git/, /.github/"
+
+      - name: Reiniciar Serviço no Servidor
+        uses: appleboy/ssh-action@master
+        with:
+          host: "103.199.185.152"
+          username: "root"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/nomemagnetico
+            # Instalar apenas dependências de produção para rodar as APIs SSR
+            npm install --omit=dev
+            
+            # Garante que o PM2 reinicie o app Astro com as portas corretas
+            export PORT=4321
+            export NODE_ENV=production
+            export HOST=0.0.0.0
+            
+            pm2 restart nomemagnetico || pm2 start dist/server/entry.mjs --name nomemagnetico
+            pm2 save

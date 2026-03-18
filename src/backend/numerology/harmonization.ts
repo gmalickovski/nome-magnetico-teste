@@ -15,8 +15,10 @@
  */
 
 import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from './triangle';
-import { calcularExpressao, calcularDestino } from './numbers';
+import { calcularExpressao, calcularDestino, calcularMotivacao } from './numbers';
 import { reduzirNumero, calcularValor, extrairLetras } from './core';
+import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from './karmic';
+import { calcularScore } from './score';
 import type { Bloqueio } from './triangle';
 
 export interface AvaliacaoNome {
@@ -103,45 +105,46 @@ export function avaliarNome(
   const destino = calcularDestino(dataNascimento);
   const compatibilidade = avaliarCompatibilidade(expressao, destino);
 
-  let score = 100;
+  const motivacao = calcularMotivacao(nomeCompleto);
+  const licoesCarmicas = detectarLicoesCarmicas(nomeCompleto);
+  const tendenciasOcultas = detectarTendenciasOcultas(nomeCompleto);
+  const debitosCarmicos = calcularDebitosCarmicos(dataNascimento, destino, motivacao, expressao);
+
+  const score = calcularScore({
+    bloqueios: bloqueios.length,
+    licoesCarmicas: licoesCarmicas.length,
+    tendenciasOcultas: tendenciasOcultas.length,
+    debitosCarmicos: debitosCarmicos.length,
+    compatibilidade,
+  });
+
   const justificativa: string[] = [];
 
-  // Penalidade por bloqueios
   if (bloqueios.length === 0) {
     justificativa.push('✓ Sem sequências negativas em nenhum triângulo');
-    score += 10;
   } else {
-    score -= bloqueios.length * 20;
     justificativa.push(
       `✗ ${bloqueios.length} bloqueio(s) detectado(s): ${bloqueios.map(b => b.codigo).join(', ')}`
     );
-    // Indicar em quais triângulos
     for (const b of bloqueios) {
       justificativa.push(`  • ${b.titulo} → aparece em: ${b.triangulos.join(', ')}`);
     }
   }
 
-  // Bônus por compatibilidade
   switch (compatibilidade) {
     case 'total':
-      score += 20;
       justificativa.push(`✓ Expressão (${expressao}) totalmente compatível com Destino (${destino})`);
       break;
     case 'complementar':
-      score += 12;
       justificativa.push(`✓ Expressão (${expressao}) complementar ao Destino (${destino})`);
       break;
     case 'aceitavel':
-      score += 5;
       justificativa.push(`~ Expressão (${expressao}) aceitável em relação ao Destino (${destino})`);
       break;
     case 'incompativel':
-      score -= 10;
       justificativa.push(`✗ Expressão (${expressao}) pouco compatível com Destino (${destino})`);
       break;
   }
-
-  score = Math.max(0, Math.min(100, score));
 
   return {
     nome: nomeCompleto,

@@ -42,9 +42,9 @@ Atualmente só tem o Triângulo da Vida. Adicionar os outros 3:
 - `sequenciasNegativas[]` — 3+ dígitos iguais em qualquer linha
 
 ### 1.3 `src/backend/numerology/karmic.ts` ← NOVO
-**Lições Cármicas** (números ausentes no nome):
+**Lições Kármics** (números ausentes no nome):
 - Identifica quais números de 1 a 8 **não aparecem** em nenhuma letra do nome completo
-- Cada ausência = uma lição cármica específica a ser aprendida nesta vida
+- Cada ausência = uma lição kármic específica a ser aprendida nesta vida
 - Retorna: `{ numero, titulo, descricao }`
 
 **Tendências Ocultas** (número que se repete 4+ vezes):
@@ -108,7 +108,7 @@ numero_expressao_social INTEGER
 **Fluxo:**
 1. Calcular os 4 triângulos do nome completo de nascimento
 2. Detectar sequências negativas em todos os triângulos
-3. Calcular lições cármicas e tendências ocultas
+3. Calcular lições kármics e tendências ocultas
 4. Sugerir variações do nome social que:
    - Eliminam sequências negativas (especialmente no Triângulo da Vida)
    - Têm Expressão compatível com Destino
@@ -126,7 +126,7 @@ numero_expressao_social INTEGER
    - Calcular os 4 triângulos com o sobrenome da família
    - Verificar sequências negativas
    - Calcular compatibilidade Expressão × Destino
-   - Verificar lições cármicas
+   - Verificar lições kármics
 3. Rankear por score e apresentar os melhores
 
 ### 3.3 Produto: `nome_empresa` ← IMPLEMENTAR LÓGICA
@@ -151,7 +151,7 @@ numero_expressao_social INTEGER
 ### 4.1 `src/backend/ai/prompts/analysis-prompt.ts` ← ATUALIZAR
 Incluir no prompt:
 - Dados dos **4 triângulos** (não só o da Vida)
-- **Lições cármicas** detectadas
+- **Lições kármics** detectadas
 - **Tendências ocultas** detectadas
 - Arcano Regente de cada triângulo
 
@@ -181,7 +181,7 @@ Mostrar os **4 triângulos** em tabs:
 - Cada triângulo com: linhas numeradas, arcanos dominantes, arcano regente, sequências em vermelho
 
 ### 5.2 `src/frontend/components/app/KarmicLessons.tsx` ← NOVO
-Card para lições cármicas:
+Card para lições kármics:
 - Lista os números ausentes com título e descrição
 
 ### 5.3 `src/frontend/components/app/HiddenTendencies.tsx` ← NOVO

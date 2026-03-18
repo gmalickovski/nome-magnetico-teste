@@ -20,7 +20,7 @@ export function HeroSection() {
 
         {/* Headline */}
         <h1 className="font-cinzel text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-          Seu Nome Carrega{' '}
+          Nomes Carregam Energia.{' '}
           <span
             style={{
               background: 'linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E)',
@@ -29,16 +29,16 @@ export function HeroSection() {
               backgroundClip: 'text',
             }}
           >
-            Bloqueios
+            O Certo
           </span>
-          {' '}Energéticos?
+          {' '}Abre Caminhos.
         </h1>
 
         {/* Subheadline */}
         <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed">
-          A numerologia cabalística revela como as vibrações do seu nome de nascimento
-          podem estar limitando sua prosperidade, relacionamentos e realização pessoal.
-          Descubra — e transforme — com seu <strong className="text-gray-200">Nome Magnético</strong>.
+          A numerologia cabalística revela bloqueios energéticos ocultos em nomes pessoais,
+          de bebês e empresariais. Descubra — e transforme — com análises dos 4 triângulos
+          cabalísticos e inteligência artificial especializada.
         </p>
 
         {/* CTAs */}
@@ -50,18 +50,18 @@ export function HeroSection() {
             Testar Meu Nome Grátis
           </a>
           <a
-            href="#como-funciona"
+            href="#produtos"
             className="w-full sm:w-auto border border-[#D4AF37]/50 text-[#D4AF37] font-medium text-lg px-8 py-4 rounded-xl hover:bg-[#D4AF37]/10 transition-all duration-300"
           >
-            Como Funciona
+            Ver os Produtos
           </a>
         </div>
 
         {/* Social proof */}
         <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
           <div className="text-center">
-            <div className="font-cinzel text-2xl font-bold text-[#D4AF37]">2.847</div>
-            <div>análises realizadas</div>
+            <div className="font-cinzel text-2xl font-bold text-[#D4AF37]">3</div>
+            <div>produtos disponíveis</div>
           </div>
           <div className="h-8 w-px bg-white/10" />
           <div className="text-center">

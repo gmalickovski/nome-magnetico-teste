@@ -1,0 +1,49 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { hasActiveSubscription } from '../../../backend/db/subscriptions';
+import { createUserClient } from '../../../backend/db/supabase';
+import { LiveNameTester } from '../../../frontend/components/app/LiveNameTester';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/auth/login');
+
+const hasAccess = await hasActiveSubscription(user.id, 'nome_magnetico');
+if (!hasAccess) return Astro.redirect('/comprar?produto=nome_magnetico');
+
+// Pegar dados base de nascimento no perfil
+const client = createUserClient(Astro.locals.accessToken);
+const { data: profile } = await client.schema('nome_magnetico')
+  .from('profiles')
+  .select('birth_name, birth_date')
+  .eq('id', user.id)
+  .single();
+
+// Proteção caso o usuário tenha burlado o modal no Dashboard
+if (!profile?.birth_name || !profile?.birth_date) {
+  return Astro.redirect('/app');
+}
+---
+
+<AppLayout title="Simulador — Nome Social">
+  <div class="max-w-4xl mx-auto space-y-8 pb-16">
+    
+    <div>
+      <a href="/app" class="text-sm text-[#D4AF37]/80 hover:text-[#D4AF37] mb-4 inline-block transition-colors">
+        &larr; Voltar ao Painel
+      </a>
+      <h1 class="font-cinzel justify-between flex flex-col md:flex-row md:items-center text-3xl font-bold text-white mb-4 pb-2 border-b border-white/10">
+        <span>Simulador de Nome Social</span>
+        <span class="mt-2 md:mt-0 text-sm bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30 font-inter self-start md:self-auto">Live Tester</span>
+      </h1>
+      <p class="text-gray-400 text-lg leading-relaxed mb-8">Utilize este ambiente para testar variações da sua assinatura ou Nome Social, avaliando em tempo real as influências, bloqueios e grau de compatibilidade com seu propósito original.</p>
+    </div>
+
+    <!-- Interface interativa em React -->
+    <LiveNameTester 
+      client:load 
+      birthName={profile.birth_name} 
+      birthDate={profile.birth_date} 
+    />
+
+  </div>
+</AppLayout>

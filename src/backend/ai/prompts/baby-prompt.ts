@@ -23,9 +23,12 @@ export function buildBabyAnalysisPrompt(params: BabyPromptParams): string {
       const bloqueioInfo = a.temBloqueio
         ? `⚠ ${a.bloqueios.length} bloqueio(s): ${a.bloqueios.map(b => b.codigo).join(', ')}`
         : '✓ Sem bloqueios';
+      const debitoInfo = a.debitosCarmicos.length === 0
+        ? '✓ Sem débitos kármicos'
+        : `⚠ Débitos: ${a.debitosCarmicos.map(d => d.numero).join(', ')}`;
       return `${rank} **${a.nomeCompleto}** | Expressão: ${a.expressao} | Compatibilidade: ${a.compatibilidade} | Score: ${a.score}/100
    ${bloqueioInfo}
-   Lições cármicas: ${a.licoesCarmicas.length} | ${a.justificativa.slice(0, 2).join(' | ')}`;
+   Lições kármics: ${a.licoesCarmicas.length} | ${debitoInfo} | ${a.justificativa.slice(0, 2).join(' | ')}`;
     })
     .join('\n\n');
 
@@ -63,7 +66,8 @@ Explique o que significa o Número de Destino **${destino}** para a trajetória 
 Explique de forma inspiradora por que este nome foi escolhido como o mais harmonioso, conectando:
 - A ausência (ou presença mínima) de bloqueios
 - A compatibilidade entre Expressão e Destino
-- As lições cármicas e o que elas significam para o desenvolvimento do bebê
+- As lições kármics e o que elas significam para o desenvolvimento do bebê
+- Os débitos kármicos presentes (ou a ausência deles) e o que isso revela sobre a jornada desta alma
 
 ### 3. Análise dos Top 3 Candidatos
 Para cada um dos 3 melhores nomes, forneça:
@@ -76,6 +80,12 @@ Uma mensagem acolhedora sobre como apoiar a criança ao longo do crescimento, co
 
 ### 5. Sugestão de Variações (opcional)
 Se o nome mais indicado tiver algum ponto de atenção, sugira 1-2 variações sutis que mantenham a sonoridade e melhorem os números.
+
+REGRAS ESTRITAS DE FORMATAÇÃO:
+1. Você DEVE usar estruturação Markdown rigorosa.
+2. NUNCA use títulos apenas com letras maiúsculas (ex: "PERFIL GERAL"). Use SEMPRE Hash Headers (ex: "## 1. O Destino", "### Top 3").
+3. Use negrito (**) livremente para destacar conceitos, dicas e trechos cruciais no meio do texto.
+4. SEMPRE adicione DUPLO ESPAÇAMENTO (duas quebras de linha) entre um parágrafo e outro, ou entre um título e um parágrafo. O texto final deve ser perfeitamente escaneável, arejado e elegante.
 
 Escreva com calor humano, leveza e profundidade — os pais estão diante de uma das decisões mais importantes da vida do filho.`;
 }

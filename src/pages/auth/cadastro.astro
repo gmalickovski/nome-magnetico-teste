@@ -1,8 +1,10 @@
 ---
 import AuthLayout from '../../layouts/AuthLayout.astro';
 import { SignupForm } from '../../frontend/components/auth/SignupForm';
+
+const produto = Astro.url.searchParams.get('produto') ?? '';
 ---
 
 <AuthLayout title="Criar Conta">
-  <SignupForm client:load />
+  <SignupForm client:load produto={produto} />
 </AuthLayout>

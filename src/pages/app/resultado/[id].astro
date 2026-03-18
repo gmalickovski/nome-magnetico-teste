@@ -1,6 +1,12 @@
 ---
-import AppLayout from '../../../layouts/AppLayout.astro';
+import ResultadoLayout from '../../../layouts/ResultadoLayout.astro';
 import { getAnalysis, getMagneticNames } from '../../../backend/db/analyses';
+import TriangleVisualization from '../../../frontend/components/app/TriangleVisualization';
+import KarmicLessons from '../../../frontend/components/app/KarmicLessons';
+import KarmicDebts from '../../../frontend/components/app/KarmicDebts';
+import HiddenTendencies from '../../../frontend/components/app/HiddenTendencies';
+import { formatAnalysisText } from '../../../utils/textFormatter';
+import { marked } from 'marked';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
@@ -16,11 +22,84 @@ const [analysis, magneticNames] = await Promise.all([
 if (!analysis || analysis.user_id !== user.id) {
   return Astro.redirect('/app');
 }
+
+// Status badge
+const statusBadgeClass = analysis.status === 'complete'
+  ? 'px-3 py-1.5 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-400'
+  : analysis.status === 'error'
+  ? 'px-3 py-1.5 rounded-full text-sm font-medium bg-red-500/20 text-red-400'
+  : 'px-3 py-1.5 rounded-full text-sm font-medium bg-yellow-500/20 text-yellow-400';
+
+const statusBadgeLabel = analysis.status === 'complete' ? '✓ Concluída'
+  : analysis.status === 'error' ? '✕ Erro'
+  : '⟳ Processando...';
+
+const errorMessage = (analysis as any).error_message || 'Ocorreu um erro inesperado.';
+
+const displayNums = [
+  { label: 'Expressão',    value: String(analysis.numero_expressao    ?? '?') },
+  { label: 'Destino',      value: String(analysis.numero_destino      ?? '?') },
+  { label: 'Motivação',    value: String(analysis.numero_motivacao    ?? '?') },
+  { label: 'Missão',       value: String(analysis.numero_missao       ?? '?') },
+  { label: 'Impressão',    value: String(analysis.numero_personalidade ?? '?') },
+];
+
+// Markdown → HTML (já com filtro reparador)
+const analiseHtml = analysis.analise_texto
+  ? String(await marked(formatAnalysisText(analysis.analise_texto)))
+      .replace(/\*\*/g, '')
+  : null;
+
+// 4 triângulos (compatível com análises antigas que só têm triangulo_da_vida)
+type TData = {
+  tipo: string;
+  linhas: number[][];
+  arcanoRegente: number | null;
+  arcanosDoMinantes: number[];
+  sequenciasNegativas: string[];
+};
+
+const tVida    = (analysis as any).triangulo_vida    as TData | null;
+const tPessoal = (analysis as any).triangulo_pessoal as TData | null;
+const tSocial  = (analysis as any).triangulo_social  as TData | null;
+const tDestino = (analysis as any).triangulo_destino as TData | null;
+const hasTriangulos = !!(tVida && tPessoal && tSocial && tDestino);
+
+type Bloqueio = { titulo: string; descricao: string; codigo: string; aspectoSaude?: string; triangulos?: string[] };
+const bloqueios: Bloqueio[] = Array.isArray(analysis.bloqueios)
+  ? (analysis.bloqueios as Bloqueio[])
+  : [];
+
+// Lições kármics, tendências ocultas e débitos kármicos
+const licoesRaw = (analysis as any).licoes_carmicas as unknown[] | null;
+const tendenciasRaw = (analysis as any).tendencias_ocultas as unknown[] | null;
+const frequenciasRaw = (analysis as any).frequencias_numeros as Record<number, number> | null;
+type DebitoCard = { numero: number; titulo: string; descricao: string };
+const debitosRaw = (analysis as any).debitos_carmicos as DebitoCard[] | null;
+const hasDebitosData = debitosRaw !== null && debitosRaw !== undefined;
+
+const hasLicoes = Array.isArray(licoesRaw) && licoesRaw.length > 0;
+const hasTendencias = Array.isArray(tendenciasRaw) && tendenciasRaw.length > 0;
+
+// Nomes magnéticos
+type MagneticNameCard = typeof magneticNames[number] & {
+  cardClass: string;
+  isTop: boolean;
+};
+const topNames: MagneticNameCard[] = magneticNames.slice(0, 3).map((name, idx) => ({
+  ...name,
+  isTop: idx === 0,
+  cardClass: idx === 0
+    ? 'bg-[#D4AF37]/5 border border-[#D4AF37]/40 rounded-2xl p-5'
+    : 'bg-white/5 border border-white/10 rounded-2xl p-5',
+}));
+
+const isProcessing = analysis.status === 'processing' || analysis.status === 'pending';
 ---
 
-<AppLayout title="Resultado da Análise">
-  <div class="max-w-4xl mx-auto space-y-8">
-    <!-- Header -->
+<ResultadoLayout title="Resultado da Análise" analysisId={analysis.id} showActions={analysis.status === 'complete'}>
+  <div class="space-y-8">
+    <!-- Header do resultado -->
     <div class="flex items-start justify-between">
       <div>
         <h1 class="font-cinzel text-3xl font-bold text-white mb-1">
@@ -28,18 +107,12 @@ if (!analysis || analysis.user_id !== user.id) {
         </h1>
         <p class="text-gray-400">{analysis.nome_completo}</p>
       </div>
-      <div class={`px-3 py-1.5 rounded-full text-sm font-medium ${
-        analysis.status === 'complete' ? 'bg-emerald-500/20 text-emerald-400' :
-        analysis.status === 'error' ? 'bg-red-500/20 text-red-400' :
-        'bg-yellow-500/20 text-yellow-400'
-      }`}>
-        {analysis.status === 'complete' ? '✓ Concluída' :
-         analysis.status === 'error' ? '✕ Erro' :
-         '⟳ Processando...'}
+      <div class={statusBadgeClass}>
+        {statusBadgeLabel}
       </div>
     </div>
 
-    {analysis.status === 'processing' || analysis.status === 'pending' ? (
+    {isProcessing ? (
       <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-12 text-center">
         <div class="inline-block w-12 h-12 border-4 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mb-6"></div>
         <h3 class="font-cinzel text-xl font-bold text-white mb-2">Analisando seu nome...</h3>
@@ -49,37 +122,47 @@ if (!analysis || analysis.user_id !== user.id) {
     ) : analysis.status === 'error' ? (
       <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
         <h3 class="font-cinzel text-xl font-bold text-red-400 mb-2">Erro na Análise</h3>
-        <p class="text-gray-400 mb-4">{analysis.error_message ?? 'Ocorreu um erro inesperado.'}</p>
-        <a href="/app/questionario" class="inline-block bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-colors">
+        <p class="text-gray-400 mb-4">{errorMessage}</p>
+        <a href="/app/analise/nome-social" class="inline-block bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-colors">
           Tentar Novamente
         </a>
       </div>
     ) : (
       <>
-        <!-- 5 Números -->
+        <!-- 5 Números Numerológicos -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {[
-            { label: 'Expressão', value: analysis.numero_expressao },
-            { label: 'Destino', value: analysis.numero_destino },
-            { label: 'Motivação', value: analysis.numero_motivacao },
-            { label: 'Missão', value: analysis.numero_missao },
-            { label: 'Personalidade', value: analysis.numero_personalidade },
-          ].map(n => (
+          {displayNums.map(n => (
             <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-4 text-center">
-              <div class="font-cinzel text-3xl font-bold text-[#D4AF37] mb-1">{n.value ?? '?'}</div>
+              <div class="font-cinzel text-3xl font-bold text-[#D4AF37] mb-1">{n.value}</div>
               <div class="text-gray-500 text-xs">{n.label}</div>
             </div>
           ))}
         </div>
 
-        <!-- Bloqueios -->
-        {Array.isArray(analysis.bloqueios) && analysis.bloqueios.length > 0 && (
+        <!-- 4 Triângulos (novo componente) -->
+        {hasTriangulos && (
+          <div>
+            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Os 4 Triângulos Numerológicos</h2>
+            <TriangleVisualization
+              client:load
+              nome={analysis.nome_completo}
+              vida={tVida!}
+              pessoal={tPessoal!}
+              social={tSocial!}
+              destino={tDestino!}
+              bloqueios={bloqueios as any}
+            />
+          </div>
+        )}
+
+        <!-- Bloqueios (fallback para análises sem os 4 triângulos) -->
+        {!hasTriangulos && bloqueios.length > 0 && (
           <div>
             <h2 class="font-cinzel text-xl font-bold text-red-400 mb-4">
-              ⚠ Bloqueios Detectados ({analysis.bloqueios.length})
+              ⚠ Bloqueios Detectados ({bloqueios.length})
             </h2>
             <div class="space-y-3">
-              {(analysis.bloqueios as Array<{titulo: string; descricao: string; codigo: string}>).map(b => (
+              {bloqueios.map(b => (
                 <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-5">
                   <h3 class="font-bold text-red-400 mb-1">{b.titulo}</h3>
                   <p class="text-gray-400 text-sm leading-relaxed">{b.descricao}</p>
@@ -89,72 +172,115 @@ if (!analysis || analysis.user_id !== user.id) {
           </div>
         )}
 
-        <!-- Análise IA -->
-        {analysis.analise_texto && (
+        <!-- Análise IA (markdown renderizado) -->
+        {analiseHtml && (
           <div>
             <h2 class="font-cinzel text-xl font-bold text-white mb-4">Análise Completa</h2>
             <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 md:p-8">
-              <div class="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed whitespace-pre-wrap">
-                {analysis.analise_texto}
-              </div>
+              <div
+                class="prose prose-invert prose-lg max-w-none
+                       prose-headings:font-cinzel
+                       prose-h1:text-2xl prose-h1:text-[#D4AF37] prose-h1:!mt-10 prose-h1:!mb-4
+                       prose-h2:text-xl prose-h2:text-[#D4AF37] prose-h2:!mt-10 prose-h2:!mb-4
+                       prose-h3:text-lg prose-h3:text-purple-400 prose-h3:!mt-7 prose-h3:!mb-3
+                       prose-h4:text-base prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-5 prose-h4:!mb-2
+                       prose-strong:text-white prose-a:text-[#D4AF37]
+                       prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-5
+                       prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
+                       prose-ul:!mt-2 prose-ul:!mb-5
+                       prose-ol:!mt-2 prose-ol:!mb-5"
+                set:html={analiseHtml}
+              />
             </div>
           </div>
         )}
 
-        <!-- Nomes Magnéticos -->
-        {magneticNames.length > 0 && (
+        <!-- Débitos Kármicos -->
+        {hasDebitosData && (
+          <div>
+            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Débitos Kármicos</h2>
+            <KarmicDebts
+              client:load
+              debitos={debitosRaw as any}
+              nomeCompleto={analysis.nome_completo}
+            />
+          </div>
+        )}
+
+        <!-- Lições Kármics -->
+        {hasLicoes && (
+          <div>
+            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Lições Kármics</h2>
+            <KarmicLessons
+              client:load
+              licoes={licoesRaw as any}
+              nomeCompleto={analysis.nome_completo}
+            />
+          </div>
+        )}
+
+        <!-- Tendências Ocultas -->
+        {hasTendencias && (
+          <div>
+            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Tendências Ocultas</h2>
+            <HiddenTendencies
+              client:load
+              tendencias={tendenciasRaw as any}
+              frequencias={frequenciasRaw ?? {}}
+              nomeCompleto={analysis.nome_completo}
+            />
+          </div>
+        )}
+
+        <!-- 🌟 Outras Sugestões 🌟 -->
+        {topNames.length > 0 && (
           <div>
             <h2 class="font-cinzel text-xl font-bold text-white mb-4">
-              ✨ Seus Nomes Magnéticos
+              ✨ Outras Sugestões
             </h2>
             <div class="grid md:grid-cols-3 gap-4">
-              {magneticNames.slice(0, 3).map((name, idx) => (
-                <div class={`bg-white/5 border rounded-2xl p-5 ${
-                  idx === 0
-                    ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5'
-                    : 'border-white/10'
-                }`}>
-                  {idx === 0 && (
-                    <div class="text-xs text-[#D4AF37] font-bold mb-2 uppercase tracking-wider">⭐ Recomendado</div>
-                  )}
-                  <div class="font-cinzel text-lg font-bold text-white mb-2">{name.nome_sugerido}</div>
-                  <div class="flex gap-3 text-xs text-gray-500 mb-3">
-                    <span>Expr.: {name.numero_expressao}</span>
-                    <span>Mot.: {name.numero_motivacao}</span>
-                    <span>Score: {name.score}/100</span>
-                  </div>
-                  {name.justificativa && (
-                    <p class="text-gray-500 text-xs leading-relaxed">{name.justificativa}</p>
-                  )}
-                </div>
+              {topNames.map(name => (
+                <form action="/api/analyze" method="POST" class="h-full group">
+                  <input type="hidden" name="nome_completo" value={name.nome_sugerido} />
+                  <input type="hidden" name="data_nascimento" value={analysis.data_nascimento ? new Date(analysis.data_nascimento).toLocaleDateString('pt-BR', {timeZone:'UTC'}) : ''} />
+                  <input type="hidden" name="product_type" value="nome_magnetico" />
+                  <button type="submit" class={`w-full text-left h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 ${name.cardClass} relative`}>
+                    
+                    {name.isTop && (
+                      <div class="text-xs text-[#D4AF37] font-bold mb-2 uppercase tracking-wider">⭐ Recomendado</div>
+                    )}
+                    <div class="font-cinzel text-lg font-bold text-white mb-2 pr-6 group-hover:text-[#D4AF37] transition-colors">
+                      {name.nome_sugerido}
+                    </div>
+                    <div class="flex gap-3 text-xs justify-between mb-3">
+                       <div class="text-emerald-400">Score: {name.score}%</div>
+                       <div class="text-gray-500">
+                          Expr: {name.numero_expressao} | Mot: {name.numero_motivacao}
+                       </div>
+                    </div>
+                    {name.justificativa && (
+                      <p class="text-gray-500 text-xs leading-relaxed">{name.justificativa}</p>
+                    )}
+                    
+                    {/* Indicador de Hover */}
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#D4AF37]">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                      </svg>
+                    </div>
+                  </button>
+                </form>
               ))}
             </div>
           </div>
         )}
-
-        <!-- Ações -->
-        <div class="flex flex-wrap gap-4">
-          <a
-            href={`/api/generate-pdf?id=${analysis.id}`}
-            class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-gray-300 font-medium px-5 py-2.5 rounded-xl hover:bg-white/15 transition-colors"
-          >
-            📄 Baixar PDF
-          </a>
-          <a
-            href="/app/questionario"
-            class="inline-flex items-center gap-2 border border-[#D4AF37]/30 text-[#D4AF37] font-medium px-5 py-2.5 rounded-xl hover:bg-[#D4AF37]/10 transition-colors"
-          >
-            + Nova Análise
-          </a>
-        </div>
       </>
     )}
   </div>
 
-  {(analysis.status === 'processing' || analysis.status === 'pending') && (
+  {isProcessing && (
     <script>
-      // Atualizar página a cada 5 segundos enquanto processando
       setTimeout(() => window.location.reload(), 5000);
     </script>
   )}
-</AppLayout>
+</ResultadoLayout>

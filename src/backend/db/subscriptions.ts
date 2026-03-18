@@ -88,6 +88,23 @@ export async function createSubscription(params: {
 }
 
 /**
+ * Verifica se o usuário já teve alguma subscription (incluindo expiradas).
+ */
+export async function hasAnySubscription(
+  userId: string,
+  productType?: ProductType
+): Promise<boolean> {
+  let query = supabase
+    .schema('nome_magnetico')
+    .from('subscriptions')
+    .select('id')
+    .eq('user_id', userId);
+  if (productType) query = query.eq('product_type', productType);
+  const { data } = await query.limit(1);
+  return (data?.length ?? 0) > 0;
+}
+
+/**
  * Lista todas as subscriptions de um usuário.
  */
 export async function getUserSubscriptions(userId: string): Promise<Subscription[]> {

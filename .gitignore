@@ -34,3 +34,7 @@ secretkey-*.tx
 
 # TypeScript
 *.tsbuildinfo
+
+# Claude
+.claude/
+

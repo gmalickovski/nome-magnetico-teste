@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { supabaseBrowser } from '../../lib/supabase-browser';
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
@@ -14,14 +13,14 @@ export function ForgotPasswordForm() {
     setError('');
     setLoading(true);
 
-    const { error: err } = await supabaseBrowser.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/nova-senha`,
-    });
-
-    if (err) {
-      setError(err.message);
-      setLoading(false);
-      return;
+    try {
+      await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+    } catch {
+      // Silenciar — sempre mostrar estado de sucesso por segurança
     }
 
     setSent(true);

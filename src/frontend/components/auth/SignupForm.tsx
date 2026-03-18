@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { supabaseBrowser } from '../../lib/supabase-browser';
 
-export function SignupForm() {
+interface Props {
+  produto?: string;
+}
+
+export function SignupForm({ produto = '' }: Props) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (produto) {
+      localStorage.setItem('nome_magnetico_pending_product', produto);
+    }
+  }, [produto]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,36 +31,37 @@ export function SignupForm() {
 
     setLoading(true);
 
-    const { error: err } = await supabaseBrowser.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { nome },
-        emailRedirectTo: `${window.location.origin}/app`,
-      },
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, password }),
     });
 
-    if (err) {
-      if (err.message === 'User already registered') {
-        // Usuário já existe em auth.users (possivelmente via outro app na
-        // mesma instância Supabase, ex: Sincro). Redirecionar para login.
-        console.log('[SignupForm] email já existe em auth.users — redirecionando para login');
-        window.location.href = '/auth/login?msg=conta-existente';
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (data.error === 'already_registered') {
+        setError('Este email já está registrado. Use-o para fazer login.');
+        setLoading(false);
+        setTimeout(() => {
+          const loginUrl = produto
+            ? `/auth/login?produto=${produto}&msg=conta-existente`
+            : '/auth/login?msg=conta-existente';
+          window.location.href = loginUrl;
+        }, 2500);
         return;
       }
-      console.error('[SignupForm] erro no signUp:', err.message);
-      setError(err.message);
+      setError(data.error ?? 'Erro ao criar conta. Tente novamente.');
       setLoading(false);
       return;
     }
-
-    console.log('[SignupForm] cadastro bem-sucedido — aguardando confirmação de email');
 
     setSuccess(true);
     setLoading(false);
   }
 
   if (success) {
+    const loginUrl = produto ? `/auth/login?produto=${produto}` : '/auth/login';
     return (
       <div className="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-8 text-center">
         <div className="text-5xl mb-4">✉️</div>
@@ -59,11 +69,12 @@ export function SignupForm() {
           Verifique seu Email
         </h2>
         <p className="text-gray-400 mb-6">
-          Enviamos um link de confirmação para <strong className="text-gray-200">{email}</strong>.
+          Enviamos um link de confirmação para{' '}
+          <strong className="text-gray-200">{email}</strong>.
           Clique no link para ativar sua conta.
         </p>
-        <a href="/auth/login" className="text-[#D4AF37] hover:underline text-sm">
-          Voltar ao login
+        <a href={loginUrl} className="text-[#D4AF37] hover:underline text-sm">
+          Após confirmar, clique aqui para fazer login →
         </a>
       </div>
     );
@@ -116,7 +127,10 @@ export function SignupForm() {
 
       <p className="text-center text-gray-500 text-sm mt-6">
         Já tem conta?{' '}
-        <a href="/auth/login" className="text-[#D4AF37] hover:underline">
+        <a
+          href={produto ? `/auth/login?produto=${produto}` : '/auth/login'}
+          className="text-[#D4AF37] hover:underline"
+        >
           Entrar
         </a>
       </p>

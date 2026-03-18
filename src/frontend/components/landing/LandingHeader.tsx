@@ -26,13 +26,13 @@ export function LandingHeader() {
 
         {/* Nav desktop */}
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#como-funciona" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
+          <a href="#como-funciona" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
             Como Funciona
           </a>
-          <a href="#teste" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
+          <a href="#teste" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
             Teste Grátis
           </a>
-          <a href="#precos" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm">
+          <a href="#precos" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
             Preços
           </a>
           <a href="/auth/login" className="text-gray-400 hover:text-gray-200 transition-colors text-sm">

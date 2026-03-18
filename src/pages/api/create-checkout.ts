@@ -1,28 +1,19 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { createCheckoutSession, type ProductType } from '../../backend/payments/stripe';
-import { createUserClient } from '../../backend/db/supabase';
 
 const schema = z.object({
   product_type: z.enum(['nome_magnetico', 'nome_bebe', 'nome_empresa']),
 });
 
-export const POST: APIRoute = async ({ request, cookies, url }) => {
+export const POST: APIRoute = async ({ request, locals, url }) => {
   // Verificar autenticação
-  const accessToken = cookies.get('sb-access-token')?.value;
-  if (!accessToken) {
+  const user = locals.user;
+  const accessToken = locals.accessToken;
+
+  if (!user || !accessToken) {
     return new Response(
       JSON.stringify({ error: 'Autenticação necessária' }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-
-  const client = createUserClient(accessToken);
-  const { data: { user }, error } = await client.auth.getUser();
-
-  if (error || !user) {
-    return new Response(
-      JSON.stringify({ error: 'Sessão inválida' }),
       { status: 401, headers: { 'Content-Type': 'application/json' } }
     );
   }
