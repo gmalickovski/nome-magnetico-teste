@@ -14,6 +14,9 @@ export default defineConfig({
       applyBaseStyles: false,
     }),
   ],
+  security: {
+    checkOrigin: false,
+  },
   vite: {
     ssr: {
       noExternal: ['@react-pdf/renderer'],
