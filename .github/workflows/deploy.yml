@@ -30,10 +30,9 @@ jobs:
           username: "root"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 2222
-          # Copia o conteúdo da pasta dist para a VPS
-          source: "dist/*, package.json, ecosystem.config.cjs"
+          # Arquivos e pastas separados apenas por vírgula, sem espaços e sem asterisco
+          source: "dist,package.json,ecosystem.config.cjs"
           target: "/var/www/webapp/nome-magnetico"
-          strip_components: 1 # Remove a palavra 'dist/' na hora de colar os arquivos
 
       - name: Reiniciar Serviço no Servidor
         uses: appleboy/ssh-action@master
