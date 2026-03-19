@@ -43,11 +43,9 @@ jobs:
           script: |
             cd /var/www/webapp/nome-magnetico
             npm install --omit=dev
-            
-            # Instala o dotenv para o ecosystem.config.cjs funcionar
             npm install dotenv
-            
-            # Limpa processos antigos e sobe o novo
             pm2 delete nome-magnetico 2>/dev/null || true
-            pm2 start ecosystem.config.cjs
+            
+            # A mágica acontece aqui: forçamos o PM2 a usar o env_production
+            pm2 start ecosystem.config.cjs --env production
             pm2 save

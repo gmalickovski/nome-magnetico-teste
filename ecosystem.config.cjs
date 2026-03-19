@@ -1,8 +1,7 @@
 const dotenv = require('dotenv');
-const path = require('path');
 
-// Carrega as variáveis do .env e converte em um objeto
-const envConfig = dotenv.config({ path: path.join(__dirname, '.env') }).parsed || {};
+// Carrega o .env usando o caminho absoluto garantido da sua VPS
+const envConfig = dotenv.config({ path: '/var/www/webapp/nome-magnetico/.env' }).parsed || {};
 
 module.exports = {
   apps: [
@@ -11,12 +10,12 @@ module.exports = {
       script: './dist/server/entry.mjs',
       instances: 'max',
       exec_mode: 'cluster',
-      // Removemos a flag nativa do Node que estava falhando
-      env: {
+      // Passa as variáveis explicitamente para o ambiente de produção
+      env_production: {
         PORT: 4321,
         HOST: '0.0.0.0',
         NODE_ENV: 'production',
-        ...envConfig, // Injeta todas as chaves do seu .env com segurança aqui
+        ...envConfig,
       },
     },
   ],
