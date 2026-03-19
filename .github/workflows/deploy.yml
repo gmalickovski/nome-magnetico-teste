@@ -29,6 +29,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_HOST: "103.199.185.152"
           REMOTE_USER: "root"
+          REMOTE_PORT: "2222"
           TARGET: "/var/www/webapp/nome-magnetico"
           SOURCE: "dist/"
           # Vamos enviar o package.json e ecosystem também para o servidor ter a config
