@@ -1,4 +1,4 @@
-name: Deploy Astro para VPS
+name: Deploy Nome Magnético para VPS
 
 on:
   push:
@@ -23,18 +23,17 @@ jobs:
           npm ci
           NODE_ENV=production npm run build
 
-      - name: Deploy via RSYNC para a VPS
-        uses: easingthemes/ssh-deploy@main
+      - name: Deploy para a VPS via SCP
+        uses: appleboy/scp-action@master
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: "103.199.185.152"
-          REMOTE_USER: "root"
-          REMOTE_PORT: "2222"
-          TARGET: "/var/www/webapp/nome-magnetico"
-          SOURCE: "dist/"
-          # Vamos enviar o package.json e ecosystem também para o servidor ter a config
-          ARGS: "-rltgoDzvO"
-          EXCLUDE: "/node_modules/, /.git/, /.github/"
+          host: "103.199.185.152"
+          username: "root"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 2222
+          # Copia o conteúdo da pasta dist para a VPS
+          source: "dist/*, package.json, ecosystem.config.cjs"
+          target: "/var/www/webapp/nome-magnetico"
+          strip_components: 1 # Remove a palavra 'dist/' na hora de colar os arquivos
 
       - name: Reiniciar Serviço no Servidor
         uses: appleboy/ssh-action@master
@@ -45,13 +44,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/webapp/nome-magnetico
-            # Instalar apenas dependências de produção para rodar as APIs SSR
             npm install --omit=dev
-            
-            # Garante que o PM2 reinicie o app Astro com as portas corretas
             export PORT=4321
             export NODE_ENV=production
             export HOST=0.0.0.0
-            
             pm2 restart nomemagnetico || pm2 start dist/server/entry.mjs --name nomemagnetico
             pm2 save
