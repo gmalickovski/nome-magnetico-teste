@@ -20,6 +20,8 @@ jobs:
 
       - name: Instalar dependências e Build
         run: |
+          echo "PUBLIC_SUPABASE_URL=https://supabase.studiomlk.com.br" >> .env
+          echo "PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzY3MTYzMTYyLCJleHAiOjIwODI1MjMxNjIsInJlZiI6InNpbmNyb2FwcF9hbm9uIn0.fxAcgzxGZe3ybA1-Ocu2AhvlNPuM2-ysE05IAcgfBaA" >> .env
           npm ci
           NODE_ENV=production npm run build
 
