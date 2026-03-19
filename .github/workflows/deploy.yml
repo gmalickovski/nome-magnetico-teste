@@ -40,6 +40,7 @@ jobs:
         with:
           host: "103.199.185.152"
           username: "root"
+          port: 2222
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/webapp/nome-magnetico
