@@ -11,7 +11,7 @@ if (!user) return Astro.redirect('/auth/login');
 let isAdmin = false;
 let profileData: any = null;
 try {
-  const client = createUserClient(Astro.locals.accessToken);
+  const client = createUserClient(Astro.locals.accessToken ?? '');
   const { data: profile } = await client.schema('nome_magnetico')
     .from('profiles').select('nome, role, birth_name, birth_date').eq('id', user.id).single();
   isAdmin = profile?.role === 'admin';
@@ -171,7 +171,7 @@ const products = [
     dataSalva={profileData?.birth_date || ''} 
   />
 
-  <script define:vars={{ needsOnboarding: !profileData?.birth_name || !profileData?.birth_date }}>
+  <script is:inline define:vars={{ needsOnboarding: !profileData?.birth_name || !profileData?.birth_date }}>
     const cards = document.querySelectorAll('.product-card');
     cards.forEach(card => {
       card.addEventListener('click', () => {

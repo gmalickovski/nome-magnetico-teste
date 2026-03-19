@@ -1,5 +1,11 @@
 import React from 'react';
 
+export interface StripePrices {
+  nome_magnetico: string;
+  nome_bebe: string;
+  nome_empresa: string;
+}
+
 interface Plan {
   id: string;
   name: string;
@@ -12,12 +18,19 @@ interface Plan {
   popular: boolean;
 }
 
-const plans: Plan[] = [
+const FALLBACK_PRICES: StripePrices = {
+  nome_magnetico: 'R$ 97',
+  nome_bebe: 'R$ 147',
+  nome_empresa: 'R$ 197',
+};
+
+function buildPlans(prices: StripePrices): Plan[] {
+  return [
   {
     id: 'nome_magnetico',
     name: 'Nome Social',
     subtitle: 'Análise Pessoal',
-    price: 'R$ 97',
+    price: prices.nome_magnetico,
     period: 'acesso por 30 dias',
     description: 'Análise completa do seu nome de nascimento com os 4 triângulos cabalísticos e IA especializada.',
     features: [
@@ -38,7 +51,7 @@ const plans: Plan[] = [
     id: 'nome_bebe',
     name: 'Nome de Bebê',
     subtitle: 'Para seu filho',
-    price: 'R$ 147',
+    price: prices.nome_bebe,
     period: 'acesso por 30 dias',
     description: 'Encontre o nome perfeito para o seu bebê — sem bloqueios e alinhado ao destino da família.',
     features: [
@@ -58,7 +71,7 @@ const plans: Plan[] = [
     id: 'nome_empresa',
     name: 'Nome Empresarial',
     subtitle: 'Para sua empresa',
-    price: 'R$ 197',
+    price: prices.nome_empresa,
     period: 'acesso por 30 dias',
     description: 'Avalie nomes empresariais pela compatibilidade com o fundador e o destino da empresa.',
     features: [
@@ -74,13 +87,16 @@ const plans: Plan[] = [
     cta: 'Analisar Minha Empresa',
     popular: false,
   },
-];
+  ];
+}
 
 interface PricingSectionProps {
   highlight?: string;
+  stripePrices?: StripePrices;
 }
 
-export function PricingSection({ highlight }: PricingSectionProps) {
+export function PricingSection({ highlight, stripePrices }: PricingSectionProps) {
+  const plans = buildPlans(stripePrices ?? FALLBACK_PRICES);
   return (
     <section id="precos" className="py-20 md:py-32 bg-[#1a1a1a]">
       <div className="max-w-5xl mx-auto px-4">

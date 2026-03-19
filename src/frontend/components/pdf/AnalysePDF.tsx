@@ -86,6 +86,11 @@ function renderMarkdownPiece(text: string, baseStyle: any, boldStyle: any): Reac
   });
 }
 
+export function capitalizeTitle(text: string): string {
+  if (!text) return text;
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 function RenderMarkdownChunks({ text, styles, GOLD, triangleMap, triCellSize }: {
   text: string;
   styles: any;
@@ -393,9 +398,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     color: TEXT,
   },
-  // Capa
+  // Capa padrão (escura)
   coverPage: {
     backgroundColor: DARK,
+    paddingTop: 80,
+    paddingBottom: 56,
+    paddingHorizontal: 48,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Capa nome_bebe (pastel suave de tom morno)
+  coverPageBebe: {
+    backgroundColor: '#FFF9F0',
     paddingTop: 80,
     paddingBottom: 56,
     paddingHorizontal: 48,
@@ -428,6 +443,14 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontFamily: 'Helvetica-Bold',
     color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 12,
+    letterSpacing: 1,
+  },
+  coverTitleBebe: {
+    fontSize: 36,
+    fontFamily: 'Helvetica-Bold',
+    color: '#1C1033',
     textAlign: 'center',
     marginBottom: 12,
     letterSpacing: 1,
@@ -584,7 +607,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#065F46',
   },
-  // Lições Kármics
+  // Lições Kármicas
   licaoRow: {
     backgroundColor: 'rgba(56,189,248,0.05)',
     borderLeftWidth: 3,
@@ -800,11 +823,11 @@ function formatDate(dateStr: string): string {
 
 function productLabel(productType: string): string {
   const map: Record<string, string> = {
-    nome_magnetico: 'Analise de Nome Social',
-    nome_bebe: 'Analise de Nome para Bebe',
-    nome_empresa: 'Analise de Nome Empresarial',
+    nome_magnetico: 'Análise de Nome Social',
+    nome_bebe: 'Análise de Nome para Bebê',
+    nome_empresa: 'Análise de Nome Empresarial',
   };
-  return map[productType] ?? 'Analise Numerologica';
+  return map[productType] ?? 'Análise Numerológica';
 }
 
 /** Extrai o último bloco de conclusão (## ... 6. Conclusão ... até o fim) */
@@ -815,7 +838,13 @@ function extractConclusao(text: string): string | null {
 }
 
 export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
-  const firstName = analysis.nome_completo.split(' ')[0];
+  const isBebe = analysis.product_type === 'nome_bebe';
+  const freqData = analysis.frequencias_numeros as any;
+  // Para nome_bebe: usar o nome do melhor candidato em vez de "(bebê) Sobrenome"
+  const nomeParaExibir = isBebe
+    ? (freqData?.ranking?.melhorNome?.nomeCompleto ?? analysis.nome_completo)
+    : analysis.nome_completo;
+  const firstName = nomeParaExibir.split(' ')[0];
   const tipoAnalise = productLabel(analysis.product_type);
   const dataGeracao = formatDate(analysis.completed_at ?? analysis.created_at);
   const dataNascimento = formatDate(analysis.data_nascimento);
@@ -844,7 +873,9 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
     ? (analysis.tendencias_ocultas as any[])
     : null;
 
-  const frequencias = analysis.frequencias_numeros ?? null;
+  // Para nome_bebe: frequencias_numeros é { ranking, frequencias }; para outros: Record<string, number>
+  const frequencias: Record<string, number> | null =
+    freqData?.frequencias ?? (freqData && !freqData?.ranking ? freqData : null);
 
   const tVida    = analysis.triangulo_vida    ?? null;
   const tPessoal = analysis.triangulo_pessoal ?? null;
@@ -877,12 +908,12 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
   return (
     <Document title={`Nome Magnetico — ${analysis.nome_completo}`} author="Nome Magnetico">
       {/* === PÁGINA 1: CAPA === */}
-      <Page size="A4" style={styles.coverPage}>
+      <Page size="A4" style={isBebe ? styles.coverPageBebe : styles.coverPage}>
         <Text style={[styles.coverLogo, { fontFamily: LOGO_FONT }]}>NOME MAGNETICO</Text>
         <View style={styles.coverAccentLine} />
         <Text style={styles.coverProduct}>{tipoAnalise}</Text>
-        <Text style={styles.coverTitle}>{analysis.nome_completo}</Text>
-        <Text style={styles.coverSubtitle}>Numerologia Cabalistica</Text>
+        <Text style={isBebe ? styles.coverTitleBebe : styles.coverTitle}>{nomeParaExibir}</Text>
+        <Text style={styles.coverSubtitle}>Numerologia Cabalística</Text>
         <View style={styles.coverBottomLine} />
         <Text style={styles.coverMeta}>Data de nascimento: {dataNascimento}</Text>
         <Text style={styles.coverMeta}>Gerado em: {dataGeracao}</Text>
@@ -892,12 +923,12 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
       <Page size="A4" style={styles.page}>
         <View style={styles.pageHeader} fixed>
           <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
-          <Text style={styles.pageHeaderInfo}>{analysis.nome_completo} — {tipoAnalise}</Text>
+          <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — {tipoAnalise}</Text>
         </View>
 
         {/* Os 5 Números */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Os 5 Numeros Numerologicos</Text>
+          <Text style={styles.sectionTitle}>Os 5 Números Numerológicos</Text>
           <View style={styles.numbersGrid}>
             {nums.map(n => (
               <View key={n.label} style={styles.numberCard}>
@@ -924,7 +955,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
         {/* Débitos Kármicos */}
         {debitos !== null && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Débitos Kármicos</Text>
+            <Text style={{ ...styles.sectionTitle, color: '#7C3AED', borderBottomColor: '#7C3AED' }}>Débitos Kármicos</Text>
             {debitos.length === 0 ? (
               <View style={styles.debitoNoneBox}>
                 <Text style={styles.debitoNoneText}>Nenhum débito kármico detectado — alma sem pendências de encarnações passadas.</Text>
@@ -932,7 +963,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
             ) : (
               debitos.map((d, i) => (
                 <View key={i} style={styles.debitoRow}>
-                  <Text style={styles.debitoTitle}>{d.titulo}</Text>
+                  <Text style={styles.debitoTitle}>{capitalizeTitle(d.titulo)}</Text>
                   <Text style={styles.debitoDesc}>{d.descricao}</Text>
                 </View>
               ))
@@ -941,12 +972,16 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
         )}
 
         {/* Lições Kármicas */}
-        {licoes !== null && licoes.length > 0 && (
+        {licoes !== null && (
           <View style={styles.section}>
             <Text style={{ ...styles.sectionTitle, color: '#38bdf8', borderBottomColor: '#38bdf8' }}>Lições Kármicas</Text>
-            {licoes.map((l, i) => (
+            {licoes.length === 0 ? (
+               <View style={{ ...styles.debitoNoneBox, backgroundColor: 'rgba(56,189,248,0.05)', borderLeftColor: '#38bdf8' }}>
+                 <Text style={{ ...styles.debitoNoneText, color: '#0369a1' }}>Nenhuma lição kármica pendente detectada para ausência de números neste nome.</Text>
+               </View>
+            ) : licoes.map((l, i) => (
               <View key={i} style={styles.licaoRow}>
-                <Text style={styles.licaoTitle}>{l.titulo}</Text>
+                <Text style={styles.licaoTitle}>{capitalizeTitle(l.titulo)}</Text>
                 <Text style={styles.licaoDesc}>{l.descricao}</Text>
               </View>
             ))}
@@ -967,9 +1002,13 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
               </View>
             )}
 
-            {tendencias.length > 0 && tendencias.map((t, i) => (
+            {tendencias.length === 0 ? (
+              <View style={{ ...styles.debitoNoneBox, backgroundColor: 'rgba(167,139,250,0.1)', borderLeftColor: '#a78bfa' }}>
+                 <Text style={{ ...styles.debitoNoneText, color: '#6d28d9' }}>Nenhuma tendência oculta detectada — nenhum número se repete excessivamente no nome.</Text>
+              </View>
+            ) : tendencias.map((t, i) => (
               <View key={i} style={styles.tendenciaRow}>
-                <Text style={styles.tendenciaTitle}>{t.titulo} (Frequência: {t.frequencia}x)</Text>
+                <Text style={styles.tendenciaTitle}>{capitalizeTitle(t.titulo)} (Frequência: {t.frequencia}x)</Text>
                 <Text style={styles.tendenciaDesc}>{t.descricao}</Text>
               </View>
             ))}
@@ -980,7 +1019,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
           <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
           <Text
             style={styles.pageFooterPage}
-            render={({ pageNumber, totalPages }) => `Pagina ${pageNumber} de ${totalPages}`}
+            render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
           />
         </View>
       </Page>
@@ -990,11 +1029,11 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
         <Page size="A4" style={styles.page}>
           <View style={styles.pageHeader} fixed>
             <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
-            <Text style={styles.pageHeaderInfo}>{analysis.nome_completo} — Analise Completa</Text>
+            <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — Análise Completa</Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Analise Completa</Text>
+            <Text style={styles.sectionTitle}>Análise Completa</Text>
             <RenderMarkdownChunks
               text={analiseCorpo}
               styles={styles}
@@ -1008,7 +1047,61 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
             <Text
               style={styles.pageFooterPage}
-              render={({ pageNumber, totalPages }) => `Pagina ${pageNumber} de ${totalPages}`}
+              render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
+            />
+          </View>
+        </Page>
+      )}
+
+      {/* PÁGINA ESPECÍFICA PARA OS 4 TRIÂNGULOS (Bebe) */}
+      {isBebe && hasTriangulos && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — Os 4 Triângulos Numerológicos</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Estudo dos 4 Triângulos</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
+              Os Quatro Triângulos Numerológicos revelam a estrutura energética profunda do nome. Cada triângulo rege uma área específica da vida e o fluxo de energia ao longo do tempo.
+            </Text>
+
+            {tVida && (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo da Vida</Text>
+                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Representa os aspectos gerais e a vibração matriz do nome.</Text>
+                <TrianguloPiramideInline data={tVida} label="Triângulo da Vida" cellSize={triCellSize} />
+              </View>
+            )}
+            {tPessoal && (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo Pessoal</Text>
+                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Revela a vida íntima, as reações emocionais e comportamentos mais profundos.</Text>
+                <TrianguloPiramideInline data={tPessoal} label="Triângulo Pessoal" cellSize={triCellSize} />
+              </View>
+            )}
+            {tSocial && (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo Social</Text>
+                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Mostra as influências externas, amizades, ambiente de trabalho e vida pública.</Text>
+                <TrianguloPiramideInline data={tSocial} label="Triângulo Social" cellSize={triCellSize} />
+              </View>
+            )}
+            {tDestino && (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo do Destino</Text>
+                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Governa a missão de vida, realizações a longo prazo e legado final.</Text>
+                <TrianguloPiramideInline data={tDestino} label="Triângulo do Destino" cellSize={triCellSize} />
+              </View>
+            )}
+          </View>
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text
+              style={styles.pageFooterPage}
+              render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
             />
           </View>
         </Page>
@@ -1019,7 +1112,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
         <Page size="A4" style={styles.page}>
           <View style={styles.pageHeader} fixed>
             <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
-            <Text style={styles.pageHeaderInfo}>{analysis.nome_completo} — Conclusao</Text>
+            <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — Conclusão</Text>
           </View>
 
           <View style={styles.conclusaoCard}>
@@ -1030,32 +1123,81 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
             <Text
               style={styles.pageFooterPage}
-              render={({ pageNumber, totalPages }) => `Pagina ${pageNumber} de ${totalPages}`}
+              render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
             />
           </View>
         </Page>
       )}
+      {/* === PÁGINA DE RANKING (exclusivo nome_bebe) === */}
+      {isBebe && freqData?.ranking?.nomesCandidatos?.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — Ranking dos Candidatos</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ranking dos Nomes Candidatos</Text>
+
+            {/* Cabeçalho da tabela */}
+            <View style={styles.tableHeader}>
+              <Text style={[styles.tableHeaderCell, styles.colNome]}>Nome</Text>
+              <Text style={[styles.tableHeaderCell, styles.colScore]}>Score</Text>
+              <Text style={[styles.tableHeaderCell, styles.colNum]}>Expressao</Text>
+              <Text style={[styles.tableHeaderCell, styles.colNum]}>Motiv.</Text>
+              <Text style={[styles.tableHeaderCell, styles.colJustificativa]}>Compatibilidade</Text>
+            </View>
+
+            {(freqData.ranking.nomesCandidatos as any[]).map((c: any, i: number) => (
+              <View key={i} style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
+                <Text style={[styles.tableCell, styles.colNome, i === 0 ? { fontFamily: 'Helvetica-Bold', color: GOLD } : {}]}>
+                  {i === 0 ? `★ ${c.primeiroNome}` : c.primeiroNome}
+                </Text>
+                <Text style={[styles.tableCell, styles.colScore, { textAlign: 'center', color: c.score >= 70 ? '#059669' : c.score >= 40 ? '#D97706' : '#DC2626', fontFamily: 'Helvetica-Bold' }]}>
+                  {c.score}%
+                </Text>
+                <Text style={[styles.tableCell, styles.colNum, { textAlign: 'center' }]}>{c.expressao}</Text>
+                <Text style={[styles.tableCell, styles.colNum, { textAlign: 'center' }]}>{c.motivacao}</Text>
+                <Text style={[styles.tableCell, styles.colJustificativa, { color: c.compatibilidade === 'total' ? '#059669' : c.compatibilidade === 'complementar' ? GOLD : c.compatibilidade === 'aceitavel' ? '#D97706' : '#DC2626' }]}>
+                  {c.compatibilidade}{c.temBloqueio ? ` · ${c.bloqueios?.length}x bloq.` : ''}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text
+              style={styles.pageFooterPage}
+              render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
+            />
+          </View>
+        </Page>
+      )}
+
       {/* === PÁGINA FINAL: TREINO DE ASSINATURA === */}
-      <Page size="A4" style={styles.assinaturaPage}>
-        <Text style={styles.assinaturaTitle}>Folha de Treino de Assinatura</Text>
-        <Text style={styles.assinaturaNome}>{analysis.nome_completo}</Text>
+      {!isBebe && (
+        <Page size="A4" style={styles.assinaturaPage}>
+          <Text style={styles.assinaturaTitle}>Folha de Treino de Assinatura</Text>
+          <Text style={styles.assinaturaNome}>{nomeParaExibir}</Text>
 
-        <View style={styles.assinaturaInstrucoesBox}>
-          <Text style={styles.assinaturaInstrucoesTitle}>Como criar uma assinatura de alto poder energetico</Text>
-          <Text style={styles.assinaturaInstrucaoItem}>• Nunca cruze tracos por cima das letras — linhas cortantes bloqueiam o fluxo energetico da assinatura.</Text>
-          <Text style={styles.assinaturaInstrucaoItem}>• Inclinacao levemente ascendente (da esquerda para a direita) transmite ambicao e crescimento positivo.</Text>
-          <Text style={styles.assinaturaInstrucaoItem}>• Evite tracados que descem abruptamente ao final — simbolizam queda ou fechamento de ciclos de forma negativa.</Text>
-          <Text style={styles.assinaturaInstrucaoItem}>• A assinatura deve ser legivel o suficiente para reconhecer as letras principais do seu nome magnetico.</Text>
-          <Text style={styles.assinaturaInstrucaoItem}>• Termine com um tracado que fecha o nome sem corte — pode ser uma curva suave ascendente ou um ponto de energia.</Text>
-          <Text style={styles.assinaturaInstrucaoItem}>• Pratique ate que o movimento se torne fluido e natural — a assinatura deve expressar confianca e leveza.</Text>
-          <Text style={styles.assinaturaInstrucaoItem}>• Escreva lentamente no inicio, focando na intencao de cada letra. Com o tempo, acelere para que o fluxo seja espontaneo.</Text>
-        </View>
+          <View style={styles.assinaturaInstrucoesBox}>
+            <Text style={styles.assinaturaInstrucoesTitle}>Como criar uma assinatura de alto poder energetico</Text>
+            <Text style={styles.assinaturaInstrucaoItem}>• Nunca cruze tracos por cima das letras — linhas cortantes bloqueiam o fluxo energetico da assinatura.</Text>
+            <Text style={styles.assinaturaInstrucaoItem}>• Inclinacao levemente ascendente (da esquerda para a direita) transmite ambicao e crescimento positivo.</Text>
+            <Text style={styles.assinaturaInstrucaoItem}>• Evite tracados que descem abruptamente ao final — simbolizam queda ou fechamento de ciclos de forma negativa.</Text>
+            <Text style={styles.assinaturaInstrucaoItem}>• A assinatura deve ser legivel o suficiente para reconhecer as letras principais do seu nome magnetico.</Text>
+            <Text style={styles.assinaturaInstrucaoItem}>• Termine com um tracado que fecha o nome sem corte — pode ser uma curva suave ascendente ou um ponto de energia.</Text>
+            <Text style={styles.assinaturaInstrucaoItem}>• Pratique ate que o movimento se torne fluido e natural — a assinatura deve expressar confianca e leveza.</Text>
+            <Text style={styles.assinaturaInstrucaoItem}>• Escreva lentamente no inicio, focando na intencao de cada letra. Com o tempo, acelere para que o fluxo seja espontaneo.</Text>
+          </View>
 
-        {/* 14 linhas de treino (preenche a folha A4) */}
-        {Array.from({ length: 14 }).map((_, i) => (
-          <View key={i} style={styles.assinaturaLinha} />
-        ))}
-      </Page>
+          {/* 14 linhas de treino (preenche a folha A4) */}
+          {Array.from({ length: 14 }).map((_, i) => (
+            <View key={i} style={styles.assinaturaLinha} />
+          ))}
+        </Page>
+      )}
     </Document>
   );
 }

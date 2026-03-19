@@ -104,6 +104,77 @@ export async function hasAnySubscription(
   return (data?.length ?? 0) > 0;
 }
 
+export interface RevenueStats {
+  grossBRL: number;
+  stripeFeeBRL: number;
+  iaCostBRL: number;
+  netBRL: number;
+  avgMonthlyNetBRL: number;
+  totalTransactions: number;
+}
+
+const STRIPE_PCT = 0.0399;
+const STRIPE_FIXED_BRL = 0.39;
+const USD_TO_BRL = 5.70;
+
+/**
+ * Calcula estatísticas de receita do negócio.
+ */
+export async function getRevenueStats(iaCostUsd: number): Promise<RevenueStats> {
+  const { data, error } = await supabase
+    .schema('nome_magnetico')
+    .from('subscriptions')
+    .select('amount_paid, created_at')
+    .not('amount_paid', 'is', null);
+
+  if (error || !data || data.length === 0) {
+    return { grossBRL: 0, stripeFeeBRL: 0, iaCostBRL: 0, netBRL: 0, avgMonthlyNetBRL: 0, totalTransactions: 0 };
+  }
+
+  const totalCents = data.reduce((sum, s) => sum + (s.amount_paid ?? 0), 0);
+  const totalTransactions = data.length;
+  const firstPurchase = new Date(Math.min(...data.map(s => new Date(s.created_at).getTime())));
+
+  const grossBRL = totalCents / 100;
+  const stripeFeeBRL = grossBRL * STRIPE_PCT + totalTransactions * STRIPE_FIXED_BRL;
+  const iaCostBRL = iaCostUsd * USD_TO_BRL;
+  const netBRL = grossBRL - stripeFeeBRL - iaCostBRL;
+
+  const monthsSinceFirst = Math.max(
+    1,
+    (Date.now() - firstPurchase.getTime()) / (1000 * 60 * 60 * 24 * 30)
+  );
+  const avgMonthlyNetBRL = netBRL / monthsSinceFirst;
+
+  return { grossBRL, stripeFeeBRL, iaCostBRL, netBRL, avgMonthlyNetBRL, totalTransactions };
+}
+
+/**
+ * Retorna um Map de userId → produtos ativos para uma lista de usuários.
+ */
+export async function getActiveProductsPerUser(
+  userIds: string[]
+): Promise<Map<string, string[]>> {
+  const result = new Map<string, string[]>();
+  if (userIds.length === 0) return result;
+
+  const { data, error } = await supabase
+    .schema('nome_magnetico')
+    .from('subscriptions')
+    .select('user_id, product_type')
+    .in('user_id', userIds)
+    .gt('ends_at', new Date().toISOString());
+
+  if (error || !data) return result;
+
+  for (const row of data) {
+    const list = result.get(row.user_id) ?? [];
+    if (!list.includes(row.product_type)) list.push(row.product_type);
+    result.set(row.user_id, list);
+  }
+  return result;
+}
+
 /**
  * Lista todas as subscriptions de um usuário.
  */

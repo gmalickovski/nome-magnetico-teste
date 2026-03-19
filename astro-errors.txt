@@ -1,0 +1,180 @@
+﻿[2m09:52:38[22m [34m[@astrojs/node][39m Enabling sessions with filesystem storage
+[2m09:52:39[22m [34m[content][39m Syncing content
+[2m09:52:39[22m [34m[content][39m Synced content
+[2m09:52:39[22m [34m[types][39m Generated [2m225ms[22m
+[2m09:52:39[22m [34m[check][39m Getting diagnostics for Astro files in C:\dev\nome-magnetico...
+[96msrc/middleware.ts[0m:[93m35[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'refreshToken' is declared but its value is never read.
+
+[7m35[0m   const refreshToken =
+[7m  [0m [93m        ~~~~~~~~~~~~[0m
+
+[96msrc/backend/ai/prompts/baby-prompt.ts[0m:[93m1[0m:[93m15[0m - [93mwarning[0m[90m ts(6196): [0m'AnaliseNomeBebe' is declared but never used.
+
+[7m1[0m import type { AnaliseNomeBebe, ResultadoNomeBebe } from '../../numerology/products/nome-bebe';
+[7m [0m [93m              ~~~~~~~~~~~~~~~[0m
+
+[96msrc/backend/ai/prompts/company-prompt.ts[0m:[93m1[0m:[93m15[0m - [93mwarning[0m[90m ts(6196): [0m'AnaliseNomeEmpresa' is declared but never used.
+
+[7m1[0m import type { AnaliseNomeEmpresa, ResultadoNomeEmpresa } from '../../numerology/products/nome-empresa';
+[7m [0m [93m              ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/backend/ai/providers/groq.ts[0m:[93m27[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'stream' is declared but its value is never read.
+
+[7m27[0m   stream = false
+[7m  [0m [93m  ~~~~~~[0m
+
+[96msrc/backend/numerology/harmonization.ts[0m:[93m19[0m:[93m40[0m - [93mwarning[0m[90m ts(6133): [0m'extrairLetras' is declared but its value is never read.
+
+[7m19[0m import { reduzirNumero, calcularValor, extrairLetras } from './core';
+[7m  [0m [93m                                       ~~~~~~~~~~~~~[0m
+[96msrc/backend/numerology/harmonization.ts[0m:[93m19[0m:[93m25[0m - [93mwarning[0m[90m ts(6133): [0m'calcularValor' is declared but its value is never read.
+
+[7m19[0m import { reduzirNumero, calcularValor, extrairLetras } from './core';
+[7m  [0m [93m                        ~~~~~~~~~~~~~[0m
+
+[96msrc/backend/numerology/suggestions.ts[0m:[93m128[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'numeroExpressaoAlvo' is declared but its value is never read.
+
+[7m128[0m   numeroExpressaoAlvo: number,
+[7m   [0m [93m  ~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/backend/numerology/suggestions.ts[0m:[93m7[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'reduzirNumero' is declared but its value is never read.
+
+[7m7[0m import { reduzirNumero } from './core';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/backend/pdf/template.tsx[0m:[93m97[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'textColor' is declared but its value is never read.
+
+[7m97[0m   const textColor = isDark ? COLORS.textPrimary : '#1a1a1a';
+[7m  [0m [93m        ~~~~~~~~~[0m
+[96msrc/backend/pdf/template.tsx[0m:[93m94[0m:[93m41[0m - [93mwarning[0m[90m ts(6133): [0m'magneticNames' is declared but its value is never read.
+
+[7m94[0m export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemplateProps) {
+[7m  [0m [93m                                        ~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/app/LiveNameTester.tsx[0m:[93m25[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'dbDateString' is declared but its value is never read.
+
+[7m25[0m   const dbDateString = birthDate; // formato DB YYYY-MM-DD
+[7m  [0m [93m        ~~~~~~~~~~~~[0m
+[96msrc/frontend/components/app/LiveNameTester.tsx[0m:[93m1[0m:[93m8[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React, { useState, useEffect } from 'react';
+[7m [0m [93m       ~~~~~[0m
+
+[96msrc/frontend/components/app/OnboardingNomeSocialModal.tsx[0m:[93m10[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'needsOnboarding' is declared but its value is never read.
+
+[7m10[0m   const needsOnboarding = !nomeSalvo || !dataSalva;
+[7m  [0m [93m        ~~~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/landing/FAQSection.tsx[0m:[93m1[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React from 'react';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/landing/HeroSection.tsx[0m:[93m1[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React from 'react';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/landing/HowItWorksSection.tsx[0m:[93m1[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React from 'react';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/landing/LandingFooter.tsx[0m:[93m1[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React from 'react';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/landing/LandingHeader.tsx[0m:[93m1[0m:[93m8[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React, { useState, useEffect } from 'react';
+[7m [0m [93m       ~~~~~[0m
+
+[96msrc/frontend/components/landing/PricingSection.tsx[0m:[93m1[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React from 'react';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/landing/ProductsSection.tsx[0m:[93m1[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React from 'react';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/pdf/AnalysePDF.tsx[0m:[93m842[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'firstName' is declared but its value is never read.
+
+[7m842[0m   const firstName = nomeParaExibir.split(' ')[0];
+[7m   [0m [93m        ~~~~~~~~~[0m
+[96msrc/frontend/components/pdf/AnalysePDF.tsx[0m:[93m835[0m:[93m55[0m - [93mwarning[0m[90m ts(6133): [0m'userName' is declared but its value is never read.
+
+[7m835[0m export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
+[7m   [0m [93m                                                      ~~~~~~~~[0m
+[96msrc/frontend/components/pdf/AnalysePDF.tsx[0m:[93m835[0m:[93m40[0m - [93mwarning[0m[90m ts(6133): [0m'magneticNames' is declared but its value is never read.
+
+[7m835[0m export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
+[7m   [0m [93m                                       ~~~~~~~~~~~~~[0m
+
+[96msrc/frontend/components/purchase/CheckoutFlow.tsx[0m:[93m1[0m:[93m17[0m - [93mwarning[0m[90m ts(6133): [0m'useEffect' is declared but its value is never read.
+
+[7m1[0m import React, { useEffect, useState } from 'react';
+[7m [0m [93m                ~~~~~~~~~[0m
+[96msrc/frontend/components/purchase/CheckoutFlow.tsx[0m:[93m1[0m:[93m8[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React, { useEffect, useState } from 'react';
+[7m [0m [93m       ~~~~~[0m
+
+[96msrc/frontend/components/ui/Accordion.tsx[0m:[93m1[0m:[93m8[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React, { useState } from 'react';
+[7m [0m [93m       ~~~~~[0m
+
+[96msrc/frontend/components/ui/Toast.tsx[0m:[93m1[0m:[93m8[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React, { useEffect, useState } from 'react';
+[7m [0m [93m       ~~~~~[0m
+
+[96msrc/layouts/AppLayout.astro[0m:[93m21[0m:[93m35[0m - [91merror[0m[90m ts(2345): [0mArgument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+
+[7m21[0m   const client = createUserClient(Astro.locals.accessToken);
+[7m  [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/layouts/ResultadoLayout.astro[0m:[93m3[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'supabase' is declared but its value is never read.
+
+[7m3[0m import { supabase } from '../backend/db/supabase';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/pages/comprar.astro[0m:[93m15[0m:[93m37[0m - [91merror[0m[90m ts(2345): [0mArgument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+
+[7m15[0m     const client = createUserClient(Astro.locals.accessToken);
+[7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/pages/api/analyze.ts[0m:[93m200[0m:[93m15[0m - [93mwarning[0m[90m ts(6133): [0m'sequenciasNegativas' is declared but its value is never read.
+
+[7m200[0m         const sequenciasNegativas = todasSequenciasNegativas(todosTriangulos);
+[7m   [0m [93m              ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/pages/app/index.astro[0m:[93m14[0m:[93m35[0m - [91merror[0m[90m ts(2345): [0mArgument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+
+[7m14[0m   const client = createUserClient(Astro.locals.accessToken);
+[7m  [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/pages/app/index.astro[0m:[93m174[0m:[93m11[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m174[0m   <script define:vars={{ needsOnboarding: !profileData?.birth_name || !profileData?.birth_date }}>
+[7m   [0m [93m          ~~~~~~~~~~~[0m
+
+[96msrc/pages/app/analise/nome-social.astro[0m:[93m14[0m:[93m33[0m - [91merror[0m[90m ts(2345): [0mArgument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+
+[7m14[0m const client = createUserClient(Astro.locals.accessToken);
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+Result (122 files): 
+- 4 errors
+- 0 warnings
+- 30 hints
+

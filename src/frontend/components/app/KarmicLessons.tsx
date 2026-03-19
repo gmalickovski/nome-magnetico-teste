@@ -32,6 +32,8 @@ function LicaoCard({ licao }: { licao: LicaoCarmica }) {
   const [expandido, setExpandido] = useState(false);
   const cor = NUMERO_CORES[licao.numero] ?? 'text-gray-400 border-gray-500/30 bg-gray-500/10';
 
+  const tituloCapitalizado = licao.titulo ? licao.titulo.charAt(0).toUpperCase() + licao.titulo.slice(1) : '';
+
   return (
     <div className={`rounded-xl border overflow-hidden ${cor}`}>
       <button
@@ -42,7 +44,7 @@ function LicaoCard({ licao }: { licao: LicaoCarmica }) {
           {licao.numero}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-200 text-sm leading-snug">{licao.titulo}</p>
+          <p className="font-semibold text-gray-200 text-sm leading-snug">{tituloCapitalizado}</p>
         </div>
         <span className="text-gray-400 shrink-0">{expandido ? '▲' : '▼'}</span>
       </button>

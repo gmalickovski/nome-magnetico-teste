@@ -38,7 +38,7 @@ export interface AnaliseNomeBebe {
 }
 
 export interface ResultadoNomeBebe {
-  sobrenomeFamilia: string;
+  sobrenomesDisponiveis: string[];
   dataNascimento: string;
   destino: number;
   nomesCandidatos: AnaliseNomeBebe[];
@@ -53,7 +53,7 @@ export function analisarNomeBebe(
   sobrenomeFamilia: string,
   dataNascimento: string
 ): AnaliseNomeBebe {
-  const nomeCompleto = `${primeiroNome} ${sobrenomeFamilia}`.trim();
+  const nomeCompleto = sobrenomeFamilia.length > 0 ? `${primeiroNome} ${sobrenomeFamilia}`.trim() : primeiroNome;
   const todos = calcularTodosTriangulos(nomeCompleto, dataNascimento);
   const bloqueios = detectarBloqueios(todos);
   const sequencias = todasSequenciasNegativas(todos);
@@ -124,22 +124,65 @@ export function analisarNomeBebe(
 }
 
 /**
- * Analisa múltiplos nomes candidatos e retorna ranqueados.
+ * Gera todas as combinações não-vazias preservando a ordem relativa dos elementos.
+ */
+function gerarCombinacoesSobrenomes(sobrenomes: string[]): string[] {
+  const combinacoes: string[] = [];
+  const n = sobrenomes.length;
+  // 1 to (2^n - 1) generates all subsets except empty
+  for (let i = 1; i < (1 << n); i++) {
+    const subset: string[] = [];
+    for (let j = 0; j < n; j++) {
+      if (i & (1 << j)) {
+        subset.push(sobrenomes[j]);
+      }
+    }
+    combinacoes.push(subset.join(' '));
+  }
+  return [...new Set(combinacoes)];
+}
+
+/**
+ * Analisa múltiplos nomes candidatos iterando sobre possíveis composições de sobrenome e retorna ranqueados.
  */
 export function analisarNomesBebe(
   nomesCandidatos: string[],
-  sobrenomeFamilia: string,
+  sobrenomesDisponiveis: string[],
   dataNascimento: string
 ): ResultadoNomeBebe {
   const destino = calcularDestino(dataNascimento);
+  
+  // Limpar os sobrenomes e remover vazios
+  const sobrenomesValidos = sobrenomesDisponiveis.map(s => s.trim()).filter(s => s.length > 0);
+  
+  // Combinações de sobrenomes a testar (ou string vazia se nenhum)
+  const combinacoes = sobrenomesValidos.length > 0
+    ? gerarCombinacoesSobrenomes(sobrenomesValidos)
+    : [''];
 
-  const analises = nomesCandidatos
-    .filter(n => n.trim().length >= 2)
-    .map(n => analisarNomeBebe(n.trim(), sobrenomeFamilia, dataNascimento))
-    .sort((a, b) => b.score - a.score);
+  const analises: AnaliseNomeBebe[] = [];
+
+  for (const candidato of nomesCandidatos.map(n => n.trim()).filter(n => n.length >= 2)) {
+    let melhorAnaliseCandidato: AnaliseNomeBebe | null = null;
+    
+    // Testa todas as combinações de sobrenome para esse primeiro nome
+    for (const combo of combinacoes) {
+      const analiseAtual = analisarNomeBebe(candidato, combo, dataNascimento);
+      // Fica com a composição que render o maior score numerológico
+      if (!melhorAnaliseCandidato || analiseAtual.score > melhorAnaliseCandidato.score) {
+        melhorAnaliseCandidato = analiseAtual;
+      }
+    }
+    
+    if (melhorAnaliseCandidato) {
+      analises.push(melhorAnaliseCandidato);
+    }
+  }
+
+  analises.sort((a, b) => b.score - a.score);
 
   return {
-    sobrenomeFamilia,
+    sobrenomesDisponiveis: sobrenomesValidos,
     dataNascimento,
     destino,
     nomesCandidatos: analises,

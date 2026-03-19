@@ -21,17 +21,19 @@ function DebitoCard({ debito }: { debito: DebitoCarmico }) {
   // Cor fixa em tons de roxo (padrão da plataforma para débitos kármicos)
   const cor = 'text-purple-400 border-purple-500/30 bg-purple-500/10';
 
+  const tituloCapitalizado = debito.titulo ? debito.titulo.charAt(0).toUpperCase() + debito.titulo.slice(1) : '';
+
   return (
-    <div className={`rounded-xl border overflow-hidden ${cor} transition-all duration-300`}>
+    <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 overflow-hidden">
       <button
-        className="w-full text-left p-4 flex items-center gap-4 hover:bg-purple-500/5 transition-colors"
+        className="w-full text-left p-4 flex items-center gap-4"
         onClick={() => setExpandido(!expandido)}
       >
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 border ${cor}`}>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 bg-purple-500/20 border border-purple-500/30 text-purple-300">
           {debito.numero}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-200 text-sm leading-snug">{debito.titulo}</p>
+          <p className="font-semibold text-gray-200 text-sm leading-snug">{tituloCapitalizado}</p>
         </div>
         <span className="text-gray-400 shrink-0 transition-transform duration-300 transform">
           {expandido ? '▲' : '▼'}

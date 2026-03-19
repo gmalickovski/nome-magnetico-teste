@@ -2,40 +2,61 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { supabase } from '../../backend/db/supabase';
 import { getMonthlyUsageStats } from '../../backend/ai/usage-stats';
+import { getRevenueStats } from '../../backend/db/subscriptions';
 
-// Métricas básicas
 const [
   { count: totalUsers },
   { count: totalAnalyses },
   { count: totalSubscriptions },
-  { count: pendingTickets },
   aiStats,
 ] = await Promise.all([
   supabase.schema('nome_magnetico').from('profiles').select('*', { count: 'exact', head: true }),
   supabase.schema('nome_magnetico').from('analyses').select('*', { count: 'exact', head: true }),
   supabase.schema('nome_magnetico').from('subscriptions').select('*', { count: 'exact', head: true }).gt('ends_at', new Date().toISOString()),
-  supabase.schema('nome_magnetico').from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
   getMonthlyUsageStats(),
 ]);
 
-const metrics = [
-  { label: 'Usuários Totais', value: totalUsers ?? 0, icon: '👥' },
-  { label: 'Análises Realizadas', value: totalAnalyses ?? 0, icon: '📊' },
-  { label: 'Assinaturas Ativas', value: totalSubscriptions ?? 0, icon: '✅' },
-  { label: 'Tickets Abertos', value: pendingTickets ?? 0, icon: '🎫' },
-  { label: 'Custo IA / Mês', value: `$${aiStats.estimatedCostUsd.toFixed(4)}`, icon: '💵' },
-];
+const revenue = await getRevenueStats(aiStats.estimatedCostUsd);
+
+const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 ---
 
 <AdminLayout title="Dashboard">
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-8">
-    {metrics.map(m => (
+  <!-- Linha 1: Cards Operacionais -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+    {[
+      { label: 'Usuários Totais', value: totalUsers ?? 0, icon: '👥' },
+      { label: 'Análises Realizadas', value: totalAnalyses ?? 0, icon: '📊' },
+      { label: 'Assinaturas Ativas', value: totalSubscriptions ?? 0, icon: '✅' },
+      { label: 'Custo IA / Mês', value: `$${aiStats.estimatedCostUsd.toFixed(4)}`, icon: '💵' },
+    ].map(m => (
       <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
         <div class="text-3xl mb-2">{m.icon}</div>
         <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{m.value}</div>
         <div class="text-gray-500 text-sm mt-1">{m.label}</div>
       </div>
     ))}
+  </div>
+
+  <!-- Linha 2: Cards Financeiros -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 text-center">
+      <div class="text-3xl mb-2">💰</div>
+      <div class="font-cinzel text-2xl font-bold text-[#D4AF37]">{fmt(revenue.grossBRL)}</div>
+      <div class="text-gray-500 text-sm mt-1">Receita Bruta</div>
+      <div class="text-gray-600 text-xs mt-2">{revenue.totalTransactions} transação(ões)</div>
+    </div>
+    <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 text-center">
+      <div class="text-3xl mb-2">💳</div>
+      <div class="font-cinzel text-2xl font-bold text-emerald-400">{fmt(revenue.netBRL)}</div>
+      <div class="text-gray-500 text-sm mt-1">Receita Líquida</div>
+      <div class="text-gray-600 text-xs mt-2">−{fmt(revenue.stripeFeeBRL)} Stripe · −{fmt(revenue.iaCostBRL)} IA</div>
+    </div>
+    <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 text-center">
+      <div class="text-3xl mb-2">📈</div>
+      <div class="font-cinzel text-2xl font-bold text-emerald-400">{fmt(revenue.avgMonthlyNetBRL)}</div>
+      <div class="text-gray-500 text-sm mt-1">Média Mensal Líquida</div>
+    </div>
   </div>
 
   <div class="grid md:grid-cols-2 gap-6">
@@ -47,12 +68,6 @@ const metrics = [
         </a>
         <a href="/admin/ia" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
           🤖 Configurar IA
-        </a>
-        <a href="/admin/suporte" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
-          🎫 Ver Tickets ({pendingTickets ?? 0} abertos)
-        </a>
-        <a href="/admin/faq" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
-          ❓ Editar FAQ
         </a>
       </div>
     </div>

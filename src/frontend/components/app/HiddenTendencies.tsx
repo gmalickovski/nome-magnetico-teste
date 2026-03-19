@@ -47,6 +47,8 @@ function FrequencyBar({ numero, frequencia, max }: { numero: number; frequencia:
 function TendenciaCard({ tendencia }: { tendencia: TendenciaOculta }) {
   const [expandido, setExpandido] = useState(false);
 
+  const tituloCapitalizado = tendencia.titulo ? tendencia.titulo.charAt(0).toUpperCase() + tendencia.titulo.slice(1) : '';
+
   return (
     <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 overflow-hidden">
       <button
@@ -57,7 +59,7 @@ function TendenciaCard({ tendencia }: { tendencia: TendenciaOculta }) {
           {tendencia.numero}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-200 text-sm leading-snug">{tendencia.titulo}</p>
+          <p className="font-semibold text-gray-200 text-sm leading-snug">{tituloCapitalizado}</p>
           <p className="text-xs text-purple-400 mt-0.5">aparece {tendencia.frequencia}× no nome</p>
         </div>
         <span className="text-gray-400 shrink-0">{expandido ? '▲' : '▼'}</span>

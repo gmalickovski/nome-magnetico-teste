@@ -85,7 +85,11 @@ export default function CompanyNameForm({ onSuccess }: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Erro ao iniciar análise');
 
-      onSuccess?.(data.analysisId);
+      if (onSuccess) {
+        onSuccess(data.analysisId);
+      } else {
+        window.location.href = `/app/resultado/${data.analysisId}`;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado. Tente novamente.');
     } finally {

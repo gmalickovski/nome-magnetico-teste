@@ -65,7 +65,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const triangulo = calcularTrianguloDaVida(nome_completo);
-    const bloqueios = detectarBloqueios(triangulo.sequencias);
+    const bloqueios = detectarBloqueios({ vida: triangulo });
     const cincoNumeros = calcularCincoNumeros(nome_completo, data_nascimento);
 
     // Retornar apenas dados parciais (chamariz — análise completa requer pagamento)

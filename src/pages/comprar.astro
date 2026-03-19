@@ -12,7 +12,7 @@ const user = Astro.locals.user;
 // Admin: redirecionar direto para o app
 if (user) {
   try {
-    const client = createUserClient(Astro.locals.accessToken);
+    const client = createUserClient(Astro.locals.accessToken ?? '');
     const { data: profile } = await client.schema('nome_magnetico')
       .from('profiles').select('role').eq('id', user.id).single();
     if (profile?.role === 'admin') return Astro.redirect('/app');

@@ -54,7 +54,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Taggear usuário para este app — usando admin API (jamais exposto ao cliente)
   const { error: tagError } = await supabase.auth.admin.updateUserById(
     data.user.id,
-    { appMetadata: { apps: [APP_ID] } }
+    { app_metadata: { apps: [APP_ID] } }
   );
 
   if (tagError) {

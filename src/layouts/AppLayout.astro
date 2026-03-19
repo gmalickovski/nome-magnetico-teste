@@ -18,7 +18,7 @@ if (!user) {
 let isAdmin = false;
 let hasAnyActive = false;
 try {
-  const client = createUserClient(Astro.locals.accessToken);
+  const client = createUserClient(Astro.locals.accessToken ?? '');
   const [profileRes, subsRes] = await Promise.all([
     client
       .schema('nome_magnetico')

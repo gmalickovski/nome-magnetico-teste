@@ -71,7 +71,7 @@ export const POST: APIRoute = async ({ request }) => {
         await notify('admin.new_payment', {
           userId,
           productType,
-          amount: session.amount_total,
+          amount: session.amount_total ?? undefined,
         });
 
         break;

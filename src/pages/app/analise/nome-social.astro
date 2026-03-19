@@ -11,7 +11,7 @@ const hasAccess = await hasActiveSubscription(user.id, 'nome_magnetico');
 if (!hasAccess) return Astro.redirect('/comprar?produto=nome_magnetico');
 
 // Pegar dados base de nascimento no perfil
-const client = createUserClient(Astro.locals.accessToken);
+const client = createUserClient(Astro.locals.accessToken ?? '');
 const { data: profile } = await client.schema('nome_magnetico')
   .from('profiles')
   .select('birth_name, birth_date')

@@ -6,10 +6,14 @@
 import { useState } from 'react';
 
 interface FormState {
-  sobrenome_familia: string;
   data_nascimento_bebe: string;
   nome_pai: string;
+  sobrenome_pai: string;
+  ignorar_pai: boolean;
   nome_mae: string;
+  sobrenome_mae: string;
+  ignorar_mae: boolean;
+  outros_sobrenomes: string;
   genero_preferido: string;
   estilo_preferido: string;
   nomes_candidatos: string;
@@ -23,10 +27,14 @@ const ESTILOS = ['Clássico', 'Moderno', 'Espiritual', 'Internacional', 'Simples
 
 export default function BabyNameForm({ onSuccess }: Props) {
   const [form, setForm] = useState<FormState>({
-    sobrenome_familia: '',
     data_nascimento_bebe: '',
     nome_pai: '',
+    sobrenome_pai: '',
+    ignorar_pai: false,
     nome_mae: '',
+    sobrenome_mae: '',
+    ignorar_mae: false,
+    outros_sobrenomes: '',
     genero_preferido: 'surpresa',
     estilo_preferido: '',
     nomes_candidatos: '',
@@ -34,7 +42,8 @@ export default function BabyNameForm({ onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function set(field: keyof FormState, value: string) {
+  // Define um tipo genérico K que é uma chave de FormState
+  function set<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm(prev => ({ ...prev, [field]: value }));
     setError('');
   }
@@ -48,14 +57,25 @@ export default function BabyNameForm({ onSuccess }: Props) {
       .map(n => n.trim())
       .filter(n => n.length >= 2);
 
-    if (!form.sobrenome_familia.trim()) {
-      setError('O sobrenome da família é obrigatório.');
-      return;
-    }
+    const outros = form.outros_sobrenomes
+      .split(/[,;\n]+/)
+      .map(n => n.trim())
+      .filter(n => n.length > 0);
+
+    const temSobrenomeMae = !form.ignorar_mae && form.sobrenome_mae.trim().length > 0;
+    const temSobrenomePai = !form.ignorar_pai && form.sobrenome_pai.trim().length > 0;
+    const temOutros = outros.length > 0;
+
     if (!form.data_nascimento_bebe) {
       setError('Informe a data de nascimento ou data prevista do bebê.');
       return;
     }
+    
+    if (!temSobrenomeMae && !temSobrenomePai && !temOutros) {
+      setError('Informe ao menos um sobrenome familiar para compor o nome (da mãe, do pai ou outros).');
+      return;
+    }
+
     if (candidatos.length === 0) {
       setError('Informe ao menos um nome candidato.');
       return;
@@ -68,11 +88,15 @@ export default function BabyNameForm({ onSuccess }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           product_type: 'nome_bebe',
-          nome_completo: `(bebê) ${form.sobrenome_familia}`,
+          nome_completo: `(bebê)`, // Será dinamicamente complementado no backend
           data_nascimento: form.data_nascimento_bebe.replace(/-/g, '/').split('/').reverse().join('/'),
-          sobrenome_familia: form.sobrenome_familia,
           nome_pai: form.nome_pai || undefined,
+          sobrenome_pai: form.sobrenome_pai || undefined,
+          ignorar_pai: form.ignorar_pai,
           nome_mae: form.nome_mae || undefined,
+          sobrenome_mae: form.sobrenome_mae || undefined,
+          ignorar_mae: form.ignorar_mae,
+          outros_sobrenomes: outros.length > 0 ? outros : undefined,
           genero_preferido: form.genero_preferido,
           estilo_preferido: form.estilo_preferido || undefined,
           nomes_candidatos: candidatos,
@@ -82,7 +106,11 @@ export default function BabyNameForm({ onSuccess }: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Erro ao iniciar análise');
 
-      onSuccess?.(data.analysisId);
+      if (onSuccess) {
+        onSuccess(data.analysisId);
+      } else {
+        window.location.href = `/app/resultado/${data.analysisId}`;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado. Tente novamente.');
     } finally {
@@ -92,57 +120,115 @@ export default function BabyNameForm({ onSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Dados da família */}
       <div className="glass rounded-xl p-5 space-y-4">
         <h3 className="text-gold font-semibold flex items-center gap-2">
           <span>👶</span> Dados do Bebê e da Família
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Sobrenome da família *</label>
-            <input
-              type="text"
-              value={form.sobrenome_familia}
-              onChange={e => set('sobrenome_familia', e.target.value)}
-              placeholder="ex: Silva Santos"
-              className="input-dark w-full"
-              required
-            />
-          </div>
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">Data de nascimento (real ou prevista) *</label>
+          <input
+            type="date"
+            value={form.data_nascimento_bebe}
+            onChange={e => set('data_nascimento_bebe', e.target.value)}
+            className="input-dark w-full sm:w-1/2"
+            required
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Data de nascimento (real ou prevista) *</label>
-            <input
-              type="date"
-              value={form.data_nascimento_bebe}
-              onChange={e => set('data_nascimento_bebe', e.target.value)}
-              className="input-dark w-full"
-              required
-            />
+        {/* Dados da Mãe */}
+        <div className="bg-white/5 border border-white/10 p-4 rounded-lg space-y-3">
+          <h4 className="text-gray-300 font-medium text-sm flex items-center gap-2">
+            Dados da Mãe
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Primeiro Nome</label>
+              <input
+                type="text"
+                value={form.nome_mae}
+                onChange={e => set('nome_mae', e.target.value)}
+                placeholder="Ex: Maria"
+                className="input-dark w-full"
+                disabled={form.ignorar_mae}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Sobrenome da mãe</label>
+              <input
+                type="text"
+                value={form.sobrenome_mae}
+                onChange={e => set('sobrenome_mae', e.target.value)}
+                placeholder="Ex: Silva"
+                className="input-dark w-full"
+                disabled={form.ignorar_mae}
+              />
+            </div>
           </div>
+          <label className="flex items-center gap-2 mt-2 cursor-pointer w-fit">
+            <input
+              type="checkbox"
+              checked={form.ignorar_mae}
+              onChange={e => set('ignorar_mae', e.target.checked)}
+              className="rounded border-gray-600 bg-gray-800 text-gold focus:ring-gold"
+            />
+            <span className="text-sm text-gray-400 select-none">Não considerar os dados da mãe na análise</span>
+          </label>
+        </div>
 
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Nome do pai</label>
-            <input
-              type="text"
-              value={form.nome_pai}
-              onChange={e => set('nome_pai', e.target.value)}
-              placeholder="opcional"
-              className="input-dark w-full"
-            />
+        {/* Dados do Pai */}
+        <div className="bg-white/5 border border-white/10 p-4 rounded-lg space-y-3">
+          <h4 className="text-gray-300 font-medium text-sm flex items-center gap-2">
+            Dados do Pai
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Primeiro Nome</label>
+              <input
+                type="text"
+                value={form.nome_pai}
+                onChange={e => set('nome_pai', e.target.value)}
+                placeholder="Ex: João"
+                className="input-dark w-full"
+                disabled={form.ignorar_pai}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Sobrenome do pai</label>
+              <input
+                type="text"
+                value={form.sobrenome_pai}
+                onChange={e => set('sobrenome_pai', e.target.value)}
+                placeholder="Ex: Santos"
+                className="input-dark w-full"
+                disabled={form.ignorar_pai}
+              />
+            </div>
           </div>
+          <label className="flex items-center gap-2 mt-2 cursor-pointer w-fit">
+            <input
+              type="checkbox"
+              checked={form.ignorar_pai}
+              onChange={e => set('ignorar_pai', e.target.checked)}
+              className="rounded border-gray-600 bg-gray-800 text-gold focus:ring-gold"
+            />
+            <span className="text-sm text-gray-400 select-none">Não considerar os dados do pai na análise</span>
+          </label>
+        </div>
 
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Nome da mãe</label>
-            <input
-              type="text"
-              value={form.nome_mae}
-              onChange={e => set('nome_mae', e.target.value)}
-              placeholder="opcional"
-              className="input-dark w-full"
-            />
-          </div>
+        {/* Outros Sobrenomes */}
+        <div className="bg-white/5 border border-white/10 p-4 rounded-lg space-y-3">
+          <h4 className="text-gray-300 font-medium text-sm mb-1">Outros sobrenomes utilizados na família</h4>
+          <label className="block text-xs text-gray-400 mb-2">
+            Pode separar por vírgula ou adicionar cada um em uma linha nova pressionando 'Enter'.
+          </label>
+          <textarea
+            value={form.outros_sobrenomes}
+            onChange={e => set('outros_sobrenomes', e.target.value)}
+            placeholder="Ex: Souza, Ferreira"
+            rows={2}
+            className="input-dark w-full resize-none"
+          />
         </div>
       </div>
 

@@ -7,15 +7,33 @@ import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } 
 import { calcularCincoNumeros } from '../../backend/numerology/numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, mapearFrequencias, calcularDebitosCarmicos } from '../../backend/numerology/karmic';
 import { gerarNomesMagneticos } from '../../backend/numerology/suggestions';
-import { generateAnalysis, generateSuggestions } from '../../backend/ai/brain';
+import { generateAnalysis, generateSuggestions, generateBabyAnalysis, generateCompanyAnalysis } from '../../backend/ai/brain';
 import { calcularScore } from '../../backend/numerology/score';
 import { avaliarCompatibilidade } from '../../backend/numerology/harmonization';
+import { analisarNomesBebe } from '../../backend/numerology/products/nome-bebe';
+import { analisarNomesEmpresa } from '../../backend/numerology/products/nome-empresa';
 import type { ProductType } from '../../backend/payments/stripe';
 
 const schema = z.object({
   nome_completo: z.string().min(2).max(150),
   data_nascimento: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/),
   product_type: z.enum(['nome_magnetico', 'nome_bebe', 'nome_empresa']).default('nome_magnetico'),
+  // campos específicos nome_bebe
+  sobrenome_familia: z.string().min(1).max(100).optional(),
+  nomes_candidatos: z.array(z.string().min(2)).min(1).optional(),
+  nome_pai: z.string().optional(),
+  sobrenome_pai: z.string().optional(),
+  ignorar_pai: z.boolean().optional(),
+  nome_mae: z.string().optional(),
+  sobrenome_mae: z.string().optional(),
+  ignorar_mae: z.boolean().optional(),
+  outros_sobrenomes: z.array(z.string()).optional(),
+  genero_preferido: z.string().optional(),
+  estilo_preferido: z.string().optional(),
+  // campos específicos nome_empresa
+  data_fundacao: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/).optional(),
+  ramo_atividade: z.string().optional(),
+  descricao_negocio: z.string().optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -44,7 +62,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  const { nome_completo, data_nascimento, product_type } = parsed.data;
+  const {
+    nome_completo, data_nascimento, product_type,
+    sobrenome_familia, nomes_candidatos,
+    nome_pai, sobrenome_pai, ignorar_pai,
+    nome_mae, sobrenome_mae, ignorar_mae,
+    outros_sobrenomes,
+    genero_preferido, estilo_preferido,
+    data_fundacao, ramo_atividade, descricao_negocio,
+  } = parsed.data;
 
   const { data: profile } = await supabase
     .schema('nome_magnetico')
@@ -76,101 +102,187 @@ export const POST: APIRoute = async ({ request, locals }) => {
     try {
       await updateAnalysis(analysis.id, { status: 'processing' });
 
-      // Calcular todos os 4 triângulos
-      const todosTriangulos = calcularTodosTriangulos(nome_completo, data_nascimento);
-      const bloqueios = detectarBloqueios(todosTriangulos);
-      const sequenciasNegativas = todasSequenciasNegativas(todosTriangulos);
-      const cincoNumeros = calcularCincoNumeros(nome_completo, data_nascimento);
+      let analiseTexto: string;
 
-      // Lições kármics, tendências ocultas e débitos kármicos
-      const licoesCarmicas = detectarLicoesCarmicas(nome_completo);
-      const tendenciasOcultas = detectarTendenciasOcultas(nome_completo);
-      const frequenciasNumeros = mapearFrequencias(nome_completo);
-      const debitosCarmicos = calcularDebitosCarmicos(
-        data_nascimento,
-        cincoNumeros.destino,
-        cincoNumeros.motivacao,
-        cincoNumeros.expressao
-      );
+      if (product_type === 'nome_empresa') {
+        // ── Produto: Nome da Empresa ──
+        const candidatos = nomes_candidatos ?? [];
 
-      const arcanoRegente = todosTriangulos.vida.arcanoRegente;
-
-      // Score unificado
-      const compatibilidade = avaliarCompatibilidade(cincoNumeros.expressao, cincoNumeros.destino);
-      const score = calcularScore({
-        bloqueios: bloqueios.length,
-        licoesCarmicas: licoesCarmicas.length,
-        tendenciasOcultas: tendenciasOcultas.length,
-        debitosCarmicos: debitosCarmicos.length,
-        compatibilidade,
-      });
-
-      // Salvar dados numerológicos calculados
-      await updateAnalysis(analysis.id, {
-        numero_expressao: cincoNumeros.expressao,
-        numero_destino: cincoNumeros.destino,
-        numero_motivacao: cincoNumeros.motivacao,
-        numero_missao: cincoNumeros.missao,
-        numero_personalidade: cincoNumeros.personalidade,
-        arcano_regente: arcanoRegente,
-        bloqueios: bloqueios as unknown[],
-        triangulo_vida: todosTriangulos.vida as unknown,
-        triangulo_pessoal: todosTriangulos.pessoal as unknown,
-        triangulo_social: todosTriangulos.social as unknown,
-        triangulo_destino: todosTriangulos.destino as unknown,
-        licoes_carmicas: licoesCarmicas as unknown[],
-        tendencias_ocultas: tendenciasOcultas as unknown[],
-        debitos_carmicos: debitosCarmicos as unknown[],
-        frequencias_numeros: frequenciasNumeros as unknown,
-        score,
-      });
-
-      // Gerar análise IA completa (todos os 4 triângulos + karmic + tendências)
-      const analiseTexto = await generateAnalysis(
-        {
-          nomeCompleto: nome_completo,
-          dataNascimento: data_nascimento,
-          cincoNumeros,
-          arcanoRegente,
-          todosTriangulos,
-          bloqueios,
-          licoesCarmicas,
-          tendenciasOcultas,
-          debitosCarmicos,
-          gender,
-        },
-        user.id,
-        analysis.id
-      );
-
-      // Gerar variações de nomes magnéticos (apenas para produto nome_magnetico)
-      if (product_type === 'nome_magnetico') {
-        const variacoes = gerarNomesMagneticos(
+        const resultado = analisarNomesEmpresa(
+          candidatos,
           nome_completo,
-          cincoNumeros.expressao,
-          cincoNumeros.destino,
-          gender,
           data_nascimento,
-          8
+          data_fundacao ?? null
         );
 
-        // Gerar descrição IA das sugestões
-        await generateSuggestions(
-          { nomeCompleto: nome_completo, cincoNumeros, variacoesCandidatas: variacoes, gender },
+        await updateAnalysis(analysis.id, {
+          frequencias_numeros: resultado as unknown,
+          numero_destino: resultado.destinoSocio,
+          score: resultado.melhorNome?.score ?? null,
+        });
+
+        analiseTexto = await generateCompanyAnalysis(
+          {
+            resultado,
+            ramoAtividade: ramo_atividade,
+            descricaoNegocio: descricao_negocio,
+          },
+          user.id,
+          analysis.id
+        );
+      } else if (product_type === 'nome_bebe') {
+        // ── Produto: Nome do Bebê ──
+        const candidatos = nomes_candidatos ?? [];
+
+        const sobrenomesValidos: string[] = [];
+        if (outros_sobrenomes && outros_sobrenomes.length > 0) {
+          sobrenomesValidos.push(...outros_sobrenomes);
+        }
+        if (!ignorar_mae && sobrenome_mae) {
+          sobrenomesValidos.push(sobrenome_mae);
+        }
+        if (!ignorar_pai && sobrenome_pai) {
+          sobrenomesValidos.push(sobrenome_pai);
+        }
+        
+        // Fallback for legacy requests 
+        if (sobrenomesValidos.length === 0 && sobrenome_familia) {
+          sobrenomesValidos.push(sobrenome_familia);
+        }
+        if (sobrenomesValidos.length === 0) {
+          sobrenomesValidos.push(nome_completo.replace('(bebê) ', ''));
+        }
+
+        const resultado = analisarNomesBebe(candidatos, sobrenomesValidos, data_nascimento);
+
+        const melhorNome = resultado.melhorNome;
+        const cincoNums = melhorNome
+          ? calcularCincoNumeros(melhorNome.nomeCompleto, data_nascimento)
+          : null;
+        const todosTriangulosBebe = melhorNome
+          ? calcularTodosTriangulos(melhorNome.nomeCompleto, data_nascimento)
+          : null;
+        const freqMapBebe = melhorNome ? mapearFrequencias(melhorNome.nomeCompleto) : {};
+
+        await updateAnalysis(analysis.id, {
+          frequencias_numeros: { ranking: resultado, frequencias: freqMapBebe } as unknown,
+          numero_expressao:    melhorNome?.expressao    ?? null,
+          numero_destino:      resultado.destino,
+          numero_motivacao:    melhorNome?.motivacao    ?? null,
+          numero_missao:       melhorNome?.missao       ?? null,
+          numero_personalidade: cincoNums?.personalidade ?? null,
+          bloqueios:           (melhorNome?.bloqueios ?? []) as unknown[],
+          triangulo_vida:      todosTriangulosBebe?.vida    as unknown ?? null,
+          triangulo_pessoal:   todosTriangulosBebe?.pessoal as unknown ?? null,
+          triangulo_social:    todosTriangulosBebe?.social  as unknown ?? null,
+          triangulo_destino:   todosTriangulosBebe?.destino as unknown ?? null,
+          licoes_carmicas:     (melhorNome?.licoesCarmicas ?? [])    as unknown[],
+          tendencias_ocultas:  (melhorNome?.tendenciasOcultas ?? []) as unknown[],
+          debitos_carmicos:    (melhorNome?.debitosCarmicos ?? [])   as unknown[],
+          score: melhorNome?.score ?? null,
+        });
+
+        analiseTexto = await generateBabyAnalysis(
+          {
+            resultado,
+            nomePai: nome_pai,
+            nomeMae: nome_mae,
+            generoPreferido: genero_preferido,
+            estiloPreferido: estilo_preferido,
+          },
+          user.id,
+          analysis.id
+        );
+      } else {
+        // ── Produto: Nome Magnético (e fallback para outros) ──
+        const todosTriangulos = calcularTodosTriangulos(nome_completo, data_nascimento);
+        const bloqueios = detectarBloqueios(todosTriangulos);
+        const sequenciasNegativas = todasSequenciasNegativas(todosTriangulos);
+        const cincoNumeros = calcularCincoNumeros(nome_completo, data_nascimento);
+
+        const licoesCarmicas = detectarLicoesCarmicas(nome_completo);
+        const tendenciasOcultas = detectarTendenciasOcultas(nome_completo);
+        const frequenciasNumeros = mapearFrequencias(nome_completo);
+        const debitosCarmicos = calcularDebitosCarmicos(
+          data_nascimento,
+          cincoNumeros.destino,
+          cincoNumeros.motivacao,
+          cincoNumeros.expressao
+        );
+
+        const arcanoRegente = todosTriangulos.vida.arcanoRegente;
+
+        const compatibilidade = avaliarCompatibilidade(cincoNumeros.expressao, cincoNumeros.destino);
+        const score = calcularScore({
+          bloqueios: bloqueios.length,
+          licoesCarmicas: licoesCarmicas.length,
+          tendenciasOcultas: tendenciasOcultas.length,
+          debitosCarmicos: debitosCarmicos.length,
+          compatibilidade,
+        });
+
+        await updateAnalysis(analysis.id, {
+          numero_expressao: cincoNumeros.expressao,
+          numero_destino: cincoNumeros.destino,
+          numero_motivacao: cincoNumeros.motivacao,
+          numero_missao: cincoNumeros.missao,
+          numero_personalidade: cincoNumeros.personalidade,
+          arcano_regente: arcanoRegente,
+          bloqueios: bloqueios as unknown[],
+          triangulo_vida: todosTriangulos.vida as unknown,
+          triangulo_pessoal: todosTriangulos.pessoal as unknown,
+          triangulo_social: todosTriangulos.social as unknown,
+          triangulo_destino: todosTriangulos.destino as unknown,
+          licoes_carmicas: licoesCarmicas as unknown[],
+          tendencias_ocultas: tendenciasOcultas as unknown[],
+          debitos_carmicos: debitosCarmicos as unknown[],
+          frequencias_numeros: frequenciasNumeros as unknown,
+          score,
+        });
+
+        analiseTexto = await generateAnalysis(
+          {
+            nomeCompleto: nome_completo,
+            dataNascimento: data_nascimento,
+            cincoNumeros,
+            arcanoRegente,
+            todosTriangulos,
+            bloqueios,
+            licoesCarmicas,
+            tendenciasOcultas,
+            debitosCarmicos,
+            gender,
+          },
           user.id,
           analysis.id
         );
 
-        // Salvar nomes magnéticos
-        await saveMagneticNames(analysis.id, user.id, variacoes.map(v => ({
-          nomeSugerido: v.nome,
-          numeroExpressao: v.numerosExpressao,
-          motivacao: v.motivacao,
-          missao: v.missao,
-          temBloqueio: v.temBloqueio,
-          score: v.score,
-          justificativa: v.justificativa,
-        })));
+        if (product_type === 'nome_magnetico') {
+          const variacoes = gerarNomesMagneticos(
+            nome_completo,
+            cincoNumeros.expressao,
+            cincoNumeros.destino,
+            gender,
+            data_nascimento,
+            8
+          );
+
+          await generateSuggestions(
+            { nomeCompleto: nome_completo, cincoNumeros, variacoesCandidatas: variacoes, gender },
+            user.id,
+            analysis.id
+          );
+
+          await saveMagneticNames(analysis.id, user.id, variacoes.map(v => ({
+            nomeSugerido: v.nome,
+            numeroExpressao: v.numerosExpressao,
+            motivacao: v.motivacao,
+            missao: v.missao,
+            temBloqueio: v.temBloqueio,
+            score: v.score,
+            justificativa: v.justificativa,
+          })));
+        }
       }
 
       await updateAnalysis(analysis.id, {

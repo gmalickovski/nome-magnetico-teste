@@ -73,13 +73,25 @@ const bloqueios: Bloqueio[] = Array.isArray(analysis.bloqueios)
 // Lições kármics, tendências ocultas e débitos kármicos
 const licoesRaw = (analysis as any).licoes_carmicas as unknown[] | null;
 const tendenciasRaw = (analysis as any).tendencias_ocultas as unknown[] | null;
-const frequenciasRaw = (analysis as any).frequencias_numeros as Record<number, number> | null;
+// frequencias_numeros pode ser { ranking, frequencias } (nome_bebe novo) ou Record<number,number> (nome_magnetico)
+const freqData = (analysis as any).frequencias_numeros as any;
+const frequenciasRaw: Record<number, number> | null =
+  freqData?.frequencias
+    ?? (freqData && !freqData?.ranking ? freqData as Record<number, number> : null);
+// Ranking de candidatos (exclusivo nome_bebe)
+const rankingBebe = freqData?.ranking ?? null;
 type DebitoCard = { numero: number; titulo: string; descricao: string };
 const debitosRaw = (analysis as any).debitos_carmicos as DebitoCard[] | null;
 const hasDebitosData = debitosRaw !== null && debitosRaw !== undefined;
 
-const hasLicoes = Array.isArray(licoesRaw) && licoesRaw.length > 0;
-const hasTendencias = Array.isArray(tendenciasRaw) && tendenciasRaw.length > 0;
+const hasLicoesData = licoesRaw !== null && licoesRaw !== undefined;
+const hasTendenciasData = tendenciasRaw !== null && tendenciasRaw !== undefined;
+const hasFrequenciasData = frequenciasRaw !== null && Object.keys(frequenciasRaw).length > 0;
+
+// Nome a exibir no header: para nome_bebe, usar o melhor candidato
+const nomeExibido: string = (analysis.product_type === 'nome_bebe' && rankingBebe?.melhorNome?.nomeCompleto)
+  ? rankingBebe.melhorNome.nomeCompleto
+  : analysis.nome_completo;
 
 // Nomes magnéticos
 type MagneticNameCard = typeof magneticNames[number] & {
@@ -103,9 +115,9 @@ const isProcessing = analysis.status === 'processing' || analysis.status === 'pe
     <div class="flex items-start justify-between">
       <div>
         <h1 class="font-cinzel text-3xl font-bold text-white mb-1">
-          {analysis.nome_completo.split(' ')[0]}
+          {nomeExibido.split(' ')[0]}
         </h1>
-        <p class="text-gray-400">{analysis.nome_completo}</p>
+        <p class="text-gray-400">{nomeExibido}</p>
       </div>
       <div class={statusBadgeClass}>
         {statusBadgeLabel}
@@ -145,7 +157,7 @@ const isProcessing = analysis.status === 'processing' || analysis.status === 'pe
             <h2 class="font-cinzel text-xl font-bold text-white mb-4">Os 4 Triângulos Numerológicos</h2>
             <TriangleVisualization
               client:load
-              nome={analysis.nome_completo}
+              nome={nomeExibido}
               vida={tVida!}
               pessoal={tPessoal!}
               social={tSocial!}
@@ -195,6 +207,8 @@ const isProcessing = analysis.status === 'processing' || analysis.status === 'pe
           </div>
         )}
 
+        {/* Movi Ranking para o final do documento */}
+
         <!-- Débitos Kármicos -->
         {hasDebitosData && (
           <div>
@@ -207,32 +221,32 @@ const isProcessing = analysis.status === 'processing' || analysis.status === 'pe
           </div>
         )}
 
-        <!-- Lições Kármics -->
-        {hasLicoes && (
+        {/* Lições Kármicas */}
+        {hasLicoesData && (
           <div>
-            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Lições Kármics</h2>
+            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Lições Kármicas</h2>
             <KarmicLessons
               client:load
               licoes={licoesRaw as any}
-              nomeCompleto={analysis.nome_completo}
+              nomeCompleto={nomeExibido}
             />
           </div>
         )}
 
-        <!-- Tendências Ocultas -->
-        {hasTendencias && (
+        {/* Tendências Ocultas */}
+        {(hasTendenciasData || hasFrequenciasData) && (
           <div>
             <h2 class="font-cinzel text-xl font-bold text-white mb-4">Tendências Ocultas</h2>
             <HiddenTendencies
               client:load
               tendencias={tendenciasRaw as any}
               frequencias={frequenciasRaw ?? {}}
-              nomeCompleto={analysis.nome_completo}
+              nomeCompleto={nomeExibido}
             />
           </div>
         )}
 
-        <!-- 🌟 Outras Sugestões 🌟 -->
+        {/* 🌟 Outras Sugestões 🌟 */}
         {topNames.length > 0 && (
           <div>
             <h2 class="font-cinzel text-xl font-bold text-white mb-4">
@@ -270,6 +284,40 @@ const isProcessing = analysis.status === 'processing' || analysis.status === 'pe
                     </div>
                   </button>
                 </form>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Ranking de Candidatos (exclusivo nome_bebe) - Agora é a ÚLTIMA seção */}
+        {rankingBebe?.nomesCandidatos?.length > 0 && (
+          <div class="mt-8">
+            <h2 class="font-cinzel text-xl font-bold text-white mb-4">
+              Ranking dos Nomes Candidatos
+            </h2>
+            <div class="space-y-3">
+              {(rankingBebe.nomesCandidatos as any[]).map((c: any, idx: number) => (
+                <div class={`rounded-2xl p-5 border ${idx === 0 ? 'bg-[#D4AF37]/5 border-[#D4AF37]/40' : 'bg-white/5 border-white/10'}`}>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-3">
+                      {idx === 0 && <span class="text-xs text-[#D4AF37] font-bold uppercase tracking-wider">⭐ Recomendado</span>}
+                      <span class="font-cinzel text-lg font-bold text-white">{c.nomeCompleto}</span>
+                    </div>
+                    <span class={`text-sm font-bold ${c.score >= 70 ? 'text-emerald-400' : c.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                      {c.score}%
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap gap-4 text-xs text-gray-500 mb-2">
+                    <span>Expr: <span class="text-gray-300">{c.expressao}</span></span>
+                    <span>Mot: <span class="text-gray-300">{c.motivacao}</span></span>
+                    <span>Missão: <span class="text-gray-300">{c.missao}</span></span>
+                    <span>Compatibilidade: <span class={`font-medium ${c.compatibilidade === 'total' ? 'text-emerald-400' : c.compatibilidade === 'complementar' ? 'text-[#D4AF37]' : c.compatibilidade === 'aceitavel' ? 'text-yellow-400' : 'text-red-400'}`}>{c.compatibilidade}</span></span>
+                    {c.temBloqueio && <span class="text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>}
+                  </div>
+                  <div class="text-xs text-gray-500 space-y-0.5">
+                    {(c.justificativa as string[]).map((j: string) => <p>{j}</p>)}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
