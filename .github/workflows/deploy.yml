@@ -43,6 +43,6 @@ jobs:
           script: |
             cd /var/www/webapp/nome-magnetico
             npm install --omit=dev
-            pm2 delete nomemagnetico 2>/dev/null || true
-            pm2 reload ecosystem.config.cjs || pm2 start ecosystem.config.cjs
+            pm2 delete nome-magnetico 2>/dev/null || true
+            pm2 start ecosystem.config.cjs --update-env
             pm2 save
