@@ -100,7 +100,7 @@ export function blocksToHtml(blocks: BlockObjectResponse[]): string {
 // -------------------------------------------------------
 async function fetchFaqsFromNotion(): Promise<FaqItem[]> {
   const notion = getNotionClient();
-  const dbId = import.meta.env.NOTION_FAQ_DB_ID;
+  const dbId = process.env.NOTION_FAQ_DB_ID;
 
   if (!dbId) throw new Error('NOTION_FAQ_DB_ID não configurado');
 

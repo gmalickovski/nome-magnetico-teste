@@ -28,7 +28,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const { email } = parsed.data;
-  const appUrl = import.meta.env.APP_URL ?? 'http://localhost:4321';
+  const appUrl = process.env.APP_URL ?? 'http://localhost:4321';
 
   try {
     const { data, error } = await supabase.auth.admin.generateLink({

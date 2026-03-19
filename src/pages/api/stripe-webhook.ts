@@ -62,7 +62,7 @@ export const POST: APIRoute = async ({ request }) => {
           await notify('payment.confirmed', {
             email: profile.email,
             firstName: profile.nome ?? profile.email.split('@')[0],
-            accessUrl: `${import.meta.env.APP_URL}/app`,
+            accessUrl: `${process.env.APP_URL}/app`,
             productName: productType,
           });
         }

@@ -14,9 +14,9 @@ export interface StripePrices {
 }
 
 const PRICE_IDS: Record<ProductType, string> = {
-  nome_magnetico: import.meta.env.STRIPE_PRICE_NOME_MAGNETICO ?? '',
-  nome_bebe: import.meta.env.STRIPE_PRICE_NOME_BEBE ?? '',
-  nome_empresa: import.meta.env.STRIPE_PRICE_NOME_EMPRESA ?? '',
+  nome_magnetico: process.env.STRIPE_PRICE_NOME_MAGNETICO ?? '',
+  nome_bebe: process.env.STRIPE_PRICE_NOME_BEBE ?? '',
+  nome_empresa: process.env.STRIPE_PRICE_NOME_EMPRESA ?? '',
 };
 
 function formatBRL(unitAmount: number | null): string {

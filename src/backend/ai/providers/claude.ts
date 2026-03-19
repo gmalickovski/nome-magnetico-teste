@@ -8,7 +8,7 @@ let claudeClient: Anthropic | null = null;
 
 function getClaudeClient(): Anthropic {
   if (!claudeClient) {
-    const apiKey = import.meta.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurado');
     claudeClient = new Anthropic({ apiKey });
   }

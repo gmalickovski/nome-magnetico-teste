@@ -81,7 +81,7 @@ const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', curren
         </div>
         <div class="flex items-center justify-between">
           <span class="text-gray-400 text-sm">APP_ENV</span>
-          <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-0.5 rounded-full">{import.meta.env.APP_ENV}</span>
+          <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-0.5 rounded-full">{process.env.APP_ENV}</span>
         </div>
       </div>
     </div>

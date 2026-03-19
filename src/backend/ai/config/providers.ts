@@ -7,7 +7,7 @@
 export type AIProvider = 'groq' | 'claude' | 'openai';
 
 export function getDefaultProvider(): AIProvider {
-  const env = import.meta.env.APP_ENV ?? 'development';
+  const env = process.env.APP_ENV ?? 'development';
   return env === 'production' ? 'claude' : 'groq';
 }
 

@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 
-const stripeSecretKey = import.meta.env.STRIPE_SECRET_KEY;
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 if (!stripeSecretKey) {
   throw new Error('STRIPE_SECRET_KEY é obrigatório');
@@ -13,9 +13,9 @@ export const stripe = new Stripe(stripeSecretKey, {
 export type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa';
 
 const PRICE_IDS: Record<ProductType, string> = {
-  nome_magnetico: import.meta.env.STRIPE_PRICE_NOME_MAGNETICO ?? '',
-  nome_bebe: import.meta.env.STRIPE_PRICE_NOME_BEBE ?? '',
-  nome_empresa: import.meta.env.STRIPE_PRICE_NOME_EMPRESA ?? '',
+  nome_magnetico: process.env.STRIPE_PRICE_NOME_MAGNETICO ?? '',
+  nome_bebe: process.env.STRIPE_PRICE_NOME_BEBE ?? '',
+  nome_empresa: process.env.STRIPE_PRICE_NOME_EMPRESA ?? '',
 };
 
 const PRODUCT_NAMES: Record<ProductType, string> = {
@@ -85,7 +85,7 @@ export function constructWebhookEvent(
   payload: string | Buffer,
   signature: string
 ): Stripe.Event {
-  const webhookSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
     throw new Error('STRIPE_WEBHOOK_SECRET é obrigatório');

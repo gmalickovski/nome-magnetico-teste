@@ -7,7 +7,7 @@ let groqClient: Groq | null = null;
 
 function getGroqClient(): Groq {
   if (!groqClient) {
-    const apiKey = import.meta.env.GROQ_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) throw new Error('GROQ_API_KEY não configurado');
     groqClient = new Groq({ apiKey });
   }

@@ -75,8 +75,8 @@ export async function notify(
 ): Promise<void> {
   const isSupport = event.startsWith('support.');
   const webhookUrl = isSupport
-    ? import.meta.env.N8N_WEBHOOK_SUPORTE
-    : import.meta.env.N8N_WEBHOOK_TRANSACIONAL;
+    ? process.env.N8N_WEBHOOK_SUPORTE
+    : process.env.N8N_WEBHOOK_TRANSACIONAL;
 
   if (!webhookUrl) {
     const varName = isSupport ? 'N8N_WEBHOOK_SUPORTE' : 'N8N_WEBHOOK_TRANSACIONAL';

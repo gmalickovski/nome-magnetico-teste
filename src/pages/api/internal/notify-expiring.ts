@@ -13,12 +13,12 @@ import { notify } from '../../../backend/notifications/notify';
  *   X-Internal-Secret: <valor de INTERNAL_API_SECRET>
  */
 export const POST: APIRoute = async ({ request }) => {
-  const secret = import.meta.env.INTERNAL_API_SECRET;
+  const secret = process.env.INTERNAL_API_SECRET;
   if (!secret || request.headers.get('X-Internal-Secret') !== secret) {
     return json({ error: 'Unauthorized' }, 401);
   }
 
-  const appUrl = import.meta.env.APP_URL ?? 'http://localhost:4321';
+  const appUrl = process.env.APP_URL ?? 'http://localhost:4321';
   const renewUrl = `${appUrl}/comprar`;
   const now = new Date();
 
