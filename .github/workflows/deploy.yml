@@ -30,7 +30,8 @@ jobs:
           username: "root"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 2222
-          source: "dist,package.json,ecosystem.config.cjs"
+          # start.mjs adicionado na linha abaixo para ser enviado à VPS
+          source: "dist,package.json,ecosystem.config.cjs,start.mjs"
           target: "/var/www/webapp/nome-magnetico"
 
       - name: Reiniciar Serviço no Servidor
@@ -46,6 +47,6 @@ jobs:
             npm install dotenv
             pm2 delete nome-magnetico 2>/dev/null || true
             
-            # A mágica acontece aqui: forçamos o PM2 a usar o env_production
-            pm2 start ecosystem.config.cjs --env production
+            # Inicia o PM2 lendo o novo ecosystem que chama o start.mjs
+            pm2 start ecosystem.config.cjs
             pm2 save
