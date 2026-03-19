@@ -21,9 +21,7 @@ jobs:
       - name: Instalar dependências e Build
         run: |
           npm ci
-          npm run build
-        env:
-          NODE_ENV: production
+          NODE_ENV=production npm run build
 
       - name: Deploy via RSYNC para a VPS
         uses: easingthemes/ssh-deploy@main
