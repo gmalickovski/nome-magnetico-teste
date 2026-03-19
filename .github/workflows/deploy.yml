@@ -30,7 +30,6 @@ jobs:
           username: "root"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 2222
-          # Arquivos e pastas separados apenas por vírgula, sem espaços e sem asterisco
           source: "dist,package.json,ecosystem.config.cjs"
           target: "/var/www/webapp/nome-magnetico"
 
@@ -44,8 +43,6 @@ jobs:
           script: |
             cd /var/www/webapp/nome-magnetico
             npm install --omit=dev
-            export PORT=4321
-            export NODE_ENV=production
-            export HOST=0.0.0.0
-            pm2 restart nomemagnetico || pm2 start dist/server/entry.mjs --name nomemagnetico
+            pm2 delete nomemagnetico 2>/dev/null || true
+            pm2 reload ecosystem.config.cjs || pm2 start ecosystem.config.cjs
             pm2 save
