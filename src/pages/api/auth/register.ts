@@ -37,12 +37,19 @@ export const POST: APIRoute = async ({ request }) => {
   const { nome, email, password } = parsed.data;
 
   // Cliente anon — necessário para signUp() que aciona o email de confirmação.
-  // O cliente service role (admin) não dispara emails.
-  const supabaseAnon = createClient(
-    process.env.PUBLIC_SUPABASE_URL!,
-    process.env.PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  // URL: usa SUPABASE_URL (runtime, definida no .env da VPS igual à do backend).
+  // Anon key: usa import.meta.env (embutida em build-time pelo Vite, pois é chave pública).
+  const supabaseUrl = process.env.SUPABASE_URL as string;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[register] env vars ausentes:', { supabaseUrl: !!supabaseUrl, supabaseAnonKey: !!supabaseAnonKey });
+    return json({ error: 'Configuração do servidor inválida' }, 500);
+  }
+
+  const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 
   const appUrl = process.env.APP_URL ?? 'http://localhost:4321';
 
