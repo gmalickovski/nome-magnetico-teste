@@ -82,7 +82,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Verificar acesso admin
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
       const { data: profile } = await client
-        .schema('nome_magnetico')
+        
         .from('profiles')
         .select('role')
         .eq('id', user.id)

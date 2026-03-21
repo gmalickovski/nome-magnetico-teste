@@ -64,8 +64,14 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // signUp() com email já cadastrado não retorna erro — retorna identities vazio.
+  // Também ocorre quando o email existe mas ainda não foi confirmado (reenvia o email).
   if (data.user && (data.user.identities?.length ?? 0) === 0) {
-    return json({ error: 'already_registered' }, 400);
+    const { data: adminData } = await supabase.auth.admin.getUserById(data.user.id);
+    if (adminData?.user?.email_confirmed_at) {
+      return json({ error: 'already_registered' }, 400);
+    }
+    // Pendente de confirmação → signUp() reenviou o email automaticamente
+    return json({ success: true }, 200);
   }
 
   console.log('[register] usuário criado:', {

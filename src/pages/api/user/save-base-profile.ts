@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const dbFormatDate = `${partesData[2]}-${partesData[1]}-${partesData[0]}`;
 
   const { error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('profiles')
     .update({
       birth_name: body.birth_name,

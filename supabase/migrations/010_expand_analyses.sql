@@ -5,7 +5,7 @@
 -- ================================================================
 
 -- Novos campos na tabela analyses
-ALTER TABLE nome_magnetico.analyses
+ALTER TABLE public.analyses
   ADD COLUMN IF NOT EXISTS triangulo_pessoal   JSONB,
   ADD COLUMN IF NOT EXISTS triangulo_social     JSONB,
   ADD COLUMN IF NOT EXISTS triangulo_destino    JSONB,
@@ -23,11 +23,11 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'nome_magnetico'
+    WHERE table_schema = 'public'
       AND table_name = 'analyses'
       AND column_name = 'triangulo_vida'
   ) THEN
-    ALTER TABLE nome_magnetico.analyses
+    ALTER TABLE public.analyses
       RENAME COLUMN triangulo_da_vida TO triangulo_vida;
   END IF;
 END $$;
@@ -35,16 +35,16 @@ END $$;
 -- ================================================================
 -- Expandir tabela subscriptions com campos para nome_bebe e nome_empresa
 -- ================================================================
-ALTER TABLE nome_magnetico.subscriptions
+ALTER TABLE public.subscriptions
   ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';
 
 -- ================================================================
 -- Tabela: baby_name_inputs
 -- Dados específicos do produto nome_bebe
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.baby_name_inputs (
+CREATE TABLE IF NOT EXISTS public.baby_name_inputs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  analysis_id UUID NOT NULL REFERENCES nome_magnetico.analyses(id) ON DELETE CASCADE,
+  analysis_id UUID NOT NULL REFERENCES public.analyses(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   -- Dados dos pais
   nome_pai TEXT,
@@ -60,19 +60,19 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.baby_name_inputs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-ALTER TABLE nome_magnetico.baby_name_inputs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.baby_name_inputs ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "baby_inputs_own" ON nome_magnetico.baby_name_inputs;
-CREATE POLICY "baby_inputs_own" ON nome_magnetico.baby_name_inputs
+DROP POLICY IF EXISTS "baby_inputs_own" ON public.baby_name_inputs;
+CREATE POLICY "baby_inputs_own" ON public.baby_name_inputs
   FOR ALL USING (auth.uid() = user_id);
 
 -- ================================================================
 -- Tabela: company_name_inputs
 -- Dados específicos do produto nome_empresa
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.company_name_inputs (
+CREATE TABLE IF NOT EXISTS public.company_name_inputs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  analysis_id UUID NOT NULL REFERENCES nome_magnetico.analyses(id) ON DELETE CASCADE,
+  analysis_id UUID NOT NULL REFERENCES public.analyses(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   -- Dados do sócio principal
   nome_socio_principal TEXT NOT NULL,
@@ -86,14 +86,14 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.company_name_inputs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-ALTER TABLE nome_magnetico.company_name_inputs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.company_name_inputs ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "company_inputs_own" ON nome_magnetico.company_name_inputs;
-CREATE POLICY "company_inputs_own" ON nome_magnetico.company_name_inputs
+DROP POLICY IF EXISTS "company_inputs_own" ON public.company_name_inputs;
+CREATE POLICY "company_inputs_own" ON public.company_name_inputs
   FOR ALL USING (auth.uid() = user_id);
 
 -- ================================================================
 -- Índice adicional para busca por produto
 -- ================================================================
 CREATE INDEX IF NOT EXISTS analyses_product_user_idx
-  ON nome_magnetico.analyses(user_id, product_type, created_at DESC);
+  ON public.analyses(user_id, product_type, created_at DESC);

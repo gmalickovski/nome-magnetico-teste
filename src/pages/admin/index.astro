@@ -10,9 +10,9 @@ const [
   { count: totalSubscriptions },
   aiStats,
 ] = await Promise.all([
-  supabase.schema('nome_magnetico').from('profiles').select('*', { count: 'exact', head: true }),
-  supabase.schema('nome_magnetico').from('analyses').select('*', { count: 'exact', head: true }),
-  supabase.schema('nome_magnetico').from('subscriptions').select('*', { count: 'exact', head: true }).gt('ends_at', new Date().toISOString()),
+  supabase.from('profiles').select('*', { count: 'exact', head: true }),
+  supabase.from('analyses').select('*', { count: 'exact', head: true }),
+  supabase.from('subscriptions').select('*', { count: 'exact', head: true }).gt('ends_at', new Date().toISOString()),
   getMonthlyUsageStats(),
 ]);
 

@@ -37,19 +37,19 @@ export const POST: APIRoute = async ({ request }) => {
 
   const [{ data: group7d }, { data: group1d }, { data: groupExpired }] = await Promise.all([
     supabase
-      .schema('nome_magnetico')
+      
       .from('subscriptions')
       .select('user_id')
       .gte('ends_at', in7d.toISOString())
       .lt('ends_at', in7dPlus1h.toISOString()),
     supabase
-      .schema('nome_magnetico')
+      
       .from('subscriptions')
       .select('user_id')
       .gte('ends_at', in1d.toISOString())
       .lt('ends_at', in1dPlus1h.toISOString()),
     supabase
-      .schema('nome_magnetico')
+      
       .from('subscriptions')
       .select('user_id')
       .gte('ends_at', yesterday.toISOString())

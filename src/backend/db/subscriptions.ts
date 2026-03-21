@@ -22,7 +22,7 @@ export async function hasActiveSubscription(
   productType: ProductType = 'nome_magnetico'
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('subscriptions')
     .select('id, ends_at')
     .eq('user_id', userId)
@@ -42,7 +42,7 @@ export async function getActiveSubscription(
   productType: ProductType = 'nome_magnetico'
 ): Promise<Subscription | null> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('subscriptions')
     .select('*')
     .eq('user_id', userId)
@@ -68,7 +68,7 @@ export async function createSubscription(params: {
   currency?: string;
 }): Promise<Subscription> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('subscriptions')
     .insert({
       user_id: params.userId,
@@ -95,7 +95,7 @@ export async function hasAnySubscription(
   productType?: ProductType
 ): Promise<boolean> {
   let query = supabase
-    .schema('nome_magnetico')
+    
     .from('subscriptions')
     .select('id')
     .eq('user_id', userId);
@@ -122,7 +122,7 @@ const USD_TO_BRL = 5.70;
  */
 export async function getRevenueStats(iaCostUsd: number): Promise<RevenueStats> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('subscriptions')
     .select('amount_paid, created_at')
     .not('amount_paid', 'is', null);
@@ -159,7 +159,7 @@ export async function getActiveProductsPerUser(
   if (userIds.length === 0) return result;
 
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('subscriptions')
     .select('user_id, product_type')
     .in('user_id', userIds)
@@ -180,7 +180,7 @@ export async function getActiveProductsPerUser(
  */
 export async function getUserSubscriptions(userId: string): Promise<Subscription[]> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('subscriptions')
     .select('*')
     .eq('user_id', userId)

@@ -27,7 +27,7 @@ export interface UserStatus extends Profile {
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('profiles')
     .select('*')
     .eq('id', userId)
@@ -40,7 +40,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 /** Retorna perfil + status do plano em uma única query (via view user_status). */
 export async function getUserStatus(userId: string): Promise<UserStatus | null> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('user_status')
     .select('*')
     .eq('id', userId)
@@ -55,7 +55,7 @@ export async function updateProfile(
   updates: Partial<Pick<Profile, 'nome' | 'phone' | 'avatar_url' | 'birth_name' | 'birth_date'>>
 ): Promise<Profile | null> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('profiles')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', userId)
@@ -68,7 +68,7 @@ export async function updateProfile(
 
 export async function isAdmin(userId: string): Promise<boolean> {
   const { data } = await supabase
-    .schema('nome_magnetico')
+    
     .from('profiles')
     .select('role')
     .eq('id', userId)
@@ -89,7 +89,7 @@ export async function listUsers(page = 1, perPage = 20, filters?: {
   const to = from + perPage - 1;
 
   let query = supabase
-    .schema('nome_magnetico')
+    
     .from('user_status')
     .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
@@ -113,7 +113,7 @@ export async function setUserRole(
   role: 'user' | 'admin'
 ): Promise<boolean> {
   const { error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('profiles')
     .update({ role, updated_at: new Date().toISOString() })
     .eq('id', userId);

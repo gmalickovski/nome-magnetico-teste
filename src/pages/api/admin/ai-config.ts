@@ -23,7 +23,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   // Verificar se é admin
   const { data: profile } = await supabase
-    .schema('nome_magnetico')
+    
     .from('profiles')
     .select('role')
     .eq('id', user.id)
@@ -62,7 +62,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }));
 
   const { error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('ai_config')
     .upsert(upserts, { onConflict: 'task' });
 

@@ -60,7 +60,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     // Verificar se perfil já existe antes do upsert (para log)
     const { data: existing } = await supabase
-      .schema('nome_magnetico')
+      
       .from('profiles')
       .select('id')
       .eq('id', userId)
@@ -70,7 +70,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Chamar função ensure_profile via service role (bypassa RLS)
     const { error: rpcError } = await supabase
-      .schema('nome_magnetico')
+      
       .rpc('ensure_profile', {
         p_user_id: userId,
         p_email: userEmail,
@@ -84,7 +84,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Buscar perfil criado/existente
     const { data: profile, error: selectError } = await supabase
-      .schema('nome_magnetico')
+      
       .from('profiles')
       .select('id, email, nome, role, app_source')
       .eq('id', userId)

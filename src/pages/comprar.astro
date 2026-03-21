@@ -13,7 +13,7 @@ const user = Astro.locals.user;
 if (user) {
   try {
     const client = createUserClient(Astro.locals.accessToken ?? '');
-    const { data: profile } = await client.schema('nome_magnetico')
+    const { data: profile } = await client
       .from('profiles').select('role').eq('id', user.id).single();
     if (profile?.role === 'admin') return Astro.redirect('/app');
   } catch {}

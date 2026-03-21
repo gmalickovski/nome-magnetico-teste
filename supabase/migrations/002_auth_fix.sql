@@ -6,23 +6,23 @@
 -- ================================================================
 
 -- Adicionar coluna app_source para rastrear origem do perfil
-ALTER TABLE nome_magnetico.profiles
+ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS app_source TEXT NOT NULL DEFAULT 'nome_magnetico';
 
 -- ================================================================
 -- Função ensure_profile (upsert seguro)
 -- Chamada após login de usuários que já existem em auth.users
--- mas ainda não têm perfil em nome_magnetico.profiles
+-- mas ainda não têm perfil em public.profiles
 -- (ex: usuários vindos do Sincro)
 -- ================================================================
-CREATE OR REPLACE FUNCTION nome_magnetico.ensure_profile(
+CREATE OR REPLACE FUNCTION public.ensure_profile(
   p_user_id UUID,
   p_email    TEXT,
   p_nome     TEXT DEFAULT NULL
 )
 RETURNS void AS $$
 BEGIN
-  INSERT INTO nome_magnetico.profiles (id, email, nome, role, app_source)
+  INSERT INTO public.profiles (id, email, nome, role, app_source)
   VALUES (
     p_user_id,
     p_email,
@@ -37,10 +37,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ================================================================
 -- Atualizar trigger handle_new_user para incluir app_source
 -- ================================================================
-CREATE OR REPLACE FUNCTION nome_magnetico.handle_new_user()
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO nome_magnetico.profiles (id, email, nome, app_source)
+  INSERT INTO public.profiles (id, email, nome, app_source)
   VALUES (
     NEW.id,
     NEW.email,

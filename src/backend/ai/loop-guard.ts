@@ -93,7 +93,7 @@ export class LoopGuard {
 export async function logAIUsage(record: UsageRecord): Promise<void> {
   try {
     await supabase
-      .schema('nome_magnetico')
+      
       .from('ai_usage')
       .insert({
         user_id: record.userId,
@@ -119,7 +119,7 @@ export async function getUserTokensToday(userId: string): Promise<number> {
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('ai_usage')
     .select('tokens_total')
     .eq('user_id', userId)

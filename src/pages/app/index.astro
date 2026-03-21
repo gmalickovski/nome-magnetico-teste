@@ -12,7 +12,7 @@ let isAdmin = false;
 let profileData: any = null;
 try {
   const client = createUserClient(Astro.locals.accessToken ?? '');
-  const { data: profile } = await client.schema('nome_magnetico')
+  const { data: profile } = await client
     .from('profiles').select('nome, role, birth_name, birth_date').eq('id', user.id).single();
   isAdmin = profile?.role === 'admin';
   profileData = profile;

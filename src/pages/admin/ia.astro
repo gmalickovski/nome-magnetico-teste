@@ -5,7 +5,7 @@ import { getMonthlyUsageStats } from '../../backend/ai/usage-stats';
 import AIConfigEditor from '../../frontend/components/admin/AIConfigEditor';
 
 const [{ data: configs }, stats] = await Promise.all([
-  supabase.schema('nome_magnetico').from('ai_config').select('*').order('task'),
+  supabase.from('ai_config').select('*').order('task'),
   getMonthlyUsageStats(),
 ]);
 

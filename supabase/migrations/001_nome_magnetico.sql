@@ -5,12 +5,11 @@
 -- ================================================================
 
 -- Criar schema dedicado
-CREATE SCHEMA IF NOT EXISTS nome_magnetico;
 
 -- ================================================================
 -- PROFILES
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   nome TEXT,
@@ -20,30 +19,30 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.profiles (
 );
 
 -- RLS
-ALTER TABLE nome_magnetico.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "profiles_select_own" ON nome_magnetico.profiles;
-CREATE POLICY "profiles_select_own" ON nome_magnetico.profiles
+DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
+CREATE POLICY "profiles_select_own" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
 
-DROP POLICY IF EXISTS "profiles_update_own" ON nome_magnetico.profiles;
-CREATE POLICY "profiles_update_own" ON nome_magnetico.profiles
+DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+CREATE POLICY "profiles_update_own" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
-DROP POLICY IF EXISTS "profiles_admin_all" ON nome_magnetico.profiles;
-CREATE POLICY "profiles_admin_all" ON nome_magnetico.profiles
+DROP POLICY IF EXISTS "profiles_admin_all" ON public.profiles;
+CREATE POLICY "profiles_admin_all" ON public.profiles
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.profiles p
+      SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
     )
   );
 
 -- Trigger para criar profile automaticamente
-CREATE OR REPLACE FUNCTION nome_magnetico.handle_new_user()
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO nome_magnetico.profiles (id, email, nome)
+  INSERT INTO public.profiles (id, email, nome)
   VALUES (
     NEW.id,
     NEW.email,
@@ -56,12 +55,12 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION nome_magnetico.handle_new_user();
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ================================================================
 -- SUBSCRIPTIONS
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.subscriptions (
+CREATE TABLE IF NOT EXISTS public.subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   product_type TEXT NOT NULL DEFAULT 'nome_magnetico'
@@ -76,7 +75,7 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.subscriptions (
 );
 
 -- Coluna computada: is_active
-CREATE OR REPLACE FUNCTION nome_magnetico.subscription_is_active(sub nome_magnetico.subscriptions)
+CREATE OR REPLACE FUNCTION public.subscription_is_active(sub public.subscriptions)
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN sub.ends_at > NOW();
@@ -84,21 +83,21 @@ END;
 $$ LANGUAGE plpgsql STABLE;
 
 -- RLS
-ALTER TABLE nome_magnetico.subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "subscriptions_select_own" ON nome_magnetico.subscriptions;
-CREATE POLICY "subscriptions_select_own" ON nome_magnetico.subscriptions
+DROP POLICY IF EXISTS "subscriptions_select_own" ON public.subscriptions;
+CREATE POLICY "subscriptions_select_own" ON public.subscriptions
   FOR SELECT USING (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "subscriptions_service_insert" ON nome_magnetico.subscriptions;
-CREATE POLICY "subscriptions_service_insert" ON nome_magnetico.subscriptions
+DROP POLICY IF EXISTS "subscriptions_service_insert" ON public.subscriptions;
+CREATE POLICY "subscriptions_service_insert" ON public.subscriptions
   FOR INSERT WITH CHECK (TRUE); -- service role only via RLS bypass
 
-DROP POLICY IF EXISTS "subscriptions_admin_all" ON nome_magnetico.subscriptions;
-CREATE POLICY "subscriptions_admin_all" ON nome_magnetico.subscriptions
+DROP POLICY IF EXISTS "subscriptions_admin_all" ON public.subscriptions;
+CREATE POLICY "subscriptions_admin_all" ON public.subscriptions
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.profiles p
+      SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
     )
   );
@@ -106,7 +105,7 @@ CREATE POLICY "subscriptions_admin_all" ON nome_magnetico.subscriptions
 -- ================================================================
 -- ANALYSES
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.analyses (
+CREATE TABLE IF NOT EXISTS public.analyses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   product_type TEXT NOT NULL DEFAULT 'nome_magnetico'
@@ -136,30 +135,30 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.analyses (
 );
 
 -- Índices
-CREATE INDEX IF NOT EXISTS analyses_user_id_idx ON nome_magnetico.analyses(user_id);
-CREATE INDEX IF NOT EXISTS analyses_status_idx ON nome_magnetico.analyses(status);
-CREATE INDEX IF NOT EXISTS analyses_created_at_idx ON nome_magnetico.analyses(created_at DESC);
+CREATE INDEX IF NOT EXISTS analyses_user_id_idx ON public.analyses(user_id);
+CREATE INDEX IF NOT EXISTS analyses_status_idx ON public.analyses(status);
+CREATE INDEX IF NOT EXISTS analyses_created_at_idx ON public.analyses(created_at DESC);
 
 -- RLS
-ALTER TABLE nome_magnetico.analyses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.analyses ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "analyses_select_own" ON nome_magnetico.analyses;
-CREATE POLICY "analyses_select_own" ON nome_magnetico.analyses
+DROP POLICY IF EXISTS "analyses_select_own" ON public.analyses;
+CREATE POLICY "analyses_select_own" ON public.analyses
   FOR SELECT USING (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "analyses_insert_own" ON nome_magnetico.analyses;
-CREATE POLICY "analyses_insert_own" ON nome_magnetico.analyses
+DROP POLICY IF EXISTS "analyses_insert_own" ON public.analyses;
+CREATE POLICY "analyses_insert_own" ON public.analyses
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "analyses_update_own" ON nome_magnetico.analyses;
-CREATE POLICY "analyses_update_own" ON nome_magnetico.analyses
+DROP POLICY IF EXISTS "analyses_update_own" ON public.analyses;
+CREATE POLICY "analyses_update_own" ON public.analyses
   FOR UPDATE USING (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "analyses_admin_all" ON nome_magnetico.analyses;
-CREATE POLICY "analyses_admin_all" ON nome_magnetico.analyses
+DROP POLICY IF EXISTS "analyses_admin_all" ON public.analyses;
+CREATE POLICY "analyses_admin_all" ON public.analyses
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.profiles p
+      SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
     )
   );
@@ -167,9 +166,9 @@ CREATE POLICY "analyses_admin_all" ON nome_magnetico.analyses
 -- ================================================================
 -- MAGNETIC_NAMES
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.magnetic_names (
+CREATE TABLE IF NOT EXISTS public.magnetic_names (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  analysis_id UUID NOT NULL REFERENCES nome_magnetico.analyses(id) ON DELETE CASCADE,
+  analysis_id UUID NOT NULL REFERENCES public.analyses(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   nome_sugerido TEXT NOT NULL,
   numero_expressao INTEGER,
@@ -182,20 +181,20 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.magnetic_names (
 );
 
 -- RLS
-ALTER TABLE nome_magnetico.magnetic_names ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.magnetic_names ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "magnetic_names_select_own" ON nome_magnetico.magnetic_names;
-CREATE POLICY "magnetic_names_select_own" ON nome_magnetico.magnetic_names
+DROP POLICY IF EXISTS "magnetic_names_select_own" ON public.magnetic_names;
+CREATE POLICY "magnetic_names_select_own" ON public.magnetic_names
   FOR SELECT USING (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "magnetic_names_service_insert" ON nome_magnetico.magnetic_names;
-CREATE POLICY "magnetic_names_service_insert" ON nome_magnetico.magnetic_names
+DROP POLICY IF EXISTS "magnetic_names_service_insert" ON public.magnetic_names;
+CREATE POLICY "magnetic_names_service_insert" ON public.magnetic_names
   FOR INSERT WITH CHECK (TRUE);
 
 -- ================================================================
 -- AI_CONFIG
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.ai_config (
+CREATE TABLE IF NOT EXISTS public.ai_config (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   provider TEXT NOT NULL DEFAULT 'groq'
     CHECK (provider IN ('groq', 'claude', 'openai')),
@@ -209,35 +208,35 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.ai_config (
 );
 
 -- Seed inicial
-INSERT INTO nome_magnetico.ai_config (provider, model, task, temperature, max_tokens) VALUES
+INSERT INTO public.ai_config (provider, model, task, temperature, max_tokens) VALUES
   ('groq', 'llama-3.3-70b-versatile', 'analysis', 0.7, 4096),
   ('groq', 'llama-3.3-70b-versatile', 'suggestions', 0.8, 2048),
   ('groq', 'llama-3.3-70b-versatile', 'guide', 0.6, 3000)
 ON CONFLICT DO NOTHING;
 
 -- RLS — só admin gerencia
-ALTER TABLE nome_magnetico.ai_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_config ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "ai_config_admin_all" ON nome_magnetico.ai_config;
-CREATE POLICY "ai_config_admin_all" ON nome_magnetico.ai_config
+DROP POLICY IF EXISTS "ai_config_admin_all" ON public.ai_config;
+CREATE POLICY "ai_config_admin_all" ON public.ai_config
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.profiles p
+      SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
     )
   );
 
-DROP POLICY IF EXISTS "ai_config_select_service" ON nome_magnetico.ai_config;
-CREATE POLICY "ai_config_select_service" ON nome_magnetico.ai_config
+DROP POLICY IF EXISTS "ai_config_select_service" ON public.ai_config;
+CREATE POLICY "ai_config_select_service" ON public.ai_config
   FOR SELECT USING (TRUE); -- leitura pública para o backend
 
 -- ================================================================
 -- AI_USAGE (Loop Guard)
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.ai_usage (
+CREATE TABLE IF NOT EXISTS public.ai_usage (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  analysis_id UUID REFERENCES nome_magnetico.analyses(id) ON DELETE SET NULL,
+  analysis_id UUID REFERENCES public.analyses(id) ON DELETE SET NULL,
   provider TEXT NOT NULL,
   model TEXT NOT NULL,
   task TEXT NOT NULL,
@@ -250,20 +249,20 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.ai_usage (
 );
 
 -- Índices para rate limiting
-CREATE INDEX IF NOT EXISTS ai_usage_user_id_created ON nome_magnetico.ai_usage(user_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS ai_usage_analysis_id ON nome_magnetico.ai_usage(analysis_id);
+CREATE INDEX IF NOT EXISTS ai_usage_user_id_created ON public.ai_usage(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS ai_usage_analysis_id ON public.ai_usage(analysis_id);
 
 -- RLS
-ALTER TABLE nome_magnetico.ai_usage ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_usage ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "ai_usage_service_all" ON nome_magnetico.ai_usage;
-CREATE POLICY "ai_usage_service_all" ON nome_magnetico.ai_usage
+DROP POLICY IF EXISTS "ai_usage_service_all" ON public.ai_usage;
+CREATE POLICY "ai_usage_service_all" ON public.ai_usage
   FOR ALL USING (TRUE); -- service role only
 
 -- ================================================================
 -- SUPPORT_TICKETS
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.support_tickets (
+CREATE TABLE IF NOT EXISTS public.support_tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   subject TEXT NOT NULL,
@@ -277,21 +276,21 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.support_tickets (
 );
 
 -- RLS
-ALTER TABLE nome_magnetico.support_tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "tickets_select_own" ON nome_magnetico.support_tickets;
-CREATE POLICY "tickets_select_own" ON nome_magnetico.support_tickets
+DROP POLICY IF EXISTS "tickets_select_own" ON public.support_tickets;
+CREATE POLICY "tickets_select_own" ON public.support_tickets
   FOR SELECT USING (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "tickets_insert_own" ON nome_magnetico.support_tickets;
-CREATE POLICY "tickets_insert_own" ON nome_magnetico.support_tickets
+DROP POLICY IF EXISTS "tickets_insert_own" ON public.support_tickets;
+CREATE POLICY "tickets_insert_own" ON public.support_tickets
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "tickets_admin_all" ON nome_magnetico.support_tickets;
-CREATE POLICY "tickets_admin_all" ON nome_magnetico.support_tickets
+DROP POLICY IF EXISTS "tickets_admin_all" ON public.support_tickets;
+CREATE POLICY "tickets_admin_all" ON public.support_tickets
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.profiles p
+      SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
     )
   );
@@ -299,9 +298,9 @@ CREATE POLICY "tickets_admin_all" ON nome_magnetico.support_tickets
 -- ================================================================
 -- SUPPORT_MESSAGES
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.support_messages (
+CREATE TABLE IF NOT EXISTS public.support_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  ticket_id UUID NOT NULL REFERENCES nome_magnetico.support_tickets(id) ON DELETE CASCADE,
+  ticket_id UUID NOT NULL REFERENCES public.support_tickets(id) ON DELETE CASCADE,
   author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   is_admin BOOLEAN NOT NULL DEFAULT FALSE,
   content TEXT NOT NULL,
@@ -309,32 +308,32 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.support_messages (
 );
 
 -- RLS
-ALTER TABLE nome_magnetico.support_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.support_messages ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "messages_select_ticket_owner" ON nome_magnetico.support_messages;
-CREATE POLICY "messages_select_ticket_owner" ON nome_magnetico.support_messages
+DROP POLICY IF EXISTS "messages_select_ticket_owner" ON public.support_messages;
+CREATE POLICY "messages_select_ticket_owner" ON public.support_messages
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.support_tickets t
+      SELECT 1 FROM public.support_tickets t
       WHERE t.id = ticket_id AND t.user_id = auth.uid()
     )
   );
 
-DROP POLICY IF EXISTS "messages_insert_ticket_owner" ON nome_magnetico.support_messages;
-CREATE POLICY "messages_insert_ticket_owner" ON nome_magnetico.support_messages
+DROP POLICY IF EXISTS "messages_insert_ticket_owner" ON public.support_messages;
+CREATE POLICY "messages_insert_ticket_owner" ON public.support_messages
   FOR INSERT WITH CHECK (
     auth.uid() = author_id AND
     EXISTS (
-      SELECT 1 FROM nome_magnetico.support_tickets t
+      SELECT 1 FROM public.support_tickets t
       WHERE t.id = ticket_id AND t.user_id = auth.uid()
     )
   );
 
-DROP POLICY IF EXISTS "messages_admin_all" ON nome_magnetico.support_messages;
-CREATE POLICY "messages_admin_all" ON nome_magnetico.support_messages
+DROP POLICY IF EXISTS "messages_admin_all" ON public.support_messages;
+CREATE POLICY "messages_admin_all" ON public.support_messages
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.profiles p
+      SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
     )
   );
@@ -342,7 +341,7 @@ CREATE POLICY "messages_admin_all" ON nome_magnetico.support_messages
 -- ================================================================
 -- FAQ_CATEGORIES
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.faq_categories (
+CREATE TABLE IF NOT EXISTS public.faq_categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
@@ -352,17 +351,17 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.faq_categories (
 );
 
 -- RLS — público para leitura, admin para escrita
-ALTER TABLE nome_magnetico.faq_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.faq_categories ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "faq_categories_public_select" ON nome_magnetico.faq_categories;
-CREATE POLICY "faq_categories_public_select" ON nome_magnetico.faq_categories
+DROP POLICY IF EXISTS "faq_categories_public_select" ON public.faq_categories;
+CREATE POLICY "faq_categories_public_select" ON public.faq_categories
   FOR SELECT USING (is_active = TRUE);
 
-DROP POLICY IF EXISTS "faq_categories_admin_all" ON nome_magnetico.faq_categories;
-CREATE POLICY "faq_categories_admin_all" ON nome_magnetico.faq_categories
+DROP POLICY IF EXISTS "faq_categories_admin_all" ON public.faq_categories;
+CREATE POLICY "faq_categories_admin_all" ON public.faq_categories
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.profiles p
+      SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
     )
   );
@@ -370,9 +369,9 @@ CREATE POLICY "faq_categories_admin_all" ON nome_magnetico.faq_categories
 -- ================================================================
 -- FAQ_ITEMS
 -- ================================================================
-CREATE TABLE IF NOT EXISTS nome_magnetico.faq_items (
+CREATE TABLE IF NOT EXISTS public.faq_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  category_id UUID NOT NULL REFERENCES nome_magnetico.faq_categories(id) ON DELETE CASCADE,
+  category_id UUID NOT NULL REFERENCES public.faq_categories(id) ON DELETE CASCADE,
   question TEXT NOT NULL,
   answer TEXT NOT NULL,
   order_index INTEGER NOT NULL DEFAULT 0,
@@ -382,17 +381,17 @@ CREATE TABLE IF NOT EXISTS nome_magnetico.faq_items (
 );
 
 -- RLS
-ALTER TABLE nome_magnetico.faq_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.faq_items ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "faq_items_public_select" ON nome_magnetico.faq_items;
-CREATE POLICY "faq_items_public_select" ON nome_magnetico.faq_items
+DROP POLICY IF EXISTS "faq_items_public_select" ON public.faq_items;
+CREATE POLICY "faq_items_public_select" ON public.faq_items
   FOR SELECT USING (is_active = TRUE);
 
-DROP POLICY IF EXISTS "faq_items_admin_all" ON nome_magnetico.faq_items;
-CREATE POLICY "faq_items_admin_all" ON nome_magnetico.faq_items
+DROP POLICY IF EXISTS "faq_items_admin_all" ON public.faq_items;
+CREATE POLICY "faq_items_admin_all" ON public.faq_items
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM nome_magnetico.profiles p
+      SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
     )
   );
@@ -400,7 +399,7 @@ CREATE POLICY "faq_items_admin_all" ON nome_magnetico.faq_items
 -- ================================================================
 -- Seed FAQ inicial
 -- ================================================================
-INSERT INTO nome_magnetico.faq_categories (title, slug, order_index) VALUES
+INSERT INTO public.faq_categories (title, slug, order_index) VALUES
   ('Sobre a Análise', 'sobre-analise', 1),
   ('Pagamento e Acesso', 'pagamento-acesso', 2),
   ('Numerologia Cabalística', 'numerologia', 3),
@@ -410,7 +409,7 @@ ON CONFLICT (slug) DO NOTHING;
 -- ================================================================
 -- RATE LIMIT helpers (para uso no backend)
 -- ================================================================
-CREATE OR REPLACE FUNCTION nome_magnetico.check_rate_limit_ip(
+CREATE OR REPLACE FUNCTION public.check_rate_limit_ip(
   p_ip TEXT,
   p_limit INTEGER DEFAULT 3,
   p_window_hours INTEGER DEFAULT 1

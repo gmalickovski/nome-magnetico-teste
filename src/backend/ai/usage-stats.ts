@@ -42,7 +42,7 @@ export async function getMonthlyUsageStats(): Promise<MonthlyUsageStats> {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
   const { data: rows, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('ai_usage')
     .select('provider, model, tokens_input, tokens_output, tokens_total')
     .gte('created_at', startOfMonth);

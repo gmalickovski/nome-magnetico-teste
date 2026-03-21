@@ -4,6 +4,6 @@
 -- o nome de nascimento e data de nascimento do usuário.
 -- ================================================================
 
-ALTER TABLE nome_magnetico.profiles
+ALTER TABLE public.profiles
 ADD COLUMN IF NOT EXISTS birth_name TEXT,
 ADD COLUMN IF NOT EXISTS birth_date DATE;

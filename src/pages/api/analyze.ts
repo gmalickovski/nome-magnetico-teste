@@ -73,7 +73,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } = parsed.data;
 
   const { data: profile } = await supabase
-    .schema('nome_magnetico')
+    
     .from('profiles')
     .select('gender')
     .eq('id', user.id)

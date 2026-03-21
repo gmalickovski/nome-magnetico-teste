@@ -64,7 +64,7 @@ export async function createAnalysis(params: {
   dataNascimento: string;
 }): Promise<Analysis> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('analyses')
     .insert({
       user_id: params.userId,
@@ -85,7 +85,7 @@ export async function updateAnalysis(
   updates: Partial<Analysis>
 ): Promise<Analysis | null> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('analyses')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', analysisId)
@@ -98,7 +98,7 @@ export async function updateAnalysis(
 
 export async function getAnalysis(analysisId: string): Promise<Analysis | null> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('analyses')
     .select('*')
     .eq('id', analysisId)
@@ -113,7 +113,7 @@ export async function getUserAnalyses(
   productType?: ProductType
 ): Promise<Analysis[]> {
   let query = supabase
-    .schema('nome_magnetico')
+    
     .from('analyses')
     .select('*')
     .eq('user_id', userId)
@@ -154,7 +154,7 @@ export async function saveMagneticNames(
   }));
 
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('magnetic_names')
     .insert(rows)
     .select();
@@ -165,7 +165,7 @@ export async function saveMagneticNames(
 
 export async function getMagneticNames(analysisId: string): Promise<MagneticName[]> {
   const { data, error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('magnetic_names')
     .select('*')
     .eq('analysis_id', analysisId)

@@ -17,7 +17,7 @@ import type { AIResponse } from './providers/groq';
 async function getProviderFromDB(task: AITask): Promise<AIProvider | null> {
   try {
     const { data } = await supabase
-      .schema('nome_magnetico')
+      
       .from('ai_config')
       .select('provider')
       .eq('task', task)

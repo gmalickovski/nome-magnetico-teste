@@ -23,7 +23,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   const { error } = await supabase
-    .schema('nome_magnetico')
+    
     .from('analyses')
     .delete()
     .eq('id', body.id)

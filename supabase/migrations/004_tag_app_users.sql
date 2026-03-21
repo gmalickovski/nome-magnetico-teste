@@ -5,7 +5,7 @@
 -- app_metadata.apps como lista de apps aos quais o usuário pertence.
 --
 -- Esta migration retroativamente adiciona 'nome_magnetico' ao campo apps de todos
--- os usuários que já têm perfil em nome_magnetico.profiles.
+-- os usuários que já têm perfil em public.profiles.
 
 DO $$
 DECLARE
@@ -13,7 +13,7 @@ DECLARE
   current_apps jsonb;
 BEGIN
   FOR r IN
-    SELECT id FROM nome_magnetico.profiles
+    SELECT id FROM public.profiles
   LOOP
     SELECT raw_app_meta_data->'apps'
     INTO current_apps
