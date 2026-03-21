@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
+import fetch from 'cross-fetch';
 import { supabase } from '../../../backend/db/supabase';
 import { z } from 'zod';
 
@@ -49,6 +50,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey, {
     auth: { autoRefreshToken: false, persistSession: false },
+    global: { fetch },
   });
 
   const appUrl = process.env.APP_URL ?? 'http://localhost:4321';
