@@ -38,3 +38,6 @@ secretkey-*.tx
 # Claude
 .claude/
 
+# temp / scripts locais
+tmp/
+
