@@ -2,8 +2,8 @@ name: Deploy Nome Magnético para VPS
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build-and-deploy:
@@ -47,8 +47,8 @@ jobs:
             cd /var/www/webapp/nome-magnetico
             npm install --omit=dev
             npm install dotenv
-            pm2 delete nome-magnetico 2>/dev/null || true
-            
-            # Inicia o PM2 lendo o novo ecosystem que chama o start.mjs
-            pm2 start ecosystem.config.cjs
+
+            # Reload sem downtime — reinicia instâncias uma a uma (rolling restart).
+            # Fallback para start se o processo ainda não existir (primeiro deploy).
+            pm2 reload ecosystem.config.cjs --update-env 2>/dev/null || pm2 start ecosystem.config.cjs
             pm2 save

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../../backend/db/supabase';
-import { notify } from '../../../backend/notifications/notify';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -14,10 +14,11 @@ const APP_ID = 'nome_magnetico';
 /**
  * POST /api/auth/register
  *
- * Signup server-side com app tagging imediato.
- * Usa admin API para criar o usuário e marcar o app_metadata.apps
- * antes de qualquer confirmação de email — garantindo isolamento
- * de autenticação entre apps que compartilham a mesma instância Supabase.
+ * Fluxo em 2 etapas:
+ * 1. supabaseAnon.auth.signUp() — única API que aciona o envio do email de
+ *    confirmação via SMTP (Amazon SES). admin.createUser() é silenciosa.
+ * 2. supabase.auth.admin.updateUserById() — seta app_metadata para isolamento
+ *    de app (requer service role, não disponível no cliente anon).
  */
 export const POST: APIRoute = async ({ request }) => {
   let body: unknown;
@@ -35,34 +36,55 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { nome, email, password } = parsed.data;
 
-  // Criar usuário via admin API (envia email de confirmação automaticamente)
-  const { data, error } = await supabase.auth.admin.createUser({
+  // Cliente anon — necessário para signUp() que aciona o email de confirmação.
+  // O cliente service role (admin) não dispara emails.
+  const supabaseAnon = createClient(
+    process.env.PUBLIC_SUPABASE_URL!,
+    process.env.PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+
+  const appUrl = process.env.APP_URL ?? 'http://localhost:4321';
+
+  const { data, error } = await supabaseAnon.auth.signUp({
     email,
     password,
-    email_confirm: false, // false = envia email de confirmação
-    user_metadata: { nome },
+    options: {
+      data: { nome },
+      emailRedirectTo: `${appUrl}/auth/confirmar-email`,
+    },
   });
 
   if (error) {
-    // Normalizar mensagens de erro do GoTrue
+    console.error('[register] erro no signUp:', error.message);
     const msg = error.message.includes('already been registered')
       ? 'already_registered'
       : error.message;
     return json({ error: msg }, 400);
   }
 
-  // Taggear usuário para este app — usando admin API (jamais exposto ao cliente)
-  const { error: tagError } = await supabase.auth.admin.updateUserById(
-    data.user.id,
-    { app_metadata: { apps: [APP_ID] } }
-  );
-
-  if (tagError) {
-    console.error('[register] falha ao taggear usuário:', tagError.message);
-    // Não bloquear o signup — a tag pode ser aplicada no próximo login via ensure-profile
+  // signUp() com email já cadastrado não retorna erro — retorna identities vazio.
+  if (data.user && (data.user.identities?.length ?? 0) === 0) {
+    return json({ error: 'already_registered' }, 400);
   }
 
-  notify('user.welcome', { email, firstName: nome }).catch(() => {});
+  console.log('[register] usuário criado:', {
+    id: data.user?.id,
+    email: data.user?.email,
+    confirmed: data.user?.email_confirmed_at ?? 'pendente — email enviado',
+  });
+
+  // Taggear app_metadata via service role para isolamento multi-app.
+  if (data.user?.id) {
+    const { error: tagError } = await supabase.auth.admin.updateUserById(
+      data.user.id,
+      { app_metadata: { apps: [APP_ID] } }
+    );
+    if (tagError) {
+      console.error('[register] falha ao taggear app_metadata:', tagError.message);
+      // Não bloquear o cadastro — a tag pode ser aplicada no próximo login via ensure-profile
+    }
+  }
 
   return json({ success: true }, 200);
 };

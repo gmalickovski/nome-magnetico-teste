@@ -1,10 +1,12 @@
-# 🚀 Manual de Deploy: Nome Magnético na VPS
+# Manual de Deploy: Nome Magnético na VPS
 
-Este é o guia completo atualizado para inicializar a sua máquina virtual (VPS) com Ubuntu/Debian e manter o deploy contínuo através do GitHub Actions. 
+Este é o guia completo para inicializar a VPS (Ubuntu/Debian) e manter o deploy contínuo através do GitHub Actions.
+
+---
 
 ## Passo 1: Preparar a VPS pela Primeira Vez
 
-Conecte-se na sua VPS via SSH como root.
+Conecte-se na sua VPS via SSH como root:
 
 ```bash
 ssh root@103.199.185.152
@@ -18,59 +20,101 @@ nano /root/setup-vps.sh
 ```bash
 bash /root/setup-vps.sh
 ```
-Esse comando garantirá que seu servidor tem o Node.js v20, o PM2 global, ferramentas Nginx e criará as pastas estruturais de hospedagem permanentemente em `/var/www/webapp/nome-magnetico`.
+
+Esse comando garantirá que seu servidor tem o Node.js v20, o PM2 global, ferramentas Nginx e criará as pastas estruturais em `/var/www/webapp/nome-magnetico`.
 
 ### 1.1 Variáveis de Ambiente na VPS
-Com o diretório base criado e pronto, não esqueça de criar o arquivo `.env` definitivo do servidor (as chaves que acessarão seu Banco Supabase, Stripe etc):
+
+Com o diretório base criado, crie o arquivo `.env` definitivo do servidor:
 ```bash
 nano /var/www/webapp/nome-magnetico/.env
 ```
 
-## Passo 2: Configurar os "Secrets" do GitHub Actions
+Esse arquivo persiste entre deploys e contém as chaves privadas (Supabase service role, Stripe, etc.). O `start.mjs` o carrega na inicialização do PM2.
 
-Para o script `.github/workflows/deploy.yml` que acabamos de configurar rodar 100% funcional na internet conectando na sua máquina, vá ao painel de configurações para guardar as informações de forma criptografada.
+---
 
-1. Acesse o Repositório no Github pelo seu navegador.
-2. Vá na aba **Settings** > **Secrets and variables** > **Actions**.
-3. Escolha **New repository secret**.
+## Passo 2: Configurar os Secrets do GitHub Actions
+
+Acesse o repositório no GitHub → **Settings** > **Secrets and variables** > **Actions** → **New repository secret**:
 
 - **Name**: `SSH_PRIVATE_KEY`
-- **Secret**: Insira todo o conteúdo bruto daquela sua chave (desde o `-----BEGIN OPENSSH PRIVATE KEY-----` até a última letra do `END OPENSSH...`).
+- **Secret**: Todo o conteúdo da chave privada SSH (de `-----BEGIN OPENSSH PRIVATE KEY-----` até o `END`).
 
-*Nota: Host, IPs, Caminhos e Configuração NPM já estão parametrizadas e preenchidas (hardcoded) no próprio arquivo Action, então a pipeline irá sempre atirar diretamente para `103.199.185.152` usando o portão `root`.*
+Host, IP e porta já estão hardcoded no `deploy.yml` (`103.199.185.152`, porta `2222`).
 
-## Passo 3: O Fluxo de Deploy
+---
 
-Sempre que a sua aplicação rodar e a branch `main` receber códigos novos (via comandos como os listados abaixo)
+## Passo 3: Fluxo de Deploy com Tags
+
+O deploy **não** é acionado em todo push. Ele usa **tags de versão** para controlar quando o GitHub Action roda:
+
+### Push normal (só atualiza o repositório, SEM deploy):
 ```bash
 git add .
-git commit -m "Nova feature gerada"
+git commit -m "feat: minha alteração"
 git push origin main
 ```
-Uma nuvem do GitHub pegará a ação para compilação (Build) completa e instalará os arquivos em produção, incluindo a reativação do PM2 invisível ao público debaixo do Node de Produção SSR.
+
+### Push de deploy (atualiza o repositório E aciona o GitHub Action):
+```bash
+git add .
+git commit -m "feat: minha alteração"
+git tag v1.2.0
+git push origin main --tags
+```
+
+Ou em dois passos separados:
+```bash
+git push origin main         # sobe o código
+git push origin v1.2.0       # sobe a tag → aciona o deploy
+```
+
+### Convenção de versões (semver):
+- `v1.0.0` → primeiro deploy em produção
+- `v1.0.1` → correção pequena (patch)
+- `v1.1.0` → nova feature (minor)
+- `v2.0.0` → mudança grande/breaking (major)
+
+### O que o GitHub Action faz ao receber a tag:
+1. Faz checkout do código na tag
+2. Instala Node.js 20 e dependências
+3. Injeta variáveis públicas no `.env` e executa `npm run build`
+4. Envia `dist/`, `package.json`, `ecosystem.config.cjs` e `start.mjs` para a VPS via SCP
+5. Na VPS: instala dependências de produção e faz `pm2 reload` (sem downtime)
+
+---
 
 ## Passo 4: Configurar Nginx e SSL (HTTPS)
 
-Para publicar de vez na internet o servidor Astro e mascará-lo profissionalmente no Google:
-
-Dentro da pasta que é recebida pelo GitHub Actions, criamos o arquivo `scripts/nginx.conf`. Você apenas entra no SSH da VPS e copia para configurar os diretórios web do servidor local Nginx:
+Dentro da pasta recebida pelo GitHub Actions, há o arquivo `scripts/nginx.conf`. Copie para o Nginx:
 
 ```bash
 cp /var/www/webapp/nome-magnetico/scripts/nginx.conf /etc/nginx/sites-available/nomemagnetico.com.br
-```
-
-Ative a configuração e verifique a recarga:
-```bash
 ln -s /etc/nginx/sites-available/nomemagnetico.com.br /etc/nginx/sites-enabled/
 systemctl reload nginx
 ```
 
-### Instalar Certificado SSL (HTTPS Seguros e Grátis)
-Sabendo que o seu Registro `.com.br` já direciona a Tabela A ao IP `103.199.185.152`, podemos autenticar e ganhar o cadeadinho nos navegadores rodando um software grátis de certificado global:
-
+### Instalar Certificado SSL (HTTPS gratuito)
 ```bash
 sudo apt install python3-certbot-nginx -y
 sudo certbot --nginx -d nomemagnetico.com.br -d www.nomemagnetico.com.br
 ```
 
-Dê apenas os simples 'Enter' ou 'Yes' se perguntarem seu e-mail, e ao fim o software reescreverá o NGINX fechando o ambiente web do Nome Magnético em tráfego criptografado SSL 443!
+---
+
+## Monitoramento e Diagnóstico
+
+```bash
+# Ver status das instâncias PM2:
+pm2 list
+
+# Ver logs em tempo real:
+pm2 logs nome-magnetico
+
+# Reiniciar manualmente (com reload zero-downtime):
+pm2 reload ecosystem.config.cjs --update-env
+
+# Ver logs do último deploy no GitHub:
+# GitHub → repositório → aba "Actions"
+```

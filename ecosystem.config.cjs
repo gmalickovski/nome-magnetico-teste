@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'nome-magnetico',
       script: './start.mjs', // Apontando para o injetor
-      instances: 'max',
+      instances: 2,
       exec_mode: 'cluster',
       env: {
         PORT: 4321,

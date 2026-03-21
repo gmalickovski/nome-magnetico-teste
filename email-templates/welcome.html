@@ -26,7 +26,7 @@
             <td style="background:linear-gradient(135deg,#1a1a1a 0%,#2a2010 100%);border:1px solid rgba(212,175,55,0.3);border-radius:16px 16px 0 0;padding:32px;text-align:center;">
               <div style="font-size:48px;margin-bottom:16px;">✨</div>
               <h2 style="margin:0;font-family:Georgia,serif;font-size:24px;font-weight:700;color:#D4AF37;">
-                Bem-vindo, {{firstName}}!
+                Bem-vindo, {{ .Data.nome }}!
               </h2>
             </td>
           </tr>
@@ -45,8 +45,8 @@
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center" style="padding:8px 0 24px;">
-                    <a href="https://nomemag.com.br/comprar" style="display:inline-block;background-color:#D4AF37;color:#111111;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;letter-spacing:1px;">
-                      COMEÇAR MINHA ANÁLISE
+                    <a href="{{ .SiteURL }}/auth/confirmar-email?token_hash={{ .TokenHash }}&type=signup" style="display:inline-block;background-color:#D4AF37;color:#111111;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;letter-spacing:1px;">
+                      CONFIRMAR MEU E-MAIL
                     </a>
                   </td>
                 </tr>

@@ -1,3 +1,4 @@
+import 'dotenv/config'; // carrega .env em process.env antes de qualquer módulo backend
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';

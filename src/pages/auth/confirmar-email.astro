@@ -1,0 +1,8 @@
+---
+import AuthLayout from '../../layouts/AuthLayout.astro';
+import { EmailConfirmation } from '../../frontend/components/auth/EmailConfirmation';
+---
+
+<AuthLayout title="Confirmar Email">
+  <EmailConfirmation client:load />
+</AuthLayout>
