@@ -1,14 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { supabaseBrowser } from '../../lib/supabase-browser';
 
+type State = 'verifying' | 'form' | 'expired' | 'no-token';
+
 export function ResetPasswordForm() {
+  const [state, setState] = useState<State>('verifying');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token_hash = params.get('token_hash');
+
+    if (!token_hash) {
+      setState('no-token');
+      return;
+    }
+
+    supabaseBrowser.auth
+      .verifyOtp({ token_hash, type: 'recovery' })
+      .then(({ error }) => {
+        if (error) {
+          console.error('[ResetPasswordForm]', error.message);
+          setState('expired');
+        } else {
+          setState('form');
+        }
+      });
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,6 +59,61 @@ export function ResetPasswordForm() {
 
     setSuccess(true);
     setTimeout(() => { window.location.href = '/app'; }, 2000);
+  }
+
+  if (state === 'verifying') {
+    return (
+      <div className="text-center">
+        <div className="mb-6 text-5xl">⏳</div>
+        <h1 className="font-cinzel text-2xl font-bold text-[#D4AF37] mb-3">
+          Verificando link...
+        </h1>
+        <p className="text-gray-400">Aguarde um momento.</p>
+      </div>
+    );
+  }
+
+  if (state === 'expired') {
+    return (
+      <div className="text-center">
+        <div className="mb-6 text-5xl">❌</div>
+        <h1 className="font-cinzel text-2xl font-bold text-[#D4AF37] mb-3">
+          Link expirado
+        </h1>
+        <p className="text-gray-400 mb-2">
+          Este link de redefinição expirou ou já foi utilizado.
+        </p>
+        <p className="text-gray-500 text-sm mb-8">
+          Links de redefinição são válidos por 1 hora.
+        </p>
+        <a
+          href="/auth/esqueci-senha"
+          className="inline-block border border-[#D4AF37] text-[#D4AF37] font-bold text-sm px-8 py-3 rounded-xl hover:bg-[#D4AF37] hover:text-[#111111] transition-all duration-300 tracking-wide"
+        >
+          SOLICITAR NOVO LINK
+        </a>
+      </div>
+    );
+  }
+
+  if (state === 'no-token') {
+    return (
+      <div className="text-center">
+        <div className="mb-6 text-5xl">📧</div>
+        <h1 className="font-cinzel text-2xl font-bold text-[#D4AF37] mb-3">
+          Acesse pelo link do email
+        </h1>
+        <p className="text-gray-400 mb-8">
+          Para redefinir sua senha, clique no link enviado para o seu email.
+        </p>
+        <a
+          href="/auth/esqueci-senha"
+          className="inline-block border border-[#D4AF37] text-[#D4AF37] font-bold text-sm px-8 py-3 rounded-xl hover:bg-[#D4AF37] hover:text-[#111111] transition-all duration-300 tracking-wide"
+        >
+          SOLICITAR LINK
+        </a>
+      </div>
+    );
   }
 
   if (success) {

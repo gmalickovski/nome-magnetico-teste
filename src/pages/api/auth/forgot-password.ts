@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../backend/db/supabase';
-import { notify } from '../../../backend/notifications/notify';
+import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -10,8 +9,8 @@ const schema = z.object({
 /**
  * POST /api/auth/forgot-password
  *
- * Gera link de recuperação via admin API (sem enviar email pelo Supabase),
- * depois dispara notify() para que o n8n envie o email com template brandado.
+ * Envia email de recuperação de senha via Supabase/SES nativo.
+ * Mesmo padrão do register.ts: anon client dispara o envio automático.
  * Retorna sempre 200 para não revelar se o email existe.
  */
 export const POST: APIRoute = async ({ request }) => {
@@ -28,21 +27,24 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const { email } = parsed.data;
+
+  const supabaseUrl = process.env.SUPABASE_URL as string;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   const appUrl = process.env.APP_URL ?? 'http://localhost:4321';
 
-  try {
-    const { data, error } = await supabase.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-      options: { redirectTo: `${appUrl}/auth/nova-senha` },
-    });
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[forgot-password] env vars ausentes');
+    return json({ ok: true }, 200);
+  }
 
-    if (!error && data?.properties?.action_link) {
-      notify('user.password_reset', {
-        email,
-        resetUrl: data.properties.action_link,
-      }).catch(() => {});
-    }
+  const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  try {
+    await supabaseAnon.auth.resetPasswordForEmail(email, {
+      redirectTo: `${appUrl}/auth/nova-senha`,
+    });
   } catch {
     // Silenciar — não revelar erros ao cliente
   }
