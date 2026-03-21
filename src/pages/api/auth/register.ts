@@ -55,21 +55,42 @@ export const POST: APIRoute = async ({ request }) => {
 
   const appUrl = process.env.APP_URL ?? 'http://localhost:4321';
 
-  const { data, error } = await supabaseAnon.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { nome },
-      emailRedirectTo: `${appUrl}/auth/confirmar-email`,
-    },
-  });
+  let data: Awaited<ReturnType<typeof supabaseAnon.auth.signUp>>['data'] | null = null;
+  let error: Awaited<ReturnType<typeof supabaseAnon.auth.signUp>>['error'] | null = null;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const result = await supabaseAnon.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { nome },
+        emailRedirectTo: `${appUrl}/auth/confirmar-email`,
+      },
+    });
+    data = result.data;
+    error = result.error;
+
+    if (!error) break;
+
+    const isTimeout = !error.message || error.message.includes('timeout') ||
+      error.message.startsWith('{') || error.status === 504;
+
+    if (!isTimeout) break;
+
+    console.warn(`[register] timeout no signUp (tentativa ${attempt}/3):`, error.message);
+    if (attempt < 3) await new Promise(r => setTimeout(r, 1500 * attempt));
+  }
 
   if (error) {
     console.error('[register] erro no signUp:', error.message);
-    const msg = error.message.includes('already been registered')
+    const isTimeout = !error.message || error.message.includes('timeout') ||
+      error.message.startsWith('{') || error.status === 504;
+    const msg = error.message?.includes('already been registered')
       ? 'already_registered'
-      : error.message;
-    return json({ error: msg }, 400);
+      : isTimeout
+        ? 'Serviço temporariamente indisponível. Tente novamente em alguns segundos.'
+        : error.message;
+    return json({ error: msg }, isTimeout ? 503 : 400);
   }
 
   // signUp() com email já cadastrado não retorna erro — retorna identities vazio.

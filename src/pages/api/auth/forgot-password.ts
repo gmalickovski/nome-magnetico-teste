@@ -43,12 +43,16 @@ export const POST: APIRoute = async ({ request }) => {
     global: { fetch },
   });
 
-  try {
-    await supabaseAnon.auth.resetPasswordForEmail(email, {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const { error } = await supabaseAnon.auth.resetPasswordForEmail(email, {
       redirectTo: `${appUrl}/auth/nova-senha`,
     });
-  } catch {
-    // Silenciar — não revelar erros ao cliente
+    if (!error) break;
+    const isTimeout = !error.message || error.message.includes('timeout') ||
+      error.message.startsWith('{') || error.status === 504;
+    if (!isTimeout) break;
+    console.warn(`[forgot-password] timeout (tentativa ${attempt}/3):`, error.message);
+    if (attempt < 3) await new Promise(r => setTimeout(r, 1500 * attempt));
   }
 
   return json({ ok: true }, 200);
