@@ -39,7 +39,7 @@ Adapte os pronomes e descrições dos nomes de acordo com o gênero acima. Certi
 
 ## Sua tarefa
 
-Das candidatas acima, selecione e apresente as **3 melhores variações** como Nomes Magnéticos para ${nomeCompleto.split(' ')[0]}.
+Das candidatas acima, selecione e apresente as **3 melhores variações de Nome Social** para ${nomeCompleto.split(' ')[0]}.
 
 Para cada nome selecionado, forneça:
 

@@ -31,27 +31,31 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
 
   const primeiroNome = nomeCompleto.split(' ')[0] ?? nomeCompleto;
 
-  // Bloqueios
+  // Bloqueios com instrução de antídoto
   const bloqueiosTexto =
     bloqueios.length > 0
       ? bloqueios
-          .map(b => `- **${b.titulo}** (aparece em: ${b.triangulos.join(', ')})\n  ${b.descricao}\n  *Aspecto saúde:* ${b.aspectoSaude}`)
+          .map(b =>
+            `- **${b.titulo}** (${b.codigo}) — aparece em: ${b.triangulos.join(', ')}\n` +
+            `  ${b.descricao}\n` +
+            `  *Aspecto saúde:* ${b.aspectoSaude}`
+          )
           .join('\n')
       : 'Nenhum bloqueio detectado em nenhum dos 4 triângulos.';
 
-  // Lições kármics
+  // Lições kármicas
   const licoesTexto =
     licoesCarmicas.length > 0
       ? licoesCarmicas
-          .map(l => `- **${l.titulo}**\n  ${l.descricao}`)
+          .map(l => `- **${l.titulo}** — ${l.descricao}\n  *Como trabalhar:* ${l.comoTrabalhar}`)
           .join('\n')
-      : 'Nenhuma lição kármic — todos os números de 1 a 8 estão presentes no nome.';
+      : 'Nenhuma lição kármica — todos os números de 1 a 8 estão presentes no nome.';
 
   // Tendências ocultas
   const tendenciasTexto =
     tendenciasOcultas.length > 0
       ? tendenciasOcultas
-          .map(t => `- **${t.titulo}** (aparece ${t.frequencia}× no nome)\n  ${t.descricao}`)
+          .map(t => `- **${t.titulo}** (aparece ${t.frequencia}× no nome)\n  ${t.descricao}\n  *Como equilibrar:* ${t.comoEquilibrar}`)
           .join('\n')
       : 'Nenhuma tendência oculta detectada.';
 
@@ -59,23 +63,23 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
   const debitosTexto =
     debitosCarmicos.length > 0
       ? debitosCarmicos
-          .map(d => `- **${d.titulo}**\n  ${d.descricao}`)
+          .map(d => `- **${d.titulo}** (${d.numero})\n  ${d.descricao}`)
           .join('\n')
       : 'Nenhum débito kármico detectado — excelente.';
 
   // Arcanos regentes por triângulo
   const arcanosTriangulos = [
-    `Triângulo da Vida: ${todosTriangulos.vida.arcanoRegente ?? '—'}`,
-    `Triângulo Pessoal: ${todosTriangulos.pessoal.arcanoRegente ?? '—'}`,
-    `Triângulo Social: ${todosTriangulos.social.arcanoRegente ?? '—'}`,
-    `Triângulo do Destino: ${todosTriangulos.destino.arcanoRegente ?? '—'}`,
+    `Triângulo da Vida: **${todosTriangulos.vida.arcanoRegente ?? '—'}**`,
+    `Triângulo Pessoal: **${todosTriangulos.pessoal.arcanoRegente ?? '—'}**`,
+    `Triângulo Social: **${todosTriangulos.social.arcanoRegente ?? '—'}**`,
+    `Triângulo do Destino: **${todosTriangulos.destino.arcanoRegente ?? '—'}**`,
   ].join(' | ');
 
-  return `## Dados para análise
+  return `## Dados para Análise
 
 **Nome completo:** ${nomeCompleto}
 **Data de nascimento:** ${dataNascimento}
-**Gênero Identificado:** ${gender}
+**Gênero:** ${gender}
 
 ## Os 5 Números Cabalísticos
 
@@ -83,8 +87,8 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
 |--------|-------|
 | Expressão (todas as letras) | ${cincoNumeros.expressao} |
 | Destino (data de nascimento) | ${cincoNumeros.destino} |
-| Motivação (vogais) | ${cincoNumeros.motivacao} |
-| Missão (consoantes) | ${cincoNumeros.missao} |
+| Motivação/Alma (vogais) | ${cincoNumeros.motivacao} |
+| Missão/Impressão (consoantes) | ${cincoNumeros.missao} |
 | Impressão (primeiro nome) | ${cincoNumeros.personalidade} |
 | Arcano Regente (Triângulo da Vida) | ${arcanoRegente ?? '—'} |
 
@@ -104,60 +108,138 @@ ${licoesTexto}
 
 ${tendenciasTexto}
 
-## Débitos Kármicos (pendências de encarnações passadas)
+## Débitos Kármicos
 
 ${debitosTexto}
 
 ---
 
-## Sua tarefa
+## Sua Tarefa
 
-Elabore uma análise numerológica cabalística completa e profundamente personalizada para **${primeiroNome}**. 
-O sistema indicou que a pessoa se identifica com o gênero: **${gender}**. Adapte os pronomes, os adjetivos e o tom da leitura para refletir adequadamente e com sensibilidade esse gênero ao longo de todo o texto.
+Elabore um relatório numerológico cabalístico completo e profundamente personalizado para **${primeiroNome}**.
+O sistema indicou que a pessoa se identifica com o gênero: **${gender}**. Adapte pronomes, adjetivos e tom para refletir esse gênero ao longo de todo o texto.
 
-Siga esta estrutura:
+Siga EXATAMENTE esta estrutura de seções, nesta ordem:
 
-### 1. Perfil Energético Geral (2-3 parágrafos)
-Uma visão geral da energia do nome completo e como ela se manifesta na vida desta pessoa. Conecte Expressão, Destino e Motivação.
+---
 
-### 2. Os 5 Números — Identidade Numerológica
-Para cada número, explique especificamente para ${primeiroNome}:
-- O que significa no contexto desta pessoa
-- Como ele se manifesta nas principais áreas da vida (relacionamentos, carreira, espiritualidade)
-- O potencial a ser desenvolvido
+## ✨ 1. Perfil Energético Geral
 
-### 3. Análise dos 4 Triângulos
-Cada triângulo revela uma dimensão distinta:
-- **Triângulo da Vida** — aspectos gerais e padrões de vida
-- **Triângulo Pessoal** — vida íntima, reações internas, como a pessoa se sente por dentro
-- **Triângulo Social** — influências externas, como o mundo percebe ${primeiroNome}
-- **Triângulo do Destino** — resultados esperados, missão de vida e previsões
-${bloqueios.length > 0 ? 'Para cada bloqueio detectado, explique profundamente o impacto e o caminho de transformação. Mencione o aspecto de saúde com sensibilidade.' : 'Celebre a ausência de bloqueios e explique o que isso significa para o fluxo energético.'}
+Visão panorâmica da energia do nome completo e como ela se manifesta na vida de ${primeiroNome}. Conecte **Expressão**, **Destino** e **Motivação** em uma narrativa coesa. Escreva 3 parágrafos reveladores e específicos — não genéricos.
 
-### 4. Lições Kármicas, Tendências Ocultas e Débitos Kármicos
-${licoesCarmicas.length > 0 ? `${primeiroNome} traz ${licoesCarmicas.length} lição(ões) kármic(s) nesta encarnação. Explique como trabalhar cada uma de forma prática.` : `${primeiroNome} não possui lições kármics — celebre esta inteireza energética.`}
-${tendenciasOcultas.length > 0 ? `Há tendências ocultas que precisam de equilíbrio consciente. Explique como ${primeiroNome} pode canalizar esses excessos positivamente.` : ''}
-${debitosCarmicos.length > 0 ? `${primeiroNome} carrega ${debitosCarmicos.length} débito(s) kármico(s). Explique com profundidade o significado de cada um e como essa pessoa pode quitá-los conscientemente nesta encarnação.` : `${primeiroNome} não possui débitos kármicos — um sinal de alma que já trabalhou suas pendências. Celebre essa leveza.`}
+---
 
-### ⚡ 5. Síntese e Direcionamento
-Uma síntese inspiradora conectando todos os elementos e apontando um caminho de crescimento e realização específico para ${primeiroNome}.
+## 🔢 2. A Estrela de 5 Pontas — Identidade Numerológica
 
-## 🌟 6. Conclusão — A Jornada de ${primeiroNome}
+Para cada um dos 5 números, escreva uma análise específica para ${primeiroNome}:
+
+### 2.1 Expressão — O Dom que Você Veio Manifestar
+O que o número **${cincoNumeros.expressao}** revela sobre os talentos e forma de agir de ${primeiroNome} no mundo. Como esse número se manifesta na carreira, relacionamentos e comunicação.
+
+### 2.2 Destino — O Chamado da Alma
+O que o número **${cincoNumeros.destino}** representa como missão de vida. Quais desafios e conquistas este caminho naturalmente oferece.
+
+### 2.3 Motivação — O Desejo Mais Profundo
+O número **${cincoNumeros.motivacao}** revela o que move ${primeiroNome} por dentro — o desejo da alma que nem sempre é dito. Como isso influencia as escolhas.
+
+### 2.4 Missão — A Impressão que Deixa no Mundo
+O número **${cincoNumeros.missao}** mostra como ${primeiroNome} é percebido pelas pessoas e qual missão carrega nas consoantes do nome.
+
+### 2.5 Impressão — A Energia do Primeiro Nome
+O número **${cincoNumeros.personalidade}** descreve a energia que ${primeiroNome} projeta ao entrar em um ambiente — a "roupa energética" do primeiro nome.
+
+---
+
+## 🔺 3. Os 4 Triângulos — Mapeamento Completo
+
+Cada triângulo revela uma dimensão distinta da energia de ${primeiroNome}:
+
+### Triângulo da Vida (Arcano **${todosTriangulos.vida.arcanoRegente ?? '—'}**)
+Padrões gerais de vida, trajetória e aspectos que permeiam toda a existência.
+
+### Triângulo Pessoal (Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}**)
+Vida íntima, reações internas e como ${primeiroNome} se sente por dentro — o mundo emocional e psicológico.
+
+### Triângulo Social (Arcano **${todosTriangulos.social.arcanoRegente ?? '—'}**)
+Influências externas, como o mundo percebe ${primeiroNome} e como as relações sociais se desenvolvem.
+
+### Triângulo do Destino (Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}**)
+Resultados que ${primeiroNome} tende a colher na vida, missão e previsões energéticas.
+
+${bloqueios.length > 0
+  ? `**Para cada bloqueio detectado, analise profundamente:**
+- O impacto específico deste bloqueio na vida de ${primeiroNome}
+- Em quais áreas da vida (carreira, saúde, relacionamentos) ele se manifesta com mais força
+- O aspecto de saúde associado (com sensibilidade e sem alarmismo)
+
+#### ⚡ Antídoto Prático para cada bloqueio:
+Para CADA bloqueio listado, escreva um subitem "**Antídoto Prático:**" com 2–3 ações concretas e práticas que ${primeiroNome} pode adotar AGORA para transformar essa energia. Seja específico e acionável — não apenas filosófico.`
+  : `**Celebre a ausência de bloqueios:** Explique o que significa ter os 4 triângulos limpos e como isso facilita a realização dos sonhos de ${primeiroNome}.`
+}
+
+---
+
+## ⚖️ 4. O Peso do Passado — Karma e Lições
+
+${licoesCarmicas.length > 0
+  ? `${primeiroNome} traz ${licoesCarmicas.length} lição(ões) kármica(s) nesta encarnação. Para cada lição, explique:
+- O que essa ausência numérica revela sobre a alma
+- Como essa qualidade se manifesta (ou não se manifesta) na vida cotidiana
+- 2 práticas específicas para desenvolver essa qualidade`
+  : `${primeiroNome} não possui lições kármicas — celebre essa inteireza energética e o que ela revela.`
+}
+
+${tendenciasOcultas.length > 0
+  ? `Há tendências ocultas que pedem equilíbrio consciente. Para cada tendência, explique como ${primeiroNome} pode canalizar esse excesso positivamente.`
+  : ''
+}
+
+${debitosCarmicos.length > 0
+  ? `${primeiroNome} carrega ${debitosCarmicos.length} débito(s) kármico(s). Para cada débito, explique com profundidade o que ele representa e como quitá-lo nesta encarnação através de ações práticas.`
+  : `${primeiroNome} não possui débitos kármicos — um sinal de alma que já trabalhou suas pendências.`
+}
+
+---
+
+## 🌙 5. Ciclo Atual e Arcano Regente
+
+O **Arcano ${arcanoRegente ?? '—'}** governa o triângulo principal de ${primeiroNome}. Explique:
+- O arquétipo profundo que este arcano representa na jornada desta pessoa
+- Qual energia domina o ciclo atual de vida de ${primeiroNome}
+- Como aproveitar ao máximo essa energia regente nos próximos meses
+- O principal desafio que este arcano convida a superar
+
+---
+
+## ✍️ 6. Manual da Nova Assinatura
+
+Com base nos números de ${primeiroNome}, escreva orientações práticas de grafoscopia para o nome magnetizado:
+
+- **Inclinação:** Qual a inclinação ideal da escrita (levemente ascendente, reta, etc.) e o que isso projeta energeticamente
+- **Traços e letras:** Quais letras devem ser escritas de forma aberta/fluida e quais traços devem ser evitados (especialmente traços que cruzam ou cortam)
+- **Ritmo e pressão:** Como a pressão da caneta e o ritmo da escrita influenciam a vibração do nome
+- **Iniciais e majúsculas:** Como trabalhar as letras iniciais para maximizar a projeção energética
+- **Prática recomendada:** Quantas vezes por dia praticar e em quais contextos começar a usar o nome
+
+---
+
+## 🌟 7. Síntese e Mensagem Final
+
 Escreva uma conclusão rica (3–4 parágrafos) que:
-- Faça um apanhado geral de todos os elementos analisados (números, triângulos, bloqueios, lições, destino)
-- Encerre com uma mensagem final sobre a jornada desta pessoa
+- Conecte todos os elementos analisados em uma narrativa de propósito único para ${primeiroNome}
 - Fale em segunda pessoa: "você", "seu caminho", "sua missão"
-- Tom esperançoso, transformador e encorajador
-- Encerre com uma mensagem final poderosa sobre a jornada desta pessoa
+- Encerre com uma mensagem transformadora e encorajadora sobre a jornada desta alma
+- Tom esperançoso, profundo e poderoso
+
+---
 
 REGRAS ESTRITAS DE FORMATAÇÃO:
-1. Você DEVE usar estruturação Markdown rigorosa com Hash Headers.
-2. NUNCA use títulos apenas com letras maiúsculas. Use SEMPRE Hash Headers com emoticon (ex: "## ✨ 1. Perfil Energético Geral").
-3. Cada seção principal começa com "## [emoticon] [número]. [Título]" — use emoticons diferentes em cada seção.
-4. **Atenção ao Uso do Negrito:** Utilize negrito (**) EXCLUSIVAMENTE para expressões numerológicas e termos cabalísticos (ex: Débitos Kármicos, Expressão, Motivação, Bloqueios, Arcano Regente) e para os números em si. O restante do texto deve permanecer no formato normal, sem usar negrito de forma genérica.
-5. SEMPRE duplo espaçamento entre parágrafos — o texto deve ser arejado e escaneável.
-6. Parágrafos com no máximo 4 linhas — quebre parágrafos longos em dois.
-7. Escreva em segunda pessoa de forma natural — como um mentor falando. Não repita pronomes possessivos desnecessariamente.
-
-${primeiroNome} pode aparecer esporadicamente, no máximo 1 vez por seção ##. Seja profundo, específico e transformador.`;
+1. Use estruturação Markdown rigorosa com Hash Headers (##, ###, ####).
+2. NUNCA use títulos apenas com letras maiúsculas. SEMPRE use Hash Headers com emoticon (ex: "## ✨ 1. Perfil Energético Geral").
+3. **Negrito:** Use EXCLUSIVAMENTE para termos numerológicos cabalísticos (Expressão, Destino, Motivação, Bloqueio, Arcano, etc.) e para os números. O restante do texto em formato normal.
+4. SEMPRE duplo espaçamento entre parágrafos — texto arejado e escaneável.
+5. Parágrafos com no máximo 4 linhas.
+6. Escreva em segunda pessoa de forma natural.
+7. ${primeiroNome} pode aparecer no máximo 1 vez por seção ##.
+8. Seja profundo, específico e transformador — este relatório vale R$ 100+ e deve justificar esse valor.`;
 }

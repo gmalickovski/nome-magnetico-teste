@@ -72,6 +72,9 @@ export function formatAnalysisText(text: string | null | undefined): string {
   // 4. Remover divisores --- soltos (linha inteira só com hifens/traços)
   f = f.replace(/^[ \t]*-{3,}[ \t]*$/gm, '');
 
+  // 4b. Remover headers vazios (##, ###, etc. sem texto após — emitidos pela IA como separadores)
+  f = f.replace(/^#{1,6}\s*$/gm, '');
+
   // 5. Garantir \n\n ANTES de qualquer header #
   f = f.replace(/([^\n])\n(#{1,6}\s)/g, '$1\n\n$2');
 

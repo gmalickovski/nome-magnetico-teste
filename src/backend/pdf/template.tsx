@@ -187,7 +187,7 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
             { label: 'Destino', value: analysis.numero_destino },
             { label: 'Motivação', value: analysis.numero_motivacao },
             { label: 'Missão', value: analysis.numero_missao },
-            { label: 'Personalidade', value: analysis.numero_personalidade },
+            { label: 'Impressão', value: analysis.numero_personalidade },
           ].map(n => (
             <View key={n.label} style={styles.numberBox}>
               <Text style={styles.numberValue}>{n.value ?? '?'}</Text>

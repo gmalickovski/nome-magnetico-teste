@@ -6,7 +6,13 @@ import { AnalysePDF } from '../../frontend/components/pdf/AnalysePDF';
 
 export const GET: APIRoute = async ({ url, locals }) => {
   const user = locals.user;
-  if (!user) return new Response('Autenticação necessária', { status: 401 });
+  if (!user) {
+    // Redirect to login so the user can re-authenticate instead of seeing a blank error page
+    return new Response(null, {
+      status: 302,
+      headers: { 'Location': '/auth/login?redirect=' + encodeURIComponent(url.pathname + url.search) },
+    });
+  }
 
   const analysisId = url.searchParams.get('id');
   if (!analysisId) return new Response('ID ausente', { status: 400 });
