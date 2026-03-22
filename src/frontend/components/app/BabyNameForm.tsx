@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { DateInput } from '../ui/DateInput';
 
 interface FormState {
   data_nascimento_bebe: string;
@@ -71,6 +72,11 @@ export default function BabyNameForm({ onSuccess }: Props) {
       return;
     }
     
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(form.data_nascimento_bebe)) {
+      setError('A data de nascimento do bebê deve estar no formato DD/MM/AAAA completando o ano corretamente.');
+      return;
+    }
+    
     if (!temSobrenomeMae && !temSobrenomePai && !temOutros) {
       setError('Informe ao menos um sobrenome familiar para compor o nome (da mãe, do pai ou outros).');
       return;
@@ -89,7 +95,7 @@ export default function BabyNameForm({ onSuccess }: Props) {
         body: JSON.stringify({
           product_type: 'nome_bebe',
           nome_completo: `(bebê)`, // Será dinamicamente complementado no backend
-          data_nascimento: form.data_nascimento_bebe.replace(/-/g, '/').split('/').reverse().join('/'),
+          data_nascimento: form.data_nascimento_bebe,
           nome_pai: form.nome_pai || undefined,
           sobrenome_pai: form.sobrenome_pai || undefined,
           ignorar_pai: form.ignorar_pai,
@@ -127,13 +133,14 @@ export default function BabyNameForm({ onSuccess }: Props) {
 
         <div>
           <label className="block text-sm text-gray-400 mb-1">Data de nascimento (real ou prevista) *</label>
-          <input
-            type="date"
-            value={form.data_nascimento_bebe}
-            onChange={e => set('data_nascimento_bebe', e.target.value)}
-            className="input-dark w-full sm:w-1/2"
-            required
-          />
+          <div className="w-full sm:w-1/2">
+            <DateInput
+              value={form.data_nascimento_bebe}
+              onChangeValue={v => set('data_nascimento_bebe', v)}
+              className="input-dark w-full"
+              required
+            />
+          </div>
         </div>
 
         {/* Dados da Mãe */}

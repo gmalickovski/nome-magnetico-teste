@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
+import { DateInput } from '../ui/DateInput';
 
 interface Props {
   nomeSalvo?: string;
@@ -37,14 +38,8 @@ export function OnboardingNomeSocialModal({ nomeSalvo, dataSalva }: Props) {
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
   }
 
-  const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/[^\d/]/g, '');
-    value = value.replace(/\//g, '');
-    if (value.length > 2) value = `${value.slice(0, 2)}/${value.slice(2)}`;
-    if (value.length > 5) value = `${value.slice(0, 5)}/${value.slice(5, 9)}`;
-    setDataNascimento(value);
-  };
-
+  // A máscara agora é delegada para o DateInput
+  // O onChange envia diretamente a string formatada
   const handleSaveAndRedirect = async () => {
     setError(null);
     setLoading(true);
@@ -111,12 +106,9 @@ export function OnboardingNomeSocialModal({ nomeSalvo, dataSalva }: Props) {
             <label className="block text-sm font-medium text-yellow-400 mb-1">
               Data de Nascimento <span className="text-red-400">*</span>
             </label>
-            <input
-              type="text"
+            <DateInput
               value={dataNascimento}
-              onChange={handleDataChange}
-              placeholder="DD/MM/AAAA"
-              maxLength={10}
+              onChangeValue={setDataNascimento}
               className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#D4AF37]/50"
             />
           </div>

@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { DateInput } from '../ui/DateInput';
 
 interface FormState {
   nome_socio_principal: string;
@@ -58,6 +59,14 @@ export default function CompanyNameForm({ onSuccess }: Props) {
       setError('Informe a data de nascimento do sócio principal.');
       return;
     }
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(form.data_nascimento_socio)) {
+      setError('A data de nascimento do sócio deve estar no formato DD/MM/AAAA.');
+      return;
+    }
+    if (form.data_fundacao && !/^\d{2}\/\d{2}\/\d{4}$/.test(form.data_fundacao)) {
+      setError('A data de fundação deve estar no formato DD/MM/AAAA.');
+      return;
+    }
     if (candidatos.length === 0) {
       setError('Informe ao menos um nome candidato para a empresa.');
       return;
@@ -65,17 +74,14 @@ export default function CompanyNameForm({ onSuccess }: Props) {
 
     setLoading(true);
     try {
-      const formatDate = (d: string) =>
-        d ? d.replace(/-/g, '/').split('/').reverse().join('/') : '';
-
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           product_type: 'nome_empresa',
           nome_completo: form.nome_socio_principal,
-          data_nascimento: formatDate(form.data_nascimento_socio),
-          data_fundacao: form.data_fundacao ? formatDate(form.data_fundacao) : undefined,
+          data_nascimento: form.data_nascimento_socio,
+          data_fundacao: form.data_fundacao || undefined,
           ramo_atividade: form.ramo_atividade || undefined,
           descricao_negocio: form.descricao_negocio || undefined,
           nomes_candidatos: candidatos,
@@ -120,10 +126,9 @@ export default function CompanyNameForm({ onSuccess }: Props) {
 
           <div>
             <label className="block text-sm text-gray-400 mb-1">Data de nascimento *</label>
-            <input
-              type="date"
+            <DateInput
               value={form.data_nascimento_socio}
-              onChange={e => set('data_nascimento_socio', e.target.value)}
+              onChangeValue={v => set('data_nascimento_socio', v)}
               className="input-dark w-full"
               required
             />
@@ -139,10 +144,9 @@ export default function CompanyNameForm({ onSuccess }: Props) {
 
         <div>
           <label className="block text-sm text-gray-400 mb-1">Data de fundação prevista</label>
-          <input
-            type="date"
+          <DateInput
             value={form.data_fundacao}
-            onChange={e => set('data_fundacao', e.target.value)}
+            onChangeValue={v => set('data_fundacao', v)}
             className="input-dark w-full"
           />
           <p className="text-xs text-gray-500 mt-1">
