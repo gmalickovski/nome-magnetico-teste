@@ -1,10 +1,16 @@
 ---
 import ResultadoLayout from '../../../layouts/ResultadoLayout.astro';
 import { getAnalysis, getMagneticNames } from '../../../backend/db/analyses';
+import { getArcano } from '../../../backend/numerology/arcanos';
 import TriangleVisualization from '../../../frontend/components/app/TriangleVisualization';
 import KarmicLessons from '../../../frontend/components/app/KarmicLessons';
 import KarmicDebts from '../../../frontend/components/app/KarmicDebts';
 import HiddenTendencies from '../../../frontend/components/app/HiddenTendencies';
+import ScoreDisplay from '../../../frontend/components/app/ScoreDisplay';
+import CompatibilityBadge from '../../../frontend/components/app/CompatibilityBadge';
+import BlockAnalysisCard from '../../../frontend/components/app/BlockAnalysisCard';
+import ArcanoCard from '../../../frontend/components/app/ArcanoCard';
+import ActionBox from '../../../frontend/components/app/ActionBox';
 import { formatAnalysisText } from '../../../utils/textFormatter';
 import { marked } from 'marked';
 
@@ -23,34 +29,12 @@ if (!analysis || analysis.user_id !== user.id) {
   return Astro.redirect('/app');
 }
 
-// Status badge
-const statusBadgeClass = analysis.status === 'complete'
-  ? 'px-3 py-1.5 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-400'
-  : analysis.status === 'error'
-  ? 'px-3 py-1.5 rounded-full text-sm font-medium bg-red-500/20 text-red-400'
-  : 'px-3 py-1.5 rounded-full text-sm font-medium bg-yellow-500/20 text-yellow-400';
-
-const statusBadgeLabel = analysis.status === 'complete' ? '✓ Concluída'
-  : analysis.status === 'error' ? '✕ Erro'
-  : '⟳ Processando...';
-
+// ── Status ──────────────────────────────────────────────────────────
+const isProcessing = analysis.status === 'processing' || analysis.status === 'pending';
+const isError = analysis.status === 'error';
 const errorMessage = (analysis as any).error_message || 'Ocorreu um erro inesperado.';
 
-const displayNums = [
-  { label: 'Expressão',    value: String(analysis.numero_expressao    ?? '?') },
-  { label: 'Destino',      value: String(analysis.numero_destino      ?? '?') },
-  { label: 'Motivação',    value: String(analysis.numero_motivacao    ?? '?') },
-  { label: 'Missão',       value: String(analysis.numero_missao       ?? '?') },
-  { label: 'Impressão',    value: String(analysis.numero_personalidade ?? '?') },
-];
-
-// Markdown → HTML (já com filtro reparador)
-const analiseHtml = analysis.analise_texto
-  ? String(await marked(formatAnalysisText(analysis.analise_texto)))
-      .replace(/\*\*/g, '')
-  : null;
-
-// 4 triângulos (compatível com análises antigas que só têm triangulo_da_vida)
+// ── Tipos locais ─────────────────────────────────────────────────────
 type TData = {
   tipo: string;
   linhas: number[][];
@@ -58,277 +42,724 @@ type TData = {
   arcanosDoMinantes: number[];
   sequenciasNegativas: string[];
 };
+type BloqueioCard = {
+  codigo: string;
+  titulo: string;
+  descricao: string;
+  aspectoSaude?: string;
+  triangulos?: string[];
+  antidoto?: string;
+};
+type LicaoCard   = { numero: number; titulo: string; descricao: string; comoTrabalhar: string };
+type TendenciaCard = { numero: number; frequencia: number; titulo: string; descricao: string; comoEquilibrar: string };
+type DebitoCard  = { numero: number; titulo: string; descricao: string };
 
+// ── Dados dos triângulos ─────────────────────────────────────────────
 const tVida    = (analysis as any).triangulo_vida    as TData | null;
 const tPessoal = (analysis as any).triangulo_pessoal as TData | null;
 const tSocial  = (analysis as any).triangulo_social  as TData | null;
 const tDestino = (analysis as any).triangulo_destino as TData | null;
 const hasTriangulos = !!(tVida && tPessoal && tSocial && tDestino);
 
-type Bloqueio = { titulo: string; descricao: string; codigo: string; aspectoSaude?: string; triangulos?: string[] };
-const bloqueios: Bloqueio[] = Array.isArray(analysis.bloqueios)
-  ? (analysis.bloqueios as Bloqueio[])
-  : [];
+// ── Arrays de dados ──────────────────────────────────────────────────
+const bloqueios     = (Array.isArray(analysis.bloqueios) ? analysis.bloqueios : []) as BloqueioCard[];
+const licoesRaw     = (analysis as any).licoes_carmicas as LicaoCard[] | null;
+const tendenciasRaw = (analysis as any).tendencias_ocultas as TendenciaCard[] | null;
+const debitosRaw    = (analysis as any).debitos_carmicos as DebitoCard[] | null;
 
-// Lições kármics, tendências ocultas e débitos kármicos
-const licoesRaw = (analysis as any).licoes_carmicas as unknown[] | null;
-const tendenciasRaw = (analysis as any).tendencias_ocultas as unknown[] | null;
-// frequencias_numeros pode ser { ranking, frequencias } (nome_bebe novo) ou Record<number,number> (nome_magnetico)
 const freqData = (analysis as any).frequencias_numeros as any;
 const frequenciasRaw: Record<number, number> | null =
   freqData?.frequencias
-    ?? (freqData && !freqData?.ranking ? freqData as Record<number, number> : null);
-// Ranking de candidatos (exclusivo nome_bebe)
-const rankingBebe = freqData?.ranking ?? null;
-type DebitoCard = { numero: number; titulo: string; descricao: string };
-const debitosRaw = (analysis as any).debitos_carmicos as DebitoCard[] | null;
-const hasDebitosData = debitosRaw !== null && debitosRaw !== undefined;
+    ?? (freqData && !freqData?.ranking && !freqData?.nomesCandidatos ? freqData as Record<number, number> : null);
+const rankingBebe    = freqData?.ranking ?? null;
+const rankingEmpresa = (analysis.product_type === 'nome_empresa' ? freqData : null) as any;
 
-const hasLicoesData = licoesRaw !== null && licoesRaw !== undefined;
-const hasTendenciasData = tendenciasRaw !== null && tendenciasRaw !== undefined;
-const hasFrequenciasData = frequenciasRaw !== null && Object.keys(frequenciasRaw).length > 0;
+// ── Arcano regente ───────────────────────────────────────────────────
+const arcanoRawNum = (analysis as any).arcano_regente as number | null;
+const arcanoData = arcanoRawNum ? getArcano(arcanoRawNum) : null;
 
-// Nome a exibir no header: para nome_bebe, usar o melhor candidato
-const nomeExibido: string = (analysis.product_type === 'nome_bebe' && rankingBebe?.melhorNome?.nomeCompleto)
-  ? rankingBebe.melhorNome.nomeCompleto
+// ── Texto da IA ──────────────────────────────────────────────────────
+const analiseHtml = analysis.analise_texto
+  ? String(await marked(formatAnalysisText(analysis.analise_texto))).replace(/\*\*/g, '')
+  : null;
+
+// ── Score geral ──────────────────────────────────────────────────────
+const scoreGeral = (analysis as any).score as number | null;
+
+// ── Nome exibido ─────────────────────────────────────────────────────
+const nomeExibido: string =
+  (analysis.product_type === 'nome_bebe' && rankingBebe?.melhorNome?.nomeCompleto)
+    ? rankingBebe.melhorNome.nomeCompleto
+  : (analysis.product_type === 'nome_empresa' && rankingEmpresa?.melhorNome?.nomeEmpresa)
+    ? rankingEmpresa.melhorNome.nomeEmpresa
   : analysis.nome_completo;
 
-// Nomes magnéticos
-type MagneticNameCard = typeof magneticNames[number] & {
-  cardClass: string;
-  isTop: boolean;
-};
-const topNames: MagneticNameCard[] = magneticNames.slice(0, 3).map((name, idx) => ({
-  ...name,
-  isTop: idx === 0,
-  cardClass: idx === 0
-    ? 'bg-[#D4AF37]/5 border border-[#D4AF37]/40 rounded-2xl p-5'
-    : 'bg-white/5 border border-white/10 rounded-2xl p-5',
-}));
+const primeiroNome = nomeExibido.split(' ')[0];
 
-const isProcessing = analysis.status === 'processing' || analysis.status === 'pending';
+// ── Nomes magnéticos ─────────────────────────────────────────────────
+type MagneticCard = typeof magneticNames[number] & { isTop: boolean };
+const topNames: MagneticCard[] = magneticNames.slice(0, 3).map((n, i) => ({ ...n, isTop: i === 0 }));
+
+// ── Helpers de produto ───────────────────────────────────────────────
+const isNomeMagnetico = analysis.product_type === 'nome_magnetico';
+const isNomeBebe      = analysis.product_type === 'nome_bebe';
+const isNomeEmpresa   = analysis.product_type === 'nome_empresa';
+
+// ── Data formatada ───────────────────────────────────────────────────
+const dataFormatada = analysis.data_nascimento
+  ? new Date(analysis.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'long', year: 'numeric' })
+  : null;
+
+// ── 5 Números com ícones e rótulos ───────────────────────────────────
+const cinco_numeros = [
+  { label: 'Expressão',   sublabel: 'O Dom', value: analysis.numero_expressao,    icon: '✦' },
+  { label: 'Destino',     sublabel: 'O Chamado', value: analysis.numero_destino,  icon: '◈' },
+  { label: 'Motivação',   sublabel: 'A Alma', value: analysis.numero_motivacao,   icon: '♡' },
+  { label: 'Missão',      sublabel: 'A Impressão', value: analysis.numero_missao, icon: '◎' },
+  { label: 'Impressão', sublabel: 'Primeiro Nome', value: analysis.numero_personalidade, icon: '◇' },
+];
 ---
 
 <ResultadoLayout title="Resultado da Análise" analysisId={analysis.id} showActions={analysis.status === 'complete'}>
-  <div class="space-y-8">
-    <!-- Header do resultado -->
-    <div class="flex items-start justify-between">
-      <div>
-        <h1 class="font-cinzel text-3xl font-bold text-white mb-1">
-          {nomeExibido.split(' ')[0]}
-        </h1>
-        <p class="text-gray-400">{nomeExibido}</p>
-      </div>
-      <div class={statusBadgeClass}>
-        {statusBadgeLabel}
-      </div>
-    </div>
+  <div class="space-y-0">
 
-    {isProcessing ? (
-      <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-12 text-center">
-        <div class="inline-block w-12 h-12 border-4 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mb-6"></div>
-        <h3 class="font-cinzel text-xl font-bold text-white mb-2">Analisando seu nome...</h3>
-        <p class="text-gray-400">A IA está calculando sua análise numerológica completa. Isso pode levar 1-2 minutos.</p>
-        <p class="text-gray-600 text-sm mt-4">Esta página atualiza automaticamente.</p>
-      </div>
-    ) : analysis.status === 'error' ? (
-      <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
+    {/* ── PROCESSANDO ─────────────────────────────────────────────── */}
+    {isProcessing && (
+      <>
+        <div id="processing-state" class="rounded-2xl bg-white/5 p-12 text-center">
+          <div class="inline-block w-12 h-12 border-4 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mb-6"></div>
+          <h3 class="font-cinzel text-xl font-bold text-white mb-2">Analisando seu nome...</h3>
+          <p class="text-gray-400">A IA está calculando sua análise completa. Isso pode levar 1–2 minutos.</p>
+          <p id="poll-counter-text" class="text-gray-600 text-sm mt-4">Esta página atualiza automaticamente.</p>
+        </div>
+        <div id="timeout-state" class="hidden rounded-2xl bg-amber-500/10 border border-amber-500/20 p-8 text-center">
+          <div class="text-3xl mb-4">⏱</div>
+          <h3 class="font-cinzel text-xl font-bold text-amber-400 mb-2">A análise está demorando mais que o esperado</h3>
+          <p class="text-gray-400 mb-6">O processamento pode estar lento. Aguarde mais alguns minutos e recarregue a página manualmente.</p>
+          <button onclick="window.location.reload()" class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-medium px-6 py-2.5 rounded-full hover:bg-amber-400 transition-all">
+            Verificar agora
+          </button>
+        </div>
+        <script define:vars={{ analysisId: id }}>
+          (function () {
+            const MAX_POLLS = 36; // 3 minutos (36 × 5s)
+            const key = 'poll_' + analysisId;
+            const count = parseInt(sessionStorage.getItem(key) || '0', 10);
+
+            if (count >= MAX_POLLS) {
+              // Parou de fazer polling — mostra mensagem de timeout
+              sessionStorage.removeItem(key);
+              document.getElementById('processing-state')?.classList.add('hidden');
+              document.getElementById('timeout-state')?.classList.remove('hidden');
+              return;
+            }
+
+            sessionStorage.setItem(key, String(count + 1));
+            const elapsed = (count + 1) * 5;
+            const counterText = document.getElementById('poll-counter-text');
+            if (counterText) counterText.textContent = `Verificando em instantes... (${elapsed}s)`;
+            setTimeout(() => {
+              sessionStorage.setItem(key, String(count + 1)); // garantir antes do reload
+              window.location.reload();
+            }, 5000);
+          })();
+        </script>
+      </>
+    )}
+
+    {/* ── ERRO ────────────────────────────────────────────────────── */}
+    {isError && (
+      <div class="rounded-2xl bg-red-500/10 p-8 text-center">
         <h3 class="font-cinzel text-xl font-bold text-red-400 mb-2">Erro na Análise</h3>
         <p class="text-gray-400 mb-4">{errorMessage}</p>
-        <a href="/app/analise/nome-social" class="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium px-6 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+        <a href="/app/analise/nome-social" class="inline-flex items-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium px-6 py-2.5 rounded-full hover:bg-[#f2ca50] transition-all duration-300">
           Tentar Novamente
         </a>
       </div>
-    ) : (
+    )}
+
+    {/* ══════════════════════════════════════════════════════════════
+        CONTEÚDO COMPLETO (status = complete)
+    ══════════════════════════════════════════════════════════════ */}
+    {!isProcessing && !isError && (
       <>
-        <!-- 5 Números Numerológicos -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {displayNums.map(n => (
-            <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-4 text-center">
-              <div class="font-cinzel text-3xl font-bold text-[#D4AF37] mb-1">{n.value}</div>
-              <div class="text-gray-500 text-xs">{n.label}</div>
+
+        {/* ── SEÇÃO 1: HEADER / CERTIFICADO ───────────────────────── */}
+        <section class="rounded-2xl bg-white/5 p-6 md:p-8 mb-6">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <p class="font-cinzel text-xs uppercase tracking-[0.2em] text-[#76746a] mb-2">
+                {isNomeMagnetico ? 'Análise de Nome Social — Certificado Cabalístico' :
+                 isNomeBebe      ? 'Análise de Nome de Bebê — O Portal do Nascimento' :
+                                   'Análise de Nome de Empresa — Relatório Estratégico'}
+              </p>
+              <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-1">{primeiroNome}</h1>
+              <p class="text-gray-400 text-sm">{nomeExibido}</p>
+              {dataFormatada && (
+                <p class="text-gray-600 text-xs mt-1">{dataFormatada}</p>
+              )}
             </div>
-          ))}
-        </div>
-
-        <!-- 4 Triângulos (novo componente) -->
-        {hasTriangulos && (
-          <div>
-            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Os 4 Triângulos Numerológicos</h2>
-            <TriangleVisualization
-              client:load
-              nome={nomeExibido}
-              vida={tVida!}
-              pessoal={tPessoal!}
-              social={tSocial!}
-              destino={tDestino!}
-              bloqueios={bloqueios as any}
-            />
-          </div>
-        )}
-
-        <!-- Bloqueios (fallback para análises sem os 4 triângulos) -->
-        {!hasTriangulos && bloqueios.length > 0 && (
-          <div>
-            <h2 class="font-cinzel text-xl font-bold text-red-400 mb-4">
-              ⚠ Bloqueios Detectados ({bloqueios.length})
-            </h2>
-            <div class="space-y-3">
-              {bloqueios.map(b => (
-                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-5">
-                  <h3 class="font-bold text-red-400 mb-1">{b.titulo}</h3>
-                  <p class="text-gray-400 text-sm leading-relaxed">{b.descricao}</p>
+            <div class="shrink-0 md:w-48">
+              {scoreGeral !== null && scoreGeral !== undefined ? (
+                <ScoreDisplay client:load score={scoreGeral} size="lg" />
+              ) : (
+                <div class="px-3 py-1.5 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-400 inline-block">
+                  ✓ Concluída
                 </div>
-              ))}
+              )}
             </div>
+            {isNomeBebe && (
+              <div class="shrink-0 rounded-2xl bg-black/20 border border-[#D4AF37]/20 p-4 flex flex-col items-center justify-center text-center gap-1 min-w-[110px]">
+                <span class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#76746a]">Destino do Bebê</span>
+                <span class="font-cinzel text-4xl font-bold text-[#D4AF37] leading-none">{analysis.numero_destino ?? '?'}</span>
+                {arcanoData && <p class="text-xs text-[#c084fc] mt-0.5">{arcanoData.palavraChave}</p>}
+              </div>
+            )}
           </div>
-        )}
-
-        <!-- Análise IA (markdown renderizado) -->
-        {analiseHtml && (
-          <div>
-            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Análise Completa</h2>
-            <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 md:p-8">
-              <div
-                class="prose prose-invert prose-lg max-w-none
-                       prose-headings:font-cinzel
-                       prose-h1:text-2xl prose-h1:text-[#D4AF37] prose-h1:!mt-10 prose-h1:!mb-4
-                       prose-h2:text-xl prose-h2:text-[#D4AF37] prose-h2:!mt-10 prose-h2:!mb-4
-                       prose-h3:text-lg prose-h3:text-purple-400 prose-h3:!mt-7 prose-h3:!mb-3
-                       prose-h4:text-base prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-5 prose-h4:!mb-2
-                       prose-strong:text-white prose-a:text-[#D4AF37]
-                       prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-5
-                       prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
-                       prose-ul:!mt-2 prose-ul:!mb-5
-                       prose-ol:!mt-2 prose-ol:!mb-5"
-                set:html={analiseHtml}
-              />
+          {isNomeBebe && rankingBebe?.melhorNome && (
+            <div class="mt-5 pt-5 border-t border-white/10 flex flex-wrap gap-x-6 gap-y-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-cinzel uppercase tracking-wider text-[#76746a]">Expressão</span>
+                <span class="font-cinzel text-lg font-bold text-[#D4AF37]/80">{(rankingBebe.melhorNome as any).expressao}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-cinzel uppercase tracking-wider text-[#76746a]">Motivação</span>
+                <span class="font-cinzel text-lg font-bold text-[#D4AF37]/80">{(rankingBebe.melhorNome as any).motivacao}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-cinzel uppercase tracking-wider text-[#76746a]">Missão</span>
+                <span class="font-cinzel text-lg font-bold text-[#D4AF37]/80">{(rankingBebe.melhorNome as any).missao}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-cinzel uppercase tracking-wider text-[#76746a]">Impressão</span>
+                <span class="font-cinzel text-lg font-bold text-[#D4AF37]/80">{(rankingBebe.melhorNome as any).impressao}</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </section>
 
-        {/* Movi Ranking para o final do documento */}
-
-        <!-- Débitos Kármicos -->
-        {hasDebitosData && (
-          <div>
-            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Débitos Kármicos</h2>
-            <KarmicDebts
-              client:load
-              debitos={debitosRaw as any}
-              nomeCompleto={analysis.nome_completo}
-            />
-          </div>
-        )}
-
-        {/* Lições Kármicas */}
-        {hasLicoesData && (
-          <div>
-            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Lições Kármicas</h2>
-            <KarmicLessons
-              client:load
-              licoes={licoesRaw as any}
-              nomeCompleto={nomeExibido}
-            />
-          </div>
-        )}
-
-        {/* Tendências Ocultas */}
-        {(hasTendenciasData || hasFrequenciasData) && (
-          <div>
-            <h2 class="font-cinzel text-xl font-bold text-white mb-4">Tendências Ocultas</h2>
-            <HiddenTendencies
-              client:load
-              tendencias={tendenciasRaw as any}
-              frequencias={frequenciasRaw ?? {}}
-              nomeCompleto={nomeExibido}
-            />
-          </div>
-        )}
-
-        {/* 🌟 Outras Sugestões 🌟 */}
-        {topNames.length > 0 && (
-          <div>
-            <h2 class="font-cinzel text-xl font-bold text-white mb-4">
-              ✨ Outras Sugestões
-            </h2>
-            <div class="grid md:grid-cols-3 gap-4">
-              {topNames.map(name => (
-                <form action="/api/analyze" method="POST" class="h-full group">
-                  <input type="hidden" name="nome_completo" value={name.nome_sugerido} />
-                  <input type="hidden" name="data_nascimento" value={analysis.data_nascimento ? new Date(analysis.data_nascimento).toLocaleDateString('pt-BR', {timeZone:'UTC'}) : ''} />
-                  <input type="hidden" name="product_type" value="nome_magnetico" />
-                  <button type="submit" class={`w-full text-left h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 ${name.cardClass} relative`}>
-                    
-                    {name.isTop && (
-                      <div class="text-xs text-[#D4AF37] font-bold mb-2 uppercase tracking-wider">⭐ Recomendado</div>
-                    )}
-                    <div class="font-cinzel text-lg font-bold text-white mb-2 pr-6 group-hover:text-[#D4AF37] transition-colors">
-                      {name.nome_sugerido}
-                    </div>
-                    <div class="flex gap-3 text-xs justify-between mb-3">
-                       <div class="text-emerald-400">Score: {name.score}%</div>
-                       <div class="text-gray-500">
-                          Expr: {name.numero_expressao} | Mot: {name.numero_motivacao}
-                       </div>
-                    </div>
-                    {name.justificativa && (
-                      <p class="text-gray-500 text-xs leading-relaxed">{name.justificativa}</p>
-                    )}
-                    
-                    {/* Indicador de Hover */}
-                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#D4AF37]">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                      </svg>
-                    </div>
-                  </button>
-                </form>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Ranking de Candidatos (exclusivo nome_bebe) - Agora é a ÚLTIMA seção */}
-        {rankingBebe?.nomesCandidatos?.length > 0 && (
-          <div class="mt-8">
-            <h2 class="font-cinzel text-xl font-bold text-white mb-4">
-              Ranking dos Nomes Candidatos
-            </h2>
-            <div class="space-y-3">
-              {(rankingBebe.nomesCandidatos as any[]).map((c: any, idx: number) => (
-                <div class={`rounded-2xl p-5 border ${idx === 0 ? 'bg-[#D4AF37]/5 border-[#D4AF37]/40' : 'bg-white/5 border-white/10'}`}>
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-3">
-                      {idx === 0 && <span class="text-xs text-[#D4AF37] font-bold uppercase tracking-wider">⭐ Recomendado</span>}
-                      <span class="font-cinzel text-lg font-bold text-white">{c.nomeCompleto}</span>
-                    </div>
-                    <span class={`text-sm font-bold ${c.score >= 70 ? 'text-emerald-400' : c.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                      {c.score}%
-                    </span>
+        {/* ══════════════════════════════════════════════════
+            NOME SOCIAL — ESTRUTURA PRINCIPAL
+        ══════════════════════════════════════════════════ */}
+        {isNomeMagnetico && (
+          <>
+            {/* ── SEÇÃO 2: A ESTRELA DE 5 PONTAS ─────────────────── */}
+            <section class="mb-12">
+              <div class="mb-3 px-1">
+                <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">A Estrela de 5 Pontas</p>
+                <h2 class="font-cinzel text-2xl font-bold text-white">Os 5 Números do Nome Social</h2>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {cinco_numeros.map(n => (
+                  <div class="rounded-2xl bg-white/5 p-4 text-center flex flex-col items-center gap-1">
+                    <span class="text-[#D4AF37]/60 text-lg leading-none">{n.icon}</span>
+                    <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{n.value ?? '?'}</div>
+                    <div class="text-white text-xs font-medium">{n.label}</div>
+                    <div class="text-gray-600 text-[10px]">{n.sublabel}</div>
                   </div>
-                  <div class="flex flex-wrap gap-4 text-xs text-gray-500 mb-2">
-                    <span>Expr: <span class="text-gray-300">{c.expressao}</span></span>
-                    <span>Mot: <span class="text-gray-300">{c.motivacao}</span></span>
-                    <span>Missão: <span class="text-gray-300">{c.missao}</span></span>
-                    <span>Compatibilidade: <span class={`font-medium ${c.compatibilidade === 'total' ? 'text-emerald-400' : c.compatibilidade === 'complementar' ? 'text-[#D4AF37]' : c.compatibilidade === 'aceitavel' ? 'text-yellow-400' : 'text-red-400'}`}>{c.compatibilidade}</span></span>
-                    {c.temBloqueio && <span class="text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>}
-                  </div>
-                  <div class="text-xs text-gray-500 space-y-0.5">
-                    {(c.justificativa as string[]).map((j: string) => <p>{j}</p>)}
-                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── SEÇÃO 3: MAPA DE TRIÂNGULOS ─────────────────────── */}
+            {hasTriangulos && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Mapa de Triângulos</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Os 4 Triângulos Numerológicos</h2>
                 </div>
-              ))}
-            </div>
-          </div>
+                <TriangleVisualization
+                  client:load
+                  nome={nomeExibido}
+                  vida={tVida!}
+                  pessoal={tPessoal!}
+                  social={tSocial!}
+                  destino={tDestino!}
+                  bloqueios={bloqueios as any}
+                />
+              </section>
+            )}
+
+            {/* ── SEÇÃO 4: O RAIO-X DOS BLOQUEIOS ─────────────────── */}
+            <section class="mb-12">
+              <div class="mb-3 px-1">
+                <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">O Raio-X dos Bloqueios</p>
+                <h2 class={`font-cinzel text-2xl font-bold ${bloqueios.length > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                  {bloqueios.length > 0
+                    ? `${bloqueios.length} Bloqueio${bloqueios.length > 1 ? 's' : ''} Energético${bloqueios.length > 1 ? 's' : ''} Detectado${bloqueios.length > 1 ? 's' : ''}`
+                    : 'Energia Limpa — Sem Bloqueios'}
+                </h2>
+              </div>
+              {bloqueios.length > 0 ? (
+                <div class="space-y-3">
+                  {bloqueios.map((b, i) => (
+                    <BlockAnalysisCard
+                      client:load
+                      bloqueio={b as any}
+                      defaultOpen={i === 0}
+                    />
+                  ))}
+                  <ActionBox client:load title="Antídotos Práticos">
+                    Os antídotos detalhados para cada bloqueio estão na análise completa abaixo. Leia atentamente a seção "Os 4 Triângulos" para as orientações específicas.
+                  </ActionBox>
+                </div>
+              ) : (
+                <div class="rounded-2xl bg-emerald-500/5 p-6 text-center">
+                  <div class="text-4xl mb-3">✦</div>
+                  <p class="text-emerald-400 font-medium mb-1">Todos os 4 triângulos estão limpos</p>
+                  <p class="text-gray-400 text-sm">Nenhuma sequência energética negativa foi detectada no seu nome. Isso indica um fluxo energético natural e desobstruído.</p>
+                </div>
+              )}
+            </section>
+
+            {/* ── SEÇÃO 5: O PESO DO PASSADO ──────────────────────── */}
+            {(licoesRaw !== null || debitosRaw !== null) && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">O Peso do Passado</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Karma e Lições</h2>
+                </div>
+                {debitosRaw !== null && (
+                  <div class="mb-4">
+                    <KarmicDebts client:load debitos={debitosRaw as any} nomeCompleto={nomeExibido} />
+                  </div>
+                )}
+                {licoesRaw !== null && (
+                  <KarmicLessons client:load licoes={licoesRaw as any} nomeCompleto={nomeExibido} />
+                )}
+              </section>
+            )}
+
+            {/* ── SEÇÃO 6: CICLO ATUAL E ARCANO REGENTE ───────────── */}
+            {arcanoData && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Ciclo Atual</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Arcano Regente</h2>
+                </div>
+                <ArcanoCard
+                  client:load
+                  arcano={{
+                    numero: arcanoData.numero,
+                    nome: arcanoData.nome,
+                    palavraChave: arcanoData.palavraChave,
+                    descricao: arcanoData.descricao,
+                  }}
+                  label="Arcano que governa seu ciclo de vida"
+                />
+              </section>
+            )}
+
+            {/* ── SEÇÃO 7: TENDÊNCIAS OCULTAS ─────────────────────── */}
+            {(tendenciasRaw !== null || (frequenciasRaw && Object.keys(frequenciasRaw).length > 0)) && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Frequências Numéricas</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Tendências Ocultas</h2>
+                </div>
+                <HiddenTendencies
+                  client:load
+                  tendencias={tendenciasRaw as any}
+                  frequencias={frequenciasRaw ?? {}}
+                  nomeCompleto={nomeExibido}
+                />
+              </section>
+            )}
+
+            {/* ── SEÇÃO 8: ANÁLISE COMPLETA DA IA ─────────────────── */}
+            {analiseHtml && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Análise Cabalística</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo</h2>
+                </div>
+                <div class="rounded-2xl bg-white/5 p-6 md:p-8">
+                  <div
+                    class="prose prose-invert prose-lg max-w-none
+                           prose-headings:font-cinzel
+                           prose-h1:text-2xl prose-h1:text-[#D4AF37] prose-h1:!mt-10 prose-h1:!mb-4
+                           prose-h2:text-xl prose-h2:text-[#D4AF37] prose-h2:!mt-10 prose-h2:!mb-4
+                           prose-h3:text-lg prose-h3:text-[#c084fc] prose-h3:!mt-7 prose-h3:!mb-3
+                           prose-h4:text-base prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-5 prose-h4:!mb-2
+                           prose-strong:text-white prose-a:text-[#D4AF37]
+                           prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-5
+                           prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
+                           prose-ul:!mt-2 prose-ul:!mb-5
+                           prose-ol:!mt-2 prose-ol:!mb-5"
+                    set:html={analiseHtml}
+                  />
+                </div>
+              </section>
+            )}
+
+            {/* ── SEÇÃO 9: VARIAÇÕES DE NOME SOCIAL ───────────────── */}
+            {topNames.length > 0 && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Harmonização</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Variações de Nome Social</h2>
+                </div>
+                <div class="grid md:grid-cols-3 gap-4">
+                  {topNames.map((name, idx) => (
+                    <button
+                      type="button"
+                      data-variation-nome={name.nome_sugerido}
+                      data-variation-data={analysis.data_nascimento ? new Date(analysis.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : ''}
+                      class={`w-full text-left h-full rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 relative group cursor-pointer
+                        ${idx === 0 ? 'bg-[#D4AF37]/5' : 'bg-white/5'}`}
+                    >
+                      {idx === 0 && (
+                        <div class="text-[10px] text-[#D4AF37] font-bold mb-2 uppercase tracking-wider">⭐ Recomendado</div>
+                      )}
+                      <div class="font-cinzel text-lg font-bold text-white mb-3 pr-6 group-hover:text-[#D4AF37] transition-colors">
+                        {name.nome_sugerido}
+                      </div>
+                      <div class="mb-3">
+                        <ScoreDisplay client:load score={name.score} size="sm" />
+                      </div>
+                      <div class="flex flex-wrap gap-2 mb-3 text-xs text-gray-500">
+                        <span>Expr: <span class="text-gray-300">{name.numero_expressao}</span></span>
+                        <span>Mot: <span class="text-gray-300">{name.numero_motivacao}</span></span>
+                      </div>
+                      {name.justificativa && (
+                        <p class="text-gray-500 text-xs leading-relaxed">{name.justificativa}</p>
+                      )}
+                      <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span class="text-xs text-[#D4AF37] font-medium">Ver análise completa →</span>
+                      </div>
+                      <div id={`variation-loading-${idx}`} class="hidden absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center">
+                        <span class="w-5 h-5 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin"></span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
+
+        {/* ══════════════════════════════════════════════════
+            NOME DO BEBÊ — ESTRUTURA ESPECÍFICA
+        ══════════════════════════════════════════════════ */}
+        {isNomeBebe && (
+          <>
+            {/* ── SEÇÃO 2: RANKING COMPARATIVO ────────────────────── */}
+            {rankingBebe?.nomesCandidatos?.length > 0 && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Tabela Comparativa</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Ranking dos Nomes Candidatos</h2>
+                </div>
+                <div class="space-y-4">
+                  {(rankingBebe.nomesCandidatos as any[]).map((c: any, idx: number) => (
+                    <div class={`rounded-2xl p-5 md:p-6 ${idx === 0 ? 'bg-[#D4AF37]/5' : 'bg-white/5'}`}>
+                      <div class="flex items-start justify-between gap-4 mb-3">
+                        <div>
+                          {idx === 0 && <span class="text-[10px] text-[#D4AF37] font-bold uppercase tracking-wider block mb-1">⭐ Nome de Ouro</span>}
+                          {c.origemSugerida === 'ia' && idx !== 0 && <span class="text-[10px] text-[#c084fc] font-bold uppercase tracking-wider block mb-1">Sugestão Numerológica</span>}
+                          <span class="font-cinzel text-xl font-bold text-white">{c.nomeCompleto}</span>
+                        </div>
+                        <div class="shrink-0">
+                          <CompatibilityBadge client:load compatibilidade={c.compatibilidade} size="sm" />
+                        </div>
+                      </div>
+                      <div class="mb-4 max-w-xs">
+                        <ScoreDisplay client:load score={c.score} size="sm" />
+                      </div>
+                      <div class="flex flex-wrap gap-4 text-xs text-gray-500 mb-4">
+                        <span>Expressão: <span class="text-gray-300">{c.expressao}</span></span>
+                        <span>Motivação: <span class="text-gray-300">{c.motivacao}</span></span>
+                        <span>Missão: <span class="text-gray-300">{c.missao}</span></span>
+                        <span>Impressão: <span class="text-gray-300">{c.impressao}</span></span>
+                        {c.temBloqueio && <span class="text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>}
+                      </div>
+                      <div class="text-xs text-gray-500 space-y-2 border-t border-white/5 pt-3">
+                        {(c.justificativa as string[]).slice(0, 2).map((j: string) => <p class="leading-relaxed">{j}</p>)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── SEÇÃO 4: ANÁLISE COMPLETA DA IA ─────────────────── */}
+            {analiseHtml && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Análise Cabalística — Nome de Bebê</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo para os Pais</h2>
+                </div>
+                <div class="rounded-2xl bg-white/5 p-6 md:p-8">
+                  <div
+                    class="prose prose-invert prose-lg max-w-none
+                           prose-headings:font-cinzel
+                           prose-h2:text-xl prose-h2:text-[#D4AF37] prose-h2:!mt-14 prose-h2:!mb-4
+                           prose-h3:text-lg prose-h3:text-[#c084fc] prose-h3:!mt-10 prose-h3:!mb-3
+                           prose-h4:text-base prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-6 prose-h4:!mb-2
+                           prose-strong:text-white prose-a:text-[#D4AF37]
+                           prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-5
+                           prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
+                           prose-ul:!mt-2 prose-ul:!mb-6 prose-ol:!mt-2 prose-ol:!mb-6"
+                    set:html={analiseHtml}
+                  />
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {/* ══════════════════════════════════════════════════
+            NOME EMPRESA — ESTRUTURA ESPECÍFICA
+        ══════════════════════════════════════════════════ */}
+        {isNomeEmpresa && (
+          <>
+            {/* ── SEÇÃO 2: A ESTRELA DE 5 PONTAS DA EMPRESA ───────── */}
+            <section class="mb-12">
+              <div class="mb-3 px-1">
+                <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Identidade Numérica</p>
+                <h2 class="font-cinzel text-2xl font-bold text-white">A Estrela de 5 Pontas da Empresa</h2>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {cinco_numeros.map(n => (
+                  <div class="rounded-2xl bg-white/5 p-4 text-center flex flex-col items-center gap-1">
+                    <span class="text-[#D4AF37]/60 text-lg leading-none">{n.icon}</span>
+                    <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{n.value ?? '?'}</div>
+                    <div class="text-white text-xs font-medium">{n.label}</div>
+                    <div class="text-gray-600 text-[10px]">{n.sublabel}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── SEÇÃO 3: PERFIL DO SÓCIO + DESTINOS ─────────────── */}
+            {rankingEmpresa && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Sinergia Numerológica</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Perfil dos Sócios & Destinos</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {/* Destino do Sócio Principal */}
+                  <div class="rounded-2xl bg-white/5 p-5 flex flex-col gap-2">
+                    <p class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#76746a]">Destino do Sócio Principal</p>
+                    <div class="font-cinzel text-5xl font-bold text-[#D4AF37] leading-none">{rankingEmpresa.destinoSocio ?? '?'}</div>
+                    <p class="text-sm text-gray-400">{rankingEmpresa.nomeSocioPrincipal ?? analysis.nome_completo}</p>
+                    {rankingEmpresa.melhorNome?.compatibilidadeSocio && (
+                      <div class="mt-1">
+                        <CompatibilityBadge client:load compatibilidade={rankingEmpresa.melhorNome.compatibilidadeSocio} size="sm" />
+                        <p class="text-[10px] text-gray-600 mt-1">Compatibilidade com o nome escolhido</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Destino do 2º Sócio (se presente) */}
+                  {rankingEmpresa.nomeSocio2 && (
+                    <div class="rounded-2xl bg-white/5 p-5 flex flex-col gap-2">
+                      <p class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#76746a]">Destino do 2º Sócio</p>
+                      <div class="font-cinzel text-5xl font-bold text-[#c084fc] leading-none">{rankingEmpresa.destinoSocio2 ?? '?'}</div>
+                      <p class="text-sm text-gray-400">{rankingEmpresa.nomeSocio2}</p>
+                    </div>
+                  )}
+
+                  {/* Destino da Empresa (se tiver data de fundação) */}
+                  {rankingEmpresa.destinoEmpresa != null && (
+                    <div class="rounded-2xl bg-black/20 border border-[#D4AF37]/20 p-5 flex flex-col gap-2">
+                      <p class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#76746a]">Destino da Empresa</p>
+                      <div class="font-cinzel text-5xl font-bold text-[#D4AF37] leading-none">{rankingEmpresa.destinoEmpresa}</div>
+                      <p class="text-[10px] text-gray-600">Baseado na data de fundação</p>
+                      {rankingEmpresa.melhorNome?.compatibilidadeEmpresa && (
+                        <div class="mt-1">
+                          <CompatibilityBadge client:load compatibilidade={rankingEmpresa.melhorNome.compatibilidadeEmpresa} size="sm" />
+                          <p class="text-[10px] text-gray-600 mt-1">Compat. nome ↔ empresa</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* ── SEÇÃO 4: MAPA DE TRIÂNGULOS ─────────────────────── */}
+            {hasTriangulos && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Mapa de Triângulos</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Os 4 Triângulos Numerológicos</h2>
+                </div>
+                <TriangleVisualization
+                  client:load
+                  nome={nomeExibido}
+                  vida={tVida!}
+                  pessoal={tPessoal!}
+                  social={tSocial!}
+                  destino={tDestino!}
+                  bloqueios={bloqueios as any}
+                />
+              </section>
+            )}
+
+            {/* ── SEÇÃO 5: MAPEAMENTO DE RISCOS ───────────────────── */}
+            {bloqueios.length > 0 && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Mapeamento de Riscos</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-red-400">
+                    {bloqueios.length} Bloqueio{bloqueios.length > 1 ? 's' : ''} Energético{bloqueios.length > 1 ? 's' : ''}
+                  </h2>
+                </div>
+                <div class="space-y-3">
+                  {bloqueios.map((b, i) => (
+                    <BlockAnalysisCard client:load bloqueio={b as any} defaultOpen={i === 0} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── SEÇÃO 6: KARMA EMPRESARIAL ───────────────────────── */}
+            {((rankingEmpresa?.melhorNome?.debitosCarmicos?.length > 0) || (rankingEmpresa?.melhorNome?.licoesCarmicas?.length > 0)) && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Karma Empresarial</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Padrões Kármicos do Sócio</h2>
+                </div>
+                {rankingEmpresa?.melhorNome?.debitosCarmicos?.length > 0 && (
+                  <KarmicDebts
+                    client:load
+                    debitos={rankingEmpresa.melhorNome.debitosCarmicos as any}
+                    nomeCompleto={analysis.nome_completo}
+                  />
+                )}
+                {rankingEmpresa?.melhorNome?.licoesCarmicas?.length > 0 && (
+                  <div class="mt-4">
+                    <KarmicLessons
+                      client:load
+                      licoes={rankingEmpresa.melhorNome.licoesCarmicas as any}
+                      nomeCompleto={nomeExibido}
+                    />
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* ── SEÇÃO 7: RANKING DE CANDIDATOS ──────────────────── */}
+            {(rankingEmpresa?.nomesCandidatos?.length > 0) && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Análise Comparativa</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Estudo dos Nomes Candidatos</h2>
+                </div>
+                <div class="space-y-4">
+                  {(rankingEmpresa.nomesCandidatos as any[]).map((c: any, idx: number) => (
+                    <div class={`rounded-2xl p-5 md:p-6 ${idx === 0 ? 'bg-[#D4AF37]/5' : 'bg-white/5'}`}>
+                      <div class="flex items-start justify-between gap-4 mb-3">
+                        <div>
+                          {idx === 0 && <span class="text-[10px] text-[#D4AF37] font-bold uppercase tracking-wider block mb-1">⭐ Recomendado</span>}
+                          {c.origemSugerida === 'ia' && idx !== 0 && <span class="text-[10px] text-[#c084fc] font-bold uppercase tracking-wider block mb-1">✨ Sugestão Numerológica</span>}
+                          <span class="font-cinzel text-xl font-bold text-white">{c.nomeEmpresa}</span>
+                        </div>
+                        <div class="flex flex-col items-end gap-1 shrink-0">
+                          <CompatibilityBadge client:load compatibilidade={c.compatibilidadeSocio} size="sm" />
+                          {c.compatibilidadeEmpresa && (
+                            <CompatibilityBadge client:load compatibilidade={c.compatibilidadeEmpresa} size="sm" />
+                          )}
+                        </div>
+                      </div>
+                      <div class="mb-4 max-w-xs">
+                        <ScoreDisplay client:load score={c.score} size="sm" />
+                      </div>
+                      <div class="flex flex-wrap gap-4 text-xs text-gray-500 mb-3">
+                        <span>Expressão: <span class="text-gray-300">{c.expressao}</span></span>
+                        <span>Motivação: <span class="text-gray-300">{c.motivacao}</span></span>
+                        <span>Missão: <span class="text-gray-300">{c.missao}</span></span>
+                        <span>Impressão: <span class="text-gray-300">{c.impressao}</span></span>
+                      </div>
+                      <div class="flex flex-wrap gap-3 text-xs">
+                        {c.temBloqueio
+                          ? <span class="text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>
+                          : <span class="text-emerald-400">✓ Sem bloqueios</span>
+                        }
+                        {c.debitosCarmicos?.length > 0
+                          ? <span class="text-amber-400">⚠ {c.debitosCarmicos.length} Débito(s) Kármico(s)</span>
+                          : <span class="text-emerald-400">✓ Sem Débitos Kármicos</span>
+                        }
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── SEÇÃO 8: ANÁLISE COMPLETA DA IA ─────────────────── */}
+            {analiseHtml && (
+              <section class="mb-12">
+                <div class="mb-3 px-1">
+                  <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-2">Análise Estratégica — Nome de Empresa</p>
+                  <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo</h2>
+                </div>
+                <div class="rounded-2xl bg-white/5 p-6 md:p-8">
+                  <div
+                    class="prose prose-invert prose-lg max-w-none
+                           prose-headings:font-cinzel
+                           prose-h2:text-xl prose-h2:text-[#D4AF37] prose-h2:!mt-10 prose-h2:!mb-4
+                           prose-h3:text-lg prose-h3:text-[#c084fc] prose-h3:!mt-7 prose-h3:!mb-3
+                           prose-h4:text-base prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-5 prose-h4:!mb-2
+                           prose-strong:text-white prose-a:text-[#D4AF37]
+                           prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-5
+                           prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
+                           prose-ul:!mt-2 prose-ul:!mb-5 prose-ol:!mt-2 prose-ol:!mb-5"
+                    set:html={analiseHtml}
+                  />
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
       </>
     )}
   </div>
-
-  {isProcessing && (
-    <script>
-      setTimeout(() => window.location.reload(), 5000);
-    </script>
-  )}
 </ResultadoLayout>
+
+<script define:vars={{ analysisId: id, isComplete: !isProcessing && !isError }}>
+  // Limpar contador de polling quando a análise estiver completa
+  if (isComplete) {
+    sessionStorage.removeItem('poll_' + analysisId);
+  }
+</script>
+
+<script>
+  // Variation card clicks — POST to /api/analyze (JSON) then redirect
+  document.querySelectorAll<HTMLButtonElement>('[data-variation-nome]').forEach((btn, idx) => {
+    btn.addEventListener('click', async () => {
+      const nome = btn.dataset.variationNome;
+      const data = btn.dataset.variationData;
+      if (!nome || !data) return;
+
+      const loader = document.getElementById(`variation-loading-${idx}`);
+      if (loader) loader.classList.remove('hidden');
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome_completo: nome,
+            data_nascimento: data,
+            product_type: 'nome_magnetico',
+          }),
+        });
+        const result = await res.json();
+        if (result.analysisId) {
+          window.location.href = `/app/resultado/${result.analysisId}`;
+        } else {
+          throw new Error(result.error ?? 'Erro ao iniciar análise');
+        }
+      } catch (err) {
+        if (loader) loader.classList.add('hidden');
+        btn.disabled = false;
+        alert('Não foi possível iniciar a análise. Tente novamente.');
+      }
+    });
+  });
+</script>

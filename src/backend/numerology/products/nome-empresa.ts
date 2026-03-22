@@ -14,18 +14,31 @@
  */
 
 import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from '../triangle';
-import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao } from '../numbers';
+import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao, calcularPersonalidade } from '../numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../karmic';
 import { avaliarCompatibilidade } from '../harmonization';
 import { calcularScore } from '../score';
 import type { LicaoCarmica, TendenciaOculta, DebitoCarmicoInfo } from '../karmic';
 import type { Bloqueio } from '../triangle';
 
+// ── Banco de nomes empresariais brandáveis para sugestões automáticas ─────────
+const NOMES_EMPRESA_POOL = [
+  'Nova', 'Alta', 'Vera', 'Alva', 'Lumen', 'Nexo', 'Vesta', 'Aura',
+  'Axis', 'Core', 'Apex', 'Prime', 'Vital', 'Lyra', 'Orion', 'Zenit',
+  'Aeon', 'Versa', 'Alma', 'Kira', 'Mara', 'Nara', 'Tara', 'Lara',
+  'Elos', 'Vela', 'Tema', 'Sena', 'Gaia', 'Hera', 'Iris', 'Lima',
+  'Mina', 'Rena', 'Vila', 'Yara', 'Ativa', 'Forma', 'Visao', 'Camara',
+  'Vena', 'Obra', 'Roma', 'Nina', 'Olga', 'Unia', 'Zona', 'Elan',
+  'Vox', 'Link', 'Nomen', 'Vibe', 'Trama', 'Livre', 'Xena', 'Sara',
+  'Zara', 'Lota', 'Jota', 'Kena', 'Pena', 'Tena', 'Wina', 'Lota',
+];
+
 export interface AnaliseNomeEmpresa {
   nomeEmpresa: string;
   expressao: number;
   motivacao: number;
   missao: number;
+  impressao: number;
   destinoSocio: number;
   destinoEmpresa: number | null;  // null se não tiver data de fundação
   temBloqueio: boolean;
@@ -38,6 +51,7 @@ export interface AnaliseNomeEmpresa {
   compatibilidadeEmpresa: 'total' | 'complementar' | 'aceitavel' | 'incompativel' | null;
   score: number;
   justificativa: string[];
+  origemSugerida?: 'usuario' | 'ia';
 }
 
 export interface ResultadoNomeEmpresa {
@@ -48,6 +62,10 @@ export interface ResultadoNomeEmpresa {
   destinoEmpresa: number | null;
   nomesCandidatos: AnaliseNomeEmpresa[];
   melhorNome: AnaliseNomeEmpresa | null;
+  // Sócio 2 (opcional)
+  nomeSocio2?: string;
+  dataNascimentoSocio2?: string;
+  destinoSocio2?: number;
 }
 
 /**
@@ -68,6 +86,7 @@ export function analisarNomeEmpresa(
   const expressao = calcularExpressao(nomeEmpresa);
   const motivacao = calcularMotivacao(nomeEmpresa);
   const missao = calcularMissao(nomeEmpresa);
+  const impressao = calcularPersonalidade(nomeEmpresa); // 1ª palavra da empresa
   const destinoSocio = calcularDestino(dataNascimentoSocio);
   const destinoEmpresa = dataFundacao ? calcularDestino(dataFundacao) : null;
   const licoes = detectarLicoesCarmicas(nomeEmpresa);
@@ -118,6 +137,7 @@ export function analisarNomeEmpresa(
     expressao,
     motivacao,
     missao,
+    impressao,
     destinoSocio,
     destinoEmpresa,
     temBloqueio: bloqueios.length > 0,
@@ -130,25 +150,80 @@ export function analisarNomeEmpresa(
     compatibilidadeEmpresa,
     score,
     justificativa,
+    origemSugerida: 'usuario' as const,
   };
 }
 
 /**
+ * Gera sugestões automáticas de nomes de empresa com score >= 80.
+ * Usado quando todos os candidatos do usuário ficam abaixo de 80.
+ */
+function gerarSugestoesEmpresaIA(
+  dataNascimentoSocio: string,
+  dataFundacao: string | null,
+  maxSugestoes = 5
+): AnaliseNomeEmpresa[] {
+  const shuffled = [...NOMES_EMPRESA_POOL].sort(() => Math.random() - 0.5);
+  const sugestoes: AnaliseNomeEmpresa[] = [];
+  const vistos = new Set<string>();
+
+  // 1ª passagem: buscar score >= 80
+  for (const nome of shuffled) {
+    if (sugestoes.length >= maxSugestoes) break;
+    const analise = analisarNomeEmpresa(nome, dataNascimentoSocio, dataFundacao);
+    if (!vistos.has(nome.toLowerCase()) && analise.score >= 80) {
+      sugestoes.push({ ...analise, origemSugerida: 'ia' });
+      vistos.add(nome.toLowerCase());
+    }
+  }
+
+  // 2ª passagem: se não atingiu o mínimo, pegar os melhores disponíveis
+  if (sugestoes.length < 2) {
+    const todos = shuffled
+      .filter(n => !vistos.has(n.toLowerCase()))
+      .map(n => ({ ...analisarNomeEmpresa(n, dataNascimentoSocio, dataFundacao), origemSugerida: 'ia' as const }))
+      .sort((a, b) => b.score - a.score);
+
+    for (const analise of todos) {
+      if (sugestoes.length >= maxSugestoes) break;
+      sugestoes.push(analise);
+      vistos.add(analise.nomeEmpresa.toLowerCase());
+    }
+  }
+
+  return sugestoes.sort((a, b) => b.score - a.score);
+}
+
+/**
  * Analisa múltiplos nomes candidatos para empresa e retorna ranqueados.
+ * Se o melhor candidato do usuário tiver score < 80, gera sugestões automáticas.
  */
 export function analisarNomesEmpresa(
   nomesCandidatos: string[],
   nomeSocioPrincipal: string,
   dataNascimentoSocio: string,
-  dataFundacao: string | null
+  dataFundacao: string | null,
+  nomeSocio2?: string,
+  dataNascimentoSocio2?: string
 ): ResultadoNomeEmpresa {
   const destinoSocio = calcularDestino(dataNascimentoSocio);
   const destinoEmpresa = dataFundacao ? calcularDestino(dataFundacao) : null;
+  const destinoSocio2 = dataNascimentoSocio2 ? calcularDestino(dataNascimentoSocio2) : undefined;
 
   const analises = nomesCandidatos
     .filter(n => n.trim().length >= 2)
     .map(n => analisarNomeEmpresa(n.trim(), dataNascimentoSocio, dataFundacao))
     .sort((a, b) => b.score - a.score);
+
+  const melhorScoreUsuario = analises[0]?.score ?? 0;
+
+  if (melhorScoreUsuario < 80) {
+    const jaUsados = new Set(analises.map(a => a.nomeEmpresa.toLowerCase()));
+    const sugestoesIA = gerarSugestoesEmpresaIA(dataNascimentoSocio, dataFundacao, 5)
+      .filter(s => !jaUsados.has(s.nomeEmpresa.toLowerCase()));
+    analises.push(...sugestoesIA);
+    analises.sort((a, b) => b.score - a.score);
+  }
 
   return {
     nomeSocioPrincipal,
@@ -158,5 +233,6 @@ export function analisarNomesEmpresa(
     destinoEmpresa,
     nomesCandidatos: analises,
     melhorNome: analises[0] ?? null,
+    ...(nomeSocio2 ? { nomeSocio2, dataNascimentoSocio2, destinoSocio2 } : {}),
   };
 }

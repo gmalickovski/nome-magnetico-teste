@@ -16,6 +16,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { formatAnalysisText } from '../../../utils/textFormatter';
+import { ARCANOS } from '../../../backend/numerology/arcanos';
 
 // 1. Desativar hifenização global para que nomes grandes não quebrem (ex: "Cor-rea")
 Font.registerHyphenationCallback((word) => [word]);
@@ -154,14 +155,14 @@ function RenderMarkdownChunks({ text, styles, GOLD, triangleMap, triCellSize, le
     if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
       const listItems = trimmed.split('\n').filter(l => l.trim());
       result.push(
-        <View key={idx} style={{ marginTop: 4, marginBottom: 8, paddingLeft: 12 }}>
+        <View key={idx} style={{ marginTop: 4, marginBottom: 6, paddingLeft: 12 }}>
           {listItems.map((item, i) => {
             const liText = item.replace(/^[-*•]\s+/, '');
             return (
-              <View key={i} style={{ flexDirection: 'row', marginBottom: 5 }}>
-                <Text style={{ ...styles.bodyText, marginRight: 6, lineHeight: 1.75 }}>•</Text>
+              <View key={i} style={{ flexDirection: 'row', marginBottom: 2 }}>
+                <Text style={{ ...styles.bodyText, marginRight: 6, lineHeight: 1.4 }}>•</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ ...styles.bodyText, lineHeight: 1.75 }}>
+                  <Text style={{ ...styles.bodyText, lineHeight: 1.4 }}>
                     {renderMarkdownPiece(liText, styles.bodyText, { fontFamily: 'Helvetica-Bold' })}
                   </Text>
                 </View>
@@ -175,7 +176,7 @@ function RenderMarkdownChunks({ text, styles, GOLD, triangleMap, triCellSize, le
 
     // Parágrafo normal
     result.push(
-      <Text key={idx} style={{ ...styles.bodyText, lineHeight: 1.75, textAlign: 'justify', marginBottom: 8 }}>
+      <Text key={idx} style={{ ...styles.bodyText, lineHeight: 1.5, textAlign: 'justify', marginBottom: 8 }}>
         {renderMarkdownPiece(trimmed, styles.bodyText, { fontFamily: 'Helvetica-Bold' })}
       </Text>
     );
@@ -564,9 +565,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
     marginTop: 4,
+    justifyContent: 'center',
   },
   numberCard: {
-    width: '18%',
+    width: '19%',
     borderWidth: 1,
     borderColor: GOLD,
     borderRadius: 6,
@@ -867,10 +869,13 @@ function extractConclusao(text: string): string | null {
 
 export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
   const isBebe = analysis.product_type === 'nome_bebe';
+  const isEmpresa = analysis.product_type === 'nome_empresa';
   const freqData = analysis.frequencias_numeros as any;
-  // Para nome_bebe: usar o nome do melhor candidato em vez de "(bebê) Sobrenome"
+  // Para nome_bebe: usar o nome do melhor candidato; para nome_empresa: usar o melhor nome da empresa
   const nomeParaExibir = isBebe
     ? (freqData?.ranking?.melhorNome?.nomeCompleto ?? analysis.nome_completo)
+    : isEmpresa
+    ? (freqData?.melhorNome?.nomeEmpresa ?? analysis.nome_completo)
     : analysis.nome_completo;
   const firstName = nomeParaExibir.split(' ')[0];
   const tipoAnalise = productLabel(analysis.product_type);
@@ -890,11 +895,11 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
   }
 
   const nums = [
-    { label: 'Expressao', value: analysis.numero_expressao },
+    { label: 'Expressão', value: analysis.numero_expressao },
     { label: 'Destino', value: analysis.numero_destino },
-    { label: 'Motivacao', value: analysis.numero_motivacao },
-    { label: 'Missao', value: analysis.numero_missao },
-    { label: 'Impressao', value: analysis.numero_personalidade },
+    { label: 'Motivação', value: analysis.numero_motivacao },
+    { label: 'Missão', value: analysis.numero_missao },
+    { label: 'Impressão', value: analysis.numero_personalidade },
   ];
 
   const bloqueios: Bloqueio[] = Array.isArray(analysis.bloqueios)
@@ -962,8 +967,8 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
         <Text style={styles.coverMeta}>Gerado em: {dataGeracao}</Text>
       </Page>
 
-      {/* === PÁGINA 2: NÚMEROS + GRÁFICO + BLOQUEIOS + LIÇÕES === */}
-      <Page size="A4" style={styles.page}>
+      {/* === PÁGINA 2: NÚMEROS + BLOQUEIOS + KARMA (apenas Nome Social) === */}
+      {(!isBebe && !isEmpresa) && (<Page size="A4" style={styles.page}>
         <View style={styles.pageHeader} fixed>
           <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
           <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — {tipoAnalise}</Text>
@@ -971,7 +976,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
         {/* Os 5 Números */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Os 5 Números Numerológicos</Text>
+          <Text style={styles.sectionTitle}>A Estrela das 5 Pontas</Text>
           <View style={styles.numbersGrid}>
             {nums.map(n => (
               <View key={n.label} style={styles.numberCard}>
@@ -1065,7 +1070,501 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
             render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
           />
         </View>
-      </Page>
+      </Page>)}
+
+      {/* === BEBE: PÁGINA 2 — DESTINO DO BEBÊ + MELHOR NOME === */}
+      {isBebe && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — O Portal do Nascimento</Text>
+          </View>
+
+          {/* Destino do bebê */}
+          <View style={{ ...styles.section, alignItems: 'center' }}>
+            <Text style={styles.sectionTitle}>O Destino que o Ceu Escolheu</Text>
+            <View style={{ backgroundColor: '#FFFDF0', borderWidth: 2, borderColor: GOLD, borderRadius: 12, padding: 24, alignItems: 'center', width: '55%', marginTop: 8 }}>
+              <Text style={{ fontSize: 10, color: GRAY, marginBottom: 8, letterSpacing: 1 }}>NUMERO DE DESTINO DO BEBE</Text>
+              <Text style={{ fontSize: 52, fontFamily: 'Helvetica-Bold', color: GOLD, marginBottom: 8 }}>
+                {freqData?.ranking?.destino ?? analysis.numero_destino ?? '?'}
+              </Text>
+              <Text style={{ fontSize: 9, color: GRAY }}>
+                Data de nascimento: {formatDate(freqData?.ranking?.dataNascimento ?? analysis.data_nascimento)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Melhor nome highlight */}
+          {freqData?.ranking?.melhorNome && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Nome Mais Indicado Numericamente</Text>
+              <View style={{ backgroundColor: '#FFFDF0', borderWidth: 2, borderColor: GOLD, borderRadius: 8, padding: 16 }}>
+                <Text style={{ fontSize: 22, fontFamily: 'Helvetica-Bold', color: DARK, textAlign: 'center', marginBottom: 14 }}>
+                  {freqData.ranking.melhorNome.nomeCompleto}
+                </Text>
+
+                {/* Score bar */}
+                <View style={{ marginBottom: 14 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <Text style={{ fontSize: 9, color: GRAY }}>Score Numerologico</Text>
+                    <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: freqData.ranking.melhorNome.score >= 70 ? '#059669' : freqData.ranking.melhorNome.score >= 40 ? '#D97706' : '#DC2626' }}>
+                      {freqData.ranking.melhorNome.score}/100
+                    </Text>
+                  </View>
+                  <View style={{ height: 8, backgroundColor: LIGHT_GRAY, borderRadius: 4 }}>
+                    <View style={{ width: `${freqData.ranking.melhorNome.score}%`, height: 8, backgroundColor: freqData.ranking.melhorNome.score >= 70 ? '#059669' : freqData.ranking.melhorNome.score >= 40 ? '#D97706' : '#DC2626', borderRadius: 4 }} />
+                  </View>
+                </View>
+
+                {/* Números */}
+                <View style={styles.numbersGrid}>
+                  {[
+                    { label: 'Expressao', value: freqData.ranking.melhorNome.expressao },
+                    { label: 'Motivacao', value: freqData.ranking.melhorNome.motivacao },
+                    { label: 'Missao', value: freqData.ranking.melhorNome.missao },
+                    { label: 'Destino Bebe', value: freqData.ranking.destino },
+                  ].map(n => (
+                    <View key={n.label} style={styles.numberCard}>
+                      <Text style={styles.numberValue}>{n.value ?? '?'}</Text>
+                      <Text style={styles.numberLabel}>{n.label}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Compatibilidade */}
+                <View style={{
+                  marginTop: 12, borderRadius: 6, padding: 8,
+                  backgroundColor: freqData.ranking.melhorNome.compatibilidade === 'total' ? '#ECFDF5' : freqData.ranking.melhorNome.compatibilidade === 'complementar' ? '#FFFDF0' : '#FEF9C3',
+                }}>
+                  <Text style={{
+                    fontSize: 9, fontFamily: 'Helvetica-Bold', textAlign: 'center',
+                    color: freqData.ranking.melhorNome.compatibilidade === 'total' ? '#059669' : freqData.ranking.melhorNome.compatibilidade === 'complementar' ? '#D97706' : '#92400E',
+                  }}>
+                    Compatibilidade Expressao x Destino:{' '}
+                    {freqData.ranking.melhorNome.compatibilidade === 'total' ? 'Harmonia Total'
+                      : freqData.ranking.melhorNome.compatibilidade === 'complementar' ? 'Harmonia Complementar'
+                      : freqData.ranking.melhorNome.compatibilidade === 'aceitavel' ? 'Aceitavel'
+                      : 'Incompativel'}
+                  </Text>
+                </View>
+
+                {/* Bloqueios */}
+                <Text style={{ fontSize: 8, marginTop: 8, textAlign: 'center', color: freqData.ranking.melhorNome.temBloqueio ? '#DC2626' : '#059669' }}>
+                  {freqData.ranking.melhorNome.temBloqueio
+                    ? `${freqData.ranking.melhorNome.bloqueios?.length ?? 1} bloqueio(s) detectado(s)`
+                    : 'Sem bloqueios energeticos'}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+          </View>
+        </Page>
+      )}
+
+      {/* === BEBE: PÁGINA 3 — RANKING COMPARATIVO === */}
+      {isBebe && freqData?.ranking?.nomesCandidatos?.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — Ranking dos Candidatos</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ranking Numerologico dos Candidatos</Text>
+
+            <View style={styles.tableHeader}>
+              <Text style={[styles.tableHeaderCell, { width: '28%' }]}>Nome Completo</Text>
+              <Text style={[styles.tableHeaderCell, { width: '20%' }]}>Score</Text>
+              <Text style={[styles.tableHeaderCell, { width: '8%', textAlign: 'center' }]}>Expr.</Text>
+              <Text style={[styles.tableHeaderCell, { width: '8%', textAlign: 'center' }]}>Motiv.</Text>
+              <Text style={[styles.tableHeaderCell, { width: '8%', textAlign: 'center' }]}>Impr.</Text>
+              <Text style={[styles.tableHeaderCell, { width: '18%', textAlign: 'center' }]}>Compatib.</Text>
+              <Text style={[styles.tableHeaderCell, { width: '10%', textAlign: 'center' }]}>Bloq.</Text>
+            </View>
+
+            {(freqData.ranking.nomesCandidatos as any[]).slice(0, 12).map((c: any, i: number) => (
+              <View key={i} style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
+                <View style={{ width: '28%' }}>
+                  <Text style={[styles.tableCell, i === 0 ? { fontFamily: 'Helvetica-Bold', color: GOLD } : {}]}>
+                    {i === 0 ? `\u2605 ${c.nomeCompleto}` : c.nomeCompleto}
+                  </Text>
+                  {c.origemSugerida === 'ia' && (
+                    <Text style={{ fontSize: 6, color: '#7c3aed' }}>sugestao automatica</Text>
+                  )}
+                </View>
+                <View style={{ width: '20%', paddingRight: 6, justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: c.score >= 70 ? '#059669' : c.score >= 40 ? '#D97706' : '#DC2626', marginBottom: 2 }}>
+                    {c.score}/100
+                  </Text>
+                  <View style={{ height: 5, backgroundColor: LIGHT_GRAY, borderRadius: 2 }}>
+                    <View style={{ width: `${Math.min(100, c.score)}%`, height: 5, backgroundColor: c.score >= 70 ? '#059669' : c.score >= 40 ? '#D97706' : '#DC2626', borderRadius: 2 }} />
+                  </View>
+                </View>
+                <Text style={[styles.tableCell, { width: '8%', textAlign: 'center' }]}>{c.expressao}</Text>
+                <Text style={[styles.tableCell, { width: '8%', textAlign: 'center' }]}>{c.motivacao}</Text>
+                <Text style={[styles.tableCell, { width: '8%', textAlign: 'center' }]}>{c.impressao ?? '—'}</Text>
+                <Text style={[styles.tableCell, { width: '18%', textAlign: 'center', fontSize: 7, color: c.compatibilidade === 'total' ? '#059669' : c.compatibilidade === 'complementar' ? GOLD : c.compatibilidade === 'aceitavel' ? '#D97706' : '#DC2626' }]}>
+                  {c.compatibilidade === 'total' ? 'Total' : c.compatibilidade === 'complementar' ? 'Complementar' : c.compatibilidade === 'aceitavel' ? 'Aceitavel' : 'Incompat.'}
+                </Text>
+                <Text style={[styles.tableCell, { width: '10%', textAlign: 'center', color: c.temBloqueio ? '#DC2626' : '#059669' }]}>
+                  {c.temBloqueio ? `${c.bloqueios?.length ?? 1}x` : 'Limpo'}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+          </View>
+        </Page>
+      )}
+
+      {/* === EMPRESA: PÁGINA 2 — SINERGIA SÓCIO-EMPRESA + MELHOR NOME === */}
+      {isEmpresa && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{analysis.nome_completo} — Análise de Nome Empresarial</Text>
+          </View>
+
+          {/* Sinergia Sócio-Empresa */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Sinergia Socio-Empresa</Text>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flex: 1, backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: GOLD, borderRadius: 8, padding: 12, alignItems: 'center' }}>
+                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6, letterSpacing: 0.5 }}>DESTINO DO SOCIO PRINCIPAL</Text>
+                <Text style={{ fontSize: 34, fontFamily: 'Helvetica-Bold', color: GOLD }}>{freqData?.destinoSocio ?? analysis.numero_destino ?? '?'}</Text>
+                <Text style={{ fontSize: 8, color: GRAY, marginTop: 4, textAlign: 'center' }}>{freqData?.nomeSocioPrincipal ?? analysis.nome_completo}</Text>
+              </View>
+              {freqData?.nomeSocio2 && freqData?.destinoSocio2 != null && (
+                <View style={{ flex: 1, backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#a78bfa', borderRadius: 8, padding: 12, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6, letterSpacing: 0.5 }}>DESTINO DO 2o SOCIO</Text>
+                  <Text style={{ fontSize: 34, fontFamily: 'Helvetica-Bold', color: '#7c3aed' }}>{freqData.destinoSocio2}</Text>
+                  <Text style={{ fontSize: 8, color: GRAY, marginTop: 4, textAlign: 'center' }}>{freqData.nomeSocio2}</Text>
+                </View>
+              )}
+              {freqData?.destinoEmpresa != null && (
+                <View style={{ flex: 1, backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#a78bfa', borderRadius: 8, padding: 12, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6, letterSpacing: 0.5 }}>DESTINO DA EMPRESA</Text>
+                  <Text style={{ fontSize: 34, fontFamily: 'Helvetica-Bold', color: '#7c3aed' }}>{freqData.destinoEmpresa}</Text>
+                  <Text style={{ fontSize: 8, color: GRAY, marginTop: 4, textAlign: 'center' }}>Data de fundacao</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Melhor nome empresarial */}
+          {freqData?.melhorNome && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Nome Mais Indicado</Text>
+              <View style={{ backgroundColor: '#FFFDF0', borderWidth: 2, borderColor: GOLD, borderRadius: 8, padding: 16 }}>
+                <Text style={{ fontSize: 22, fontFamily: 'Helvetica-Bold', color: DARK, textAlign: 'center', marginBottom: 14 }}>
+                  {freqData.melhorNome.nomeEmpresa}
+                </Text>
+
+                {/* Score bar */}
+                <View style={{ marginBottom: 14 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <Text style={{ fontSize: 9, color: GRAY }}>Score Numerologico</Text>
+                    <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: freqData.melhorNome.score >= 70 ? '#059669' : freqData.melhorNome.score >= 40 ? '#D97706' : '#DC2626' }}>
+                      {freqData.melhorNome.score}/100
+                    </Text>
+                  </View>
+                  <View style={{ height: 8, backgroundColor: LIGHT_GRAY, borderRadius: 4 }}>
+                    <View style={{ width: `${Math.min(100, freqData.melhorNome.score)}%`, height: 8, backgroundColor: freqData.melhorNome.score >= 70 ? '#059669' : freqData.melhorNome.score >= 40 ? '#D97706' : '#DC2626', borderRadius: 4 }} />
+                  </View>
+                </View>
+
+                {/* 4 Números (agora inclui Impressão) */}
+                <View style={styles.numbersGrid}>
+                  {[
+                    { label: 'Expressao', value: freqData.melhorNome.expressao },
+                    { label: 'Motivacao', value: freqData.melhorNome.motivacao },
+                    { label: 'Missao', value: freqData.melhorNome.missao },
+                    { label: 'Impressao', value: freqData.melhorNome.impressao },
+                  ].map(n => (
+                    <View key={n.label} style={styles.numberCard}>
+                      <Text style={styles.numberValue}>{n.value ?? '?'}</Text>
+                      <Text style={styles.numberLabel}>{n.label}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Compatibilidades */}
+                <View style={{ marginTop: 12, borderRadius: 6, padding: 8, backgroundColor: freqData.melhorNome.compatibilidadeSocio === 'total' ? '#ECFDF5' : '#FFFDF0' }}>
+                  <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', textAlign: 'center', color: freqData.melhorNome.compatibilidadeSocio === 'total' ? '#059669' : '#D97706' }}>
+                    Compatibilidade com Socio Principal:{' '}
+                    {freqData.melhorNome.compatibilidadeSocio === 'total' ? 'Harmonia Total'
+                      : freqData.melhorNome.compatibilidadeSocio === 'complementar' ? 'Complementar'
+                      : freqData.melhorNome.compatibilidadeSocio === 'aceitavel' ? 'Aceitavel'
+                      : 'Incompativel'}
+                  </Text>
+                </View>
+
+                {freqData.melhorNome.compatibilidadeEmpresa != null && (
+                  <View style={{ marginTop: 6, borderRadius: 6, padding: 8, backgroundColor: freqData.melhorNome.compatibilidadeEmpresa === 'total' ? '#ECFDF5' : '#FFFDF0' }}>
+                    <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', textAlign: 'center', color: freqData.melhorNome.compatibilidadeEmpresa === 'total' ? '#059669' : '#7c3aed' }}>
+                      Compatibilidade com Empresa:{' '}
+                      {freqData.melhorNome.compatibilidadeEmpresa === 'total' ? 'Harmonia Total'
+                        : freqData.melhorNome.compatibilidadeEmpresa === 'complementar' ? 'Complementar'
+                        : freqData.melhorNome.compatibilidadeEmpresa === 'aceitavel' ? 'Aceitavel'
+                        : 'Incompativel'}
+                    </Text>
+                  </View>
+                )}
+
+                <Text style={{ fontSize: 8, marginTop: 8, textAlign: 'center', color: freqData.melhorNome.temBloqueio ? '#DC2626' : '#059669' }}>
+                  {freqData.melhorNome.temBloqueio
+                    ? `${freqData.melhorNome.bloqueios?.length ?? 1} bloqueio(s) detectado(s)`
+                    : 'Sem bloqueios energeticos'}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+          </View>
+        </Page>
+      )}
+
+      {/* === EMPRESA: PÁGINA 3 — ESTUDO COMPLETO DOS CANDIDATOS === */}
+      {isEmpresa && freqData?.nomesCandidatos?.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{analysis.nome_completo} — Estudo dos Nomes Candidatos</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Estudo Completo dos Nomes Candidatos</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 12, lineHeight: 1.5 }}>
+              Todos os nomes foram analisados numerologicamente. Os marcados com estrela sao as sugestoes mais indicadas. Itens com (*) foram gerados automaticamente pela analise numerologica por terem score superior a 80.
+            </Text>
+
+            {(freqData.nomesCandidatos as any[]).slice(0, 10).map((c: any, i: number) => {
+              const scoreColor = c.score >= 70 ? '#059669' : c.score >= 40 ? '#D97706' : '#DC2626';
+              const isTop = i === 0;
+              const isIA = c.origemSugerida === 'ia';
+              return (
+                <View key={i} style={{
+                  marginBottom: 8,
+                  padding: 10,
+                  backgroundColor: isTop ? '#FFFDF0' : '#F9FAFB',
+                  borderWidth: isTop ? 1.5 : 1,
+                  borderColor: isTop ? GOLD : '#E5E7EB',
+                  borderRadius: 6,
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      {isTop && <Text style={{ fontSize: 8, color: GOLD, fontFamily: 'Helvetica-Bold' }}>\u2605 RECOMENDADO  </Text>}
+                      {isIA && !isTop && <Text style={{ fontSize: 7, color: '#7c3aed', fontFamily: 'Helvetica-Bold' }}>(*) SUGESTAO  </Text>}
+                      <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: isTop ? DARK : '#374151' }}>
+                        {c.nomeEmpresa}
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: scoreColor }}>
+                      {c.score}/100
+                    </Text>
+                  </View>
+
+                  <View style={{ height: 4, backgroundColor: '#E5E7EB', borderRadius: 2, marginBottom: 5 }}>
+                    <View style={{ width: `${Math.min(100, c.score)}%`, height: 4, backgroundColor: scoreColor, borderRadius: 2 }} />
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <Text style={{ fontSize: 8, color: GRAY }}>Expressao: <Text style={{ fontFamily: 'Helvetica-Bold', color: GOLD }}>{c.expressao}</Text></Text>
+                    <Text style={{ fontSize: 8, color: GRAY }}>Motivacao: <Text style={{ fontFamily: 'Helvetica-Bold', color: '#374151' }}>{c.motivacao}</Text></Text>
+                    <Text style={{ fontSize: 8, color: GRAY }}>Missao: <Text style={{ fontFamily: 'Helvetica-Bold', color: '#374151' }}>{c.missao}</Text></Text>
+                    <Text style={{ fontSize: 8, color: GRAY }}>Impressao: <Text style={{ fontFamily: 'Helvetica-Bold', color: '#374151' }}>{c.impressao ?? '?'}</Text></Text>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <Text style={{ fontSize: 7, color: c.compatibilidadeSocio === 'total' ? '#059669' : c.compatibilidadeSocio === 'complementar' ? GOLD : c.compatibilidadeSocio === 'aceitavel' ? '#D97706' : '#DC2626' }}>
+                      Socio: {c.compatibilidadeSocio === 'total' ? 'Harmonia Total' : c.compatibilidadeSocio === 'complementar' ? 'Complementar' : c.compatibilidadeSocio === 'aceitavel' ? 'Aceitavel' : 'Incompativel'}
+                    </Text>
+                    {c.compatibilidadeEmpresa != null && (
+                      <Text style={{ fontSize: 7, color: c.compatibilidadeEmpresa === 'total' ? '#059669' : c.compatibilidadeEmpresa === 'complementar' ? '#7c3aed' : c.compatibilidadeEmpresa === 'aceitavel' ? '#D97706' : '#DC2626' }}>
+                        Empresa: {c.compatibilidadeEmpresa === 'total' ? 'Harmonia Total' : c.compatibilidadeEmpresa === 'complementar' ? 'Complementar' : c.compatibilidadeEmpresa === 'aceitavel' ? 'Aceitavel' : 'Incompativel'}
+                      </Text>
+                    )}
+                    <Text style={{ fontSize: 7, color: c.temBloqueio ? '#DC2626' : '#059669' }}>
+                      {c.temBloqueio ? `${c.bloqueios?.length ?? 1} bloqueio(s)` : 'Sem bloqueios'}
+                    </Text>
+                    {c.debitosCarmicos?.length > 0 && (
+                      <Text style={{ fontSize: 7, color: '#D97706' }}>{c.debitosCarmicos.length} Debito(s) Karmico(s)</Text>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+          </View>
+        </Page>
+      )}
+
+      {/* === EMPRESA: PÁGINA 4 — OS 4 TRIÂNGULOS NUMEROLÓGICOS === */}
+      {isEmpresa && hasTriangulos && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{freqData?.melhorNome?.nomeEmpresa ?? analysis.nome_completo} — Os 4 Triângulos Numerológicos</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Estudo dos 4 Triângulos</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
+              Os Quatro Triângulos Numerológicos revelam a estrutura energética profunda do nome escolhido para a empresa. Cada triângulo rege uma dimensão específica do negócio e o fluxo de energia ao longo do tempo.
+            </Text>
+
+            {tVida && (() => {
+              const arcanoVida = tVida.arcanoRegente != null ? ARCANOS[tVida.arcanoRegente] ?? null : null;
+              return (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8, letterSpacing: 0 }}>Triângulo da Vida</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>
+                    Vibração base do nome da empresa — revela os aspectos gerais de energia que o negócio projeta ao mercado e como é percebido naturalmente por clientes e parceiros.
+                  </Text>
+                  <TrianguloPiramideInline data={tVida} label="Triângulo da Vida" cellSize={triCellSize} letras={letrasNome} />
+                  {arcanoVida && (
+                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
+                        Arcano {tVida.arcanoRegente} — {arcanoVida.nome}: {arcanoVida.palavraChave.toLowerCase()}
+                      </Text>
+                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>{arcanoVida.descricao.split('.')[0]}.</Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+            {tPessoal && (() => {
+              const arcanoPessoal = tPessoal.arcanoRegente != null ? ARCANOS[tPessoal.arcanoRegente] ?? null : null;
+              return (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8, letterSpacing: 0 }}>Triângulo Pessoal</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>
+                    Dimensão íntima do negócio — a cultura interna, os valores e a forma como a equipe e os sócios vivenciam a empresa por dentro. Revela a identidade interna do negócio.
+                  </Text>
+                  <TrianguloPiramideInline data={tPessoal} label="Triângulo Pessoal" cellSize={triCellSize} letras={letrasNome} />
+                  {arcanoPessoal && (
+                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
+                        Arcano {tPessoal.arcanoRegente} — {arcanoPessoal.nome}: {arcanoPessoal.palavraChave.toLowerCase()}
+                      </Text>
+                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>{arcanoPessoal.descricao.split('.')[0]}.</Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+            {tSocial && (() => {
+              const arcanoSocial = tSocial.arcanoRegente != null ? ARCANOS[tSocial.arcanoRegente] ?? null : null;
+              return (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8, letterSpacing: 0 }}>Triângulo Social</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>
+                    Posicionamento de mercado — como clientes, concorrentes e o mercado percebem esta empresa. Revela as influências externas e o campo de atração que o nome cria.
+                  </Text>
+                  <TrianguloPiramideInline data={tSocial} label="Triângulo Social" cellSize={triCellSize} letras={letrasNome} />
+                  {arcanoSocial && (
+                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
+                        Arcano {tSocial.arcanoRegente} — {arcanoSocial.nome}: {arcanoSocial.palavraChave.toLowerCase()}
+                      </Text>
+                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>{arcanoSocial.descricao.split('.')[0]}.</Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+            {tDestino && (() => {
+              const arcanoDestino = tDestino.arcanoRegente != null ? ARCANOS[tDestino.arcanoRegente] ?? null : null;
+              return (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8, letterSpacing: 0 }}>Triângulo do Destino</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>
+                    Missão e legado da empresa — o propósito de longo prazo do negócio, as realizações que ele veio construir e o impacto que este nome carrega para o futuro.
+                  </Text>
+                  <TrianguloPiramideInline data={tDestino} label="Triângulo do Destino" cellSize={triCellSize} letras={letrasNome} />
+                  {arcanoDestino && (
+                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
+                        Arcano {tDestino.arcanoRegente} — {arcanoDestino.nome}: {arcanoDestino.palavraChave.toLowerCase()}
+                      </Text>
+                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>{arcanoDestino.descricao.split('.')[0]}.</Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+          </View>
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+          </View>
+        </Page>
+      )}
+
+      {/* === EMPRESA: PÁGINA 5 — KARMA EMPRESARIAL === */}
+      {isEmpresa && ((freqData?.melhorNome?.debitosCarmicos?.length > 0) || (freqData?.melhorNome?.licoesCarmicas?.length > 0)) && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{analysis.nome_completo} — Karma Empresarial</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Karma Empresarial — Perfil do Socio</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 14, lineHeight: 1.5 }}>
+              Os padrões kármicos do empreendedor influenciam diretamente a energia e os resultados do negócio. Compreender e trabalhar conscientemente esses padrões é fundamental para o sucesso sustentável da empresa.
+            </Text>
+
+            {freqData?.melhorNome?.debitosCarmicos?.length > 0 && (
+              <View style={{ marginBottom: 16 }}>
+                <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#D97706', marginBottom: 8 }}>Debitos Karmicos Identificados</Text>
+                {(freqData.melhorNome.debitosCarmicos as any[]).map((d: any, i: number) => (
+                  <View key={i} style={{ marginBottom: 8, padding: 10, backgroundColor: '#FFFBEB', borderWidth: 1, borderColor: '#FDE68A', borderRadius: 6 }}>
+                    <Text style={{ fontSize: 10, fontFamily: 'Helvetica-Bold', color: '#92400E', marginBottom: 3 }}>
+                      Debito Karmico {d.numero} — {d.titulo ?? ''}
+                    </Text>
+                    <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>{d.descricao ?? ''}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {freqData?.melhorNome?.licoesCarmicas?.length > 0 && (
+              <View>
+                <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#7c3aed', marginBottom: 8 }}>Licoes Karmicas — Qualidades a Desenvolver</Text>
+                {(freqData.melhorNome.licoesCarmicas as any[]).map((l: any, i: number) => (
+                  <View key={i} style={{ marginBottom: 8, padding: 10, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#DDD6FE', borderRadius: 6 }}>
+                    <Text style={{ fontSize: 10, fontFamily: 'Helvetica-Bold', color: '#5B21B6', marginBottom: 3 }}>
+                      Licao Karmica {l.numero} — {l.titulo ?? ''}
+                    </Text>
+                    <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>{l.descricao ?? ''}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+          </View>
+        </Page>
+      )}
 
       {/* === PÁGINA(S) DE ANÁLISE COMPLETA (triângulos injetados inline sob seus títulos) === */}
       {analiseCorpo && (
@@ -1108,37 +1607,173 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Estudo dos 4 Triângulos</Text>
             <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
-              Os Quatro Triângulos Numerológicos revelam a estrutura energética profunda do nome. Cada triângulo rege uma área específica da vida e o fluxo de energia ao longo do tempo.
+              Os Quatro Triângulos Numerológicos revelam a estrutura energética profunda do nome escolhido para esta criança. Cada triângulo rege uma dimensão específica da vida e o fluxo de energia ao longo do desenvolvimento.
             </Text>
 
-            {tVida && (
-              <View style={{ marginBottom: 12 }}>
-                <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo da Vida</Text>
-                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Representa os aspectos gerais e a vibração matriz do nome.</Text>
-                <TrianguloPiramideInline data={tVida} label="Triângulo da Vida" cellSize={triCellSize} letras={letrasNome} />
-              </View>
-            )}
-            {tPessoal && (
-              <View style={{ marginBottom: 12 }}>
-                <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo Pessoal</Text>
-                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Revela a vida íntima, as reações emocionais e comportamentos mais profundos.</Text>
-                <TrianguloPiramideInline data={tPessoal} label="Triângulo Pessoal" cellSize={triCellSize} letras={letrasNome} />
-              </View>
-            )}
-            {tSocial && (
-              <View style={{ marginBottom: 12 }}>
-                <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo Social</Text>
-                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Mostra as influências externas, amizades, ambiente de trabalho e vida pública.</Text>
-                <TrianguloPiramideInline data={tSocial} label="Triângulo Social" cellSize={triCellSize} letras={letrasNome} />
-              </View>
-            )}
-            {tDestino && (
-              <View style={{ marginBottom: 12 }}>
-                <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo do Destino</Text>
-                <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Governa a missão de vida, realizações a longo prazo e legado final.</Text>
-                <TrianguloPiramideInline data={tDestino} label="Triângulo do Destino" cellSize={triCellSize} letras={letrasNome} />
-              </View>
-            )}
+            {tVida && (() => {
+              const arcanoVida = tVida.arcanoRegente != null ? ARCANOS[tVida.arcanoRegente] ?? null : null;
+              return (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8, letterSpacing: 0 }}>Triângulo da Vida</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>
+                    Vibração base do nome — revela os aspectos gerais de personalidade desta criança e a energia que ela naturalmente projeta ao mundo ao longo de toda a vida.
+                  </Text>
+                  <TrianguloPiramideInline data={tVida} label="Triângulo da Vida" cellSize={triCellSize} letras={letrasNome} />
+                  {arcanoVida && (
+                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
+                        Arcano {tVida.arcanoRegente} — {arcanoVida.nome}: {arcanoVida.palavraChave.toLowerCase()}
+                      </Text>
+                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>
+                        {arcanoVida.descricao.split('.')[0]}.
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+            {tPessoal && (() => {
+              const arcanoPessoal = tPessoal.arcanoRegente != null ? ARCANOS[tPessoal.arcanoRegente] ?? null : null;
+              return (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8, letterSpacing: 0 }}>Triângulo Pessoal</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>
+                    Mundo íntimo da criança — reações emocionais profundas, como ela processa sentimentos internamente, o que a move por dentro e como reage em momentos de pressão ou afeto.
+                  </Text>
+                  <TrianguloPiramideInline data={tPessoal} label="Triângulo Pessoal" cellSize={triCellSize} letras={letrasNome} />
+                  {arcanoPessoal && (
+                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
+                        Arcano {tPessoal.arcanoRegente} — {arcanoPessoal.nome}: {arcanoPessoal.palavraChave.toLowerCase()}
+                      </Text>
+                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>
+                        {arcanoPessoal.descricao.split('.')[0]}.
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+            {tSocial && (() => {
+              const arcanoSocial = tSocial.arcanoRegente != null ? ARCANOS[tSocial.arcanoRegente] ?? null : null;
+              return (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8, letterSpacing: 0 }}>Triângulo Social</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>
+                    Influências externas — como esta criança se comporta em grupo, na escola e nas amizades; a percepção que os outros têm dela e como ela absorve o ambiente ao redor.
+                  </Text>
+                  <TrianguloPiramideInline data={tSocial} label="Triângulo Social" cellSize={triCellSize} letras={letrasNome} />
+                  {arcanoSocial && (
+                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
+                        Arcano {tSocial.arcanoRegente} — {arcanoSocial.nome}: {arcanoSocial.palavraChave.toLowerCase()}
+                      </Text>
+                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>
+                        {arcanoSocial.descricao.split('.')[0]}.
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+            {tDestino && (() => {
+              const arcanoDestino = tDestino.arcanoRegente != null ? ARCANOS[tDestino.arcanoRegente] ?? null : null;
+              return (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8, letterSpacing: 0 }}>Triângulo do Destino</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>
+                    Missão de vida — o propósito de longo prazo desta alma, as realizações e o legado que esta criança veio construir. É o triângulo que aponta para onde a vida naturalmente conduz.
+                  </Text>
+                  <TrianguloPiramideInline data={tDestino} label="Triângulo do Destino" cellSize={triCellSize} letras={letrasNome} />
+                  {arcanoDestino && (
+                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
+                        Arcano {tDestino.arcanoRegente} — {arcanoDestino.nome}: {arcanoDestino.palavraChave.toLowerCase()}
+                      </Text>
+                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>
+                        {arcanoDestino.descricao.split('.')[0]}.
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })()}
+          </View>
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text
+              style={styles.pageFooterPage}
+              render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
+            />
+          </View>
+        </Page>
+      )}
+
+      {/* === NOME SOCIAL: PÁGINA DE VARIAÇÕES / SUGESTÕES === */}
+      {(!isBebe && !isEmpresa) && magneticNames.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.pageHeader} fixed>
+            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
+            <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — Variações Numerológicas</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Estudo das Variações de Nome Social</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 14, lineHeight: 1.5 }}>
+              Abaixo estão as principais variações numerológicas geradas para o seu nome. Cada opção foi calculada para reduzir bloqueios e aumentar a harmonia entre os números de Expressão e Destino. Compare os scores e escolha a variação que mais ressoa com você.
+            </Text>
+
+            {magneticNames.slice(0, 8).map((name, i) => {
+              const scoreColor = name.score >= 70 ? '#059669' : name.score >= 40 ? '#D97706' : '#DC2626';
+              const isTop = i === 0;
+              return (
+                <View key={i} style={{
+                  marginBottom: 10,
+                  padding: 10,
+                  backgroundColor: isTop ? '#FFFDF0' : '#F9FAFB',
+                  borderWidth: isTop ? 1.5 : 1,
+                  borderColor: isTop ? GOLD : '#E5E7EB',
+                  borderRadius: 6,
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      {isTop && <Text style={{ fontSize: 8, color: GOLD, fontFamily: 'Helvetica-Bold' }}>\u2605 RECOMENDADO  </Text>}
+                      <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: isTop ? DARK : '#374151' }}>
+                        {name.nome_sugerido}
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: scoreColor }}>
+                      {name.score}/100
+                    </Text>
+                  </View>
+
+                  {/* Score bar */}
+                  <View style={{ height: 4, backgroundColor: '#E5E7EB', borderRadius: 2, marginBottom: 6 }}>
+                    <View style={{ width: `${Math.min(100, name.score)}%`, height: 4, backgroundColor: scoreColor, borderRadius: 2 }} />
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 16, marginBottom: name.justificativa ? 5 : 0 }}>
+                    {name.numero_expressao != null && (
+                      <Text style={{ fontSize: 8, color: GRAY }}>
+                        Expressão: <Text style={{ fontFamily: 'Helvetica-Bold', color: GOLD }}>{name.numero_expressao}</Text>
+                      </Text>
+                    )}
+                    {name.numero_motivacao != null && (
+                      <Text style={{ fontSize: 8, color: GRAY }}>
+                        Motivação: <Text style={{ fontFamily: 'Helvetica-Bold', color: '#374151' }}>{name.numero_motivacao}</Text>
+                      </Text>
+                    )}
+                  </View>
+
+                  {name.justificativa && (
+                    <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4, marginTop: 3 }}>
+                      {name.justificativa}
+                    </Text>
+                  )}
+                </View>
+              );
+            })}
           </View>
 
           <View style={styles.pageFooter} fixed>
@@ -1172,55 +1807,8 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
           </View>
         </Page>
       )}
-      {/* === PÁGINA DE RANKING (exclusivo nome_bebe) === */}
-      {isBebe && freqData?.ranking?.nomesCandidatos?.length > 0 && (
-        <Page size="A4" style={styles.page}>
-          <View style={styles.pageHeader} fixed>
-            <Text style={styles.pageHeaderBrand}>NOME MAGNETICO</Text>
-            <Text style={styles.pageHeaderInfo}>{nomeParaExibir} — Ranking dos Candidatos</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ranking dos Nomes Candidatos</Text>
-
-            {/* Cabeçalho da tabela */}
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderCell, styles.colNome]}>Nome</Text>
-              <Text style={[styles.tableHeaderCell, styles.colScore]}>Score</Text>
-              <Text style={[styles.tableHeaderCell, styles.colNum]}>Expressao</Text>
-              <Text style={[styles.tableHeaderCell, styles.colNum]}>Motiv.</Text>
-              <Text style={[styles.tableHeaderCell, styles.colJustificativa]}>Compatibilidade</Text>
-            </View>
-
-            {(freqData.ranking.nomesCandidatos as any[]).map((c: any, i: number) => (
-              <View key={i} style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
-                <Text style={[styles.tableCell, styles.colNome, i === 0 ? { fontFamily: 'Helvetica-Bold', color: GOLD } : {}]}>
-                  {i === 0 ? `★ ${c.primeiroNome}` : c.primeiroNome}
-                </Text>
-                <Text style={[styles.tableCell, styles.colScore, { textAlign: 'center', color: c.score >= 70 ? '#059669' : c.score >= 40 ? '#D97706' : '#DC2626', fontFamily: 'Helvetica-Bold' }]}>
-                  {c.score}%
-                </Text>
-                <Text style={[styles.tableCell, styles.colNum, { textAlign: 'center' }]}>{c.expressao}</Text>
-                <Text style={[styles.tableCell, styles.colNum, { textAlign: 'center' }]}>{c.motivacao}</Text>
-                <Text style={[styles.tableCell, styles.colJustificativa, { color: c.compatibilidade === 'total' ? '#059669' : c.compatibilidade === 'complementar' ? GOLD : c.compatibilidade === 'aceitavel' ? '#D97706' : '#DC2626' }]}>
-                  {c.compatibilidade}{c.temBloqueio ? ` · ${c.bloqueios?.length}x bloq.` : ''}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.pageFooter} fixed>
-            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
-            <Text
-              style={styles.pageFooterPage}
-              render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
-            />
-          </View>
-        </Page>
-      )}
-
-      {/* === PÁGINA FINAL: TREINO DE ASSINATURA === */}
-      {!isBebe && (
+      {/* === PÁGINA FINAL: TREINO DE ASSINATURA (apenas Nome Social) === */}
+      {(!isBebe && !isEmpresa) && (
         <Page size="A4" style={styles.assinaturaPage}>
           <Text style={styles.assinaturaTitle}>Folha de Treino de Assinatura</Text>
           <Text style={styles.assinaturaNome}>{nomeParaExibir}</Text>

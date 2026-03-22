@@ -30,10 +30,13 @@ const schema = z.object({
   outros_sobrenomes: z.array(z.string()).optional(),
   genero_preferido: z.string().optional(),
   estilo_preferido: z.string().optional(),
+  caracteristicas_desejadas: z.string().max(300).optional(),
   // campos específicos nome_empresa
   data_fundacao: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/).optional(),
   ramo_atividade: z.string().optional(),
   descricao_negocio: z.string().optional(),
+  nome_socio2: z.string().min(2).max(150).optional(),
+  data_nascimento_socio2: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/).optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -68,7 +71,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     nome_pai, sobrenome_pai, ignorar_pai,
     nome_mae, sobrenome_mae, ignorar_mae,
     outros_sobrenomes,
-    genero_preferido, estilo_preferido,
+    genero_preferido, estilo_preferido, caracteristicas_desejadas,
     data_fundacao, ramo_atividade, descricao_negocio,
   } = parsed.data;
 
@@ -113,12 +116,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
           candidatos,
           nome_completo,
           data_nascimento,
-          data_fundacao ?? null
+          data_fundacao ?? null,
+          nome_socio2,
+          data_nascimento_socio2
         );
 
         await updateAnalysis(analysis.id, {
           frequencias_numeros: resultado as unknown,
           numero_destino: resultado.destinoSocio,
+          numero_personalidade: resultado.melhorNome?.impressao ?? null,
           score: resultado.melhorNome?.score ?? null,
         });
 
@@ -154,7 +160,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           sobrenomesValidos.push(nome_completo.replace('(bebê) ', ''));
         }
 
-        const resultado = analisarNomesBebe(candidatos, sobrenomesValidos, data_nascimento);
+        const resultado = analisarNomesBebe(candidatos, sobrenomesValidos, data_nascimento, genero_preferido);
 
         const melhorNome = resultado.melhorNome;
         const cincoNums = melhorNome
@@ -190,6 +196,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
             nomeMae: nome_mae,
             generoPreferido: genero_preferido,
             estiloPreferido: estilo_preferido,
+            caracteristicasDesejadas: caracteristicas_desejadas,
           },
           user.id,
           analysis.id

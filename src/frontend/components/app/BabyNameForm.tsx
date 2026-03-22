@@ -18,6 +18,7 @@ interface FormState {
   genero_preferido: string;
   estilo_preferido: string;
   nomes_candidatos: string;
+  caracteristicas_desejadas: string;
 }
 
 interface Props {
@@ -39,6 +40,7 @@ export default function BabyNameForm({ onSuccess }: Props) {
     genero_preferido: 'surpresa',
     estilo_preferido: '',
     nomes_candidatos: '',
+    caracteristicas_desejadas: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -105,6 +107,7 @@ export default function BabyNameForm({ onSuccess }: Props) {
           outros_sobrenomes: outros.length > 0 ? outros : undefined,
           genero_preferido: form.genero_preferido,
           estilo_preferido: form.estilo_preferido || undefined,
+          caracteristicas_desejadas: form.caracteristicas_desejadas.trim() || undefined,
           nomes_candidatos: candidatos,
         }),
       });
@@ -291,6 +294,47 @@ export default function BabyNameForm({ onSuccess }: Props) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Características desejadas */}
+      <div className="glass rounded-xl p-5 space-y-3">
+        <h3 className="text-gold font-semibold flex items-center gap-2">
+          <span>✨</span> Características Desejadas <span className="text-gray-500 text-xs font-normal">(opcional)</span>
+        </h3>
+        <p className="text-sm text-gray-400">
+          Descreva características de personalidade que você gostaria que seu filho tivesse. A IA levará isso em consideração na análise e nas sugestões.
+        </p>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {['Responsável', 'Carinhoso', 'Determinado', 'Criativo', 'Divertido', 'Sério', 'Meigo', 'Corajoso', 'Sensível', 'Liderança'].map(c => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => {
+                const current = form.caracteristicas_desejadas;
+                const already = current.toLowerCase().includes(c.toLowerCase());
+                if (already) {
+                  set('caracteristicas_desejadas', current.replace(new RegExp(`,?\\s*${c}`, 'i'), '').replace(/^,\s*/, '').trim());
+                } else {
+                  set('caracteristicas_desejadas', current ? `${current}, ${c}` : c);
+                }
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs transition-all duration-200 ${
+                form.caracteristicas_desejadas.toLowerCase().includes(c.toLowerCase())
+                  ? 'bg-gold text-black font-medium'
+                  : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10'
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+        <textarea
+          value={form.caracteristicas_desejadas}
+          onChange={e => set('caracteristicas_desejadas', e.target.value)}
+          placeholder="Ex: responsável, carinhoso, com liderança natural, criativo..."
+          rows={2}
+          className="input-dark w-full resize-none"
+        />
       </div>
 
       {/* Nomes candidatos */}

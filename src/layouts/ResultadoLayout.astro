@@ -23,17 +23,28 @@ const pdfHref = '/api/generate-pdf?id=' + analysisId;
   <div class="min-h-screen bg-[#1a1a1a]">
     <!-- Header do resultado — sem menu, apenas botões contextuais -->
     <header class="border-b border-[#D4AF37]/20 bg-[#111111]/80 backdrop-blur-md sticky top-0 z-40">
-      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <a href="/app" class="font-cinzel text-base sm:text-lg md:text-xl font-bold text-[#D4AF37] tracking-wider hover:opacity-80 transition-opacity whitespace-nowrap">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between relative">
+        <!-- Back Button (Mobile) -->
+        <a href="/app/analises" class="text-[#D4AF37] hover:text-[#f2ca50] transition-colors md:hidden">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+
+        <!-- Title -->
+        <a href="/app" class="font-cinzel text-base sm:text-lg md:text-xl font-bold text-[#D4AF37] tracking-wider hover:opacity-80 transition-opacity whitespace-nowrap absolute left-1/2 -translate-x-1/2 md:static md:transform-none">
           NOME MAGNÉTICO
         </a>
+
+        <!-- Spacer for mobile flex balance -->
+        <div class="w-6 md:hidden"></div>
+
+        <!-- Desktop Nav -->
         {showActions && (
-          <div class="flex items-center gap-3">
+          <div class="hidden md:flex items-center gap-3">
             <a
               href="/app/analises"
               class="relative inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#D4AF37] transition-colors pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300 after:w-0 hover:after:w-full"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
               Análises
             </a>
             <a
@@ -47,8 +58,21 @@ const pdfHref = '/api/generate-pdf?id=' + analysisId;
       </div>
     </header>
 
+    <!-- Mobile Fixed PDF Button -->
+    {showActions && (
+      <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[300px] md:hidden z-50">
+        <a
+          href={pdfHref}
+          class="flex items-center justify-center gap-2 bg-[#D4AF37] text-black text-sm font-bold uppercase tracking-wider px-6 py-4 rounded-full shadow-[0_4px_20px_rgba(212,175,55,0.3)] hover:bg-[#f2ca50] hover:scale-105 active:scale-95 transition-all"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Baixar PDF
+        </a>
+      </div>
+    )}
+
     <!-- Conteúdo principal -->
-    <main class="max-w-4xl mx-auto px-4 py-8">
+    <main class="max-w-4xl mx-auto px-4 py-8 pb-32 md:pb-8">
       <slot />
     </main>
   </div>

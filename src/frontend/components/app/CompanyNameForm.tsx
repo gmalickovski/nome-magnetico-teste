@@ -13,6 +13,8 @@ interface FormState {
   ramo_atividade: string;
   descricao_negocio: string;
   nomes_candidatos: string;
+  nome_socio2: string;
+  data_nascimento_socio2: string;
 }
 
 interface Props {
@@ -33,7 +35,10 @@ export default function CompanyNameForm({ onSuccess }: Props) {
     ramo_atividade: '',
     descricao_negocio: '',
     nomes_candidatos: '',
+    nome_socio2: '',
+    data_nascimento_socio2: '',
   });
+  const [showSocio2, setShowSocio2] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -67,6 +72,14 @@ export default function CompanyNameForm({ onSuccess }: Props) {
       setError('A data de fundação deve estar no formato DD/MM/AAAA.');
       return;
     }
+    if (showSocio2 && form.nome_socio2.trim() && !form.data_nascimento_socio2) {
+      setError('Informe a data de nascimento do 2º sócio.');
+      return;
+    }
+    if (showSocio2 && form.data_nascimento_socio2 && !/^\d{2}\/\d{2}\/\d{4}$/.test(form.data_nascimento_socio2)) {
+      setError('A data de nascimento do 2º sócio deve estar no formato DD/MM/AAAA.');
+      return;
+    }
     if (candidatos.length === 0) {
       setError('Informe ao menos um nome candidato para a empresa.');
       return;
@@ -85,6 +98,10 @@ export default function CompanyNameForm({ onSuccess }: Props) {
           ramo_atividade: form.ramo_atividade || undefined,
           descricao_negocio: form.descricao_negocio || undefined,
           nomes_candidatos: candidatos,
+          ...(showSocio2 && form.nome_socio2.trim() ? {
+            nome_socio2: form.nome_socio2.trim(),
+            data_nascimento_socio2: form.data_nascimento_socio2,
+          } : {}),
         }),
       });
 
@@ -135,6 +152,52 @@ export default function CompanyNameForm({ onSuccess }: Props) {
           </div>
         </div>
       </div>
+
+      {/* 2º Sócio (opcional) */}
+      {!showSocio2 ? (
+        <button
+          type="button"
+          onClick={() => setShowSocio2(true)}
+          className="w-full py-3 rounded-xl border border-dashed border-white/20 text-gray-400 text-sm hover:border-[#D4AF37]/40 hover:text-[#D4AF37] transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <span className="text-lg leading-none">+</span> Adicionar 2º Sócio
+        </button>
+      ) : (
+        <div className="glass rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-gold font-semibold flex items-center gap-2">
+              <span>👤</span> 2º Sócio
+            </h3>
+            <button
+              type="button"
+              onClick={() => { setShowSocio2(false); set('nome_socio2', ''); set('data_nascimento_socio2', ''); }}
+              className="text-xs text-gray-500 hover:text-red-400 transition-colors"
+            >
+              Remover
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Nome completo</label>
+              <input
+                type="text"
+                value={form.nome_socio2}
+                onChange={e => set('nome_socio2', e.target.value)}
+                placeholder="ex: Ana Paula Ferreira"
+                className="input-dark w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Data de nascimento</label>
+              <DateInput
+                value={form.data_nascimento_socio2}
+                onChangeValue={v => set('data_nascimento_socio2', v)}
+                className="input-dark w-full"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Dados da empresa */}
       <div className="glass rounded-xl p-5 space-y-4">
