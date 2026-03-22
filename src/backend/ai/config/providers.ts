@@ -1,14 +1,15 @@
 /**
  * Configuração de provedores de IA.
- * development → Groq (gratuito)
- * production  → Claude (Anthropic)
+ * Padrão: Groq (gratuito e rápido).
+ * Override via variável AI_DEFAULT_PROVIDER ou via painel /admin/ia (tabela ai_config).
  */
 
 export type AIProvider = 'groq' | 'claude' | 'openai';
 
 export function getDefaultProvider(): AIProvider {
-  const env = process.env.APP_ENV ?? 'development';
-  return env === 'production' ? 'claude' : 'groq';
+  const override = process.env.AI_DEFAULT_PROVIDER as AIProvider | undefined;
+  if (override && ['groq', 'claude', 'openai'].includes(override)) return override;
+  return 'groq';
 }
 
 export const PROVIDER_LABELS: Record<AIProvider, string> = {
