@@ -15,6 +15,11 @@ export function OnboardingNomeSocialModal({ nomeSalvo, dataSalva }: Props) {
 
   useEffect(() => {
     const handler = () => {
+      // Previne reabrir o modal se a sessão atual avisou que já completamos
+      if (sessionStorage.getItem('onboarding_completed') === 'true') {
+        window.location.href = '/app/analise/nome-social';
+        return;
+      }
       setOpen(true);
     };
     document.addEventListener('openNomeSocialModal', handler);
@@ -67,7 +72,14 @@ export function OnboardingNomeSocialModal({ nomeSalvo, dataSalva }: Props) {
         throw new Error(errorData.error || 'Erro ao salvar perfil');
       }
 
-      window.location.href = '/app/analise/nome-social';
+      // Marcar na sessão local para evitar repetição ao testar o botão voltar do navegador
+      sessionStorage.setItem('onboarding_completed', 'true');
+      
+      // Destruir o modal via prop "open" enquanto recarrega a página
+      setOpen(false);
+      
+      // Substituir histórico local e direcionar (Bypass Back button stack)
+      window.location.replace('/app/analise/nome-social');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado');
       setLoading(false);

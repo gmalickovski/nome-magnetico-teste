@@ -79,12 +79,21 @@ export function LoginForm() {
       document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
     }
 
-    // Redirecionar: produto tem prioridade (vindo do funil landing → cadastro → login)
+    // Redirecionar: produto tem prioridade (vindo do funil landing -> cadastro -> login)
     const searchParams = new URLSearchParams(window.location.search);
-    const produto = searchParams.get('produto');
-    window.location.href = produto
-      ? `/comprar?produto=${produto}`
-      : (searchParams.get('redirect') ?? '/app');
+    let produto = searchParams.get('produto');
+    
+    // Recuperar produto solto durante a confirmação de e-mail (fallback)
+    if (!produto) {
+      produto = localStorage.getItem('nome_magnetico_pending_product');
+    }
+    
+    if (produto) {
+      localStorage.removeItem('nome_magnetico_pending_product');
+      window.location.href = `/comprar?produto=${produto}`;
+    } else {
+      window.location.href = searchParams.get('redirect') ?? '/app';
+    }
   }
 
   return (

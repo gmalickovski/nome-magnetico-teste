@@ -7,6 +7,11 @@ import { OnboardingNomeSocialModal } from '../../frontend/components/app/Onboard
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
 
+// Desabilitar cache para o botão voltar do navegador não repuxar dados velhos
+Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+Astro.response.headers.set('Pragma', 'no-cache');
+Astro.response.headers.set('Expires', '0');
+
 // Verificar admin e dados
 let isAdmin = false;
 let profileData: any = null;
