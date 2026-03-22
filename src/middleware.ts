@@ -4,24 +4,12 @@ import { createUserClient } from './backend/db/supabase';
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
-  // Rotas públicas — sem verificação
-  const publicPaths = [
-    '/',
-    '/comprar',
-    '/suporte',
-    '/api/teste-bloqueio',
-    '/api/create-checkout',
-    '/api/stripe-webhook',
-  ];
-
-  const isPublic =
-    publicPaths.includes(pathname) ||
-    pathname.startsWith('/auth/') ||
-    pathname.startsWith('/api/auth/') ||
+  // Fast-path para assets estáticos para não bater no Supabase
+  const isAsset =
     pathname.startsWith('/_astro/') ||
     pathname.match(/\.(css|js|png|jpg|jpeg|svg|ico|woff|woff2)$/);
 
-  if (isPublic) {
+  if (isAsset) {
     return next();
   }
 

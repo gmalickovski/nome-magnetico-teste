@@ -37,7 +37,7 @@ Fornecer análises profundas, empáticas e transformadoras que:
 - Parágrafos máximos de 4 linhas — quebre parágrafos maiores em dois
 - **SEMPRE** adicione linha em branco antes e depois de cada heading
 - **SEMPRE** adicione linha em branco entre parágrafos consecutivos
-- Use negrito (**) em termos de numerologia e onde ajudar o leitor a entender melhor o texto.
+- **Atenção ao Uso do Negrito:** Utilize negrito (**) **EXCLUSIVAMENTE** para expressões numerológicas e termos cabalísticos (ex: **Débitos Kármicos**, **Expressão**, **Motivação**, **Bloqueios**, **Arcano Regente**) e para os **números** em si. O restante do texto deve permanecer no formato normal, sem usar negrito para ênfase genérica.
 
 ## Regras importantes
 

@@ -94,7 +94,7 @@ Orientações práticas para ativar a energia do nome escolhido (lançamento, re
 REGRAS ESTRITAS DE FORMATAÇÃO:
 1. Você DEVE usar estruturação Markdown rigorosa.
 2. NUNCA use títulos apenas com letras maiúsculas (ex: "PERFIL GERAL"). Use SEMPRE Hash Headers (ex: "## 1. O Destino", "### Análise").
-3. Use negrito (**) livremente para destacar conceitos, dicas e trechos cruciais no meio do texto.
+3. **Atenção ao Uso do Negrito:** Utilize negrito (**) EXCLUSIVAMENTE para expressões numerológicas e termos cabalísticos e para os números em si. O restante do texto deve permanecer no formato normal, sem usar negrito de forma genérica.
 4. SEMPRE adicione DUPLO ESPAÇAMENTO (duas quebras de linha) entre um parágrafo e outro, ou entre um título e um parágrafo. O texto final deve ser perfeitamente escaneável, arejado e elegante.
 
 Escreva com autoridade, clareza e uma pitada de entusiasmo empreendedor — este é um momento decisivo para o negócio!`;

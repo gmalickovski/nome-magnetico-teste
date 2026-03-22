@@ -6,13 +6,13 @@ const products = [
     icon: '✨',
     name: 'Nome Social',
     tagline: 'Desbloqueie a energia do seu nome',
-    description: 'Análise completa do seu nome de nascimento com os 4 triângulos cabalísticos, lições kármics e sugestões de nome sem bloqueios.',
+    description: 'Análise cabalística completa do seu nome de nascimento e data. O Estudo revela as energias ocultas e mostra exatamente como elas afetam sua vida diária.',
     benefits: [
-      '5 números + 4 triângulos + lições kármicas e tendências ocultas',
-      'Bloqueios e débitos kármicos com aspectos de saúde',
-      '3 Nomes Magnéticos alinhados ao Expressão e Destino',
+      'Identifica bloqueios na vida financeira, relacionamentos e saúde.',
+      'Revela seus 5 números principais e os 4 triângulos de destino.',
+      'Apresenta 3 opções de Nomes Magnéticos harmonizados para você usar na sua assinatura e redes.',
+      'Acompanha um guia em PDF detalhado para manifestação diária.'
     ],
-    cta: 'Analisar Meu Nome',
     highlight: true,
   },
   {
@@ -20,13 +20,13 @@ const products = [
     icon: '👶',
     name: 'Nome de Bebê',
     tagline: 'O melhor começo começa pelo nome',
-    description: 'Encontre o nome ideal para seu filho — sem bloqueios, compatível com o sobrenome da família e alinhado ao destino do bebê.',
+    description: 'Garanta um futuro sem bloqueios limitadores para seu filho. O Estudo cruza os sobrenomes da família com nomes pretendidos para encontrar a opção ideal.',
     benefits: [
-      '4 triângulos cabalísticos + lições kármicas por candidato',
-      'Compatibilidade com sobrenome e Destino do bebê',
-      'Ranking score 0–100 — melhor nome automaticamente destacado',
+      'Evita números kármicos e sequências negativas na vida do seu filho.',
+      'Avalia múltiplos nomes candidatos enviando um ranking claro de harmonia (0-100).',
+      'Harmoniza o nome com a data de nascimento e com o destino energético dos pais.',
+      'Traz paz mental de saber que está dando a melhor base energética desde o nascimento.'
     ],
-    cta: 'Analisar Nome do Bebê',
     highlight: false,
   },
   {
@@ -34,13 +34,13 @@ const products = [
     icon: '🏢',
     name: 'Nome Empresarial',
     tagline: 'Um nome que projeta prosperidade',
-    description: 'Avalie nomes de empresa pela compatibilidade com o Destino do fundador e da data de fundação, evitando bloqueios de crescimento.',
+    description: 'Um nome empresarial mal escolhido pode travar suas vendas desde o dia 1. A análise cruza a vibração da marca com a essência do fundador.',
     benefits: [
-      'Dupla compatibilidade: Destino do fundador + Destino da empresa',
-      'Débitos kármicos e bloqueios de crescimento detectados',
-      'Alerta de excesso do 8 — risco de materialismo no negócio',
+      'Alinha a assinatura energética da empresa ao destino e missão do fundador.',
+      'Evita o excesso do número 8 (risco de ganância corporativa) e faltas graves.',
+      'Avalia múltiplos candidatos mostrando a harmonia de cada opção no mercado.',
+      'Desenvolvido para atrair de forma mais natural um fluxo de negócios e prosperidade.'
     ],
-    cta: 'Analisar Minha Empresa',
     highlight: false,
   },
 ];
@@ -68,9 +68,9 @@ export function ProductsSection() {
           {products.map(product => (
             <div
               key={product.id}
-              className={`relative rounded-2xl p-8 flex flex-col transition-all duration-300 hover:scale-[1.02] ${
+              className={`relative rounded-2xl p-8 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[#D4AF37]/20 ${
                 product.highlight
-                  ? 'bg-white/5 border-2 border-[#D4AF37]/50 shadow-xl shadow-yellow-500/10'
+                  ? 'bg-white/5 border-2 border-[#D4AF37]/50'
                   : 'bg-white/3 border border-white/10 hover:border-[#D4AF37]/30 hover:bg-white/5'
               }`}
             >
@@ -87,29 +87,16 @@ export function ProductsSection() {
                 {product.tagline}
               </p>
 
-              <p className="text-gray-400 text-sm leading-relaxed mb-6">{product.description}</p>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4 font-medium">{product.description}</p>
 
-              <ul className="space-y-3 mb-8 flex-1">
+              <div className="flex-1 space-y-2">
                 {product.benefits.map(benefit => (
-                  <li key={benefit} className="flex items-start gap-2 text-sm text-gray-300">
-                    <svg className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {benefit}
-                  </li>
+                  <p key={benefit} className="flex items-start gap-2 text-sm text-gray-400">
+                    <span className="text-[#D4AF37] font-bold">-</span>
+                    <span className="leading-snug">{benefit}</span>
+                  </p>
                 ))}
-              </ul>
-
-              <a
-                href={`/comprar?produto=${product.id}`}
-                className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-300 ${
-                  product.highlight
-                    ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
-                    : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
-                }`}
-              >
-                {product.cta}
-              </a>
+              </div>
             </div>
           ))}
         </div>

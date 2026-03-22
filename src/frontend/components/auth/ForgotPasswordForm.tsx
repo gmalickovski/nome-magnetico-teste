@@ -29,7 +29,7 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-8 text-center">
+      <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 text-center shadow-2xl shadow-black/50">
         <div className="text-5xl mb-4">📧</div>
         <h2 className="font-cinzel text-2xl font-bold text-white mb-3">Email Enviado</h2>
         <p className="text-gray-400 mb-6">
@@ -43,7 +43,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-8">
+    <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 shadow-2xl shadow-black/50">
       <h2 className="font-cinzel text-2xl font-bold text-white text-center mb-2">
         Esqueci minha Senha
       </h2>
@@ -74,7 +74,7 @@ export function ForgotPasswordForm() {
 
       <p className="text-center text-gray-500 text-sm mt-6">
         <a href="/auth/login" className="text-[#D4AF37] hover:underline">
-          ← Voltar ao login
+          &lt; Voltar ao login
         </a>
       </p>
     </div>

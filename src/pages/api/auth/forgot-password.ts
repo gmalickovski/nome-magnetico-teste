@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
-import fetch from 'cross-fetch';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -40,7 +39,6 @@ export const POST: APIRoute = async ({ request }) => {
 
   const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey, {
     auth: { autoRefreshToken: false, persistSession: false },
-    global: { fetch },
   });
 
   for (let attempt = 1; attempt <= 3; attempt++) {

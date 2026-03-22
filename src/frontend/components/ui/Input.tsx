@@ -21,7 +21,7 @@ export function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-yellow-400 mb-2"
+          className="block text-sm font-medium text-gray-300 mb-2"
         >
           {label}
           {props.required && <span className="text-red-400 ml-1">*</span>}
@@ -31,12 +31,12 @@ export function Input({
         {...props}
         id={inputId}
         className={`
-          w-full bg-gray-900/50 border rounded-xl px-4 py-3 text-white
-          focus:outline-none focus:ring-2 focus:border-transparent
+          w-full bg-black/40 border rounded-xl px-4 py-3 text-white
+          focus:outline-none focus:ring-1 focus:border-transparent
           transition duration-300 placeholder-gray-500
           ${error
             ? 'border-red-500/70 focus:ring-red-500/50'
-            : 'border-gray-700 focus:ring-[#D4AF37]/50 hover:border-gray-600'
+            : 'border-white/10 focus:ring-[#D4AF37]/50 hover:border-white/20'
           }
           ${className}
         `}

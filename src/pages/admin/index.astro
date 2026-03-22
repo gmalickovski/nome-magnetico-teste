@@ -18,72 +18,116 @@ const [
 
 const revenue = await getRevenueStats(aiStats.estimatedCostUsd);
 
-const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const fmtCurrency = (v: number, currency: string = 'BRL') => 
+  v.toLocaleString('pt-BR', { style: 'currency', currency, maximumFractionDigits: 0 });
+
+const formatNumber = (num: number) => {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+};
 ---
 
-<AdminLayout title="Dashboard">
+<AdminLayout title="">
+  <div class="flex flex-col items-center mb-10 mt-4">
+    <h1 class="font-cinzel text-3xl md:text-4xl font-normal text-gray-200 tracking-wide mb-2 text-center">
+      PORTAL DO ORÁCULO
+    </h1>
+    <p class="text-xs tracking-[0.2em] text-gray-500 uppercase text-center">
+      Painel de Controle Administrativo
+    </p>
+  </div>
+
   <!-- Linha 1: Cards Operacionais -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-    {[
-      { label: 'Usuários Totais', value: totalUsers ?? 0, icon: '👥' },
-      { label: 'Análises Realizadas', value: totalAnalyses ?? 0, icon: '📊' },
-      { label: 'Assinaturas Ativas', value: totalSubscriptions ?? 0, icon: '✅' },
-      { label: 'Custo IA / Mês', value: `$${aiStats.estimatedCostUsd.toFixed(4)}`, icon: '💵' },
-    ].map(m => (
-      <div class="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-        <div class="text-3xl mb-2">{m.icon}</div>
-        <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{m.value}</div>
-        <div class="text-gray-500 text-sm mt-1">{m.label}</div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+    <div class="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 md:p-6 flex flex-col justify-between aspect-square">
+      <div class="text-[#c084fc] mb-auto">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
       </div>
-    ))}
-  </div>
-
-  <!-- Linha 2: Cards Financeiros -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 text-center">
-      <div class="text-3xl mb-2">💰</div>
-      <div class="font-cinzel text-2xl font-bold text-[#D4AF37]">{fmt(revenue.grossBRL)}</div>
-      <div class="text-gray-500 text-sm mt-1">Receita Bruta</div>
-      <div class="text-gray-600 text-xs mt-2">{revenue.totalTransactions} transação(ões)</div>
-    </div>
-    <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 text-center">
-      <div class="text-3xl mb-2">💳</div>
-      <div class="font-cinzel text-2xl font-bold text-emerald-400">{fmt(revenue.netBRL)}</div>
-      <div class="text-gray-500 text-sm mt-1">Receita Líquida</div>
-      <div class="text-gray-600 text-xs mt-2">−{fmt(revenue.stripeFeeBRL)} Stripe · −{fmt(revenue.iaCostBRL)} IA</div>
-    </div>
-    <div class="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 text-center">
-      <div class="text-3xl mb-2">📈</div>
-      <div class="font-cinzel text-2xl font-bold text-emerald-400">{fmt(revenue.avgMonthlyNetBRL)}</div>
-      <div class="text-gray-500 text-sm mt-1">Média Mensal Líquida</div>
-    </div>
-  </div>
-
-  <div class="grid md:grid-cols-2 gap-6">
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
-      <h3 class="font-cinzel text-lg font-bold text-gray-100 mb-4">Ações Rápidas</h3>
-      <div class="space-y-2">
-        <a href="/admin/usuarios" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
-          👥 Gerenciar Usuários
-        </a>
-        <a href="/admin/ia" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-200">
-          🤖 Configurar IA
-        </a>
+      <div>
+        <div class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Total de Usuários</div>
+        <div class="font-cinzel text-2xl md:text-3xl text-white">{totalUsers ?? 0}</div>
       </div>
     </div>
 
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
-      <h3 class="font-cinzel text-lg font-bold text-gray-100 mb-4">Status do Sistema</h3>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-gray-400 text-sm">Supabase</span>
-          <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded-full">Online</span>
+    <div class="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 md:p-6 flex flex-col justify-between aspect-square">
+      <div class="text-[#f2ca50] mb-auto">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+      </div>
+      <div>
+        <div class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Faturamento</div>
+        <div class="font-cinzel text-2xl md:text-3xl text-[#f2ca50]">{fmtCurrency(revenue.grossBRL)}</div>
+      </div>
+    </div>
+
+    <div class="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 md:p-6 flex flex-col justify-between aspect-square">
+      <div class="text-indigo-300 mb-auto">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M5.64 16.36a9 9 0 1112.72 0l-1.41-1.42a7 7 0 10-9.9 0l-1.41 1.42zM12 10a2 2 0 110-4 2 2 0 010 4z" /><path d="M12 14l-4 4h8l-4-4z" /></svg>
+      </div>
+      <div>
+        <div class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Análises Realizadas</div>
+        <div class="font-cinzel text-2xl md:text-3xl text-white">{formatNumber(totalAnalyses ?? 0)}</div>
+      </div>
+    </div>
+
+    <div class="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 md:p-6 flex flex-col justify-between aspect-square">
+      <div class="text-orange-300 mb-auto">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+      </div>
+      <div>
+        <div class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Custo de IA</div>
+        <div class="font-cinzel text-2xl md:text-3xl text-white">{fmtCurrency(aiStats.estimatedCostUsd, 'USD')}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-6 flex justify-center md:justify-start">
+    <h2 class="font-cinzel text-[#f2ca50] text-sm md:text-base tracking-[0.3em] uppercase">
+      Rituais de Gestão
+    </h2>
+  </div>
+
+  <div class="space-y-4 mb-10">
+    <a href="/admin/usuarios" class="flex items-center justify-between bg-[#131313] hover:bg-[#1a1a1a] border border-white/5 transition-colors p-5 rounded-2xl group">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/5 p-3 rounded-full text-[#c084fc] group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
         </div>
-        <div class="flex items-center justify-between">
-          <span class="text-gray-400 text-sm">APP_ENV</span>
-          <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-0.5 rounded-full">{process.env.APP_ENV}</span>
-        </div>
+        <span class="text-gray-200 font-medium">Gerenciar Usuários</span>
       </div>
+      <svg class="w-5 h-5 text-gray-600 group-hover:text-[#D4AF37] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </a>
+
+    <a href="/admin/assinaturas" class="flex items-center justify-between bg-[#131313] hover:bg-[#1a1a1a] border border-white/5 transition-colors p-5 rounded-2xl group">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/5 p-3 rounded-full text-[#f2ca50] group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        </div>
+        <span class="text-gray-200 font-medium">Sincronizar Ciclos (Assinaturas)</span>
+      </div>
+      <svg class="w-5 h-5 text-gray-600 group-hover:text-[#D4AF37] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </a>
+
+    <a href="/admin/ia" class="flex items-center justify-between bg-[#131313] hover:bg-[#1a1a1a] border border-white/5 transition-colors p-5 rounded-2xl group">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/5 p-3 rounded-full text-gray-400 group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+        </div>
+        <span class="text-gray-200 font-medium">Exportar Relatórios / Logs IA</span>
+      </div>
+      <svg class="w-5 h-5 text-gray-600 group-hover:text-[#D4AF37] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </a>
+  </div>
+
+  <div class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-5 flex items-center gap-4">
+    <div class="relative flex h-3 w-3">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+    </div>
+    <div>
+      <h3 class="text-[#c084fc] text-sm font-semibold tracking-wide uppercase">Sistemas Estáveis</h3>
+      <p class="text-gray-500 text-xs mt-0.5">Conexão com Banco de Dados e Serviços IA ativa</p>
     </div>
   </div>
+
 </AdminLayout>

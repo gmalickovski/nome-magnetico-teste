@@ -31,13 +31,14 @@ const pdfHref = '/api/generate-pdf?id=' + analysisId;
           <div class="flex items-center gap-3">
             <a
               href="/app/analises"
-              class="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#D4AF37] transition-colors"
+              class="relative inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#D4AF37] transition-colors pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300 after:w-0 hover:after:w-full"
             >
-              ← Minhas Análises
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              Análises
             </a>
             <a
               href={pdfHref}
-              class="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 text-gray-300 text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/15 transition-colors"
+              class="inline-flex items-center gap-1.5 bg-[#111111] border border-[#D4AF37] text-[#D4AF37] text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#D4AF37]/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.1)] transition-all duration-300"
             >
               📄 Baixar PDF
             </a>

@@ -35,12 +35,12 @@ export function LandingHeader() {
           <a href="#precos" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
             Preços
           </a>
-          <a href="/auth/login" className="text-gray-400 hover:text-gray-200 transition-colors text-sm">
+          <a href="/auth/login" className="bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-sm px-5 py-2 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">
             Entrar
           </a>
           <a
-            href="/comprar"
-            className="bg-[#D4AF37] text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/20"
+            href="#precos"
+            className="bg-[#D4AF37] text-[#1A1A1A] font-medium text-sm px-5 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20"
           >
             Começar Agora
           </a>
@@ -67,8 +67,8 @@ export function LandingHeader() {
           <a href="#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Como Funciona</a>
           <a href="#teste" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Teste Grátis</a>
           <a href="#precos" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Preços</a>
-          <a href="/auth/login" className="block text-gray-400 hover:text-gray-200 py-2">Entrar</a>
-          <a href="/comprar" className="block bg-[#D4AF37] text-black font-bold text-center py-3 rounded-xl hover:bg-yellow-300 transition-colors">
+          <a href="/auth/login" className="block bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-center py-2.5 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">Entrar</a>
+          <a href="#precos" className="block bg-[#D4AF37] text-[#1A1A1A] font-medium text-center py-3 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" onClick={() => setMenuOpen(false)}>
             Começar Agora
           </a>
         </div>

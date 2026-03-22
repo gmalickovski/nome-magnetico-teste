@@ -81,7 +81,7 @@ const products = [
         </div>
         <a
           href="/comprar"
-          class="flex-shrink-0 bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105"
+          class="flex-shrink-0 bg-[#D4AF37] text-[#1A1A1A] font-medium px-6 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
         >
           Renovar Acesso
         </a>
@@ -99,9 +99,9 @@ const products = [
         </div>
         <a
           href="/comprar"
-          class="flex-shrink-0 bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105"
+          class="flex-shrink-0 bg-[#D4AF37] text-[#1A1A1A] font-medium px-6 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
         >
-          Ver Produtos
+          Ver Todos os Produtos
         </a>
       </div>
     )}
@@ -110,12 +110,16 @@ const products = [
     <div>
       <h2 class="font-cinzel text-xl font-bold text-gray-100 mb-4">Seus Produtos</h2>
       <div class="grid md:grid-cols-3 gap-6">
-        {products.map(product => (
-          product.hasAccess ? (
-            <div
+        {products.map(product => {
+          const isNomeSocial = product.id === 'nome_magnetico';
+          const needsOnboarding = !profileData?.birth_name || !profileData?.birth_date;
+          
+          return product.hasAccess ? (
+            <a
               data-product-id={product.id}
-              data-href={product.href}
-              class="product-card group bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 hover:border-[#D4AF37]/40 hover:bg-white/8 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+              href={isNomeSocial ? (needsOnboarding ? '#' : product.href) : product.href}
+              onclick={isNomeSocial && needsOnboarding ? "event.preventDefault(); document.dispatchEvent(new CustomEvent('openNomeSocialModal'));" : undefined}
+              class="product-card block group bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 hover:border-[#D4AF37]/40 hover:bg-white/8 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
             >
               <div class="text-4xl mb-4">{product.icon}</div>
               <h3 class="font-cinzel text-xl font-bold text-white mb-2 group-hover:text-[#D4AF37] transition-colors">
@@ -128,38 +132,34 @@ const products = [
                   <span class="text-xs bg-purple-500/20 border border-purple-500/30 text-purple-400 px-2 py-0.5 rounded-full">Admin</span>
                 )}
               </div>
-            </div>
+            </a>
           ) : isExpired ? (
-            <div class="bg-white/3 border border-white/10 rounded-2xl p-6 relative">
+            <a href={'/comprar?produto=' + product.id} class="block group bg-white/3 border border-red-500/10 hover:border-red-500/30 rounded-2xl p-6 relative transition-all duration-300 hover:scale-[1.02] cursor-pointer">
               <div class="absolute top-3 right-3 text-gray-600 text-lg">🔒</div>
-              <div class="text-4xl mb-4 opacity-40">{product.icon}</div>
-              <h3 class="font-cinzel text-xl font-bold text-gray-500 mb-2">
+              <div class="text-4xl mb-4 opacity-40 group-hover:opacity-60 transition-opacity">{product.icon}</div>
+              <h3 class="font-cinzel text-xl font-bold text-gray-500 mb-2 group-hover:text-red-400 transition-colors">
                 {product.name}
               </h3>
               <p class="text-gray-600 text-sm">{product.description}</p>
-              <a
-                href={'/comprar?produto=' + product.id}
-                class="mt-4 inline-block bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-bold px-4 py-2 rounded-lg hover:bg-red-500/20 transition-all duration-300"
-              >
+              <div class="mt-4 inline-block bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-bold px-4 py-2 rounded-lg group-hover:bg-red-500/20 transition-all duration-300">
                 Renovar
-              </a>
-            </div>
+              </div>
+            </a>
           ) : (
-            <div class="bg-white/3 border border-white/10 rounded-2xl p-6">
-              <div class="text-4xl mb-4 opacity-50">{product.icon}</div>
-              <h3 class="font-cinzel text-xl font-bold text-gray-500 mb-2">
+            <a href={'/comprar?produto=' + product.id} class="block group bg-white/3 border border-white/10 hover:border-[#D4AF37]/30 rounded-2xl p-6 relative transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+              <div class="absolute top-3 right-3 text-gray-600 text-lg">🔒</div>
+              <div class="text-4xl mb-4 opacity-50 group-hover:opacity-80 transition-opacity">{product.icon}</div>
+              <h3 class="font-cinzel text-xl font-bold text-gray-500 mb-2 group-hover:text-[#D4AF37] transition-colors">
                 {product.name}
               </h3>
               <p class="text-gray-600 text-sm">{product.description}</p>
-              <a
-                href={'/comprar?produto=' + product.id}
-                class="mt-4 inline-block bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-sm font-bold px-4 py-2 rounded-lg hover:bg-[#D4AF37]/20 transition-all duration-300"
-              >
+              <p class="text-gray-500 text-xs mt-2 group-hover:text-gray-400 transition-colors">Ainda não adquirido</p>
+              <div class="mt-4 inline-block bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-sm font-bold px-4 py-2 rounded-lg group-hover:bg-[#D4AF37]/20 transition-all duration-300">
                 Adquirir
-              </a>
-            </div>
+              </div>
+            </a>
           )
-        ))}
+        })}
       </div>
     </div>
 
@@ -171,23 +171,5 @@ const products = [
     dataSalva={profileData?.birth_date || ''} 
   />
 
-  <script is:inline define:vars={{ needsOnboarding: !profileData?.birth_name || !profileData?.birth_date }}>
-    const cards = document.querySelectorAll('.product-card');
-    cards.forEach(card => {
-      card.addEventListener('click', () => {
-        const id = card.getAttribute('data-product-id');
-        const href = card.getAttribute('data-href');
-        
-        if (id !== 'nome_magnetico') {
-          if (href) window.location.href = href;
-        } else {
-          if (needsOnboarding) {
-            document.dispatchEvent(new CustomEvent('openNomeSocialModal'));
-          } else {
-            window.location.href = '/app/analise/nome-social';
-          }
-        }
-      });
-    });
-  </script>
+
 </AppLayout>

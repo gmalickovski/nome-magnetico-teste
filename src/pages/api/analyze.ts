@@ -75,15 +75,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { data: profile } = await supabase
     
     .from('profiles')
-    .select('gender')
+    .select('gender, role')
     .eq('id', user.id)
     .single();
 
   const gender = profile?.gender || 'Neutro';
+  const isAdmin = profile?.role === 'admin';
 
   // Verificar subscription
   const hasAccess = await hasActiveSubscription(user.id, product_type as ProductType);
-  if (!hasAccess) {
+  if (!hasAccess && !isAdmin) {
     return new Response(JSON.stringify({ error: 'Subscription inativa para este produto' }), {
       status: 403, headers: { 'Content-Type': 'application/json' },
     });

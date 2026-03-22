@@ -4,7 +4,7 @@
 
 **Produto:** Nome Magnético
 **O que é:** SaaS de numerologia cabalística que analisa o nome de nascimento, detecta bloqueios energéticos e sugere variações do nome sem bloqueios, compatíveis com os números de Expressão e Destino do usuário.
-**Stack:** Astro 5 SSR + React islands + Tailwind CSS + Supabase + Stripe
+**Stack:** Astro 5 SSR + React islands + Tailwind CSS + Supabase Cloud + Stripe
 **Nota:** "Astro" é APENAS o framework técnico. Nunca aparece na interface, copy ou branding do produto.
 
 ---
@@ -194,10 +194,11 @@ Pagamento único por ciclo de 30 dias (não recorrente)
 
 ## Banco de Dados
 
-- Schema dedicado: `nome_magnetico`
+- **Supabase Cloud:** projeto `nome_magnetico` (`bhxneaeuhybtucmbmpvg.supabase.co`)
+- Schema: **`public`** (todas as tabelas estão no schema public)
 - Auth: `auth.users` do Supabase (nativo)
 - RLS ativo em todas as tabelas
-- Admin: `nome_magnetico.profiles.role = 'admin'`
+- Admin: `profiles.role = 'admin'`
 
 ### Tabelas principais
 - `profiles` — perfis (role, nome, email)
@@ -212,20 +213,30 @@ Pagamento único por ciclo de 30 dias (não recorrente)
 - `faq_categories` + `faq_items` — FAQ editável
 
 ### Migrations aplicadas
-- `001_nome_magnetico.sql` — schema base completo
+- `001_nome_magnetico.sql` — schema base completo (schema public no Supabase Cloud)
 - `002_expand_analyses.sql` — expansão para 4 triângulos, lições kármics, tendências ocultas, produtos nome_bebe e nome_empresa
 
 ---
 
-## Emails (n8n + Resend)
+## Emails
 
-NUNCA enviar email diretamente do código. Sempre usar:
+### Auth (Supabase + Amazon SES) — NÃO usar código para isso
+- **Confirmação de cadastro** e **recuperação de senha** são gerenciadas 100% pelo Supabase Auth nativo
+- Supabase está configurado com Amazon SES como provedor SMTP (sem Resend, sem n8n para auth)
+- Templates HTML de confirmação e recuperação estão configurados diretamente no Supabase Dashboard
+- `auth.signUp()` → dispara email de confirmação via SES automaticamente
+- `auth.resetPasswordForEmail()` → dispara email de recuperação via SES automaticamente
+
+### Emails transacionais (n8n) — pagamentos e suporte
+NUNCA enviar emails de pagamento/suporte diretamente do código. Sempre usar:
 ```typescript
 import { notify } from '@/backend/notifications/notify'
-await notify('user.welcome', { email, firstName, accessUrl })
+await notify('payment.confirmed', { email, firstName, accessUrl })
 ```
 
-O n8n recebe o evento e o Resend envia o email. Templates ficam no n8n.
+O n8n recebe o evento via webhook e processa o envio. Webhooks configurados:
+- `N8N_WEBHOOK_TRANSACIONAL` — eventos de pagamento
+- `N8N_WEBHOOK_SUPORTE` — tickets de suporte
 
 ---
 
@@ -246,6 +257,16 @@ O n8n recebe o evento e o Resend envia o email. Templates ficam no n8n.
 - `SignatureEvaluation` — critérios objetivos da assinatura (sem radiestesia)
 - `BabyNameForm` — formulário completo para produto nome_bebe
 - `CompanyNameForm` — formulário completo para produto nome_empresa
+
+---
+
+## MCP Stripe — Configuração
+
+- O MCP Stripe está configurado em `C:\Users\gmali\.claude\settings.local.json`
+- **SEMPRE** usar a chave da conta **Nome Magnético** (não Sincro): `STRIPE_SECRET_KEY` do arquivo `.env` do projeto
+- Chave test: `sk_test_51TDUrBL...` (conta `TDUrBL66SzSlet1`)
+- Chave live: `sk_live_51TDUrBL...` (mesma conta, modo produção)
+- Se o MCP Stripe mostrar produtos "Sincro Sinergia" ou "Sincro Desperta", a chave está errada — trocar pela do `.env`
 
 ---
 

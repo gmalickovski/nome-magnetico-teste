@@ -81,7 +81,7 @@ const hasMultipleProducts = uniqueProducts.length > 1;
       </div>
       <a
         href="/app"
-        class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105"
+        class="inline-flex items-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium text-sm px-4 py-2 rounded-md hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
       >
         + Nova Análise
       </a>
@@ -89,9 +89,9 @@ const hasMultipleProducts = uniqueProducts.length > 1;
 
     {hasMultipleProducts && (
       <div class="flex items-center gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide">
-        <button class="filter-btn px-5 py-2 rounded-xl text-sm font-bold bg-[#D4AF37] text-black hover:bg-yellow-300 transition-colors" data-filter="all">Todos</button>
+        <button class="filter-btn px-4 py-2 rounded-md text-sm font-medium bg-[#D4AF37] text-[#1A1A1A] transition-colors" data-filter="all">Todos</button>
         {uniqueProducts.map(pt => (
-          <button class="filter-btn px-5 py-2 rounded-xl text-sm font-medium bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors" data-filter={pt}>
+          <button class="filter-btn px-4 py-2 rounded-md text-sm font-medium bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors" data-filter={pt}>
             {productLabel[pt] ?? pt}
           </button>
         ))}
@@ -105,7 +105,7 @@ const hasMultipleProducts = uniqueProducts.length > 1;
         <p class="text-gray-400 mb-6">Inicie sua primeira análise numerológica.</p>
         <a
           href="/app"
-          class="inline-block bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-300 transition-colors"
+          class="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium px-6 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
         >
           Começar Agora
         </a>
@@ -167,11 +167,11 @@ const hasMultipleProducts = uniqueProducts.length > 1;
       btn.addEventListener('click', () => {
         // Atualizar estilos dos botões
         filterBtns.forEach(b => {
-          b.classList.remove('bg-[#D4AF37]', 'text-black', 'font-bold');
-          b.classList.add('bg-white/5', 'text-gray-400', 'font-medium');
+          b.classList.remove('bg-[#D4AF37]', 'text-[#1A1A1A]');
+          b.classList.add('bg-white/5', 'text-gray-400');
         });
-        btn.classList.remove('bg-white/5', 'text-gray-400', 'font-medium');
-        btn.classList.add('bg-[#D4AF37]', 'text-black', 'font-bold');
+        btn.classList.remove('bg-white/5', 'text-gray-400');
+        btn.classList.add('bg-[#D4AF37]', 'text-[#1A1A1A]');
 
         const filter = (btn as HTMLElement).dataset.filter;
 

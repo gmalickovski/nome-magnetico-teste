@@ -57,6 +57,13 @@ export function ResetPasswordForm() {
       return;
     }
 
+    // Setar cookies para o middleware SSR encontrar o token (igual ao LoginForm)
+    const { data: { session } } = await supabaseBrowser.auth.getSession();
+    if (session) {
+      document.cookie = `nome-magnetico-auth-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+      document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+    }
+
     setSuccess(true);
     setTimeout(() => { window.location.href = '/app'; }, 2000);
   }

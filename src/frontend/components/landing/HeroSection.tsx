@@ -45,13 +45,13 @@ export function HeroSection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
           <a
             href="#teste"
-            className="w-full sm:w-auto bg-[#D4AF37] text-black font-bold text-lg px-8 py-4 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105 shadow-xl shadow-yellow-500/20"
+            className="w-full sm:w-auto bg-[#D4AF37] text-[#1A1A1A] font-medium text-lg px-8 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
           >
             Testar Meu Nome Grátis
           </a>
           <a
             href="#produtos"
-            className="w-full sm:w-auto border border-[#D4AF37]/50 text-[#D4AF37] font-medium text-lg px-8 py-4 rounded-xl hover:bg-[#D4AF37]/10 transition-all duration-300"
+            className="w-full sm:w-auto border border-[#D4AF37]/50 text-[#D4AF37] font-medium text-lg px-8 py-4 rounded-xl hover:bg-[#D4AF37]/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
           >
             Ver os Produtos
           </a>

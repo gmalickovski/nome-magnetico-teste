@@ -61,5 +61,5 @@ REGRAS OBRIGATÓRIAS DE FORMATAÇÃO:
 3. Use segunda pessoa: "você", "seu", "sua" — fale diretamente com a pessoa pelo nome.
 4. SEMPRE duplo espaçamento entre parágrafos.
 5. Parágrafos com no máximo 4 linhas.
-6. Use **negrito** para destacar palavras-chave e práticas importantes.`;
+6. **Atenção ao Uso do Negrito:** Utilize negrito (**) EXCLUSIVAMENTE para referenciar os números e dicas essenciais. O restante do texto NORMAL.`;
 }

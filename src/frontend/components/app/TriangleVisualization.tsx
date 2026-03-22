@@ -73,21 +73,24 @@ function TrianguloSVG({ triangulo, nome }: { triangulo: TrianguloData; nome: str
   const N = linhas[0]?.length ?? 1;
 
   const ELEM = 50;         // px entre elementos (igual ao formula.js)
-  const largura = 100 + (N - 1) * ELEM;
+  const textWidth = (N - 1) * ELEM;
+  const largura = textWidth + 120; // 60px padding on each side
   const altura = 80 + linhas.length * 30;
-  const viewBox = `0 0 ${largura + 20} ${altura + 20}`;
+  const viewBox = `0 0 ${largura} ${altura}`;
+  
+  const midX = largura / 2;
 
   const bloqueioPos = buildBloqueioPositions(linhas);
 
   // Centro horizontal da primeira linha
-  const xBase = largura / 2 - (N * ELEM) / 2 + 10;
+  const xBase = midX - textWidth / 2;
 
   return (
-    <div className="overflow-x-auto py-2">
+    <div className="overflow-x-auto py-2 flex justify-center w-full">
       <svg
         viewBox={viewBox}
         xmlns="http://www.w3.org/2000/svg"
-        style={{ width: '100%', height: 'auto' }}
+        style={{ width: '100%', height: 'auto', maxWidth: `${largura}px` }}
         preserveAspectRatio="xMidYMid meet"
       >
         {/* ── Linha das letras ── */}
@@ -109,7 +112,7 @@ function TrianguloSVG({ triangulo, nome }: { triangulo: TrianguloData; nome: str
         {/* ── Linhas numéricas ── */}
         {linhas.map((linha, r) => {
           const yNum = 55 + r * 30;
-          const xRowStart = largura / 2 - (linha.length * ELEM) / 2 + 10;
+          const xRowStart = midX - ((linha.length - 1) * ELEM) / 2;
           const isLastRow = r === linhas.length - 1;
 
           return linha.map((num, c) => {
@@ -297,7 +300,7 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
       </div>
 
       {/* Abas */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap justify-center gap-2 w-full">
         {tabs.map(t => {
           const info = TIPO_LABEL[t]!;
           const tri = triangulosMap[t];
@@ -307,18 +310,14 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
               key={t}
               onClick={() => setAba(t)}
               className={`
-                flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                flex-auto flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 min-w-[130px] whitespace-nowrap
                 ${aba === t
                   ? 'bg-[#D4AF37] text-black shadow-lg shadow-[#D4AF37]/20'
                   : 'bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10'}
               `}
             >
               <span>{info.emoji}</span>
-              <span className="hidden sm:inline">{info.label}</span>
-              <span className="sm:hidden">{t.charAt(0).toUpperCase() + t.slice(1)}</span>
-              {temBloqueio && (
-                <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" title="Possui bloqueios" />
-              )}
+              <span>{info.label}</span>
             </button>
           );
         })}
@@ -330,7 +329,7 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
       </div>
 
       {/* SVG do triângulo */}
-      <div className="bg-black/30 border border-white/10 rounded-xl p-4">
+      <div className="rounded-xl flex justify-center">
         <TrianguloSVG triangulo={triangulo} nome={nome} />
       </div>
 

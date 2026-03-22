@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { calcularTrianguloDaVida, detectarBloqueios } from '../../backend/numerology/triangle';
+import { calcularTodosTriangulos, detectarBloqueios } from '../../backend/numerology/triangle';
 import { calcularCincoNumeros } from '../../backend/numerology/numbers';
 
 const schema = z.object({
@@ -64,15 +64,15 @@ export const POST: APIRoute = async ({ request }) => {
   const { nome_completo, data_nascimento } = parsed.data;
 
   try {
-    const triangulo = calcularTrianguloDaVida(nome_completo);
-    const bloqueios = detectarBloqueios({ vida: triangulo });
+    const todosTriangulos = calcularTodosTriangulos(nome_completo, data_nascimento);
+    const bloqueios = detectarBloqueios(todosTriangulos);
     const cincoNumeros = calcularCincoNumeros(nome_completo, data_nascimento);
 
     // Retornar apenas dados parciais (chamariz — análise completa requer pagamento)
     return new Response(
       JSON.stringify({
         nome: nome_completo.split(' ')[0],
-        arcanoRegente: triangulo.arcanoRegente,
+        arcanoRegente: todosTriangulos.vida.arcanoRegente,
         quantidadeBloqueios: bloqueios.length,
         bloqueios: bloqueios.map(b => ({
           codigo: b.codigo,

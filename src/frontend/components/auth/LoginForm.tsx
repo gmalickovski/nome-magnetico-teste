@@ -79,21 +79,16 @@ export function LoginForm() {
       document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
     }
 
-    // Verificar produto pendente no localStorage (fluxo de compra)
-    const pendingProduct = localStorage.getItem('nome_magnetico_pending_product');
-    if (pendingProduct) {
-      localStorage.removeItem('nome_magnetico_pending_product');
-      window.location.href = `/comprar?produto=${pendingProduct}`;
-      return;
-    }
-
-    // Redirecionar para o app ou para onde veio
+    // Redirecionar: produto tem prioridade (vindo do funil landing → cadastro → login)
     const searchParams = new URLSearchParams(window.location.search);
-    window.location.href = searchParams.get('redirect') ?? '/app';
+    const produto = searchParams.get('produto');
+    window.location.href = produto
+      ? `/comprar?produto=${produto}`
+      : (searchParams.get('redirect') ?? '/app');
   }
 
   return (
-    <div className="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-8">
+    <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 shadow-2xl shadow-black/50">
       <h2 className="font-cinzel text-2xl font-bold text-white text-center mb-6">
         Entrar
       </h2>

@@ -10,6 +10,7 @@ import {
   View,
   StyleSheet,
   Font,
+  Image,
 } from '@react-pdf/renderer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -91,12 +92,13 @@ export function capitalizeTitle(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function RenderMarkdownChunks({ text, styles, GOLD, triangleMap, triCellSize }: {
+function RenderMarkdownChunks({ text, styles, GOLD, triangleMap, triCellSize, letrasNome }: {
   text: string;
   styles: any;
   GOLD: string;
   triangleMap?: TriangleMap;
   triCellSize?: number;
+  letrasNome?: string[];
 }) {
   if (!text) return null;
   const blocks = text.split(/\n\s*\n/);
@@ -140,6 +142,7 @@ function RenderMarkdownChunks({ text, styles, GOLD, triangleMap, triCellSize }: 
                 data={tData}
                 label={TRIANGLE_LABELS[triKey]}
                 cellSize={cellSize}
+                letras={letrasNome}
               />
             );
           }
@@ -239,30 +242,55 @@ function detectTriangleKey(content: string): TriangleKey | null {
 }
 
 // Triângulo inline — aparece dentro do fluxo da análise, largura total
-function TrianguloPiramideInline({ data, label, cellSize }: { data: TrianguloData; label: string; cellSize: number }) {
+function TrianguloPiramideInline({ data, label, cellSize, letras }: { data: TrianguloData; label: string; cellSize: number; letras?: string[] }) {
   const bloqueioPositions = buildBloqueioPositions(data.linhas);
   const cellFontSize = Math.max(4, Math.floor(cellSize * 0.65));
+  const letterFontSize = Math.max(5, Math.floor(cellSize * 0.70));
 
   return (
     <View style={triStyles.card}>
       <Text style={triStyles.cardLabel}>{label}</Text>
+      
+      {letras && letras.length === data.linhas[0].length && (
+        <View style={triStyles.row}>
+          {letras.map((char, ni) => (
+            <View key={`letra-${ni}`} style={{ width: cellSize, margin: 0.5, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 2 }}>
+              <Text style={{ fontSize: letterFontSize, fontFamily: 'Helvetica-Bold', color: '#4B5563' }}>{char}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
       {data.linhas.map((linha, li) => (
         <View key={li} style={triStyles.row}>
           {linha.map((num, ni) => {
             const isBloqueio = bloqueioPositions.has(`${li}:${ni}`);
+            const isFirstRow = li === 0;
+            const isRegent = li === data.linhas.length - 1;
+
+            let cellStyle = isBloqueio ? triStyles.cellBloqueio : triStyles.cellNormal;
+            let textStyle = isBloqueio ? triStyles.cellTextBloqueio : triStyles.cellTextNormal;
+
+            if (isFirstRow && !isBloqueio) {
+              textStyle = { color: '#D4AF37' }; // Gold
+            }
+            if (isRegent && !isBloqueio) {
+              textStyle = { color: '#a78bfa' }; // Purple
+            }
+
             return (
               <View
                 key={ni}
                 style={[
                   triStyles.cellBase,
                   { width: cellSize, height: cellSize, margin: 0.5 },
-                  isBloqueio ? triStyles.cellBloqueio : triStyles.cellNormal,
+                  cellStyle,
                 ]}
               >
                 <Text
                   style={[
                     { fontSize: cellFontSize, fontFamily: 'Helvetica-Bold' },
-                    isBloqueio ? triStyles.cellTextBloqueio : triStyles.cellTextNormal,
+                    textStyle,
                   ]}
                 >
                   {num}
@@ -440,7 +468,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   coverTitle: {
-    fontSize: 36,
+    fontSize: 24,
     fontFamily: 'Helvetica-Bold',
     color: '#FFFFFF',
     textAlign: 'center',
@@ -448,7 +476,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   coverTitleBebe: {
-    fontSize: 36,
+    fontSize: 24,
     fontFamily: 'Helvetica-Bold',
     color: '#1C1033',
     textAlign: 'center',
@@ -849,6 +877,18 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
   const dataGeracao = formatDate(analysis.completed_at ?? analysis.created_at);
   const dataNascimento = formatDate(analysis.data_nascimento);
 
+  const letrasNome = nomeParaExibir.replace(/\s+/g, '').replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ]/g, '').toUpperCase().split('');
+  
+  let logoSrc = '';
+  try {
+    const candidatePath = path.resolve(process.cwd(), 'src/frontend/assets/logo-nome-magnético-v4.png');
+    if (fs.existsSync(candidatePath)) {
+      logoSrc = `data:image/png;base64,${fs.readFileSync(candidatePath).toString('base64')}`;
+    }
+  } catch (e) {
+    // Ignore error
+  }
+
   const nums = [
     { label: 'Expressao', value: analysis.numero_expressao },
     { label: 'Destino', value: analysis.numero_destino },
@@ -909,6 +949,9 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
     <Document title={`Nome Magnetico — ${analysis.nome_completo}`} author="Nome Magnetico">
       {/* === PÁGINA 1: CAPA === */}
       <Page size="A4" style={isBebe ? styles.coverPageBebe : styles.coverPage}>
+        {logoSrc ? (
+          <Image src={logoSrc} style={{ width: 80, marginBottom: 16 }} />
+        ) : null}
         <Text style={[styles.coverLogo, { fontFamily: LOGO_FONT }]}>NOME MAGNETICO</Text>
         <View style={styles.coverAccentLine} />
         <Text style={styles.coverProduct}>{tipoAnalise}</Text>
@@ -1040,6 +1083,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
               GOLD={GOLD}
               triangleMap={triangleMap}
               triCellSize={triCellSize}
+              letrasNome={letrasNome}
             />
           </View>
 
@@ -1071,28 +1115,28 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo da Vida</Text>
                 <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Representa os aspectos gerais e a vibração matriz do nome.</Text>
-                <TrianguloPiramideInline data={tVida} label="Triângulo da Vida" cellSize={triCellSize} />
+                <TrianguloPiramideInline data={tVida} label="Triângulo da Vida" cellSize={triCellSize} letras={letrasNome} />
               </View>
             )}
             {tPessoal && (
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo Pessoal</Text>
                 <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Revela a vida íntima, as reações emocionais e comportamentos mais profundos.</Text>
-                <TrianguloPiramideInline data={tPessoal} label="Triângulo Pessoal" cellSize={triCellSize} />
+                <TrianguloPiramideInline data={tPessoal} label="Triângulo Pessoal" cellSize={triCellSize} letras={letrasNome} />
               </View>
             )}
             {tSocial && (
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo Social</Text>
                 <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Mostra as influências externas, amizades, ambiente de trabalho e vida pública.</Text>
-                <TrianguloPiramideInline data={tSocial} label="Triângulo Social" cellSize={triCellSize} />
+                <TrianguloPiramideInline data={tSocial} label="Triângulo Social" cellSize={triCellSize} letras={letrasNome} />
               </View>
             )}
             {tDestino && (
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ ...styles.sectionTitle, fontSize: 11, borderBottomWidth: 0, paddingBottom: 0, marginBottom: 4 }}>Triângulo do Destino</Text>
                 <Text style={{ fontSize: 9, color: GRAY, marginBottom: 6 }}>Governa a missão de vida, realizações a longo prazo e legado final.</Text>
-                <TrianguloPiramideInline data={tDestino} label="Triângulo do Destino" cellSize={triCellSize} />
+                <TrianguloPiramideInline data={tDestino} label="Triângulo do Destino" cellSize={triCellSize} letras={letrasNome} />
               </View>
             )}
           </View>
@@ -1192,10 +1236,18 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
             <Text style={styles.assinaturaInstrucaoItem}>• Escreva lentamente no inicio, focando na intencao de cada letra. Com o tempo, acelere para que o fluxo seja espontaneo.</Text>
           </View>
 
-          {/* 14 linhas de treino (preenche a folha A4) */}
-          {Array.from({ length: 14 }).map((_, i) => (
+          {/* 13 linhas de treino (preenche a folha A4 e deixa espaço para o footer) */}
+          {Array.from({ length: 13 }).map((_, i) => (
             <View key={i} style={styles.assinaturaLinha} />
           ))}
+
+          <View style={styles.pageFooter} fixed>
+            <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text
+              style={styles.pageFooterPage}
+              render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
+            />
+          </View>
         </Page>
       )}
     </Document>

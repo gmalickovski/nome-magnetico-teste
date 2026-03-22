@@ -222,7 +222,7 @@ export default function CompanyNameForm({ onSuccess }: Props) {
             Analisando os nomes...
           </span>
         ) : (
-          '✦ Analisar Nomes da Empresa'
+          'Analisar Nomes da Empresa'
         )}
       </button>
     </form>

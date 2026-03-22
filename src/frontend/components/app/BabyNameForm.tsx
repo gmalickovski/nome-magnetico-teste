@@ -137,8 +137,8 @@ export default function BabyNameForm({ onSuccess }: Props) {
         </div>
 
         {/* Dados da Mãe */}
-        <div className="bg-white/5 border border-white/10 p-4 rounded-lg space-y-3">
-          <h4 className="text-gray-300 font-medium text-sm flex items-center gap-2">
+        <div className="pt-4 border-t border-white/5 space-y-3">
+          <h4 className="text-gold font-medium text-sm flex items-center gap-2 uppercase tracking-wider">
             Dados da Mãe
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -177,8 +177,8 @@ export default function BabyNameForm({ onSuccess }: Props) {
         </div>
 
         {/* Dados do Pai */}
-        <div className="bg-white/5 border border-white/10 p-4 rounded-lg space-y-3">
-          <h4 className="text-gray-300 font-medium text-sm flex items-center gap-2">
+        <div className="pt-4 border-t border-white/5 space-y-3">
+          <h4 className="text-gold font-medium text-sm flex items-center gap-2 uppercase tracking-wider">
             Dados do Pai
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -217,8 +217,8 @@ export default function BabyNameForm({ onSuccess }: Props) {
         </div>
 
         {/* Outros Sobrenomes */}
-        <div className="bg-white/5 border border-white/10 p-4 rounded-lg space-y-3">
-          <h4 className="text-gray-300 font-medium text-sm mb-1">Outros sobrenomes utilizados na família</h4>
+        <div className="pt-4 border-t border-white/5 space-y-3">
+          <h4 className="text-gold font-medium text-sm uppercase tracking-wider mb-1">Outros sobrenomes utilizados na família</h4>
           <label className="block text-xs text-gray-400 mb-2">
             Pode separar por vírgula ou adicionar cada um em uma linha nova pressionando 'Enter'.
           </label>
@@ -326,7 +326,7 @@ export default function BabyNameForm({ onSuccess }: Props) {
             Analisando os nomes...
           </span>
         ) : (
-          '✦ Analisar Nomes do Bebê'
+          'Analisar Nomes do Bebê'
         )}
       </button>
     </form>

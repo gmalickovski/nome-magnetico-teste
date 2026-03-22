@@ -56,6 +56,24 @@ export const POST: APIRoute = async ({ request }) => {
           currency: session.currency ?? 'brl',
         });
 
+        // Enviar evento Stripe bruto para o n8n (trigger do workflow)
+        const n8nUrl = process.env.N8N_WEBHOOK_TRANSACIONAL;
+        if (n8nUrl) {
+          fetch(n8nUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              stripeEvent: event,
+              userId,
+              productType,
+              customerEmail: session.customer_email,
+              amountPaid: session.amount_total,
+              currency: session.currency,
+              stripeSessionId: session.id,
+            }),
+          }).catch(err => console.error('[stripe-webhook] Falha ao notificar n8n:', err));
+        }
+
         // Notificar usuário
         const profile = await getProfile(userId);
         if (profile) {
@@ -63,6 +81,7 @@ export const POST: APIRoute = async ({ request }) => {
             email: profile.email,
             firstName: profile.nome ?? profile.email.split('@')[0],
             accessUrl: `${process.env.APP_URL}/app`,
+            productType,
             productName: productType,
           });
         }

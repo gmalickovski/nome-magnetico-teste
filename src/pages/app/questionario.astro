@@ -1,11 +1,16 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import { hasActiveSubscription } from '../../backend/db/subscriptions';
+import { createUserClient } from '../../backend/db/supabase';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
 
-const hasAccess = await hasActiveSubscription(user.id, 'nome_magnetico');
+const client = createUserClient(Astro.locals.accessToken ?? '');
+const { data: profile } = await client.from('profiles').select('role').eq('id', user.id).single();
+const isAdmin = profile?.role === 'admin';
+
+const hasAccess = isAdmin || await hasActiveSubscription(user.id, 'nome_magnetico');
 if (!hasAccess) return Astro.redirect('/comprar');
 ---
 
@@ -52,7 +57,7 @@ if (!hasAccess) return Astro.redirect('/comprar');
       <button
         type="submit"
         id="submitBtn"
-        class="w-full bg-[#D4AF37] text-black font-bold py-4 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-[1.01] shadow-lg shadow-yellow-500/20 text-lg"
+        class="w-full inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium py-3.5 rounded-xl text-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
       >
         Iniciar Análise Completa
       </button>

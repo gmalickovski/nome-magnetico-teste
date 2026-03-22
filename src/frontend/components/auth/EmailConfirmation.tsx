@@ -6,10 +6,13 @@ type State = 'loading' | 'success' | 'error' | 'no-token';
 export function EmailConfirmation() {
   const [state, setState] = useState<State>('loading');
   const [countdown, setCountdown] = useState(3);
+  const [loginUrl, setLoginUrl] = useState('/auth/login');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token_hash = params.get('token_hash');
+    const produto = params.get('produto');
+    setLoginUrl(produto ? `/auth/login?produto=${produto}` : '/auth/login');
 
     if (!token_hash) {
       setState('no-token');
@@ -31,7 +34,7 @@ export function EmailConfirmation() {
   useEffect(() => {
     if (state !== 'success') return;
     if (countdown <= 0) {
-      window.location.href = '/auth/login';
+      window.location.href = loginUrl;
       return;
     }
     const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
@@ -65,7 +68,7 @@ export function EmailConfirmation() {
           <span className="text-[#D4AF37] font-semibold">{countdown}s</span>...
         </p>
         <a
-          href="/auth/login"
+          href={loginUrl}
           className="inline-block bg-[#D4AF37] text-[#111111] font-bold text-sm px-8 py-3 rounded-xl hover:opacity-90 transition-opacity duration-300 tracking-wide"
         >
           FAZER LOGIN AGORA

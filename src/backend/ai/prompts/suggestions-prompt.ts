@@ -64,5 +64,5 @@ REGRAS OBRIGATÓRIAS DE FORMATAÇÃO:
 3. Use segunda pessoa: "você", "seu", "sua" — fale diretamente com a pessoa.
 4. SEMPRE duplo espaçamento entre parágrafos.
 5. Parágrafos com no máximo 4 linhas.
-6. Use **negrito** para destacar os nomes e números importantes.`;
+6. **Atenção ao Uso do Negrito:** Utilize negrito (**) EXCLUSIVAMENTE para expressões numerológicas e termos cabalísticos (ex: Expressão, Destino, nomes, etc) e para os números em si. O restante do texto NÃO deve ser em negrito.`;
 }

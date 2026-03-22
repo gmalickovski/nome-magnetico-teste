@@ -120,12 +120,9 @@ export function LiveNameTester({ birthName, birthDate }: Props) {
           >
             {generating ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            ) : (
-               <>
-                 <span className="text-xl group-hover:scale-110 transition-transform">📄</span>
-                 Analisar Nome Original
-               </>
-            )}
+             ) : (
+               'Analisar Nome Original'
+             )}
           </button>
         </div>
       </div>
@@ -215,6 +212,21 @@ export function LiveNameTester({ birthName, birthDate }: Props) {
                 bloqueios={result.bloqueios}
                 nome={candidateName}
               />
+
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                   <div className="text-2xl font-bold text-red-400 mb-1">{result.debitosCarmicos ? result.debitosCarmicos.length : 0}</div>
+                   <div className="text-gray-400 text-sm">Débitos Kármicos</div>
+                 </div>
+                 <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                   <div className="text-2xl font-bold text-yellow-400 mb-1">{result.tendenciasOcultas ? result.tendenciasOcultas.length : 0}</div>
+                   <div className="text-gray-400 text-sm">Tendências Ocultas</div>
+                 </div>
+                 <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                   <div className="text-2xl font-bold text-purple-400 mb-1">{result.licoesCarmicas ? result.licoesCarmicas.length : 0}</div>
+                   <div className="text-gray-400 text-sm">Lições Kármicas</div>
+                 </div>
+              </div>
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={() => handleGenerateAnalysis(candidateName)}
@@ -224,7 +236,7 @@ export function LiveNameTester({ birthName, birthDate }: Props) {
                   {generating ? (
                      <div className="w-6 h-6 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
                   ) : (
-                     <>✨ Gerar Relatório Deste Nome ✨</>
+                     'Gerar Relatório Deste Nome'
                   )}
                 </button>
               </div>

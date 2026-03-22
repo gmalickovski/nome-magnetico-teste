@@ -7,16 +7,17 @@ import { LiveNameTester } from '../../../frontend/components/app/LiveNameTester'
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
 
-const hasAccess = await hasActiveSubscription(user.id, 'nome_magnetico');
-if (!hasAccess) return Astro.redirect('/comprar?produto=nome_magnetico');
-
 // Pegar dados base de nascimento no perfil
 const client = createUserClient(Astro.locals.accessToken ?? '');
 const { data: profile } = await client
   .from('profiles')
-  .select('birth_name, birth_date')
+  .select('birth_name, birth_date, role')
   .eq('id', user.id)
   .single();
+
+const isAdmin = profile?.role === 'admin';
+const hasAccess = isAdmin || await hasActiveSubscription(user.id, 'nome_magnetico');
+if (!hasAccess) return Astro.redirect('/comprar?produto=nome_magnetico');
 
 // Proteção caso o usuário tenha burlado o modal no Dashboard
 if (!profile?.birth_name || !profile?.birth_date) {

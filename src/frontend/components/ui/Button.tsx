@@ -1,27 +1,32 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'secondary' | 'inverted' | 'outlined' | 'ghost' | 'danger';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   loading?: boolean;
   children: React.ReactNode;
 }
 
 const VARIANTS = {
   primary:
-    'bg-[#D4AF37] text-black font-bold hover:bg-yellow-300 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40',
+    'bg-[#D4AF37] text-[#1A1A1A] font-medium hover:bg-[#f2ca50]',
   secondary:
-    'border border-[#D4AF37] text-[#D4AF37] font-medium hover:bg-[#D4AF37] hover:text-black',
+    'bg-[#2A2A2A] text-gray-200 hover:bg-[#333333]',
+  inverted:
+    'bg-gray-100 text-[#1A1A1A] font-medium hover:bg-white',
+  outlined:
+    'border border-white/20 text-gray-200 hover:bg-white/5',
   ghost:
     'text-gray-400 hover:text-gray-200 hover:bg-white/5',
   danger:
-    'bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/40',
+    'bg-red-500/20 text-red-400 hover:bg-red-500/30',
 };
 
 const SIZES = {
-  sm: 'px-4 py-2 text-sm rounded-lg',
-  md: 'px-6 py-3 text-base rounded-xl',
-  lg: 'px-8 py-4 text-lg rounded-xl',
+  sm: 'px-4 py-2 text-sm rounded-md',
+  md: 'px-6 py-2.5 text-base rounded-lg',
+  lg: 'px-8 py-3.5 text-lg rounded-xl',
+  icon: 'p-2 rounded-xl flex items-center justify-center',
 };
 
 export function Button({

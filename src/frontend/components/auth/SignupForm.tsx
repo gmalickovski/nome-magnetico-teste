@@ -34,7 +34,7 @@ export function SignupForm({ produto = '' }: Props) {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, email, password }),
+      body: JSON.stringify({ nome, email, password, produto }),
     });
 
     const data = await res.json();
@@ -63,7 +63,7 @@ export function SignupForm({ produto = '' }: Props) {
   if (success) {
     const loginUrl = produto ? `/auth/login?produto=${produto}` : '/auth/login';
     return (
-      <div className="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-8 text-center">
+      <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 text-center shadow-2xl shadow-black/50">
         <div className="text-5xl mb-4">✉️</div>
         <h2 className="font-cinzel text-2xl font-bold text-white mb-3">
           Verifique seu Email
@@ -81,7 +81,7 @@ export function SignupForm({ produto = '' }: Props) {
   }
 
   return (
-    <div className="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-8">
+    <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 shadow-2xl shadow-black/50">
       <h2 className="font-cinzel text-2xl font-bold text-white text-center mb-6">
         Criar Conta
       </h2>

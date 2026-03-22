@@ -164,11 +164,11 @@ export function PricingSection({ highlight, stripePrices }: PricingSectionProps)
               </ul>
 
               <a
-                href={`/comprar?produto=${plan.id}`}
-                className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-300 ${
+                href={`/auth/cadastro?produto=${plan.id}`}
+                className={`block text-center font-medium px-6 py-3 rounded-lg transition-all duration-300 ${
                   isHighlighted
-                    ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
-                    : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
+                    ? 'bg-[#D4AF37] text-[#1A1A1A] hover:bg-[#f2ca50] hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20'
+                    : 'border border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37] hover:scale-[1.02] active:scale-[0.98]'
                 }`}
               >
                 {plan.cta}

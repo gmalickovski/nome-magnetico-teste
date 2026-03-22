@@ -195,16 +195,23 @@ export function TesteBloqueio() {
             </div>
 
             {/* CTA */}
-            <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-6 text-center">
-              <p className="text-gray-200 font-medium mb-2">{result.cta.mensagem}</p>
-              <p className="text-gray-400 text-sm mb-5">
-                A análise completa inclui: interpretação dos 5 números, guia de implementação e seu Nome Magnético personalizado.
-              </p>
+            <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-8 text-center mt-4 shadow-xl shadow-black/20">
+              <p className="text-gray-200 font-medium mb-3 text-lg">{result.cta.mensagem}</p>
+              
+              <div className="text-gray-400 text-sm mb-6 space-y-3 leading-relaxed">
+                <p>
+                  A análise completa revela o <strong>caminho de transformação</strong> de todos os seus bloqueios, além da interpretação profunda dos 5 números da sua Numerologia Cabalística e o seu guia prático do Nome Magnético personalizado.
+                </p>
+                <p>
+                  Você também irá verificar de forma detalhada se possui <strong>Débitos Kármicos</strong>, <strong>Lições Kármicas</strong> e <strong>Tendências Ocultas</strong> atuando em sua vida agora.
+                </p>
+              </div>
+
               <a
                 href={result.cta.url}
-                className="inline-block bg-[#D4AF37] text-black font-bold px-8 py-3.5 rounded-xl hover:bg-yellow-300 transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/20"
+                className="inline-block bg-gradient-to-r from-[#D4AF37] to-[#f2ca50] text-[#1A1A1A] font-bold text-lg px-8 py-4 rounded-xl hover:brightness-110 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/30"
               >
-                Ver Análise Completa →
+                Desbloquear Minha Análise Completa
               </a>
             </div>
 

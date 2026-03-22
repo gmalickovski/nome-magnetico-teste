@@ -2,7 +2,13 @@
 import AuthLayout from '../../layouts/AuthLayout.astro';
 import { SignupForm } from '../../frontend/components/auth/SignupForm';
 
+const user = Astro.locals.user;
 const produto = Astro.url.searchParams.get('produto') ?? '';
+
+// Usuário já logado → vai direto para o checkout ou para o app
+if (user) {
+  return Astro.redirect(produto ? `/comprar?produto=${produto}` : '/app');
+}
 ---
 
 <AuthLayout title="Criar Conta">
