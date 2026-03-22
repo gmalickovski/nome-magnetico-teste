@@ -143,7 +143,7 @@ export default function CompanyNameForm({ onSuccess }: Props) {
             type="date"
             value={form.data_fundacao}
             onChange={e => set('data_fundacao', e.target.value)}
-            className="input-dark w-full sm:w-auto"
+            className="input-dark w-full"
           />
           <p className="text-xs text-gray-500 mt-1">
             Opcional — se informada, usaremos o Destino da empresa na análise

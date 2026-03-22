@@ -23,7 +23,7 @@ export function LandingFooter() {
               <li><a href="/" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Início</a></li>
               <li><a href="#como-funciona" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Como Funciona</a></li>
               <li><a href="#precos" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Preços</a></li>
-              <li><a href="/suporte" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Suporte</a></li>
+              <li><a href="/app/suporte" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Suporte</a></li>
               <li><a href="/auth/login" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Entrar</a></li>
             </ul>
           </div>

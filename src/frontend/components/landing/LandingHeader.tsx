@@ -20,8 +20,8 @@ export function LandingHeader() {
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider">
-          Nome Magnético
+        <a href="/" className="font-cinzel text-base sm:text-lg md:text-xl font-bold text-[#D4AF37] tracking-wider hover:opacity-80 transition-opacity whitespace-nowrap">
+          NOME MAGNÉTICO
         </a>
 
         {/* Nav desktop */}
@@ -49,7 +49,7 @@ export function LandingHeader() {
         {/* Menu mobile */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-gray-400 hover:text-white p-2"
+          className="md:hidden text-[#D4AF37] hover:text-[#f2ca50] transition-colors"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {menuOpen ? (

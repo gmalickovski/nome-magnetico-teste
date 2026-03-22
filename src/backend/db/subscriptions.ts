@@ -118,9 +118,9 @@ const STRIPE_FIXED_BRL = 0.39;
 const USD_TO_BRL = 5.70;
 
 /**
- * Calcula estatísticas de receita do negócio.
+ * Calcula estatísticas de receita do negócio baseado em todo o histórico.
  */
-export async function getRevenueStats(iaCostUsd: number): Promise<RevenueStats> {
+export async function getRevenueStats(allTimeIaCostUsd: number): Promise<RevenueStats> {
   const { data, error } = await supabase
     
     .from('subscriptions')
@@ -137,7 +137,7 @@ export async function getRevenueStats(iaCostUsd: number): Promise<RevenueStats> 
 
   const grossBRL = totalCents / 100;
   const stripeFeeBRL = grossBRL * STRIPE_PCT + totalTransactions * STRIPE_FIXED_BRL;
-  const iaCostBRL = iaCostUsd * USD_TO_BRL;
+  const iaCostBRL = allTimeIaCostUsd * USD_TO_BRL;
   const netBRL = grossBRL - stripeFeeBRL - iaCostBRL;
 
   const monthsSinceFirst = Math.max(

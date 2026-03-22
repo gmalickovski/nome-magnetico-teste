@@ -40,12 +40,12 @@ const usageCards = [
     </p>
 
     <!-- Cards de uso mensal -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
       {usageCards.map(card => (
-        <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
-          <div class="text-2xl mb-2">{card.icon}</div>
-          <div class="font-cinzel text-xl font-bold text-[#D4AF37]">{card.value}</div>
-          <div class="text-gray-500 text-xs mt-1">{card.label}</div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3 sm:p-5 text-center flex flex-col justify-center">
+          <div class="text-2xl mb-1 sm:mb-2">{card.icon}</div>
+          <div class="font-cinzel text-lg sm:text-xl font-bold text-[#D4AF37] break-words">{card.value}</div>
+          <div class="text-gray-500 text-[10px] sm:text-xs mt-1">{card.label}</div>
         </div>
       ))}
     </div>
@@ -56,34 +56,36 @@ const usageCards = [
         <div class="px-5 py-3 border-b border-white/10">
           <h3 class="text-sm font-medium text-gray-300">Uso por Provedor — Mês Atual</h3>
         </div>
-        <table class="w-full text-sm">
-          <thead class="border-b border-white/10">
-            <tr>
-              <th class="text-left px-5 py-3 text-gray-400 font-medium">Provedor</th>
-              <th class="text-right px-5 py-3 text-gray-400 font-medium">Requisições</th>
-              <th class="text-right px-5 py-3 text-gray-400 font-medium">Tokens Input</th>
-              <th class="text-right px-5 py-3 text-gray-400 font-medium">Tokens Output</th>
-              <th class="text-right px-5 py-3 text-gray-400 font-medium">Custo (USD)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stats.byProvider.map(row => (
-              <tr class="border-b border-white/5 hover:bg-white/3">
-                <td class="px-5 py-3">
-                  <span class={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    row.provider === 'groq' ? 'bg-orange-500/20 text-orange-400' :
-                    row.provider === 'claude' ? 'bg-purple-500/20 text-purple-400' :
-                    'bg-blue-500/20 text-blue-400'
-                  }`}>{row.provider}</span>
-                </td>
-                <td class="px-5 py-3 text-gray-400 text-right">{row.requests.toLocaleString('pt-BR')}</td>
-                <td class="px-5 py-3 text-gray-400 text-right">{row.tokensInput.toLocaleString('pt-BR')}</td>
-                <td class="px-5 py-3 text-gray-400 text-right">{row.tokensOutput.toLocaleString('pt-BR')}</td>
-                <td class="px-5 py-3 text-[#D4AF37] text-right font-mono text-xs">${row.estimatedCostUsd.toFixed(4)}</td>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-white/10">
+              <tr>
+                <th class="text-left px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Provedor</th>
+                <th class="text-right px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Requisições</th>
+                <th class="text-right px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Tokens Input</th>
+                <th class="text-right px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Tokens Output</th>
+                <th class="text-right px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Custo (USD)</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {stats.byProvider.map(row => (
+                <tr class="border-b border-white/5 hover:bg-white/3">
+                  <td class="px-5 py-3 whitespace-nowrap">
+                    <span class={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      row.provider === 'groq' ? 'bg-orange-500/20 text-orange-400' :
+                      row.provider === 'claude' ? 'bg-purple-500/20 text-purple-400' :
+                      'bg-blue-500/20 text-blue-400'
+                    }`}>{row.provider}</span>
+                  </td>
+                  <td class="px-5 py-3 text-gray-400 text-right whitespace-nowrap">{row.requests.toLocaleString('pt-BR')}</td>
+                  <td class="px-5 py-3 text-gray-400 text-right whitespace-nowrap">{row.tokensInput.toLocaleString('pt-BR')}</td>
+                  <td class="px-5 py-3 text-gray-400 text-right whitespace-nowrap">{row.tokensOutput.toLocaleString('pt-BR')}</td>
+                  <td class="px-5 py-3 text-[#D4AF37] text-right font-mono text-xs whitespace-nowrap">${row.estimatedCostUsd.toFixed(4)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     )}
 
@@ -101,40 +103,42 @@ const usageCards = [
       <div class="px-5 py-3 border-b border-white/10">
         <h3 class="text-sm font-medium text-gray-300">Configuração Atual no Banco</h3>
       </div>
-      <table class="w-full text-sm">
-        <thead class="border-b border-white/10">
-          <tr>
-            <th class="text-left px-5 py-3 text-gray-400 font-medium">Tarefa</th>
-            <th class="text-left px-5 py-3 text-gray-400 font-medium">Provedor</th>
-            <th class="text-left px-5 py-3 text-gray-400 font-medium">Modelo</th>
-            <th class="text-left px-5 py-3 text-gray-400 font-medium">Temp.</th>
-            <th class="text-left px-5 py-3 text-gray-400 font-medium">Tokens</th>
-            <th class="text-left px-5 py-3 text-gray-400 font-medium">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(configs ?? []).map(config => (
-            <tr class="border-b border-white/5 hover:bg-white/3">
-              <td class="px-5 py-3 text-gray-200 font-medium capitalize">{config.task}</td>
-              <td class="px-5 py-3">
-                <span class={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                  config.provider === 'groq' ? 'bg-orange-500/20 text-orange-400' :
-                  config.provider === 'claude' ? 'bg-purple-500/20 text-purple-400' :
-                  'bg-blue-500/20 text-blue-400'
-                }`}>{config.provider}</span>
-              </td>
-              <td class="px-5 py-3 text-gray-400 font-mono text-xs">{config.model}</td>
-              <td class="px-5 py-3 text-gray-400">{config.temperature}</td>
-              <td class="px-5 py-3 text-gray-400">{config.max_tokens}</td>
-              <td class="px-5 py-3">
-                <span class={`px-2 py-0.5 rounded-full text-xs ${
-                  config.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-500'
-                }`}>{config.is_active ? 'Ativo' : 'Inativo'}</span>
-              </td>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-white/10">
+            <tr>
+              <th class="text-left px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Tarefa</th>
+              <th class="text-left px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Provedor</th>
+              <th class="text-left px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Modelo</th>
+              <th class="text-left px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Temp.</th>
+              <th class="text-left px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Tokens</th>
+              <th class="text-left px-5 py-3 text-gray-400 font-medium whitespace-nowrap">Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {(configs ?? []).map(config => (
+              <tr class="border-b border-white/5 hover:bg-white/3">
+                <td class="px-5 py-3 text-gray-200 font-medium capitalize whitespace-nowrap">{config.task}</td>
+                <td class="px-5 py-3 whitespace-nowrap">
+                  <span class={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    config.provider === 'groq' ? 'bg-orange-500/20 text-orange-400' :
+                    config.provider === 'claude' ? 'bg-purple-500/20 text-purple-400' :
+                    'bg-blue-500/20 text-blue-400'
+                  }`}>{config.provider}</span>
+                </td>
+                <td class="px-5 py-3 text-gray-400 font-mono text-xs whitespace-nowrap">{config.model}</td>
+                <td class="px-5 py-3 text-gray-400 whitespace-nowrap">{config.temperature}</td>
+                <td class="px-5 py-3 text-gray-400 whitespace-nowrap">{config.max_tokens}</td>
+                <td class="px-5 py-3 whitespace-nowrap">
+                  <span class={`px-2 py-0.5 rounded-full text-xs ${
+                    config.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-500'
+                  }`}>{config.is_active ? 'Ativo' : 'Inativo'}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </AdminLayout>

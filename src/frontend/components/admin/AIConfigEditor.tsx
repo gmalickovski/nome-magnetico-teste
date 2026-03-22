@@ -171,7 +171,7 @@ export default function AIConfigEditor({ currentConfigs }: Props) {
       {/* Seletor de provedor */}
       <div>
         <h3 className="text-sm font-medium text-gray-400 mb-3">Provedor de IA</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {(Object.keys(PROVIDER_LABELS) as AIProvider[]).map(provider => {
             const s = PROVIDER_STYLES[provider];
             const isActive = selectedProvider === provider;
@@ -204,17 +204,23 @@ export default function AIConfigEditor({ currentConfigs }: Props) {
           {TASKS.map(task => (
             <div
               key={task.id}
-              className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between gap-4"
+              className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             >
               <div className="min-w-0">
                 <div className="text-sm font-medium text-gray-200">{task.label}</div>
                 <div className="text-xs text-gray-500 mt-0.5">{task.description}</div>
               </div>
-              <div className="flex-shrink-0">
+              <div className="w-full sm:w-auto flex-shrink-0">
                 <select
                   value={taskModels[task.id]}
                   onChange={e => handleModelChange(task.id, e.target.value)}
-                  className={`bg-[#1a1a1a] border rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-1 transition-colors ${styles.border} focus:ring-[#D4AF37]/50`}
+                  className={`w-full sm:w-auto appearance-none bg-[#1a1a1a] border rounded-lg pl-3 pr-10 py-2.5 sm:py-2 text-sm text-gray-200 focus:outline-none focus:ring-1 transition-colors ${styles.border} focus:ring-[#D4AF37]/50`}
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundSize: '1em',
+                  }}
                 >
                   {models.map(m => (
                     <option key={m.id} value={m.id}>

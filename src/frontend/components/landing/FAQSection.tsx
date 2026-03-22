@@ -77,7 +77,7 @@ export function FAQSection({ items }: FAQSectionProps) {
         <div className="text-center mt-10">
           <p className="text-gray-400 text-sm">
             Ainda tem dúvidas?{' '}
-            <a href="/suporte" className="text-[#D4AF37] hover:underline">
+            <a href="/app/suporte" className="text-[#D4AF37] hover:underline">
               Entre em contato
             </a>
           </p>

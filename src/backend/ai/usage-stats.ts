@@ -92,3 +92,21 @@ export async function getMonthlyUsageStats(): Promise<MonthlyUsageStats> {
     byProvider,
   };
 }
+
+export async function getAllTimeUsageStats(): Promise<number> {
+  const { data: rows, error } = await supabase
+    
+    .from('ai_usage')
+    .select('model, tokens_input, tokens_output');
+
+  if (error || !rows) return 0;
+
+  let totalCost = 0;
+  for (const row of rows) {
+    const input = row.tokens_input ?? 0;
+    const output = row.tokens_output ?? 0;
+    totalCost += estimateCost(row.model ?? '', input, output);
+  }
+
+  return totalCost;
+}
