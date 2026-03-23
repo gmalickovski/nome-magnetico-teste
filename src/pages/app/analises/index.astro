@@ -74,14 +74,14 @@ const hasMultipleProducts = uniqueProducts.length > 1;
 
 <AppLayout title="Minhas Análises">
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between items-start gap-5">
       <div>
-        <h1 class="font-cinzel text-3xl font-bold text-white mb-1">Minhas Análises</h1>
+        <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-1 leading-tight">Minhas Análises</h1>
         <p class="text-gray-400 text-sm">{analyses.length} análise{analyses.length !== 1 ? 's' : ''} no total</p>
       </div>
       <a
         href="/app"
-        class="inline-flex items-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium text-sm px-4 py-2 rounded-md hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+        class="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium text-sm px-5 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
       >
         + Nova Análise
       </a>
