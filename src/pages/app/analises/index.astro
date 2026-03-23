@@ -26,9 +26,9 @@ const productLabel: Record<string, string> = {
 
 // Pre-resolver classes de status para evitar template literals no map
 function statusClass(status: string) {
-  if (status === 'complete') return 'text-xs px-2.5 py-1 rounded-full font-medium bg-emerald-500/20 text-emerald-400 flex-shrink-0';
-  if (status === 'error')    return 'text-xs px-2.5 py-1 rounded-full font-medium bg-red-500/20 text-red-400 flex-shrink-0';
-  return 'text-xs px-2.5 py-1 rounded-full font-medium bg-yellow-500/20 text-yellow-400 flex-shrink-0';
+  if (status === 'complete') return 'text-[10px] sm:text-xs px-2 py-0.5 rounded font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 flex-shrink-0 whitespace-nowrap uppercase tracking-wider';
+  if (status === 'error')    return 'text-[10px] sm:text-xs px-2 py-0.5 rounded font-medium bg-red-500/20 text-red-400 border border-red-500/20 flex-shrink-0 whitespace-nowrap uppercase tracking-wider';
+  return 'text-[10px] sm:text-xs px-2 py-0.5 rounded font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 flex-shrink-0 whitespace-nowrap uppercase tracking-wider';
 }
 function statusLabel(status: string) {
   if (status === 'complete')   return 'Completa';
@@ -101,9 +101,9 @@ const hasMultipleProducts = uniqueProducts.length > 1;
 
     {hasMultipleProducts && (
       <div class="flex items-center gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide">
-        <button class="filter-btn px-4 py-2 rounded-md text-sm font-medium bg-[#D4AF37] text-[#1A1A1A] transition-colors" data-filter="all">Todos</button>
+        <button class="filter-btn flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-md text-sm font-medium bg-[#D4AF37] text-[#1A1A1A] transition-colors" data-filter="all">Todos</button>
         {uniqueProducts.map(pt => (
-          <button class="filter-btn px-4 py-2 rounded-md text-sm font-medium bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors" data-filter={pt}>
+          <button class="filter-btn flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-md text-sm font-medium bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors" data-filter={pt}>
             {productLabel[pt] ?? pt}
           </button>
         ))}
@@ -126,44 +126,54 @@ const hasMultipleProducts = uniqueProducts.length > 1;
       <div class="space-y-3" id="analysis-list">
         {analysesWithMeta.map(analysis => (
           <div 
-            class="analysis-card flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-5 py-4 hover:border-[#D4AF37]/30 transition-all duration-200"
+            class="analysis-card flex flex-col gap-3 bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5 hover:border-[#D4AF37]/30 transition-all duration-200"
             data-product={analysis.product_type ?? 'nome_magnetico'}
           >
-            <span class="text-2xl flex-shrink-0">{analysis.icon}</span>
-            <a
-              href={'/app/resultado/' + analysis.id}
-              class="flex-1 flex items-center justify-between min-w-0"
-            >
-              <div class="min-w-0">
-                <div class="flex items-center flex-wrap gap-2 mb-1">
-                  <p class="text-gray-200 font-medium truncate">{analysis.nomeExibido}</p>
-                  {analysis.isOriginal && (
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-bold border border-blue-500/30 whitespace-nowrap">
-                      ★ Nome Original
-                    </span>
-                  )}
-                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-gray-400 whitespace-nowrap">
-                    {analysis.productName}
-                  </span>
-                </div>
-                <div class="flex items-center gap-3 text-sm">
-                  <span class="text-gray-500">{analysis.dateFormatted}</span>
-                  {!analysis.isOriginal && analysis.score !== null && (
-                    <span class={`font-bold ${analysis.score >= 80 ? 'text-emerald-400' : analysis.score >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
-                      {analysis.score}% Compatível
-                    </span>
-                  )}
-                </div>
-              </div>
+            {/* Top Row: Icon + Name + Delete */}
+            <div class="flex items-start justify-between gap-3 w-full">
+              <a href={'/app/resultado/' + analysis.id} class="flex items-center gap-3 min-w-0 flex-1 group">
+                <span class="text-xl sm:text-2xl flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-black/20 rounded-lg flex items-center justify-center border border-white/5 group-hover:border-[#D4AF37]/30 transition-colors">
+                  {analysis.icon}
+                </span>
+                <p class="text-gray-200 font-semibold truncate text-base sm:text-lg group-hover:text-[#D4AF37] transition-colors">{analysis.nomeExibido}</p>
+              </a>
+              <button
+                data-delete-id={analysis.id}
+                class="delete-analysis flex-shrink-0 p-2 text-gray-500 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
+                title="Excluir análise"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
+            </div>
+
+            {/* Bottom Row: Tags, Date, Score */}
+            <a href={'/app/resultado/' + analysis.id} class="w-full flex flex-wrap items-center gap-2 mt-1">
+              <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-white/10 text-gray-300 font-medium whitespace-nowrap uppercase tracking-wider border border-white/5">
+                {analysis.productName}
+              </span>
+              
+              {analysis.isOriginal && (
+                <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold border border-blue-500/20 whitespace-nowrap uppercase tracking-wider">
+                  ★ Nome Original
+                </span>
+              )}
+              
               <span class={analysis.statusCls}>{analysis.statusLbl}</span>
+              
+              {/* Force elements to right or wrap */}
+              <div class="flex items-center gap-2 ml-auto">
+                <span class="text-gray-500 text-xs flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-white/5 whitespace-nowrap">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  {analysis.dateFormatted}
+                </span>
+
+                {!analysis.isOriginal && analysis.score !== null && (
+                  <span class={`text-xs whitespace-nowrap px-2 py-1 font-bold rounded border bg-black/20 ${analysis.score >= 80 ? 'text-emerald-400 border-emerald-500/20' : analysis.score >= 60 ? 'text-yellow-400 border-yellow-500/20' : 'text-red-400 border-red-500/20'}`}>
+                    {analysis.score}% Compatível
+                  </span>
+                )}
+              </div>
             </a>
-            <button
-              data-delete-id={analysis.id}
-              class="delete-analysis flex-shrink-0 p-2 text-gray-600 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
-              title="Excluir análise"
-            >
-              🗑
-            </button>
           </div>
         ))}
       </div>
@@ -175,22 +185,35 @@ const hasMultipleProducts = uniqueProducts.length > 1;
     const filterBtns = document.querySelectorAll('.filter-btn');
     const cards = document.querySelectorAll('.analysis-card');
 
+    let currentFilter = 'all';
+
     filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
+        const clickedFilter = (btn as HTMLElement).dataset.filter || 'all';
+
+        // Toggle: Se clicar no mesmo filtro (não-tudo), volta para 'all'
+        if (clickedFilter !== 'all' && currentFilter === clickedFilter) {
+          currentFilter = 'all';
+        } else {
+          currentFilter = clickedFilter;
+        }
+
         // Atualizar estilos dos botões
         filterBtns.forEach(b => {
-          b.classList.remove('bg-[#D4AF37]', 'text-[#1A1A1A]');
-          b.classList.add('bg-white/5', 'text-gray-400');
+          const bFilter = (b as HTMLElement).dataset.filter;
+          if (bFilter === currentFilter) {
+            b.classList.remove('bg-white/5', 'text-gray-400');
+            b.classList.add('bg-[#D4AF37]', 'text-[#1A1A1A]');
+          } else {
+            b.classList.remove('bg-[#D4AF37]', 'text-[#1A1A1A]');
+            b.classList.add('bg-white/5', 'text-gray-400');
+          }
         });
-        btn.classList.remove('bg-white/5', 'text-gray-400');
-        btn.classList.add('bg-[#D4AF37]', 'text-[#1A1A1A]');
-
-        const filter = (btn as HTMLElement).dataset.filter;
 
         // Filtrar cards
         cards.forEach(card => {
           const product = (card as HTMLElement).dataset.product;
-          if (filter === 'all' || product === filter) {
+          if (currentFilter === 'all' || product === currentFilter) {
             (card as HTMLElement).style.display = 'flex';
           } else {
             (card as HTMLElement).style.display = 'none';
