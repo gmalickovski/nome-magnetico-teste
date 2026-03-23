@@ -38,7 +38,18 @@ function statusLabel(status: string) {
 }
 
 const analysesWithMeta = analyses.map(a => {
-  const isOriginal = a.nome_completo.trim().toLowerCase() === profileName;
+  const freqData = (a as any).frequencias_numeros as any;
+  const rankingBebe    = freqData?.ranking ?? null;
+  const rankingEmpresa = (a.product_type === 'nome_empresa' ? freqData : null) as any;
+
+  const nomeExibido = 
+    (a.product_type === 'nome_bebe' && rankingBebe?.melhorNome?.nomeCompleto)
+      ? rankingBebe.melhorNome.nomeCompleto
+    : (a.product_type === 'nome_empresa' && rankingEmpresa?.melhorNome?.nomeEmpresa)
+      ? rankingEmpresa.melhorNome.nomeEmpresa
+    : a.nome_completo;
+
+  const isOriginal = (a.product_type === 'nome_magnetico' || !a.product_type) && a.nome_completo.trim().toLowerCase() === profileName;
 
   let score: number | null = null;
   if (!isOriginal && a.status === 'complete') {
@@ -59,6 +70,7 @@ const analysesWithMeta = analyses.map(a => {
   return {
     ...a,
     isOriginal,
+    nomeExibido,
     score,
     icon: productIcon[a.product_type ?? 'nome_magnetico'] ?? '✨',
     productName: productLabel[a.product_type ?? 'nome_magnetico'] ?? 'Análise',
@@ -124,7 +136,7 @@ const hasMultipleProducts = uniqueProducts.length > 1;
             >
               <div class="min-w-0">
                 <div class="flex items-center flex-wrap gap-2 mb-1">
-                  <p class="text-gray-200 font-medium truncate">{analysis.nome_completo}</p>
+                  <p class="text-gray-200 font-medium truncate">{analysis.nomeExibido}</p>
                   {analysis.isOriginal && (
                     <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-bold border border-blue-500/30 whitespace-nowrap">
                       ★ Nome Original
