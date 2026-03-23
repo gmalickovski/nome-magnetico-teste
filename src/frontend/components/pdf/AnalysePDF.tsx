@@ -13,7 +13,7 @@ import {
   Image,
 } from '@react-pdf/renderer';
 import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { formatAnalysisText } from '../../../utils/textFormatter';
 import { ARCANOS } from '../../../backend/numerology/arcanos';
@@ -21,23 +21,29 @@ import { ARCANOS } from '../../../backend/numerology/arcanos';
 // 1. Desativar hifenização global para que nomes grandes não quebrem (ex: "Cor-rea")
 Font.registerHyphenationCallback((word) => [word]);
 
-// 2. Registrar Cinzel (Regular + Bold) via file:// URL (mais confiável que base64 — fontkit detecta o formato correto)
-// Candidatos: dev (public/), produção VPS (public/ tem prioridade pois são TTFs originais não processados pelo Astro)
+// 2. Registrar Cinzel (Regular + Bold) via caminho absoluto (string).
+// @react-pdf/font roteia strings que não são URL nem data URI para fontkit.open(),
+// que lê o arquivo diretamente — evita o fetch() que não suporta file:// em Node.js.
+// Candidatos: dev (public/), produção VPS (dist/client/ — Astro copia public/ aqui no build)
 function _loadFont(name: string, filename: string): boolean {
   const candidates = [
     path.resolve(process.cwd(), `public/fonts/${filename}`),
-    path.resolve(path.dirname(fileURLToPath(import.meta.url)), `../../../public/fonts/${filename}`),
     path.resolve(process.cwd(), `dist/client/fonts/${filename}`),
+    path.resolve(path.dirname(fileURLToPath(import.meta.url)), `../../../public/fonts/${filename}`),
     path.resolve(path.dirname(fileURLToPath(import.meta.url)), `../../../dist/client/fonts/${filename}`),
   ];
-  try {
-    for (const p of candidates) {
-      if (fs.existsSync(p)) {
-        Font.register({ family: name, src: pathToFileURL(p).href });
-        return true;
-      }
-    }
-  } catch { /* ignore */ }
+  for (const p of candidates) {
+    try {
+      if (!fs.existsSync(p)) continue;
+      // Validar magic bytes: TTF (00010000), OTF (4F54544F), TTC (74746366), 'true' (74727565)
+      const buf = fs.readFileSync(p);
+      if (buf.length < 12) continue;
+      const magic = buf.readUInt32BE(0);
+      if (![0x00010000, 0x4F54544F, 0x74746366, 0x74727565].includes(magic)) continue;
+      Font.register({ family: name, src: p });
+      return true;
+    } catch { continue; }
+  }
   return false;
 }
 
