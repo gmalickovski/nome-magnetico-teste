@@ -17,7 +17,7 @@ interface Props {
   nomeCompleto: string;
 }
 
-const COR_LICAO = 'text-blue-400 border-blue-500/30 bg-blue-500/10';
+const COR_LICAO = 'border-[#D4AF37]/30 bg-[#D4AF37]/10';
 
 function LicaoCard({ licao }: { licao: LicaoCarmica }) {
   const [expandido, setExpandido] = useState(false);
@@ -31,7 +31,7 @@ function LicaoCard({ licao }: { licao: LicaoCarmica }) {
         className="w-full text-left p-4 flex items-center gap-4"
         onClick={() => setExpandido(!expandido)}
       >
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 border ${cor}`}>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 border text-[#D4AF37] border-[#D4AF37]/30 bg-[#D4AF37]/10`}>
           {licao.numero}
         </div>
         <div className="flex-1 min-w-0">
@@ -73,7 +73,7 @@ export default function KarmicLessons({ licoes, nomeCompleto }: Props) {
     <div className="space-y-4">
       <div className="glass rounded-xl p-4">
         <p className="text-sm text-gray-400 leading-relaxed">
-          <strong className="text-blue-400">{licoes.length} {licoes.length === 1 ? 'Lição Kármica' : 'Lições Kármicas'}</strong> — números ausentes de 1 a 8 no nome de {primeiroNome}.
+          <strong className="text-[#D4AF37]">{licoes.length} {licoes.length === 1 ? 'Lição Kármica' : 'Lições Kármicas'}</strong> — números ausentes de 1 a 8 no nome de {primeiroNome}.
           Cada ausência indica uma qualidade a ser desenvolvida nesta encarnação.
         </p>
       </div>

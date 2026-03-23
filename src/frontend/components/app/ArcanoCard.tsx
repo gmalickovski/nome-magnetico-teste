@@ -22,7 +22,7 @@ export default function ArcanoCard({ arcano, label = 'Arcano Regente' }: ArcanoC
         </div>
         <h3 className="font-cinzel text-xl font-bold text-white mb-0.5">{arcano.nome}</h3>
         <p className="text-[#D4AF37] text-sm font-medium mb-2">{arcano.palavraChave}</p>
-        <p className="text-gray-400 text-sm leading-relaxed line-clamp-3">{arcano.descricao}</p>
+        <p className="text-gray-400 text-sm leading-relaxed">{arcano.descricao}</p>
       </div>
     </div>
   );

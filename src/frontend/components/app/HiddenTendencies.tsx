@@ -32,14 +32,14 @@ function FrequencyBar({ numero, frequencia, max }: { numero: number; frequencia:
       <span className="w-6 text-center font-mono font-bold text-sm text-gold">{numero}</span>
       <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${isTendencia ? 'bg-purple-400' : 'bg-gold/50'}`}
+          className={`h-full rounded-full transition-all duration-500 ${isTendencia ? 'bg-blue-400' : 'bg-gold/50'}`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className={`w-5 text-right text-sm font-mono ${isTendencia ? 'text-purple-400 font-bold' : 'text-gray-400'}`}>
+      <span className={`w-5 text-right text-sm font-mono ${isTendencia ? 'text-blue-400 font-bold' : 'text-gray-400'}`}>
         {frequencia}
       </span>
-      {isTendencia && <span className="text-xs text-purple-400">⚠</span>}
+      {isTendencia && <span className="text-xs text-blue-400">⚠</span>}
     </div>
   );
 }
@@ -50,23 +50,23 @@ function TendenciaCard({ tendencia }: { tendencia: TendenciaOculta }) {
   const tituloCapitalizado = tendencia.titulo ? tendencia.titulo.charAt(0).toUpperCase() + tendencia.titulo.slice(1) : '';
 
   return (
-    <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 overflow-hidden">
+    <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 overflow-hidden">
       <button
         className="w-full text-left p-4 flex items-center gap-4"
         onClick={() => setExpandido(!expandido)}
       >
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 bg-purple-500/20 border border-purple-500/30 text-purple-300">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 bg-blue-500/20 border border-blue-500/30 text-blue-300">
           {tendencia.numero}
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-gray-200 text-sm leading-snug">{tituloCapitalizado}</p>
-          <p className="text-xs text-purple-400 mt-0.5">aparece {tendencia.frequencia}× no nome</p>
+          <p className="text-xs text-blue-400 mt-0.5">aparece {tendencia.frequencia}× no nome</p>
         </div>
         <span className="text-gray-400 shrink-0">{expandido ? '▲' : '▼'}</span>
       </button>
 
       {expandido && (
-        <div className="px-4 pb-4 space-y-4 border-t border-purple-500/10">
+        <div className="px-4 pb-4 space-y-4 border-t border-blue-500/10">
           <p className="text-gray-300 text-sm leading-relaxed pt-4">{tendencia.descricao}</p>
           <div className="rounded-lg p-3 bg-blue-500/10 border border-blue-500/20">
             <p className="text-xs text-blue-400 uppercase tracking-wider mb-2">Como Equilibrar</p>
@@ -101,8 +101,8 @@ export default function HiddenTendencies({ tendencias, frequencias, nomeCompleto
           ))}
         </div>
         {tendencias.length > 0 && (
-          <p className="text-xs text-purple-400 mt-3 flex items-center gap-1">
-            <span>⚠</span> Números em roxo apareceram 4 ou mais vezes = tendência oculta
+          <p className="text-xs text-blue-400 mt-3 flex items-center gap-1">
+            <span>⚠</span> Números em azul apareceram 4 ou mais vezes = tendência oculta
           </p>
         )}
       </div>
@@ -118,7 +118,7 @@ export default function HiddenTendencies({ tendencias, frequencias, nomeCompleto
         <div className="space-y-3">
           <div className="glass rounded-xl p-4">
             <p className="text-sm text-gray-400 leading-relaxed">
-              <strong className="text-purple-300">{tendencias.length} tendência(s) oculta(s)</strong> — números
+              <strong className="text-blue-300">{tendencias.length} tendência(s) oculta(s)</strong> — números
               que aparecem 4 ou mais vezes indicam um excesso daquela qualidade. Quando bem canalizada,
               pode ser um superpoder. Quando não, torna-se um padrão limitante.
             </p>

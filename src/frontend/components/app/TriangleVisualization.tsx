@@ -336,15 +336,6 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
       {/* Info: arcano + sequências */}
       <TrianguloInfo triangulo={triangulo} />
 
-      {/* Bloqueios consolidados (visíveis em todas as abas) */}
-      {bloqueios.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
-            Bloqueios Detectados ({bloqueios.length})
-          </h3>
-          {bloqueios.map((b, i) => <BloqueioCard key={i} bloqueio={b} />)}
-        </div>
-      )}
     </div>
   );
 }
