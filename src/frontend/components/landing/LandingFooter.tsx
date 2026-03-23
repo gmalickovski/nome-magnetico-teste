@@ -45,7 +45,7 @@ export function LandingFooter() {
               &copy; {new Date().getFullYear()} Nome Magnético. Todos os direitos reservados.
             </p>
             <p className="text-gray-700 text-xs mt-1">
-              Studio MLK — CNPJ 63.865.049/0001-27 — Estrada São Caetano, 4952 — Branquinha, Viamão/RS — CEP 94463-100
+              Studio MLK — CNPJ 63.865.049/0001-27
             </p>
           </div>
           <p className="text-gray-700 text-xs">
