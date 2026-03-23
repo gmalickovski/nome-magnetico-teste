@@ -44,7 +44,14 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
     <meta name="twitter:image" content={ogImage} />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+    <meta name="theme-color" content="#D4AF37" />
+
+    <!-- SEO extra -->
+    <meta property="og:site_name" content="Nome Magnético" />
+    <meta name="author" content="Nome Magnético" />
 
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

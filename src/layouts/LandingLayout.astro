@@ -8,10 +8,24 @@ export interface Props {
 
 const {
   title = 'Descubra Seu Nome Magnético',
-  description,
+  description = 'Análise de numerologia cabalística do seu nome de nascimento. Detecte bloqueios energéticos e encontre variações do nome em harmonia com seus números de Expressão e Destino.',
 } = Astro.props;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Nome Magnético',
+  url: 'https://www.nomemagnetico.com.br',
+  description,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://www.nomemagnetico.com.br/?q={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+};
 ---
 
 <BaseLayout title={title} description={description}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
   <slot />
 </BaseLayout>
