@@ -447,6 +447,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Capa nome_empresa (navy corporativo)
+  coverPageEmpresa: {
+    backgroundColor: '#0F1C2E',
+    paddingTop: 80,
+    paddingBottom: 56,
+    paddingHorizontal: 48,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   coverLogo: {
     fontSize: 30,
     color: GOLD,
@@ -953,7 +963,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
   return (
     <Document title={`Nome Magnetico — ${analysis.nome_completo}`} author="Nome Magnetico">
       {/* === PÁGINA 1: CAPA === */}
-      <Page size="A4" style={isBebe ? styles.coverPageBebe : styles.coverPage}>
+      <Page size="A4" style={isBebe ? styles.coverPageBebe : isEmpresa ? styles.coverPageEmpresa : styles.coverPage}>
         {logoSrc ? (
           <Image src={logoSrc} style={{ width: 80, marginBottom: 16 }} />
         ) : null}

@@ -118,6 +118,15 @@ const cinco_numeros = [
   { label: 'Missão',      sublabel: 'A Impressão', value: analysis.numero_missao, icon: '◎' },
   { label: 'Impressão', sublabel: 'Primeiro Nome', value: analysis.numero_personalidade, icon: '◇' },
 ];
+
+// ── 5 Números empresa (lidos do rankingEmpresa, não do analysis) ──────
+const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
+  { label: 'Expressão',  sublabel: 'O Dom',       value: rankingEmpresa.melhorNome.expressao,  icon: '✦' },
+  { label: 'Destino',    sublabel: 'O Chamado',    value: rankingEmpresa.destinoSocio,          icon: '◈' },
+  { label: 'Motivação',  sublabel: 'A Alma',       value: rankingEmpresa.melhorNome.motivacao,  icon: '♡' },
+  { label: 'Missão',     sublabel: 'O Propósito',  value: rankingEmpresa.melhorNome.missao,     icon: '◎' },
+  { label: 'Impressão',  sublabel: '1ª Palavra',   value: rankingEmpresa.melhorNome.impressao,  icon: '◉' },
+] : cinco_numeros;
 ---
 
 <ResultadoLayout title="Resultado da Análise" analysisId={analysis.id} showActions={analysis.status === 'complete'}>
@@ -520,7 +529,7 @@ const cinco_numeros = [
                 <h2 class="font-cinzel text-2xl font-bold text-white">A Estrela de 5 Pontas da Empresa</h2>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {cinco_numeros.map(n => (
+                {cinco_numeros_empresa.map(n => (
                   <div class="rounded-2xl bg-white/5 p-4 text-center flex flex-col items-center gap-1">
                     <span class="text-[#D4AF37]/60 text-lg leading-none">{n.icon}</span>
                     <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{n.value ?? '?'}</div>

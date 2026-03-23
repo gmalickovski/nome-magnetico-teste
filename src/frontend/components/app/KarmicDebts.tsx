@@ -18,18 +18,18 @@ interface Props {
 
 function DebitoCard({ debito }: { debito: DebitoCarmico }) {
   const [expandido, setExpandido] = useState(false);
-  // Cor fixa em tons de roxo (padrão da plataforma para débitos kármicos)
-  const cor = 'text-purple-400 border-purple-500/30 bg-purple-500/10';
+  // Cor fixa em tons de âmbar (padrão da plataforma para débitos kármicos)
+  const cor = 'text-amber-400 border-amber-500/30 bg-amber-500/10';
 
   const tituloCapitalizado = debito.titulo ? debito.titulo.charAt(0).toUpperCase() + debito.titulo.slice(1) : '';
 
   return (
-    <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 overflow-hidden">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 overflow-hidden">
       <button
         className="w-full text-left p-4 flex items-center gap-4"
         onClick={() => setExpandido(!expandido)}
       >
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 bg-purple-500/20 border border-purple-500/30 text-purple-300">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 bg-amber-500/20 border border-amber-500/30 text-amber-300">
           {debito.numero}
         </div>
         <div className="flex-1 min-w-0">
@@ -41,7 +41,7 @@ function DebitoCard({ debito }: { debito: DebitoCarmico }) {
       </button>
 
       {expandido && (
-        <div className="px-4 pb-4 space-y-4 border-t border-purple-500/10 bg-purple-500/5">
+        <div className="px-4 pb-4 space-y-4 border-t border-amber-500/10 bg-amber-500/5">
           <p className="text-gray-300 text-sm leading-relaxed pt-4 break-words">
             {debito.descricao}
           </p>
@@ -72,7 +72,7 @@ export default function KarmicDebts({ debitos, nomeCompleto }: Props) {
     <div className="space-y-4">
       <div className="glass rounded-xl p-4">
         <p className="text-sm text-gray-400 leading-relaxed">
-          <strong className="text-purple-400">{debitos.length} débito(s) kármico(s)</strong> — o nome de {primeiroNome} aponta para tendências de encarnações passadas que precisam ser redimidas nesta vida. Cada débito exige conscientização e ação focada para não repetir os velhos padrões.
+          <strong className="text-amber-400">{debitos.length} {debitos.length === 1 ? 'Débito Kármico' : 'Débitos Kármicos'}</strong> — o nome de {primeiroNome} aponta para tendências de encarnações passadas que precisam ser redimidas nesta vida. Cada débito exige conscientização e ação focada para não repetir os velhos padrões.
         </p>
       </div>
 

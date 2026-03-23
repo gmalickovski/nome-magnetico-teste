@@ -119,7 +119,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
           data_nascimento,
           data_fundacao ?? null,
           nome_socio2,
-          data_nascimento_socio2
+          data_nascimento_socio2,
+          ramo_atividade,
+          descricao_negocio
         );
 
         await updateAnalysis(analysis.id, {
