@@ -104,8 +104,8 @@ async function fetchFaqsFromNotion(): Promise<FaqItem[]> {
 
   if (!dbId) throw new Error('NOTION_FAQ_DB_ID não configurado');
 
-  const response = await notion.dataSources.query({
-    data_source_id: dbId,
+  const response = await notion.databases.query({
+    database_id: dbId,
     filter: {
       property: 'Publicado',
       checkbox: { equals: true },

@@ -73,6 +73,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     outros_sobrenomes,
     genero_preferido, estilo_preferido, caracteristicas_desejadas,
     data_fundacao, ramo_atividade, descricao_negocio,
+    nome_socio2, data_nascimento_socio2,
   } = parsed.data;
 
   const { data: profile } = await supabase
