@@ -51,6 +51,11 @@ export function SignupForm({ produto = '' }: Props) {
         }, 2500);
         return;
       }
+      if (data.error === 'email_pending_confirmation') {
+        setError('Este email já está cadastrado e aguarda confirmação. Reenviamos o link para sua caixa de entrada.');
+        setLoading(false);
+        return;
+      }
       setError(data.error ?? 'Erro ao criar conta. Tente novamente.');
       setLoading(false);
       return;

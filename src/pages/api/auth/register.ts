@@ -37,6 +37,17 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { nome, email, password, produto } = parsed.data;
 
+  // Pré-check: email já existe? (service role bypassa RLS — pega confirmados, pendentes e admins)
+  const { data: existingProfile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existingProfile) {
+    return json({ error: 'already_registered' }, 400);
+  }
+
   // Cliente anon — necessário para signUp() que aciona o email de confirmação.
   // URL: usa SUPABASE_URL (runtime, definida no .env da VPS igual à do backend).
   // Anon key: usa import.meta.env (embutida em build-time pelo Vite, pois é chave pública).
@@ -100,7 +111,7 @@ export const POST: APIRoute = async ({ request }) => {
       return json({ error: 'already_registered' }, 400);
     }
     // Pendente de confirmação → signUp() reenviou o email automaticamente
-    return json({ success: true }, 200);
+    return json({ error: 'email_pending_confirmation' }, 400);
   }
 
   console.log('[register] usuário criado:', {
