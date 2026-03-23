@@ -21,27 +21,30 @@ import { ARCANOS } from '../../../backend/numerology/arcanos';
 // 1. Desativar hifenização global para que nomes grandes não quebrem (ex: "Cor-rea")
 Font.registerHyphenationCallback((word) => [word]);
 
-// 2. Registrar Cinzel a partir do arquivo local como base64 (mais confiável em SSR)
-// Tenta dois caminhos candidatos: process.cwd() e relativo ao import.meta.url
-let _cinzelRegistered = false;
-try {
-  const _candidates = [
-    path.resolve(process.cwd(), 'public/fonts/Cinzel-Regular.ttf'),
-    path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../public/fonts/Cinzel-Regular.ttf'),
+// 2. Registrar Cinzel (Regular + Bold) a partir do arquivo local como base64
+// Candidatos: dev (public/), produção VPS (dist/client/)
+function _loadFont(name: string, filename: string): boolean {
+  const candidates = [
+    path.resolve(process.cwd(), `public/fonts/${filename}`),
+    path.resolve(process.cwd(), `dist/client/fonts/${filename}`),
+    path.resolve(path.dirname(fileURLToPath(import.meta.url)), `../../../public/fonts/${filename}`),
+    path.resolve(path.dirname(fileURLToPath(import.meta.url)), `../../../dist/client/fonts/${filename}`),
   ];
-  for (const _p of _candidates) {
-    if (fs.existsSync(_p)) {
-      Font.register({
-        family: 'Cinzel',
-        src: `data:font/truetype;base64,${fs.readFileSync(_p).toString('base64')}`,
-      });
-      _cinzelRegistered = true;
-      break;
+  try {
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        Font.register({ family: name, src: `data:font/truetype;base64,${fs.readFileSync(p).toString('base64')}` });
+        return true;
+      }
     }
-  }
-} catch { /* fallback para Helvetica-Bold */ }
+  } catch { /* ignore */ }
+  return false;
+}
 
-const LOGO_FONT = _cinzelRegistered ? 'Cinzel' : 'Helvetica-Bold';
+const _cinzelRegularOk = _loadFont('Cinzel', 'Cinzel-Regular.ttf');
+const _cinzelBoldOk = _loadFont('CinzelBold', 'Cinzel-Bold.ttf');
+const LOGO_FONT = _cinzelRegularOk ? 'Cinzel' : 'Helvetica-Bold';
+const TITLE_FONT = _cinzelBoldOk ? 'CinzelBold' : (_cinzelRegularOk ? 'Cinzel' : 'Helvetica-Bold');
 
 // Remove Unicode emoji/emoticons — react-pdf não suporta a maioria
 // Não faz trim() para não remover espaços intencionais em texto inline (negrito)
@@ -479,17 +482,22 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   coverTitle: {
-    fontSize: 24,
-    fontFamily: 'Helvetica-Bold',
+    fontSize: 22,
     color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 12,
     letterSpacing: 1,
   },
   coverTitleBebe: {
-    fontSize: 24,
-    fontFamily: 'Helvetica-Bold',
-    color: '#1C1033',
+    fontSize: 22,
+    color: '#5C3317',
+    textAlign: 'center',
+    marginBottom: 12,
+    letterSpacing: 1,
+  },
+  coverTitleEmpresa: {
+    fontSize: 22,
+    color: '#E2F0FF',
     textAlign: 'center',
     marginBottom: 12,
     letterSpacing: 1,
@@ -896,13 +904,19 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
   
   let logoSrc = '';
   try {
-    const candidatePath = path.resolve(process.cwd(), 'src/frontend/assets/logo-nome-magnético-v4.png');
-    if (fs.existsSync(candidatePath)) {
-      logoSrc = `data:image/png;base64,${fs.readFileSync(candidatePath).toString('base64')}`;
+    const logoCandidates = [
+      path.resolve(process.cwd(), 'public/logo-nome-magnetico.png'),
+      path.resolve(process.cwd(), 'dist/client/logo-nome-magnetico.png'),
+      path.resolve(process.cwd(), 'src/frontend/assets/logo-nome-magnético-v4.png'),
+      path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../dist/client/logo-nome-magnetico.png'),
+    ];
+    for (const p of logoCandidates) {
+      if (fs.existsSync(p)) {
+        logoSrc = `data:image/png;base64,${fs.readFileSync(p).toString('base64')}`;
+        break;
+      }
     }
-  } catch (e) {
-    // Ignore error
-  }
+  } catch { /* Ignore */ }
 
   const nums = [
     { label: 'Expressão', value: analysis.numero_expressao },
@@ -970,7 +984,10 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
         <Text style={[styles.coverLogo, { fontFamily: LOGO_FONT }]}>NOME MAGNETICO</Text>
         <View style={styles.coverAccentLine} />
         <Text style={styles.coverProduct}>{tipoAnalise}</Text>
-        <Text style={isBebe ? styles.coverTitleBebe : styles.coverTitle}>{nomeParaExibir}</Text>
+        <Text style={[
+          isBebe ? styles.coverTitleBebe : isEmpresa ? styles.coverTitleEmpresa : styles.coverTitle,
+          { fontFamily: TITLE_FONT },
+        ]}>{nomeParaExibir}</Text>
         <Text style={styles.coverSubtitle}>Numerologia Cabalística</Text>
         <View style={styles.coverBottomLine} />
         <Text style={styles.coverMeta}>Data de nascimento: {dataNascimento}</Text>
