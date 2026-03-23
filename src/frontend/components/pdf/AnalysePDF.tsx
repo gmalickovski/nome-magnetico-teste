@@ -13,7 +13,7 @@ import {
   Image,
 } from '@react-pdf/renderer';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import fs from 'fs';
 import { formatAnalysisText } from '../../../utils/textFormatter';
 import { ARCANOS } from '../../../backend/numerology/arcanos';
@@ -21,19 +21,19 @@ import { ARCANOS } from '../../../backend/numerology/arcanos';
 // 1. Desativar hifenização global para que nomes grandes não quebrem (ex: "Cor-rea")
 Font.registerHyphenationCallback((word) => [word]);
 
-// 2. Registrar Cinzel (Regular + Bold) a partir do arquivo local como base64
-// Candidatos: dev (public/), produção VPS (dist/client/)
+// 2. Registrar Cinzel (Regular + Bold) via file:// URL (mais confiável que base64 — fontkit detecta o formato correto)
+// Candidatos: dev (public/), produção VPS (public/ tem prioridade pois são TTFs originais não processados pelo Astro)
 function _loadFont(name: string, filename: string): boolean {
   const candidates = [
     path.resolve(process.cwd(), `public/fonts/${filename}`),
-    path.resolve(process.cwd(), `dist/client/fonts/${filename}`),
     path.resolve(path.dirname(fileURLToPath(import.meta.url)), `../../../public/fonts/${filename}`),
+    path.resolve(process.cwd(), `dist/client/fonts/${filename}`),
     path.resolve(path.dirname(fileURLToPath(import.meta.url)), `../../../dist/client/fonts/${filename}`),
   ];
   try {
     for (const p of candidates) {
       if (fs.existsSync(p)) {
-        Font.register({ family: name, src: `data:font/truetype;base64,${fs.readFileSync(p).toString('base64')}` });
+        Font.register({ family: name, src: pathToFileURL(p).href });
         return true;
       }
     }
