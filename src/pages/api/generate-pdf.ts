@@ -29,6 +29,30 @@ export const GET: APIRoute = async ({ url, locals }) => {
   const magneticNames = await getMagneticNames(analysisId);
   const firstName = analysis.nome_completo.split(' ')[0];
 
+  // Gera slug para uso no nome do arquivo
+  function toSlug(str: string) {
+    return str
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  const productType = analysis.product_type ?? 'nome_magnetico';
+  let filename: string;
+  if (productType === 'nome_bebe') {
+    const sobrenome = toSlug(
+      analysis.nome_completo.split(' ').slice(1).join(' ') || analysis.nome_completo
+    );
+    filename = `analise-nome-bebe-${sobrenome}-nome-magnetico.pdf`;
+  } else if (productType === 'nome_empresa') {
+    const freqData = (analysis as any).frequencias_numeros as any;
+    const nomeEmpresa = freqData?.melhorNome?.nomeEmpresa ?? analysis.nome_completo;
+    filename = `analise-nome-empresa-${toSlug(nomeEmpresa)}-nome-magnetico.pdf`;
+  } else {
+    filename = `analise-nome-social-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
+  }
+
   const pdfBuffer = await renderToBuffer(
     React.createElement(AnalysePDF, {
       analysis: analysis as any,
@@ -41,7 +65,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
     status: 200,
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="nome-magnetico-${firstName}.pdf"`,
+      'Content-Disposition': `attachment; filename="${filename}"`,
     },
   });
 };

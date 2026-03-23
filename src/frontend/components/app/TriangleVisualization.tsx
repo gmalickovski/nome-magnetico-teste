@@ -29,6 +29,7 @@ interface Props {
   destino: TrianguloData;
   bloqueios: Bloqueio[];
   nome: string;
+  productType?: 'nome_magnetico' | 'nome_bebe' | 'nome_empresa';
 }
 
 const TIPO_LABEL: Record<string, { label: string; descricao: string; emoji: string }> = {
@@ -37,6 +38,18 @@ const TIPO_LABEL: Record<string, { label: string; descricao: string; emoji: stri
   social:  { label: 'Triângulo Social',     descricao: 'Influências externas e como o mundo te percebe',     emoji: '🌐' },
   destino: { label: 'Triângulo do Destino', descricao: 'Resultados esperados, missão e previsões de vida',   emoji: '⭐' },
 };
+
+const TIPO_LABEL_EMPRESA: Record<string, string> = {
+  vida:    'Vibração base do nome — energia central que o negócio projeta ao mercado e como é percebido naturalmente por clientes e parceiros.',
+  pessoal: 'Cultura interna — os valores, a dinâmica da equipe e a forma como os sócios vivenciam a empresa por dentro.',
+  social:  'Posicionamento de mercado — como clientes, concorrentes e o mercado percebem e se relacionam com esta empresa.',
+  destino: 'Missão e legado — o propósito de longo prazo do negócio e o impacto que este nome carrega para o futuro.',
+};
+
+function getDescricao(tipo: string, productType?: string): string {
+  if (productType === 'nome_empresa') return TIPO_LABEL_EMPRESA[tipo] ?? TIPO_LABEL[tipo]!.descricao;
+  return TIPO_LABEL[tipo]!.descricao;
+}
 
 const BLOQUEIO_SEQUENCIAS = ['111','222','333','444','555','666','777','888','999'];
 
@@ -270,7 +283,7 @@ function BloqueioCard({ bloqueio }: { bloqueio: Bloqueio }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Componente principal
 // ─────────────────────────────────────────────────────────────────────────────
-export default function TriangleVisualization({ vida, pessoal, social, destino, bloqueios, nome }: Props) {
+export default function TriangleVisualization({ vida, pessoal, social, destino, bloqueios, nome, productType }: Props) {
   const tabs = ['vida', 'pessoal', 'social', 'destino'] as const;
   const [aba, setAba] = useState<typeof tabs[number]>('vida');
 
@@ -325,7 +338,7 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
 
       {/* Descrição da aba */}
       <div className="bg-white/5 border border-[#D4AF37]/10 rounded-xl p-4">
-        <p className="text-sm text-gray-400">{TIPO_LABEL[aba]?.descricao}</p>
+        <p className="text-sm text-gray-400">{getDescricao(aba, productType)}</p>
       </div>
 
       {/* SVG do triângulo */}

@@ -565,6 +565,10 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: GRAY,
   },
+  pageFooterSite: {
+    fontSize: 8,
+    color: GRAY,
+  },
   pageFooterPage: {
     fontSize: 8,
     color: GRAY,
@@ -917,10 +921,13 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
       path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../dist/client/logo-nome-magnetico.png'),
     ];
     for (const p of logoCandidates) {
-      if (fs.existsSync(p)) {
-        logoSrc = `data:image/png;base64,${fs.readFileSync(p).toString('base64')}`;
+      try {
+        if (!fs.existsSync(p)) continue;
+        const buf = fs.readFileSync(p);
+        if (buf.length < 1024) continue; // arquivo inválido (< 1 KB)
+        logoSrc = `data:image/png;base64,${buf.toString('base64')}`;
         break;
-      }
+      } catch { continue; }
     }
   } catch { /* Ignore */ }
 
@@ -1098,6 +1105,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
         <View style={styles.pageFooter} fixed>
           <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+          <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
           <Text
             style={styles.pageFooterPage}
             render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
@@ -1193,6 +1201,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
           </View>
         </Page>
@@ -1252,6 +1261,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
           </View>
         </Page>
@@ -1362,6 +1372,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
           </View>
         </Page>
@@ -1441,6 +1452,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
           </View>
         </Page>
@@ -1544,6 +1556,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
           </View>
         </Page>
@@ -1594,6 +1607,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text style={styles.pageFooterPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
           </View>
         </Page>
@@ -1621,6 +1635,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text
               style={styles.pageFooterPage}
               render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
@@ -1735,6 +1750,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text
               style={styles.pageFooterPage}
               render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
@@ -1811,6 +1827,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text
               style={styles.pageFooterPage}
               render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
@@ -1833,6 +1850,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text
               style={styles.pageFooterPage}
               render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}
@@ -1864,6 +1882,7 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
 
           <View style={styles.pageFooter} fixed>
             <Text style={styles.pageFooterEmail}>contato@nomemagnetico.com.br</Text>
+            <Text style={styles.pageFooterSite}>www.nomemagnetico.com.br</Text>
             <Text
               style={styles.pageFooterPage}
               render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`}

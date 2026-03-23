@@ -124,11 +124,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
           descricao_negocio
         );
 
+        // Calcular triângulos do melhor nome (mesmo padrão do nome_bebe)
+        const melhorNomeEmpresaStr = resultado.melhorNome?.nomeEmpresa ?? null;
+        const dataTriangulosEmpresa = data_fundacao ?? data_nascimento;
+        const todosTriangulosEmpresa = melhorNomeEmpresaStr
+          ? calcularTodosTriangulos(melhorNomeEmpresaStr, dataTriangulosEmpresa)
+          : null;
+
         await updateAnalysis(analysis.id, {
           frequencias_numeros: resultado as unknown,
           numero_destino: resultado.destinoSocio,
           numero_personalidade: resultado.melhorNome?.impressao ?? null,
           score: resultado.melhorNome?.score ?? null,
+          triangulo_vida:    todosTriangulosEmpresa?.vida    as unknown ?? null,
+          triangulo_pessoal: todosTriangulosEmpresa?.pessoal as unknown ?? null,
+          triangulo_social:  todosTriangulosEmpresa?.social  as unknown ?? null,
+          triangulo_destino: todosTriangulosEmpresa?.destino as unknown ?? null,
         });
 
         analiseTexto = await generateCompanyAnalysis(
