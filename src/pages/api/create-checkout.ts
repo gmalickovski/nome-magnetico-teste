@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { createCheckoutSession, type ProductType } from '../../backend/payments/stripe';
 
 const schema = z.object({
-  product_type: z.enum(['nome_magnetico', 'nome_bebe', 'nome_empresa']),
+  product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']),
 });
 
 export const POST: APIRoute = async ({ request, locals, url }) => {
@@ -38,7 +38,10 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
   }
 
   const { product_type } = parsed.data;
-  const baseUrl = url.origin;
+  // O Node SSR atrás de um proxy reverso as vezes recebe a origin como localhost ou IP
+  // se o X-Forwarded-Host não estiver configurado perfeitamente no NGINX/Caddy.
+  // APP_URL no .env é a fonte absoluta de verdade, logo, usamos ela como primeira opção.
+  const baseUrl = process.env.APP_URL || url.origin;
 
   try {
     const session = await createCheckoutSession({

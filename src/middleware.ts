@@ -1,5 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
-import { createUserClient } from './backend/db/supabase';
+import { supabase } from './backend/db/supabase';
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
@@ -32,8 +32,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   try {
-    const client = createUserClient(accessToken);
-    const { data: { user }, error } = await client.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
 
     if (error || !user) {
       // Token inválido — limpar cookies e redirecionar
@@ -69,8 +68,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     // Verificar acesso admin
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
-      const { data: profile } = await client
-        
+      const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)

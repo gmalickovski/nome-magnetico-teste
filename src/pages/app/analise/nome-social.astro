@@ -16,8 +16,8 @@ const { data: profile } = await client
   .single();
 
 const isAdmin = profile?.role === 'admin';
-const hasAccess = isAdmin || await hasActiveSubscription(user.id, 'nome_magnetico');
-if (!hasAccess) return Astro.redirect('/comprar?produto=nome_magnetico');
+const hasAccess = isAdmin || await hasActiveSubscription(user.id, 'nome_social');
+if (!hasAccess) return Astro.redirect('/comprar?produto=nome_social');
 
 // Proteção caso o usuário tenha burlado o modal no Dashboard
 if (!profile?.birth_name || !profile?.birth_date) {

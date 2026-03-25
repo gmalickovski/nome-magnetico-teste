@@ -8,13 +8,13 @@ import { stripe } from './stripe';
 import type { ProductType } from './stripe';
 
 export interface StripePrices {
-  nome_magnetico: string;
+  nome_social: string;
   nome_bebe: string;
   nome_empresa: string;
 }
 
 const PRICE_IDS: Record<ProductType, string> = {
-  nome_magnetico: process.env.STRIPE_PRICE_NOME_MAGNETICO ?? '',
+  nome_social: process.env.STRIPE_PRICE_NOME_SOCIAL ?? '',
   nome_bebe: process.env.STRIPE_PRICE_NOME_BEBE ?? '',
   nome_empresa: process.env.STRIPE_PRICE_NOME_EMPRESA ?? '',
 };
@@ -31,13 +31,13 @@ export async function getStripePrices(): Promise<StripePrices> {
   if (ids.length < 3) throw new Error('Price IDs do Stripe não configurados');
 
   const [nm, nb, ne] = await Promise.all([
-    stripe.prices.retrieve(PRICE_IDS.nome_magnetico),
+    stripe.prices.retrieve(PRICE_IDS.nome_social),
     stripe.prices.retrieve(PRICE_IDS.nome_bebe),
     stripe.prices.retrieve(PRICE_IDS.nome_empresa),
   ]);
 
   return {
-    nome_magnetico: formatBRL(nm.unit_amount),
+    nome_social: formatBRL(nm.unit_amount),
     nome_bebe: formatBRL(nb.unit_amount),
     nome_empresa: formatBRL(ne.unit_amount),
   };

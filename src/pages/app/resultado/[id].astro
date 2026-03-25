@@ -101,7 +101,7 @@ type MagneticCard = typeof magneticNames[number] & { isTop: boolean };
 const topNames: MagneticCard[] = magneticNames.slice(0, 3).map((n, i) => ({ ...n, isTop: i === 0 }));
 
 // ── Helpers de produto ───────────────────────────────────────────────
-const isNomeMagnetico = analysis.product_type === 'nome_magnetico';
+const isNomeSocial = analysis.product_type === 'nome_social';
 const isNomeBebe      = analysis.product_type === 'nome_bebe';
 const isNomeEmpresa   = analysis.product_type === 'nome_empresa';
 
@@ -198,7 +198,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
           <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div class="flex-1 min-w-0">
               <p class="font-cinzel text-xs uppercase tracking-[0.2em] text-[#76746a] mb-2">
-                {isNomeMagnetico ? 'Análise de Nome Social — Certificado Cabalístico' :
+                {isNomeSocial ? 'Análise de Nome Social — Certificado Cabalístico' :
                  isNomeBebe      ? 'Análise de Nome de Bebê — O Portal do Nascimento' :
                                    'Análise de Nome de Empresa — Relatório Estratégico'}
               </p>
@@ -250,7 +250,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
         {/* ══════════════════════════════════════════════════
             NOME SOCIAL — ESTRUTURA PRINCIPAL
         ══════════════════════════════════════════════════ */}
-        {isNomeMagnetico && (
+        {isNomeSocial && (
           <>
             {/* ── SEÇÃO 2: A ESTRELA DE 5 PONTAS ─────────────────── */}
             <section class="mb-12">
@@ -758,7 +758,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
           body: JSON.stringify({
             nome_completo: nome,
             data_nascimento: data,
-            product_type: 'nome_magnetico',
+            product_type: 'nome_social',
           }),
         });
         const result = await res.json();

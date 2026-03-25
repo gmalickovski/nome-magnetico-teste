@@ -17,7 +17,7 @@ if (user) {
 }
 
 const produto = Astro.url.searchParams.get('produto') ?? '';
-const produtosValidos = ['nome_magnetico', 'nome_bebe', 'nome_empresa'] as const;
+const produtosValidos = ['nome_social', 'nome_bebe', 'nome_empresa'] as const;
 type ProductType = typeof produtosValidos[number];
 const productType: ProductType | null = (produtosValidos as readonly string[]).includes(produto)
   ? (produto as ProductType)
@@ -30,7 +30,7 @@ if (user && productType) {
 }
 
 const paymentLinks = {
-  nome_magnetico: '/auth/login?redirect=/comprar?produto=nome_magnetico',
+  nome_social: '/auth/login?redirect=/comprar?produto=nome_social',
   nome_bebe:      '/auth/login?redirect=/comprar?produto=nome_bebe',
   nome_empresa:   '/auth/login?redirect=/comprar?produto=nome_empresa',
 };

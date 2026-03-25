@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface StripePrices {
-  nome_magnetico: string;
+  nome_social: string;
   nome_bebe: string;
   nome_empresa: string;
 }
@@ -19,7 +19,7 @@ interface Plan {
 }
 
 const FALLBACK_PRICES: StripePrices = {
-  nome_magnetico: 'R$ 97',
+  nome_social: 'R$ 97',
   nome_bebe: 'R$ 147',
   nome_empresa: 'R$ 197',
 };
@@ -27,10 +27,10 @@ const FALLBACK_PRICES: StripePrices = {
 function buildPlans(prices: StripePrices): Plan[] {
   return [
   {
-    id: 'nome_magnetico',
+    id: 'nome_social',
     name: 'Nome Social',
     subtitle: 'Análise Pessoal',
-    price: prices.nome_magnetico,
+    price: prices.nome_social,
     period: 'acesso por 30 dias',
     description: 'Análise completa do seu nome de nascimento com os 4 triângulos cabalísticos e IA especializada.',
     features: [

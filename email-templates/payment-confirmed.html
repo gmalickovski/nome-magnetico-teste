@@ -4,28 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pagamento Confirmado — Nome Magnético</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#111111;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#111111;padding:40px 20px;">
+<body style="margin:0;padding:0;background-color:#131313;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#131313;padding:48px 20px;">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
           <!-- Logo -->
           <tr>
-            <td align="center" style="padding-bottom:32px;">
-              <h1 style="margin:0;font-family:Georgia,serif;font-size:28px;font-weight:700;color:#D4AF37;letter-spacing:3px;">
+            <td align="center" style="padding-bottom:40px;">
+              <h1 style="margin:0;font-family:'Cinzel',Georgia,serif;font-size:26px;font-weight:700;color:#D4AF37;letter-spacing:0.125em;">
                 NOME MAGNÉTICO
               </h1>
-              <p style="margin:4px 0 0;font-size:12px;color:#a0a0a0;letter-spacing:2px;">NUMEROLOGIA CABALÍSTICA</p>
+              <p style="margin:6px 0 0;font-size:11px;color:#76746a;letter-spacing:3px;text-transform:uppercase;font-family:'Inter',sans-serif;">
+                Numerologia Cabalística
+              </p>
             </td>
           </tr>
 
           <!-- Banner -->
           <tr>
-            <td style="background:linear-gradient(135deg,#0a1f0a 0%,#0d2b0d 100%);border:1px solid rgba(16,185,129,0.3);border-radius:16px 16px 0 0;padding:32px;text-align:center;">
+            <td style="background:linear-gradient(135deg,#0a1f0a 0%,#0d2b0d 100%);border-radius:24px 24px 0 0;padding:40px 32px;text-align:center;">
               <div style="font-size:48px;margin-bottom:16px;">✅</div>
-              <h2 style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:700;color:#10b981;">
+              <h2 style="margin:0;font-family:'Cinzel',Georgia,serif;font-size:22px;font-weight:700;color:#10b981;letter-spacing:1px;line-height:1.4;">
                 Pagamento Confirmado!
               </h2>
             </td>
@@ -33,44 +39,52 @@
 
           <!-- Body -->
           <tr>
-            <td style="background-color:#1a1a1a;border:1px solid rgba(16,185,129,0.2);border-top:none;border-radius:0 0 16px 16px;padding:32px;">
-              <p style="margin:0 0 16px;font-size:16px;color:#e5e7eb;line-height:1.6;">
-                Olá, <strong>{{firstName}}</strong>! Seu pagamento foi processado com sucesso.
+            <td style="background-color:#1c1c1c;border-radius:0 0 24px 24px;padding:36px 32px 40px;">
+              <p style="margin:0 0 16px;font-size:16px;color:#e5e2e1;line-height:1.7;font-family:'Inter',sans-serif;">
+                Olá, <strong style="color:#f2ca50;">{{firstName}}</strong>! Seu pagamento foi processado com sucesso.
               </p>
 
-              <div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:20px;margin-bottom:24px;">
-                <p style="margin:0 0 8px;font-size:13px;color:#a0a0a0;text-transform:uppercase;letter-spacing:1px;">Produto adquirido</p>
-                <p style="margin:0;font-size:18px;font-weight:700;color:#e5e7eb;">{{productName}}</p>
+              <div style="background:rgba(16,185,129,0.05);border-radius:16px;padding:20px;margin-bottom:32px;">
+                <p style="margin:0 0 8px;font-size:13px;color:#76746a;text-transform:uppercase;letter-spacing:1px;font-family:'Inter',sans-serif;">Produto adquirido</p>
+                <p style="margin:0;font-size:18px;font-weight:700;color:#e5e2e1;font-family:'Inter',sans-serif;">{{productName}}</p>
               </div>
 
-              <p style="margin:0 0 24px;font-size:15px;color:#a0a0a0;line-height:1.6;">
+              <p style="margin:0 0 32px;font-size:15px;color:#76746a;line-height:1.7;font-family:'Inter',sans-serif;font-weight:300;">
                 Seu acesso está ativo. Clique abaixo para começar sua análise numerológica agora.
               </p>
 
               <!-- CTA -->
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td align="center" style="padding:8px 0 24px;">
-                    <a href="{{accessUrl}}" style="display:inline-block;background-color:#D4AF37;color:#111111;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:8px;letter-spacing:1px;">
-                      ACESSAR MINHA ANÁLISE
+                  <td align="center" style="padding-bottom:36px;">
+                    <a href="{{accessUrl}}" style="display:inline-block;background:linear-gradient(135deg,#f2ca50 0%,#D4AF37 100%);color:#131313;font-size:14px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:100px;letter-spacing:2px;text-transform:uppercase;font-family:'Inter',sans-serif;">
+                      Acessar minha Análise
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <hr style="border:none;border-top:1px solid rgba(212,175,55,0.15);margin:8px 0 24px;" />
+              <!-- Celestial Divider -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="height:1px;background:linear-gradient(to right,transparent,rgba(212,175,55,0.25),transparent);font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
 
-              <p style="margin:0;font-size:13px;color:#a0a0a0;text-align:center;">
+              <p style="margin:0;font-size:13px;color:#76746a;text-align:center;font-family:'Inter',sans-serif;">
                 Dúvidas?
-                <a href="https://nomemag.com.br/suporte" style="color:#D4AF37;text-decoration:none;">Entre em contato com o suporte</a>
+                <a href="https://nomemag.com.br/suporte" style="color:#D4AF37;text-decoration:none;font-weight:500;">Entre em contato com o suporte</a>
               </p>
             </td>
           </tr>
 
+          <!-- Spacer -->
+          <tr><td style="height:32px;"></td></tr>
+
           <!-- Footer -->
           <tr>
-            <td align="center" style="padding-top:24px;">
-              <p style="margin:0;font-size:12px;color:#666666;">
+            <td align="center">
+              <p style="margin:0;font-size:12px;color:#4a4a4a;font-family:'Inter',sans-serif;letter-spacing:0.5px;">
                 © 2026 Nome Magnético. Todos os direitos reservados.
               </p>
             </td>

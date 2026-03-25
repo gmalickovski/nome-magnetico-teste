@@ -14,7 +14,7 @@ type AdminUsersTableProps = {
 };
 
 const PRODUCT_BADGES: Record<string, { label: string; style: string }> = {
-  nome_magnetico: { label: 'NM', style: 'bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30' },
+  nome_social: { label: 'NM', style: 'bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30' },
   nome_bebe:      { label: 'Bebê', style: 'bg-purple-500/20 text-purple-400 border border-purple-500/30' },
   nome_empresa:   { label: 'Empresa', style: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
 };

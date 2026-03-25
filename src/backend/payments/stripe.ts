@@ -10,22 +10,22 @@ export const stripe = new Stripe(stripeSecretKey, {
   apiVersion: '2025-02-24.acacia',
 });
 
-export type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa';
+export type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
 const PRICE_IDS: Record<ProductType, string> = {
-  nome_magnetico: process.env.STRIPE_PRICE_NOME_MAGNETICO ?? '',
+  nome_social: process.env.STRIPE_PRICE_NOME_SOCIAL ?? '',
   nome_bebe: process.env.STRIPE_PRICE_NOME_BEBE ?? '',
   nome_empresa: process.env.STRIPE_PRICE_NOME_EMPRESA ?? '',
 };
 
 const PRODUCT_NAMES: Record<ProductType, string> = {
-  nome_magnetico: 'Nome Social',
+  nome_social: 'Nome Social',
   nome_bebe: 'Nome de Bebê',
   nome_empresa: 'Nome Empresarial',
 };
 
 const PRODUCT_CUSTOM_TEXT: Record<ProductType, { submit: { message: string } }> = {
-  nome_magnetico: { submit: { message: 'Você receberá acesso por 30 dias após o pagamento.' } },
+  nome_social: { submit: { message: 'Você receberá acesso por 30 dias após o pagamento.' } },
   nome_bebe: { submit: { message: 'Acesso por 30 dias. Analise quantos nomes candidatos quiser.' } },
   nome_empresa: { submit: { message: 'Acesso por 30 dias. Avalie nomes de empresa sem limite.' } },
 };

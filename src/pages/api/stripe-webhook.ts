@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { constructWebhookEvent } from '../../backend/payments/stripe';
+import { constructWebhookEvent, PRODUCT_NAMES } from '../../backend/payments/stripe';
 import { createSubscription } from '../../backend/db/subscriptions';
 import { getProfile } from '../../backend/db/users';
 import { notify } from '../../backend/notifications/notify';
@@ -82,7 +82,7 @@ export const POST: APIRoute = async ({ request }) => {
             firstName: profile.nome ?? profile.email.split('@')[0],
             accessUrl: `${process.env.APP_URL}/app`,
             productType,
-            productName: productType,
+            productName: PRODUCT_NAMES[productType],
           });
         }
 
@@ -98,15 +98,18 @@ export const POST: APIRoute = async ({ request }) => {
 
       case 'payment_intent.payment_failed': {
         const pi = event.data.object as {
-          metadata?: { user_id?: string };
+          metadata?: { user_id?: string; product_type?: string };
         };
         const userId = pi.metadata?.user_id;
+        const failedProductType = (pi.metadata?.product_type ?? 'nome_social') as ProductType;
         if (userId) {
           const profile = await getProfile(userId);
           if (profile) {
             await notify('payment.failed', {
               email: profile.email,
               firstName: profile.nome ?? profile.email.split('@')[0],
+              productType: failedProductType,
+              productName: PRODUCT_NAMES[failedProductType],
             });
           }
         }

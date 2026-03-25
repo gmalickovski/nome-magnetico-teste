@@ -161,10 +161,10 @@ Compatibilidade Expressão × Destino:
 ## Produtos
 
 ```typescript
-type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa'
+type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa'
 ```
 
-### `nome_magnetico` — Análise Pessoal (produto principal)
+### `nome_social` — Nome Social (produto principal)
 - Analisa nome de nascimento + data de nascimento
 - Calcula 5 números + 4 triângulos + bloqueios + lições kármics + tendências ocultas
 - Sugere variações do nome sem bloqueios e compatíveis com Expressão × Destino

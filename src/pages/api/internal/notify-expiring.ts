@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { supabase } from '../../../backend/db/supabase';
 import { getProfile } from '../../../backend/db/users';
 import { notify } from '../../../backend/notifications/notify';
+import { PRODUCT_NAMES } from '../../../backend/payments/stripe';
+import type { ProductType } from '../../../backend/payments/stripe';
 
 /**
  * POST /api/internal/notify-expiring
@@ -39,26 +41,28 @@ export const POST: APIRoute = async ({ request }) => {
     supabase
       
       .from('subscriptions')
-      .select('user_id')
+      .select('user_id, product_type')
       .gte('ends_at', in7d.toISOString())
       .lt('ends_at', in7dPlus1h.toISOString()),
     supabase
       
       .from('subscriptions')
-      .select('user_id')
+      .select('user_id, product_type')
       .gte('ends_at', in1d.toISOString())
       .lt('ends_at', in1dPlus1h.toISOString()),
     supabase
       
       .from('subscriptions')
-      .select('user_id')
+      .select('user_id, product_type')
       .gte('ends_at', yesterday.toISOString())
       .lt('ends_at', now.toISOString()),
   ]);
 
-  async function notifyUser(userId: string, daysLeft: 7 | 1 | null) {
+  async function notifyUser(userId: string, daysLeft: 7 | 1 | null, productType: ProductType) {
     const profile = await getProfile(userId);
     if (!profile?.email) return;
+
+    const productName = PRODUCT_NAMES[productType];
 
     if (daysLeft !== null) {
       await notify('subscription.expiring_soon', {
@@ -66,12 +70,16 @@ export const POST: APIRoute = async ({ request }) => {
         firstName: profile.nome ?? undefined,
         daysLeft,
         renewUrl,
+        productType,
+        productName,
       }).catch(() => {});
     } else {
       await notify('subscription.expired', {
         email: profile.email,
         firstName: profile.nome ?? undefined,
         renewUrl,
+        productType,
+        productName,
       }).catch(() => {});
     }
   }
@@ -79,15 +87,15 @@ export const POST: APIRoute = async ({ request }) => {
   const tasks: Promise<void>[] = [];
 
   for (const row of group7d ?? []) {
-    tasks.push(notifyUser(row.user_id, 7));
+    tasks.push(notifyUser(row.user_id, 7, (row.product_type ?? 'nome_social') as ProductType));
     results.expiring7d++;
   }
   for (const row of group1d ?? []) {
-    tasks.push(notifyUser(row.user_id, 1));
+    tasks.push(notifyUser(row.user_id, 1, (row.product_type ?? 'nome_social') as ProductType));
     results.expiring1d++;
   }
   for (const row of groupExpired ?? []) {
-    tasks.push(notifyUser(row.user_id, null));
+    tasks.push(notifyUser(row.user_id, null, (row.product_type ?? 'nome_social') as ProductType));
     results.expired++;
   }
 

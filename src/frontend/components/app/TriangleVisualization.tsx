@@ -29,7 +29,7 @@ interface Props {
   destino: TrianguloData;
   bloqueios: Bloqueio[];
   nome: string;
-  productType?: 'nome_magnetico' | 'nome_bebe' | 'nome_empresa';
+  productType?: 'nome_social' | 'nome_bebe' | 'nome_empresa';
 }
 
 const TIPO_LABEL: Record<string, { label: string; descricao: string; emoji: string }> = {

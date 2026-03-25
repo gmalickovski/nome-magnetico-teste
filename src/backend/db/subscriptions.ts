@@ -19,7 +19,7 @@ export interface Subscription {
  */
 export async function hasActiveSubscription(
   userId: string,
-  productType: ProductType = 'nome_magnetico'
+  productType: ProductType = 'nome_social'
 ): Promise<boolean> {
   const { data, error } = await supabase
     
@@ -39,7 +39,7 @@ export async function hasActiveSubscription(
  */
 export async function getActiveSubscription(
   userId: string,
-  productType: ProductType = 'nome_magnetico'
+  productType: ProductType = 'nome_social'
 ): Promise<Subscription | null> {
   const { data, error } = await supabase
     

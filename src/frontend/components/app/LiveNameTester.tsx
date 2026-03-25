@@ -36,7 +36,7 @@ export function LiveNameTester({ birthName, birthDate }: Props) {
         body: JSON.stringify({
           nome_completo: nomeParaAnalisar,
           data_nascimento: formatUserBR,
-          product_type: 'nome_magnetico',
+          product_type: 'nome_social',
         }),
       });
 

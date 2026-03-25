@@ -14,12 +14,12 @@ const profileName = profile?.nome?.trim().toLowerCase() || '';
 const analyses = await getUserAnalyses(user.id);
 
 const productIcon: Record<string, string> = {
-  nome_magnetico: '✨',
+  nome_social: '✨',
   nome_bebe: '👶',
   nome_empresa: '🏢',
 };
 const productLabel: Record<string, string> = {
-  nome_magnetico: 'Nome Social',
+  nome_social: 'Nome Social',
   nome_bebe: 'Nome de Bebê',
   nome_empresa: 'Nome Empresarial',
 };
@@ -49,7 +49,7 @@ const analysesWithMeta = analyses.map(a => {
       ? rankingEmpresa.melhorNome.nomeEmpresa
     : a.nome_completo;
 
-  const isOriginal = (a.product_type === 'nome_magnetico' || !a.product_type) && a.nome_completo.trim().toLowerCase() === profileName;
+  const isOriginal = (a.product_type === 'nome_social' || !a.product_type) && a.nome_completo.trim().toLowerCase() === profileName;
 
   let score: number | null = null;
   if (!isOriginal && a.status === 'complete') {
@@ -72,15 +72,15 @@ const analysesWithMeta = analyses.map(a => {
     isOriginal,
     nomeExibido,
     score,
-    icon: productIcon[a.product_type ?? 'nome_magnetico'] ?? '✨',
-    productName: productLabel[a.product_type ?? 'nome_magnetico'] ?? 'Análise',
+    icon: productIcon[a.product_type ?? 'nome_social'] ?? '✨',
+    productName: productLabel[a.product_type ?? 'nome_social'] ?? 'Análise',
     dateFormatted: new Date(a.created_at).toLocaleDateString('pt-BR'),
     statusCls: statusClass(a.status),
     statusLbl: statusLabel(a.status),
   };
 });
 
-const uniqueProducts = [...new Set(analysesWithMeta.map(a => a.product_type ?? 'nome_magnetico'))];
+const uniqueProducts = [...new Set(analysesWithMeta.map(a => a.product_type ?? 'nome_social'))];
 const hasMultipleProducts = uniqueProducts.length > 1;
 ---
 
@@ -127,7 +127,7 @@ const hasMultipleProducts = uniqueProducts.length > 1;
         {analysesWithMeta.map(analysis => (
           <div 
             class="analysis-card flex flex-col gap-3 bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5 hover:border-[#D4AF37]/30 transition-all duration-200"
-            data-product={analysis.product_type ?? 'nome_magnetico'}
+            data-product={analysis.product_type ?? 'nome_social'}
           >
             {/* Top Row: Icon + Name + Delete */}
             <div class="flex items-start justify-between gap-3 w-full">

@@ -881,7 +881,7 @@ function formatDate(dateStr: string): string {
 
 function productLabel(productType: string): string {
   const map: Record<string, string> = {
-    nome_magnetico: 'Análise de Nome Social',
+    nome_social: 'Análise de Nome Social',
     nome_bebe: 'Análise de Nome para Bebê',
     nome_empresa: 'Análise de Nome Empresarial',
   };

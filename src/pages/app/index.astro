@@ -27,7 +27,7 @@ try {
 const [hasNomeSocial, hasNomeBebe, hasNomeEmpresa] = isAdmin
   ? [true, true, true]
   : await Promise.all([
-      hasActiveSubscription(user.id, 'nome_magnetico'),
+      hasActiveSubscription(user.id, 'nome_social'),
       hasActiveSubscription(user.id, 'nome_bebe'),
       hasActiveSubscription(user.id, 'nome_empresa'),
     ]);
@@ -39,7 +39,7 @@ const isExpired = !isAdmin && !hasAnyAccess && await hasAnySubscription(user.id)
 
 const products = [
   {
-    id: 'nome_magnetico',
+    id: 'nome_social',
     icon: '✨',
     name: 'Nome Social',
     description: 'Análise pessoal com 4 triângulos, lições kármics e sugestões de nome.',
@@ -116,7 +116,7 @@ const products = [
       <h2 class="font-cinzel text-xl font-bold text-gray-100 mb-4">Seus Produtos</h2>
       <div class="grid md:grid-cols-3 gap-6">
         {products.map(product => {
-          const isNomeSocial = product.id === 'nome_magnetico';
+          const isNomeSocial = product.id === 'nome_social';
           const needsOnboarding = !profileData?.birth_name || !profileData?.birth_date;
           
           return product.hasAccess ? (

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa';
+type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
 interface Props {
   productType: ProductType | null;
@@ -9,7 +9,7 @@ interface Props {
   paymentLinks: Record<ProductType, string>;
 }
 
-const ALL_PRODUCTS: ProductType[] = ['nome_magnetico', 'nome_bebe', 'nome_empresa'];
+const ALL_PRODUCTS: ProductType[] = ['nome_social', 'nome_bebe', 'nome_empresa'];
 
 const PRODUCT_DATA: Record<ProductType, {
   name: string;
@@ -21,7 +21,7 @@ const PRODUCT_DATA: Record<ProductType, {
   cta: string;
   popular: boolean;
 }> = {
-  nome_magnetico: {
+  nome_social: {
     name: 'Nome Social',
     subtitle: 'Análise Pessoal',
     price: 'R$ 97',
@@ -271,7 +271,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
 
   // Não logado — card único com link para entrar
   if (!isLoggedIn) {
-    const type = productType ?? 'nome_magnetico';
+    const type = productType ?? 'nome_social';
     return (
       <div className="min-h-screen bg-[#111111]">
         <StickyHeader />

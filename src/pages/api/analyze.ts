@@ -17,7 +17,7 @@ import type { ProductType } from '../../backend/payments/stripe';
 const schema = z.object({
   nome_completo: z.string().min(2).max(150),
   data_nascimento: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/),
-  product_type: z.enum(['nome_magnetico', 'nome_bebe', 'nome_empresa']).default('nome_magnetico'),
+  product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']).default('nome_social'),
   // campos específicos nome_bebe
   sobrenome_familia: z.string().min(1).max(100).optional(),
   nomes_candidatos: z.array(z.string().min(2)).min(1).optional(),
@@ -279,7 +279,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           analysis.id
         );
 
-        if (product_type === 'nome_magnetico') {
+        if (product_type === 'nome_social') {
           const variacoes = gerarNomesMagneticos(
             nome_completo,
             cincoNumeros.expressao,

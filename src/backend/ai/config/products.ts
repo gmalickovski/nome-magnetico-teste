@@ -7,7 +7,7 @@ export interface ProductAIConfig {
 }
 
 export const PRODUCT_AI_CONFIG: Record<ProductType, ProductAIConfig> = {
-  nome_magnetico: {
+  nome_social: {
     tasks: ['analysis', 'suggestions', 'guide'],
     systemPromptKey: 'kabbalistic',
   },

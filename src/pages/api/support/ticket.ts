@@ -31,7 +31,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const activeProducts = [...new Set((subs || []).map(s => {
       switch (s.product_type) {
-        case 'nome_magnetico': return 'Nome Social';
+        case 'nome_social': return 'Nome Social';
         case 'nome_bebe': return 'Nome de Bebê';
         case 'nome_empresa': return 'Nome de Empresa';
         default: return s.product_type;

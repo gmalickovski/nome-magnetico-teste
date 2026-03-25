@@ -38,7 +38,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
       .replace(/^-|-$/g, '');
   }
 
-  const productType = analysis.product_type ?? 'nome_magnetico';
+  const productType = analysis.product_type ?? 'nome_social';
   let filename: string;
   if (productType === 'nome_bebe') {
     const sobrenome = toSlug(

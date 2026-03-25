@@ -2,7 +2,7 @@ import React from 'react';
 
 const products = [
   {
-    id: 'nome_magnetico',
+    id: 'nome_social',
     icon: '✨',
     name: 'Nome Social',
     tagline: 'Desbloqueie a energia do seu nome',
