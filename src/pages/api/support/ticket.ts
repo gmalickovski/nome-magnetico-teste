@@ -69,6 +69,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const baseUrl        = (process.env.CHATWOOT_BASE_URL ?? '').trim();
   const CHATWOOT_BASE  = `${baseUrl.replace(/\/$/, '')}/api/v1`;
 
+  console.log(`[ticket] chatwoot cfg: token_len=${token.length} token_start="${token.slice(0,6)}" account="${accountId}" inbox="${inboxIdGeral}" base="${CHATWOOT_BASE}"`);
+
   let body: z.infer<typeof bodySchema>;
   try {
     body = bodySchema.parse(await request.json());

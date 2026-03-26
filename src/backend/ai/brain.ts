@@ -54,7 +54,12 @@ async function runWithGuard(
       const message = err instanceof Error ? err.message : String(err);
 
       // Groq atingiu limite diário → fallback automático para OpenAI
-      if (message === 'GROQ_RATE_LIMITED' && provider === 'groq') {
+      // Detecta tanto o erro já convertido quanto o erro raw do SDK (429 + rate_limit)
+      const isGroqRateLimit = message === 'GROQ_RATE_LIMITED' ||
+        (provider === 'groq' && message.includes('429') &&
+          (message.toLowerCase().includes('rate_limit') || message.toLowerCase().includes('rate limit')));
+
+      if (isGroqRateLimit) {
         console.warn('[Brain] Groq rate limited — fallback automático para OpenAI');
         try {
           const userPrompt = buildPrompt();
