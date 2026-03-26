@@ -76,6 +76,11 @@ const frequenciasRaw: Record<number, number> | null =
 const rankingBebe    = freqData?.ranking ?? null;
 const rankingEmpresa = (analysis.product_type === 'nome_empresa' ? freqData : null) as any;
 
+// ── Helpers de produto (declarados cedo pois são usados abaixo) ──────
+const isNomeSocial  = analysis.product_type === 'nome_social';
+const isNomeBebe    = analysis.product_type === 'nome_bebe';
+const isNomeEmpresa = analysis.product_type === 'nome_empresa';
+
 // ── Arcano regente ───────────────────────────────────────────────────
 const arcanoRawNum = (analysis as any).arcano_regente as number | null;
 const arcanoData = arcanoRawNum ? getArcano(arcanoRawNum) : null;
@@ -111,10 +116,7 @@ const primeiroNome = nomeExibido.split(' ')[0];
 type MagneticCard = typeof magneticNames[number] & { isTop: boolean };
 const topNames: MagneticCard[] = magneticNames.slice(0, 3).map((n, i) => ({ ...n, isTop: i === 0 }));
 
-// ── Helpers de produto ───────────────────────────────────────────────
-const isNomeSocial = analysis.product_type === 'nome_social';
-const isNomeBebe      = analysis.product_type === 'nome_bebe';
-const isNomeEmpresa   = analysis.product_type === 'nome_empresa';
+// (isNomeSocial / isNomeBebe / isNomeEmpresa declarados antes, ver acima)
 
 // ── Data formatada ───────────────────────────────────────────────────
 const dataFormatada = analysis.data_nascimento
