@@ -26,6 +26,11 @@ interface ImportMetaEnv {
   readonly N8N_WEBHOOK_URL: string;
   readonly N8N_WEBHOOK_SECRET: string;
   readonly RATE_LIMIT_TESTE_BLOQUEIO: string;
+  readonly CHATWOOT_BASE_URL: string;
+  readonly CHATWOOT_API_TOKEN: string;
+  readonly CHATWOOT_ACCOUNT_ID: string;
+  readonly CHATWOOT_INBOX_ID: string;
+  readonly CHATWOOT_INBOX_ID_CLIENTES: string;
 }
 
 interface ImportMeta {

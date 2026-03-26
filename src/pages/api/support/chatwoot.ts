@@ -2,8 +2,7 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { supabase } from '../../../backend/db/supabase';
 
-// URL base vem de variável de ambiente — NUNCA hardcoded (multi-SaaS)
-const CHATWOOT_BASE = `${process.env.CHATWOOT_BASE_URL ?? ''}/api/v1`;
+// URL base é lida em runtime dentro do handler — evita módulo-level avaliação antes do env estar pronto
 
 const LABEL_MAP: Record<string, string> = {
   'Bug': 'bug',
@@ -34,6 +33,7 @@ function chatwootHeaders(token: string) {
 }
 
 async function findOrCreateContact(
+  chatwootBase: string,
   token: string,
   accountId: string,
   email: string,
@@ -41,7 +41,7 @@ async function findOrCreateContact(
 ): Promise<number> {
   // 1. Buscar contato existente pelo email
   const searchRes = await fetch(
-    `${CHATWOOT_BASE}/accounts/${accountId}/contacts/search?q=${encodeURIComponent(email)}&include_contacts=true`,
+    `${chatwootBase}/accounts/${accountId}/contacts/search?q=${encodeURIComponent(email)}&include_contacts=true`,
     { headers: chatwootHeaders(token) }
   );
   if (searchRes.ok) {
@@ -52,7 +52,7 @@ async function findOrCreateContact(
 
   // 2. Criar novo contato
   const createRes = await fetch(
-    `${CHATWOOT_BASE}/accounts/${accountId}/contacts`,
+    `${chatwootBase}/accounts/${accountId}/contacts`,
     {
       method: 'POST',
       headers: chatwootHeaders(token),
@@ -73,12 +73,14 @@ async function findOrCreateContact(
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const token = process.env.CHATWOOT_API_TOKEN;
-  const accountId = process.env.CHATWOOT_ACCOUNT_ID ?? '1';
-  const inboxIdGeral = process.env.CHATWOOT_INBOX_ID;
-  const inboxIdClientes = process.env.CHATWOOT_INBOX_ID_CLIENTES;
+  const token        = import.meta.env.CHATWOOT_API_TOKEN        ?? process.env.CHATWOOT_API_TOKEN;
+  const accountId    = import.meta.env.CHATWOOT_ACCOUNT_ID       ?? process.env.CHATWOOT_ACCOUNT_ID    ?? '1';
+  const inboxIdGeral   = import.meta.env.CHATWOOT_INBOX_ID       ?? process.env.CHATWOOT_INBOX_ID;
+  const inboxIdClientes = import.meta.env.CHATWOOT_INBOX_ID_CLIENTES ?? process.env.CHATWOOT_INBOX_ID_CLIENTES;
+  const baseUrl      = import.meta.env.CHATWOOT_BASE_URL         ?? process.env.CHATWOOT_BASE_URL ?? '';
+  const CHATWOOT_BASE = `${baseUrl.replace(/\/$/, '')}/api/v1`;
 
-  if (!token || !inboxIdGeral || !process.env.CHATWOOT_BASE_URL) {
+  if (!token || !inboxIdGeral || !baseUrl) {
     console.error('[chatwoot] Variáveis de ambiente não configuradas');
     return new Response(
       JSON.stringify({ error: 'Suporte temporariamente indisponível.' }),
@@ -136,7 +138,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   try {
     // 1. Buscar ou criar contato
-    const contactId = await findOrCreateContact(token, accountId, contactEmail, contactName);
+    const contactId = await findOrCreateContact(CHATWOOT_BASE, token, accountId, contactEmail, contactName);
 
     // 2. Criar conversa
     const convRes = await fetch(
