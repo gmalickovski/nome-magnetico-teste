@@ -161,7 +161,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       ).catch(() => {});
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    return new Response(JSON.stringify({ success: true, conversationId }), { status: 200 });
   } catch (err) {
     console.error('[chatwoot] Erro ao criar conversa:', err);
     return new Response(

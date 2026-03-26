@@ -15,6 +15,7 @@ export function SupportForm() {
   const [form, setForm] = useState({ assunto: '', mensagem: '' });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [ticketId, setTicketId] = useState<number | null>(null);
   const { toasts, addToast, removeToast } = useToast();
 
   const isValid = form.assunto.trim() !== '' && form.mensagem.trim().length >= 10;
@@ -35,6 +36,8 @@ export function SupportForm() {
       });
 
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setTicketId(data.conversationId ?? null);
         setSent(true);
         addToast('Conversa aberta! Nossa equipe responderá em breve.', 'success');
       } else {
@@ -53,12 +56,18 @@ export function SupportForm() {
       <div className="bg-white/5 border border-emerald-500/30 rounded-2xl p-8 text-center">
         <div className="text-4xl mb-4">✅</div>
         <h3 className="font-cinzel text-xl font-bold text-white mb-2">Conversa aberta!</h3>
+        {ticketId && (
+          <p className="text-xs text-[#D4AF37]/70 font-mono mb-2">
+            Ticket #{ticketId}
+          </p>
+        )}
         <p className="text-gray-400 text-sm">
-          Nossa equipe responderá em breve. Você pode acompanhar pelo widget de chat.
+          Nossa equipe responderá em breve. Acompanhe pelo chat no canto da tela.
         </p>
         <button
           onClick={() => {
             setSent(false);
+            setTicketId(null);
             setForm({ assunto: '', mensagem: '' });
           }}
           className="mt-6 text-sm text-[#D4AF37] hover:underline"
