@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { COLORS, pdfStyles } from './styles';
 import type { Analysis, MagneticName } from '../db/analyses';
 import { formatAnalysisText } from '../../utils/textFormatter';
+import { getArquetipo } from '../numerology/archetypes';
 
 interface PDFTemplateProps {
   analysis: Analysis;
@@ -147,6 +148,10 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
 
   const primeiroNome = analysis.nome_completo.split(' ')[0] ?? analysis.nome_completo;
 
+  // Arquétipo derivado do número de Expressão já calculado
+  const expressaoNum = analysis.numero_expressao;
+  const arquetipo = expressaoNum ? getArquetipo(expressaoNum) : null;
+
   return (
     <Document>
       {/* Página 1 — Capa */}
@@ -195,6 +200,42 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
             </View>
           ))}
         </View>
+
+        <View style={pdfStyles.goldDivider} />
+
+        {/* Arquétipo */}
+        {arquetipo && (
+          <>
+            <Text style={{ ...styles.sectionTitle, color: COLORS.gold, marginTop: 16 }}>
+              Arquétipo — {arquetipo.nome}
+            </Text>
+            <View style={{
+              padding: 14, marginBottom: 12, borderRadius: 8,
+              backgroundColor: isDark ? 'rgba(212,175,55,0.07)' : '#fffdf0',
+              borderWidth: 1, borderColor: COLORS.border,
+            }}>
+              <Text style={{ fontSize: 11, color: COLORS.gold, fontFamily: 'Helvetica-Bold', marginBottom: 6, textAlign: 'center' }}>
+                "{arquetipo.essencia}"
+              </Text>
+              <Text style={{ ...styles.body, fontSize: 10, marginBottom: 8 }}>{arquetipo.descricao}</Text>
+              <Text style={{ fontSize: 9, color: '#10b981', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                Expressão Positiva
+              </Text>
+              {arquetipo.expressaoPositiva.map((item, i) => (
+                <Text key={i} style={{ ...styles.body, fontSize: 9, marginBottom: 2 }}>• {item}</Text>
+              ))}
+              {analysis.product_type === 'nome_empresa' && (
+                <>
+                  <Text style={{ fontSize: 9, color: '#c084fc', fontFamily: 'Helvetica-Bold', marginTop: 6, marginBottom: 4 }}>
+                    Marcas de Referência
+                  </Text>
+                  <Text style={{ ...styles.body, fontSize: 9 }}>{arquetipo.marcasReferencia.join('  ·  ')}</Text>
+                  <Text style={{ ...styles.body, fontSize: 9, marginTop: 4 }}>{arquetipo.posicionamento}</Text>
+                </>
+              )}
+            </View>
+          </>
+        )}
 
         <View style={pdfStyles.goldDivider} />
 

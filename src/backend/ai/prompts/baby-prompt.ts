@@ -1,4 +1,5 @@
 import type { AnaliseNomeBebe, ResultadoNomeBebe } from '../../numerology/products/nome-bebe';
+import type { Arquetipo } from '../../numerology/archetypes';
 
 export interface BabyPromptParams {
   resultado: ResultadoNomeBebe;
@@ -7,10 +8,11 @@ export interface BabyPromptParams {
   generoPreferido?: string;
   estiloPreferido?: string;
   caracteristicasDesejadas?: string;
+  arquetipo?: Arquetipo;
 }
 
 export function buildBabyAnalysisPrompt(params: BabyPromptParams): string {
-  const { resultado, nomePai, nomeMae, generoPreferido, estiloPreferido, caracteristicasDesejadas } = params;
+  const { resultado, nomePai, nomeMae, generoPreferido, estiloPreferido, caracteristicasDesejadas, arquetipo } = params;
   const { sobrenomesDisponiveis, dataNascimento, destino, nomesCandidatos, melhorNome } = resultado;
 
   const parentesco = [nomePai && `Pai: ${nomePai}`, nomeMae && `Mãe: ${nomeMae}`]
@@ -152,6 +154,27 @@ Com base nos nomes dos pais (${parentesco}) e no nome do bebê, analise:
 - Uma bênção final para a jornada desta família
 
 ---
+
+${arquetipo ? `---
+
+## 🦸 Arquétipo da Criança
+
+Com o nome **${melhorNome?.nomeCompleto ?? 'o nome escolhido'}**, esta criança carrega o arquétipo do(a) **${arquetipo.nome}**.
+
+Essência do arquétipo: *"${arquetipo.essencia}"*
+Manifestações positivas: ${arquetipo.expressaoPositiva.join(' | ')}
+Sombra que os pais devem conhecer: ${arquetipo.expressaoSombra.join(' | ')}
+Personagens e figuras que representam esse arquétipo: ${arquetipo.figurasMiticas.join(', ')}
+
+Escreva uma seção chamada "🦸 O Arquétipo da Criança — Quem Essa Alma Veio Ser" que:
+- Apresente o arquétipo do(a) **${arquetipo.nome}** de forma calorosa e acessível aos pais
+- Explique em linguagem simples o que esse arquétipo significa para a trajetória da criança
+- Oriente os pais sobre como NUTRIR as manifestações positivas desse arquétipo na criação
+- Alerte gentilmente sobre como EVITAR reforçar a sombra (${arquetipo.sombra}) nos primeiros anos
+- Sugira 2–3 histórias, livros infantis, filmes ou personagens culturais que representam esse arquétipo e podem ser usados na educação da criança
+- Use tom afetuoso e esperançoso — os pais estão descobrindo a identidade mítica de seu filho
+
+` : ''}---
 
 REGRAS ESTRITAS DE FORMATAÇÃO:
 1. Use estruturação Markdown rigorosa com Hash Headers (##, ###).

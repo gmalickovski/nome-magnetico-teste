@@ -1,13 +1,15 @@
 import type { AnaliseNomeEmpresa, ResultadoNomeEmpresa } from '../../numerology/products/nome-empresa';
+import type { Arquetipo } from '../../numerology/archetypes';
 
 export interface CompanyPromptParams {
   resultado: ResultadoNomeEmpresa;
   ramoAtividade?: string;
   descricaoNegocio?: string;
+  arquetipo?: Arquetipo;
 }
 
 export function buildCompanyAnalysisPrompt(params: CompanyPromptParams): string {
-  const { resultado, ramoAtividade, descricaoNegocio } = params;
+  const { resultado, ramoAtividade, descricaoNegocio, arquetipo } = params;
   const {
     nomeSocioPrincipal,
     dataNascimentoSocio,
@@ -89,6 +91,26 @@ Explique como nomes de empresas atraem (ou repelem) clientes através da vibraç
 - Por que este nome tem poder de atração além do branding convencional
 
 ---
+
+${arquetipo ? `## 🎭 1b. Arquétipo da Marca — A Personalidade Profunda do Negócio
+
+A **Expressão ${melhorNome?.expressao ?? '—'}** do nome **${melhorNome?.nomeEmpresa ?? 'da empresa'}** revela o arquétipo do(a) **${arquetipo.nome}**.
+
+Essência: *"${arquetipo.essencia}"*
+Manifestações da marca: ${arquetipo.expressaoPositiva.join(' | ')}
+Risco de sombra: ${arquetipo.expressaoSombra.join(' | ')}
+Marcas de referência com esse arquétipo: ${arquetipo.marcasReferencia.join(', ')}
+Posicionamento natural: ${arquetipo.posicionamento}
+
+Escreva a seção "🎭 1b. Arquétipo da Marca — A Personalidade Profunda do Negócio" que:
+- Apresente o(a) **${arquetipo.nome}** como a persona da marca — a identidade que o mercado vai perceber e sentir
+- Compare com as marcas de referência (${arquetipo.marcasReferencia.join(', ')}) — o que essas marcas têm em comum e como **${melhorNome?.nomeEmpresa ?? 'a empresa'}** pode se posicionar no mesmo território
+- Oriente sobre TOM DE VOZ: como a empresa deve se comunicar (formal/informal, autoritária/acessível, técnica/emocional)
+- Oriente sobre VALORES DA MARCA: o que comunicar consistentemente para ser autêntico ao arquétipo
+- Aponte os RISCOS de desvio: o que acontece quando a comunicação ou as decisões saem do arquétipo (a sombra — ${arquetipo.sombra})
+- Escreva 3–4 parágrafos estratégicos, como se fosse uma consultoria de branding premium
+
+` : ''}---
 
 ## 🔗 2. Sinergia Sócio-Empresa
 

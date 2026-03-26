@@ -1,6 +1,7 @@
 import type { CincoNumeros } from '../../numerology/numbers';
 import type { Bloqueio, TodosTriangulos } from '../../numerology/triangle';
 import type { LicaoCarmica, TendenciaOculta, DebitoCarmicoInfo } from '../../numerology/karmic';
+import type { Arquetipo } from '../../numerology/archetypes';
 
 export interface AnalysisPromptParams {
   nomeCompleto: string;
@@ -13,6 +14,7 @@ export interface AnalysisPromptParams {
   tendenciasOcultas: TendenciaOculta[];
   debitosCarmicos: DebitoCarmicoInfo[];
   gender: string;
+  arquetipo?: Arquetipo;
 }
 
 export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
@@ -27,6 +29,7 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
     tendenciasOcultas,
     debitosCarmicos,
     gender,
+    arquetipo,
   } = params;
 
   const primeiroNome = nomeCompleto.split(' ')[0] ?? nomeCompleto;
@@ -211,7 +214,28 @@ O **Arcano ${arcanoRegente ?? '—'}** governa o triângulo principal de ${prime
 
 ---
 
-## ✍️ 6. Manual da Nova Assinatura
+${arquetipo ? `---
+
+## 🎭 6. Seu Arquétipo — A Identidade Mítica
+
+O número de **Expressão ${cincoNumeros.expressao}** revela que ${primeiroNome} carrega o arquétipo do(a) **${arquetipo.nome}**.
+
+Essência: *"${arquetipo.essencia}"*
+Manifestações positivas: ${arquetipo.expressaoPositiva.join(' | ')}
+Sombra a integrar: ${arquetipo.expressaoSombra.join(' | ')}
+Figuras míticas de referência: ${arquetipo.figurasMiticas.join(', ')}
+
+Escreva a seção "🎭 6. Seu Arquétipo — A Identidade Mítica" que:
+- Apresente o arquétipo do(a) **${arquetipo.nome}** como a identidade narrativa profunda de ${primeiroNome}
+- Conecte a essência do arquétipo à jornada numerológica já analisada nas seções anteriores
+- Explique como a **sombra do arquétipo** (${arquetipo.sombra}) se manifesta nos bloqueios ou padrões identificados
+- Mostre como o nome magnético sugerido ativa a expressão positiva do arquétipo — o que muda na vibração quando ${primeiroNome} adota o novo nome
+- Use linguagem mítica e psicológica, mas acessível — conecte o simbólico ao cotidiano concreto de ${primeiroNome}
+- Escreva 3–4 parágrafos reveladores que façam ${primeiroNome} se reconhecer nessa identidade arquetípica
+
+` : ''}---
+
+## ✍️ ${arquetipo ? '7' : '6'}. Manual da Nova Assinatura
 
 Com base nos números de ${primeiroNome}, escreva orientações práticas de grafoscopia para o nome magnetizado:
 
@@ -223,7 +247,7 @@ Com base nos números de ${primeiroNome}, escreva orientações práticas de gra
 
 ---
 
-## 🌟 7. Síntese e Mensagem Final
+## 🌟 ${arquetipo ? '8' : '7'}. Síntese e Mensagem Final
 
 Escreva uma conclusão rica (3–4 parágrafos) que:
 - Conecte todos os elementos analisados em uma narrativa de propósito único para ${primeiroNome}

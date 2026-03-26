@@ -12,6 +12,7 @@ import { buildGuidePrompt, type GuidePromptParams } from './prompts/guide-prompt
 import { buildBabyAnalysisPrompt, type BabyPromptParams } from './prompts/baby-prompt';
 import { buildCompanyAnalysisPrompt, type CompanyPromptParams } from './prompts/company-prompt';
 import { getModel } from './config/models';
+import { getArquetipo } from '../numerology/archetypes';
 
 // ================================================================
 // HELPER INTERNO
@@ -72,7 +73,11 @@ export async function generateAnalysis(
   userId: string | null,
   analysisId: string | null
 ): Promise<string> {
-  return runWithGuard(() => buildAnalysisPrompt(params), 'analysis', userId, analysisId);
+  const paramsWithArquetipo = {
+    ...params,
+    arquetipo: getArquetipo(params.cincoNumeros.expressao),
+  };
+  return runWithGuard(() => buildAnalysisPrompt(paramsWithArquetipo), 'analysis', userId, analysisId);
 }
 
 /**
@@ -146,7 +151,12 @@ export async function generateBabyAnalysis(
   userId: string | null,
   analysisId: string | null
 ): Promise<string> {
-  return runWithGuard(() => buildBabyAnalysisPrompt(params), 'analysis', userId, analysisId);
+  const expressaoBebe = params.resultado.melhorNome?.expressao ?? params.resultado.destino;
+  const paramsWithArquetipo = {
+    ...params,
+    arquetipo: getArquetipo(expressaoBebe),
+  };
+  return runWithGuard(() => buildBabyAnalysisPrompt(paramsWithArquetipo), 'analysis', userId, analysisId);
 }
 
 // ================================================================
@@ -161,5 +171,9 @@ export async function generateCompanyAnalysis(
   userId: string | null,
   analysisId: string | null
 ): Promise<string> {
-  return runWithGuard(() => buildCompanyAnalysisPrompt(params), 'analysis', userId, analysisId);
+  const expressaoEmpresa = params.resultado.melhorNome?.expressao;
+  const paramsWithArquetipo = expressaoEmpresa
+    ? { ...params, arquetipo: getArquetipo(expressaoEmpresa) }
+    : params;
+  return runWithGuard(() => buildCompanyAnalysisPrompt(paramsWithArquetipo), 'analysis', userId, analysisId);
 }
