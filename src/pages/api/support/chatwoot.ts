@@ -68,9 +68,10 @@ async function findOrCreateContact(
 export const POST: APIRoute = async ({ request, locals }) => {
   const token = process.env.CHATWOOT_API_TOKEN;
   const accountId = process.env.CHATWOOT_ACCOUNT_ID ?? '1';
-  const inboxId = process.env.CHATWOOT_INBOX_ID;
+  const inboxIdGeral = process.env.CHATWOOT_INBOX_ID;
+  const inboxIdClientes = process.env.CHATWOOT_INBOX_ID_CLIENTES;
 
-  if (!token || !inboxId || !process.env.CHATWOOT_BASE_URL) {
+  if (!token || !inboxIdGeral || !process.env.CHATWOOT_BASE_URL) {
     console.error('[chatwoot] Variáveis de ambiente não configuradas');
     return new Response(
       JSON.stringify({ error: 'Suporte temporariamente indisponível.' }),
@@ -112,6 +113,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
     );
   }
 
+  // Determinar inbox: clientes com plano ativo têm prioridade
+  let selectedInboxId = inboxIdGeral;
+  if (authUser && inboxIdClientes) {
+    try {
+      const { data: subs } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('user_id', authUser.id)
+        .gt('ends_at', new Date().toISOString())
+        .limit(1);
+      if ((subs?.length ?? 0) > 0) selectedInboxId = inboxIdClientes;
+    } catch { /* silencioso */ }
+  }
+
   try {
     // 1. Buscar ou criar contato
     const contactId = await findOrCreateContact(token, accountId, contactEmail, contactName);
@@ -123,7 +138,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         method: 'POST',
         headers: chatwootHeaders(token),
         body: JSON.stringify({
-          inbox_id: Number(inboxId),
+          inbox_id: Number(selectedInboxId),
           contact_id: contactId,
           additional_attributes: { assunto },
         }),

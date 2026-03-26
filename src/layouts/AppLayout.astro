@@ -195,9 +195,13 @@ const isActive = (path: string) =>
     }
   </script>
 
-  <script define:vars={{ _uid: user.id, _email: user.email ?? '', _name: userNome }}>
+  <script define:vars={{ _uid: user.id, _email: user.email ?? '', _name: userNome, _showBubble: pathname.startsWith('/app/suporte') }}>
     function _syncChatwoot() {
       window.$chatwoot.setUser(_uid, { email: _email, name: _name });
+      // Balão visível apenas na página de suporte — nas demais o usuário abre via botão
+      if (!_showBubble) {
+        window.$chatwoot.toggleBubbleVisibility('hide');
+      }
     }
     if (window.$chatwoot) {
       _syncChatwoot();
