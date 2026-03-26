@@ -7,7 +7,7 @@ import { getFaqs } from '../../backend/notion/faqs';
 
 const user = Astro.locals.user;
 if (!user) {
-  return Astro.redirect('/login');
+  return Astro.redirect('/auth/login');
 }
 
 let faqItems: FaqItemProps[] = [];

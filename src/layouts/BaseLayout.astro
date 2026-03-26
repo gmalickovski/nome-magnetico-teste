@@ -14,8 +14,9 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
-const chatwootBaseUrl = import.meta.env.PUBLIC_CHATWOOT_BASE_URL ?? '';
-const chatwootToken = import.meta.env.PUBLIC_CHATWOOT_WEBSITE_TOKEN ?? '';
+// process.env lê em runtime da VPS — import.meta.env seria substituído em build-time pelo CI
+const chatwootBaseUrl = process.env.CHATWOOT_BASE_URL ?? '';
+const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
 ---
 
 <!DOCTYPE html>
