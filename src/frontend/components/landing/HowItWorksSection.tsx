@@ -46,7 +46,7 @@ export function HowItWorksSection() {
           <p className="text-gray-400 max-w-2xl mx-auto">
             Diferente da astrologia genérica, o Nome Magnético une milênios de tradição matemática
             da Cabala com tecnologia de Inteligência Artificial para destravar o seu verdadeiro potencial.
-          </p>>
+          </p>
         </div>
 
         {/* Steps */}
