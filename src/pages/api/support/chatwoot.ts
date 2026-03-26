@@ -60,8 +60,15 @@ async function findOrCreateContact(
     }
   );
   const createData = await createRes.json();
+  if (!createRes.ok) {
+    console.error('[chatwoot] Erro na API ao criar contato:', createRes.status, JSON.stringify(createData));
+    throw new Error(`Chatwoot retornou ${createRes.status}: ${JSON.stringify(createData)}`);
+  }
   const contactId = createData?.id ?? createData?.payload?.contact?.id;
-  if (!contactId) throw new Error('Falha ao criar contato no Chatwoot');
+  if (!contactId) {
+    console.error('[chatwoot] Contato criado mas ID ausente no payload:', JSON.stringify(createData));
+    throw new Error('Falha ao criar contato no Chatwoot');
+  }
   return contactId;
 }
 
