@@ -25,7 +25,7 @@ export function SupportForm() {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/support/ticket', {
+      const res = await fetch('/api/support/chatwoot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -36,7 +36,7 @@ export function SupportForm() {
 
       if (res.ok) {
         setSent(true);
-        addToast('Mensagem enviada com sucesso! Logo entraremos em contato.', 'success');
+        addToast('Conversa aberta! Nossa equipe responderá em breve.', 'success');
       } else {
         const data = await res.json().catch(() => ({}));
         addToast(data.error ?? 'Erro ao enviar ticket. Tente novamente.', 'error');
@@ -52,9 +52,9 @@ export function SupportForm() {
     return (
       <div className="bg-white/5 border border-emerald-500/30 rounded-2xl p-8 text-center">
         <div className="text-4xl mb-4">✅</div>
-        <h3 className="font-cinzel text-xl font-bold text-white mb-2">Mensagem enviada!</h3>
+        <h3 className="font-cinzel text-xl font-bold text-white mb-2">Conversa aberta!</h3>
         <p className="text-gray-400 text-sm">
-          Nossa equipe responderá em até 24 horas no seu email cadastrado.
+          Nossa equipe responderá em breve. Você pode acompanhar pelo widget de chat.
         </p>
         <button
           onClick={() => {
