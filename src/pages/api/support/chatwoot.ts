@@ -73,12 +73,11 @@ async function findOrCreateContact(
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const rawToken     = import.meta.env.CHATWOOT_API_TOKEN        ?? process.env.CHATWOOT_API_TOKEN ?? '';
-  const token        = rawToken.trim();
-  const accountId    = (import.meta.env.CHATWOOT_ACCOUNT_ID       ?? process.env.CHATWOOT_ACCOUNT_ID    ?? '1').trim();
-  const inboxIdGeral   = (import.meta.env.CHATWOOT_INBOX_ID       ?? process.env.CHATWOOT_INBOX_ID ?? '').trim();
-  const inboxIdClientes = (import.meta.env.CHATWOOT_INBOX_ID_CLIENTES ?? process.env.CHATWOOT_INBOX_ID_CLIENTES ?? '').trim() || undefined;
-  const baseUrl      = (import.meta.env.CHATWOOT_BASE_URL         ?? process.env.CHATWOOT_BASE_URL ?? '').trim();
+  const token           = (process.env.CHATWOOT_API_TOKEN ?? '').trim();
+  const accountId       = (process.env.CHATWOOT_ACCOUNT_ID ?? '1').trim();
+  const inboxIdGeral    = (process.env.CHATWOOT_INBOX_ID ?? '').trim();
+  const inboxIdClientes = (process.env.CHATWOOT_INBOX_ID_CLIENTES ?? '').trim() || undefined;
+  const baseUrl         = (process.env.CHATWOOT_BASE_URL ?? '').trim();
   const CHATWOOT_BASE = `${baseUrl.replace(/\/$/, '')}/api/v1`;
 
   console.log(`[chatwoot] token len=${token.length} starts="${token.slice(0,4)}" base="${CHATWOOT_BASE}" inbox="${inboxIdGeral}"`);
