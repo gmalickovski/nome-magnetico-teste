@@ -207,12 +207,12 @@ export function TesteBloqueio() {
                 </p>
               </div>
 
-              <a
-                href={result.cta.url}
+              <button
+                onClick={() => document.getElementById('precos')?.scrollIntoView({ behavior: 'smooth' })}
                 className="inline-block bg-gradient-to-r from-[#D4AF37] to-[#f2ca50] text-[#1A1A1A] font-bold text-lg px-8 py-4 rounded-xl hover:brightness-110 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/30"
               >
                 Desbloquear Minha Análise Completa
-              </a>
+              </button>
             </div>
 
             <button

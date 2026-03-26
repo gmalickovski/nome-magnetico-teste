@@ -125,8 +125,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     );
   }
 
-  // Determinar inbox: clientes com plano ativo têm prioridade
+  // Determinar inbox e prioridade: clientes com plano ativo têm prioridade
   let selectedInboxId = inboxIdGeral;
+  let conversationPriority = authUser ? 'medium' : 'low';
   if (authUser && inboxIdClientes) {
     try {
       const { data: subs } = await supabase
@@ -135,7 +136,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
         .eq('user_id', authUser.id)
         .gt('ends_at', new Date().toISOString())
         .limit(1);
-      if ((subs?.length ?? 0) > 0) selectedInboxId = inboxIdClientes;
+      if ((subs?.length ?? 0) > 0) {
+        selectedInboxId = inboxIdClientes;
+        conversationPriority = 'urgent';
+      }
     } catch { /* silencioso */ }
   }
 
@@ -152,6 +156,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         body: JSON.stringify({
           inbox_id: Number(selectedInboxId),
           contact_id: contactId,
+          priority: conversationPriority,
           additional_attributes: { assunto },
         }),
       }

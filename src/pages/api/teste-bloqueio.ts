@@ -91,7 +91,7 @@ export const POST: APIRoute = async ({ request }) => {
           mensagem: bloqueios.length > 0
             ? `${nome_completo.split(' ')[0]}, detectamos ${bloqueios.length} bloqueio(s) no seu nome. A análise completa revela como transformar essa energia.`
             : `${nome_completo.split(' ')[0]}, seu nome tem uma vibração energética poderosa! Descubra como potencializá-la ainda mais.`,
-          url: '/comprar',
+          url: '/#precos',
         },
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
