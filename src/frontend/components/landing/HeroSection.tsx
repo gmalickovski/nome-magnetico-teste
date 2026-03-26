@@ -12,7 +12,7 @@ export function HeroSection() {
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-24 pb-16">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-2">
+        <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
           <span className="text-[#D4AF37] text-xs">✦</span>
           <span className="text-[#D4AF37] text-sm font-medium">Numerologia Cabalística Premium</span>
           <span className="text-[#D4AF37] text-xs">✦</span>
@@ -40,7 +40,7 @@ export function HeroSection() {
 
         {/* Subheadline */}
         <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-light">
-          Tudo no universo é número e vibração. Descubra como a tradição milenar da Cabala revela os bloqueios invisíveis da sua vida — e como o nome certo alinha sua Expressão ao seu verdadeiro Destino.
+          Tudo no universo é número e vibração. Descubra como a matemática da Cabala revela os bloqueios invisíveis da sua vida, desperta seu Arquétipo adormecido e como o nome certo alinha sua Expressão ao seu verdadeiro Destino.
         </p>
 
         {/* CTAs */}
