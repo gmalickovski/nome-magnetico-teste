@@ -63,6 +63,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
   </head>
   <body class="bg-[#1a1a1a] text-gray-200 min-h-screen font-inter antialiased">
     <slot />
+    <script is:inline>
+      (function(d,t) {
+        var BASE_URL="https://suporte.studiomlk.com.br";
+        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=BASE_URL+"/packs/js/sdk.js";
+        g.async=true;
+        s.parentNode.insertBefore(g,s);
+        g.onload=function(){
+          window.chatwootSDK.run({
+            websiteToken: '8s7aSyxaJrU4ZRYVGZfWDNwH',
+            baseUrl: BASE_URL
+          })
+        }
+      })(document,"script");
+    </script>
   </body>
 </html>
 

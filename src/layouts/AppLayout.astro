@@ -17,17 +17,18 @@ if (!user) {
 // Verificar perfil e subscriptions ativas
 let isAdmin = false;
 let hasAnyActive = false;
+let userNome = user.email?.split('@')[0] ?? '';
 try {
   const client = createUserClient(Astro.locals.accessToken ?? '');
   const [profileRes, subsRes] = await Promise.all([
     client
-      
+
       .from('profiles')
-      .select('role')
+      .select('role, nome')
       .eq('id', user.id)
       .single(),
     client
-      
+
       .from('subscriptions')
       .select('product_type')
       .eq('user_id', user.id)
@@ -35,6 +36,7 @@ try {
   ]);
   isAdmin = profileRes.data?.role === 'admin';
   hasAnyActive = (subsRes.data?.length ?? 0) > 0;
+  if (profileRes.data?.nome) userNome = profileRes.data.nome;
 } catch { /* silencioso */ }
 
 const pathname = Astro.url.pathname;
@@ -94,7 +96,7 @@ const isActive = (path: string) =>
           <a
             href="/app/suporte"
             class={`relative text-sm transition-colors pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300 ${
-              isActive('/suporte')
+              isActive('/app/suporte')
                 ? 'text-[#D4AF37] after:w-full'
                 : 'text-gray-400 hover:text-[#D4AF37] after:w-0 hover:after:w-full'
             }`}
@@ -170,6 +172,7 @@ const isActive = (path: string) =>
         // Limpar cookies de auth
         document.cookie = 'nome-magnetico-auth-access-token=; path=/; max-age=0';
         document.cookie = 'nome-magnetico-auth-refresh-token=; path=/; max-age=0';
+        window.$chatwoot?.reset();
         window.location.href = '/auth/login';
       });
     };
@@ -189,6 +192,17 @@ const isActive = (path: string) =>
       btnClose.addEventListener('click', () => {
         menu.classList.add('translate-x-full');
       });
+    }
+  </script>
+
+  <script define:vars={{ _uid: user.id, _email: user.email ?? '', _name: userNome }}>
+    function _syncChatwoot() {
+      window.$chatwoot.setUser(_uid, { email: _email, name: _name });
+    }
+    if (window.$chatwoot) {
+      _syncChatwoot();
+    } else {
+      window.addEventListener('chatwoot:ready', _syncChatwoot);
     }
   </script>
 </BaseLayout>
