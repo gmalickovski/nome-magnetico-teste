@@ -12,37 +12,31 @@ const fallbackItems = [
     id: '1',
     question: 'O que é a numerologia cabalística?',
     answer:
-      'A numerologia cabalística é um sistema ancestral que atribui valores numéricos às letras do nome de nascimento, revelando padrões energéticos, bloqueios e potenciais. Diferente de outras numerologias, ela considera os acentos e a vibração completa do nome como foi registrado.',
+      'É a ciência exata de conversão de letras em números e cálculo de frequências. Baseada na tradição mística hebraica, oferece um mapa matemático profundo, unindo cabala, cálculos precisos e arquétipos junguianos.',
   },
   {
     id: '2',
-    question: 'O que são os bloqueios energéticos no nome?',
+    question: 'Como a mudança da assinatura remove bloqueios?',
     answer:
-      'Bloqueios são sequências de três ou mais números iguais (como 111, 333, 555) que aparecem no Triângulo da Vida calculado a partir do seu nome. Cada sequência indica uma área de vida onde a energia flui com dificuldade — pode ser relacionamentos, prosperidade, expressão criativa, etc.',
+      'Cada letra emite uma força. Mudando letras na assinatura, a equação do seu Triângulo da Vida muda, desmanchando sequências repetitivas (como 444, de inércia ou 888 de excesso) que causam bloqueios visíveis em diversas áreas.',
   },
   {
     id: '3',
-    question: 'Preciso mudar meu nome nos documentos?',
+    question: 'Qual a diferença para a numerologia comum?',
     answer:
-      'Não necessariamente. O Nome Magnético pode ser usado em contextos específicos — redes sociais, vida profissional, assinatura artística — sem necessidade de mudança legal. O importante é ativar a vibração do nome magneticamente.',
+      'Nosso motor processa velozmente os 4 triângulos completos, cruza a compatibilidade de destino e expressão e gera um score perfeito para o nível da sua vibração pessoal — alinhado aos Arquétipos Junguianos, algo inacessível em semanas de cálculos manuais.',
   },
   {
     id: '4',
-    question: 'Em quanto tempo vejo resultados?',
+    question: 'Preciso mudar meu nome na identidade?',
     answer:
-      'A vibração do nome se manifesta de forma gradual. Muitos usuários relatam mudanças de percepção e oportunidades já nas primeiras semanas após adotar o Nome Magnético. O Guia de Implementação de 30 dias auxilia nessa transição.',
+      'Não necessariamente. O Nome Magnético pode ser adotado na sua assinatura do dia a dia, redes sociais e vida profissional para ativar magneticamente a vibração sem burocracias de cartório.',
   },
   {
     id: '5',
-    question: 'Qual é a diferença entre o teste gratuito e a análise completa?',
+    question: 'O que o relatório completo entrega?',
     answer:
-      'O teste gratuito mostra apenas a quantidade de bloqueios e um preview do título de cada bloqueio. A análise completa inclui: interpretação profunda dos 5 números, detalhes de cada bloqueio com o caminho de transformação, 3 Nomes Magnéticos personalizados com scoring numérico, guia de implementação de 30 dias, afirmações personalizadas e PDF para download.',
-  },
-  {
-    id: '6',
-    question: 'Minha privacidade está protegida?',
-    answer:
-      'Sim. Seus dados de nome e data de nascimento são usados exclusivamente para o cálculo numerológico. Não compartilhamos suas informações com terceiros. Você pode solicitar a exclusão de seus dados a qualquer momento.',
+      'Uma interpretação profunda dos 5 números, o caminho de transformação de cada bloqueio, top 3 Nomes Magnéticos personalizados com scoring numérico, além do Guia Executivo de Implementação de 30 dias em PDF premium.',
   },
 ];
 

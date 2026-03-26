@@ -12,15 +12,20 @@ export function HeroSection() {
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-24 pb-16">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-8">
+        <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-2">
           <span className="text-[#D4AF37] text-xs">✦</span>
-          <span className="text-[#D4AF37] text-sm font-medium">Numerologia Cabalística</span>
+          <span className="text-[#D4AF37] text-sm font-medium">Numerologia Cabalística Premium</span>
           <span className="text-[#D4AF37] text-xs">✦</span>
         </div>
 
+        {/* Super Headline */}
+        <p className="text-[#D4AF37] text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-4">
+          O SEU NOME NÃO É APENAS UMA PALAVRA
+        </p>
+
         {/* Headline */}
-        <h1 className="font-cinzel text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-          Nomes Carregam Energia.{' '}
+        <h1 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+          Descubra a Frequência do Seu Nome e{' '}
           <span
             style={{
               background: 'linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E)',
@@ -29,32 +34,32 @@ export function HeroSection() {
               backgroundClip: 'text',
             }}
           >
-            O Certo
+            Destrave Seu Potencial
           </span>
-          {' '}Abre Caminhos.
         </h1>
 
         {/* Subheadline */}
-        <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed">
-          A numerologia cabalística revela bloqueios energéticos ocultos em nomes pessoais,
-          de bebês e empresariais. Descubra — e transforme — com análises dos 4 triângulos
-          cabalísticos e inteligência artificial especializada.
+        <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-light">
+          A numerologia cabalística não é misticismo, é matemática pura. Entenda por que você trava em certas áreas da vida e descubra a variação exata do seu nome que dissolve esses bloqueios, alinhando sua Expressão ao seu Destino.
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           <a
             href="#teste"
             className="w-full sm:w-auto bg-[#D4AF37] text-[#1A1A1A] font-medium text-lg px-8 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
           >
-            Testar Meu Nome Grátis
+            Quero Descobrir a Força do Meu Nome
           </a>
-          <a
-            href="#produtos"
-            className="w-full sm:w-auto border border-[#D4AF37]/50 text-[#D4AF37] font-medium text-lg px-8 py-4 rounded-xl hover:bg-[#D4AF37]/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Ver os Produtos
-          </a>
+        </div>
+
+        {/* Trust Indicators */}
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[#D4AF37]/80 uppercase tracking-wider font-semibold mb-10">
+          <span>✓ Análise Profunda via IA</span>
+          <span className="hidden sm:inline">•</span>
+          <span>✓ 4 Triângulos Numéricos</span>
+          <span className="hidden sm:inline">•</span>
+          <span>✓ Relatório Premium em PDF</span>
         </div>
 
         {/* Social proof */}

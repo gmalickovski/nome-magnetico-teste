@@ -3,30 +3,30 @@ import React from 'react';
 const steps = [
   {
     number: '01',
-    title: 'Informe seu Nome e Data',
+    title: 'Os 5 Números Fundamentais',
     description:
-      'Digite seu nome completo de nascimento e data de nascimento. Esses são os dados base para a análise cabalística.',
-    icon: '✍️',
+      'Calculamos sua Expressão, Destino, Motivação, Missão e Impressão para formar o seu mapa base a partir de seu nome.',
+    icon: '📝',
   },
   {
     number: '02',
-    title: 'Calculamos os 4 Triângulos Cabalísticos',
+    title: 'Os 4 Triângulos',
     description:
-      'Nossa engine converte cada letra em vibrações numéricas e constrói os 4 triângulos cabalísticos (Vida, Pessoal, Social e Destino), detectando sequências de bloqueio em cada dimensão.',
-    icon: '🔢',
+      'Desenhamos os Triângulos da Vida, Pessoal, Social e Destino para encontrar travamentos invisíveis em diversas áreas.',
+    icon: '📐',
   },
   {
     number: '03',
-    title: 'IA Interpreta os Padrões',
+    title: 'Arquétipos Junguianos',
     description:
-      'Uma IA especializada em numerologia cabalística analisa seus 5 números principais e revela o impacto dos bloqueios.',
-    icon: '🤖',
+      'Nossa IA especializada traduz os seus resultados numéricos para narrativas psicológicas reais para o seu perfil.',
+    icon: '🎭',
   },
   {
     number: '04',
-    title: 'Receba seu Nome Ideal',
+    title: 'A Nova Assinatura',
     description:
-      'Sugerimos variações do nome que eliminam os bloqueios, compatíveis com os números de Expressão e Destino — para você, seu bebê ou sua empresa.',
+      'Identificamos e sugerimos variações luxuosas do seu nome sem bloqueios, com um score perfeito de harmonia vibracional.',
     icon: '✨',
   },
 ];
@@ -44,9 +44,9 @@ export function HowItWorksSection() {
             Como Funciona
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Em minutos, você terá uma análise completa da energia do nome — seja pessoal,
-            de bebê ou empresarial — com sugestões personalizadas sem bloqueios.
-          </p>
+            Diferente da astrologia genérica, o Nome Magnético une milênios de tradição matemática
+            da Cabala com tecnologia de Inteligência Artificial para destravar o seu verdadeiro potencial.
+          </p>>
         </div>
 
         {/* Steps */}

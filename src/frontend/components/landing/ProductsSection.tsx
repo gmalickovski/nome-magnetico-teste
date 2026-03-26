@@ -5,13 +5,13 @@ const products = [
     id: 'nome_social',
     icon: '✨',
     name: 'Nome Social',
-    tagline: 'Desbloqueie a energia do seu nome',
-    description: 'Análise cabalística completa do seu nome de nascimento e data. O Estudo revela as energias ocultas e mostra exatamente como elas afetam sua vida diária.',
+    tagline: 'A Jornada de Transformação Pessoal',
+    description: 'Para adultos em busca de autoconhecimento aplicado e vida destravada.',
     benefits: [
-      'Identifica bloqueios na vida financeira, relacionamentos e saúde.',
-      'Revela seus 5 números principais e os 4 triângulos de destino.',
-      'Apresenta 3 opções de Nomes Magnéticos harmonizados para você usar na sua assinatura e redes.',
-      'Acompanha um guia em PDF detalhado para manifestação diária.'
+      'Identificação de Bloqueios Energéticos e Tendências Ocultas.',
+      'Top 3 sugestões de nomes magnéticos e harmonizados.',
+      'Guia prático de 30 dias para implementar sua nova assinatura.',
+      'Guia de grafoscopia poderoso (como assinar sua vida nova).'
     ],
     highlight: true,
   },
@@ -19,13 +19,13 @@ const products = [
     id: 'nome_bebe',
     icon: '👶',
     name: 'Nome de Bebê',
-    tagline: 'O melhor começo começa pelo nome',
-    description: 'Garanta um futuro sem bloqueios limitadores para seu filho. O Estudo cruza os sobrenomes da família com nomes pretendidos para encontrar a opção ideal.',
+    tagline: 'A Decisão Mais Importante do Seu Filho',
+    description: 'A certeza de dar o melhor começo vibracional de todos para quem você mais ama.',
     benefits: [
-      'Evita números kármicos e sequências negativas na vida do seu filho.',
-      'Avalia múltiplos nomes candidatos enviando um ranking claro de harmonia (0-100).',
-      'Harmoniza o nome com a data de nascimento e com o destino energético dos pais.',
-      'Traz paz mental de saber que está dando a melhor base energética desde o nascimento.'
+      'Análise cruzada dos nomes candidatos com o Destino da criança.',
+      'Ranking objetivo do pior ao "Nome de Ouro".',
+      'Identificação do Arquétipo da Criança (perfil e talentos naturais).',
+      'Guia dos pais para criar o bebê segundo sua natureza numérica original.'
     ],
     highlight: false,
   },
@@ -33,13 +33,13 @@ const products = [
     id: 'nome_empresa',
     icon: '🏢',
     name: 'Nome Empresarial',
-    tagline: 'Um nome que projeta prosperidade',
-    description: 'Um nome empresarial mal escolhido pode travar suas vendas desde o dia 1. A análise cruza a vibração da marca com a essência do fundador.',
+    tagline: 'Branding com Fundamento Vibracional',
+    description: 'A diferença entre uma marca que as pessoas esquecem e uma marca magnética.',
     benefits: [
-      'Alinha a assinatura energética da empresa ao destino e missão do fundador.',
-      'Evita o excesso do número 8 (risco de ganância corporativa) e faltas graves.',
-      'Avalia múltiplos candidatos mostrando a harmonia de cada opção no mercado.',
-      'Desenvolvido para atrair de forma mais natural um fluxo de negócios e prosperidade.'
+      'Avaliação da sinergia entre o Destino dos sócios e o nome da marca.',
+      'Verificação rigorosa de riscos ocultos operacionais e financeiros.',
+      'Guia de Posicionamento e Arquétipo de Marca (como a Apple ou a Nike têm).',
+      'Sugestões de tom de voz e ativação anual para a empresa.'
     ],
     highlight: false,
   },
