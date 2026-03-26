@@ -17,7 +17,7 @@ interface ImportMetaEnv {
   readonly PUBLIC_SUPABASE_ANON_KEY: string;
   readonly STRIPE_SECRET_KEY: string;
   readonly STRIPE_WEBHOOK_SECRET: string;
-  readonly STRIPE_PRICE_NOME_MAGNETICO: string;
+  readonly STRIPE_PRICE_NOME_SOCIAL: string;
   readonly STRIPE_PRICE_NOME_BEBE: string;
   readonly STRIPE_PRICE_NOME_EMPRESA: string;
   readonly GROQ_API_KEY: string;
