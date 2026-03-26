@@ -26,7 +26,7 @@ export function SupportForm() {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/support/chatwoot', {
+      const res = await fetch('/api/support/create-ticket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
