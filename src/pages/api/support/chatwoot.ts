@@ -73,12 +73,15 @@ async function findOrCreateContact(
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const token        = import.meta.env.CHATWOOT_API_TOKEN        ?? process.env.CHATWOOT_API_TOKEN;
-  const accountId    = import.meta.env.CHATWOOT_ACCOUNT_ID       ?? process.env.CHATWOOT_ACCOUNT_ID    ?? '1';
-  const inboxIdGeral   = import.meta.env.CHATWOOT_INBOX_ID       ?? process.env.CHATWOOT_INBOX_ID;
-  const inboxIdClientes = import.meta.env.CHATWOOT_INBOX_ID_CLIENTES ?? process.env.CHATWOOT_INBOX_ID_CLIENTES;
-  const baseUrl      = import.meta.env.CHATWOOT_BASE_URL         ?? process.env.CHATWOOT_BASE_URL ?? '';
+  const rawToken     = import.meta.env.CHATWOOT_API_TOKEN        ?? process.env.CHATWOOT_API_TOKEN ?? '';
+  const token        = rawToken.trim();
+  const accountId    = (import.meta.env.CHATWOOT_ACCOUNT_ID       ?? process.env.CHATWOOT_ACCOUNT_ID    ?? '1').trim();
+  const inboxIdGeral   = (import.meta.env.CHATWOOT_INBOX_ID       ?? process.env.CHATWOOT_INBOX_ID ?? '').trim();
+  const inboxIdClientes = (import.meta.env.CHATWOOT_INBOX_ID_CLIENTES ?? process.env.CHATWOOT_INBOX_ID_CLIENTES ?? '').trim() || undefined;
+  const baseUrl      = (import.meta.env.CHATWOOT_BASE_URL         ?? process.env.CHATWOOT_BASE_URL ?? '').trim();
   const CHATWOOT_BASE = `${baseUrl.replace(/\/$/, '')}/api/v1`;
+
+  console.log(`[chatwoot] token len=${token.length} starts="${token.slice(0,4)}" base="${CHATWOOT_BASE}" inbox="${inboxIdGeral}"`);
 
   if (!token || !inboxIdGeral || !baseUrl) {
     console.error('[chatwoot] Variáveis de ambiente não configuradas');
