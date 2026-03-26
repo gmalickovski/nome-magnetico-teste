@@ -12,7 +12,7 @@ export function HeroSection() {
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-24 pb-16">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
+        <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-8">
           <span className="text-[#D4AF37] text-xs">✦</span>
           <span className="text-[#D4AF37] text-sm font-medium">Numerologia Cabalística Premium</span>
           <span className="text-[#D4AF37] text-xs">✦</span>
