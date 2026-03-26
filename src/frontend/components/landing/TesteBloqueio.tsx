@@ -76,7 +76,7 @@ export function TesteBloqueio() {
   }
 
   return (
-    <section id="teste" className="py-20 md:py-32 bg-[#111111]">
+    <section id="teste" className="pb-20 md:pb-32 pt-8 md:pt-12 bg-[#111111]">
       <div className="max-w-2xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-10">
