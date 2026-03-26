@@ -57,6 +57,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     task: cfg.task,
     provider: cfg.provider,
     model: cfg.model,
+    is_active: true,
     updated_by: user.id,
     updated_at: now,
   }));

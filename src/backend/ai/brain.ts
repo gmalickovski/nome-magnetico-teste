@@ -52,6 +52,31 @@ async function runWithGuard(
       return response.content;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+
+      // Groq atingiu limite diário → fallback automático para OpenAI
+      if (message === 'GROQ_RATE_LIMITED' && provider === 'groq') {
+        console.warn('[Brain] Groq rate limited — fallback automático para OpenAI');
+        try {
+          const userPrompt = buildPrompt();
+          const fallback = await callAI(SYSTEM_KABBALISTIC, userPrompt, task, 'openai');
+          guard.recordResponse(fallback.content, fallback.tokensInput + fallback.tokensOutput);
+          await logAIUsage({
+            userId,
+            analysisId,
+            provider: 'openai',
+            model: getModel('openai', task),
+            task,
+            tokensInput: fallback.tokensInput,
+            tokensOutput: fallback.tokensOutput,
+            attemptNumber: attempt,
+            similarToPrevious: false,
+          });
+          return fallback.content;
+        } catch {
+          throw new Error('QUOTA_EXCEEDED');
+        }
+      }
+
       if (message.includes('Loop Guard')) throw err;
       console.warn(`[Brain] Tentativa ${attempt} falhou: ${message}`);
       if (attempt === 3) throw new Error(`${task} falhou após 3 tentativas: ${message}`);

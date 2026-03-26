@@ -313,10 +313,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
         completed_at: new Date().toISOString(),
       });
     } catch (err) {
-      console.error('[analyze] Erro ao processar:', err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const isQuota = errMsg.includes('QUOTA_EXCEEDED');
+      console.error('[analyze] Erro ao processar:', isQuota ? 'QUOTA_EXCEEDED (Groq + OpenAI)' : err);
       await updateAnalysis(analysis.id, {
         status: 'error',
-        error_message: err instanceof Error ? err.message : String(err),
+        error_message: isQuota
+          ? 'Nosso sistema de análise está com alta demanda agora. Por favor, tente novamente em alguns minutos. 🙏'
+          : errMsg,
       });
     }
   })();

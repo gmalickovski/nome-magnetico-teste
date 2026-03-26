@@ -3,6 +3,12 @@ import type { AITask } from '../config/models';
 import { getModel } from '../config/models';
 import { getTaskConfig } from '../config/temperatures';
 
+function isRateLimit(err: unknown): boolean {
+  if (err instanceof Groq.APIError && err.status === 429) return true;
+  const msg = err instanceof Error ? err.message.toLowerCase() : '';
+  return msg.includes('rate_limit') || msg.includes('rate limit') || msg.includes('quota');
+}
+
 let groqClient: Groq | null = null;
 
 function getGroqClient(): Groq {
@@ -30,16 +36,22 @@ export async function callGroq(
   const model = getModel('groq', task);
   const config = getTaskConfig(task);
 
-  const completion = await client.chat.completions.create({
-    model,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    temperature: config.temperature,
-    max_tokens: config.maxTokens,
-    stream: false,
-  });
+  let completion;
+  try {
+    completion = await client.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: config.temperature,
+      max_tokens: config.maxTokens,
+      stream: false,
+    });
+  } catch (err) {
+    if (isRateLimit(err)) throw new Error('GROQ_RATE_LIMITED');
+    throw err;
+  }
 
   const choice = completion.choices[0];
   if (!choice?.message?.content) {
@@ -62,16 +74,22 @@ export async function* streamGroq(
   const model = getModel('groq', task);
   const config = getTaskConfig(task);
 
-  const stream = await client.chat.completions.create({
-    model,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    temperature: config.temperature,
-    max_tokens: config.maxTokens,
-    stream: true,
-  });
+  let stream;
+  try {
+    stream = await client.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: config.temperature,
+      max_tokens: config.maxTokens,
+      stream: true,
+    });
+  } catch (err) {
+    if (isRateLimit(err)) throw new Error('GROQ_RATE_LIMITED');
+    throw err;
+  }
 
   for await (const chunk of stream) {
     const delta = chunk.choices[0]?.delta?.content;
