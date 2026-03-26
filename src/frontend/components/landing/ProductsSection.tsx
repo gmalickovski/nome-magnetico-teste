@@ -9,9 +9,9 @@ const products = [
     description: 'Para adultos em busca de autoconhecimento aplicado e vida destravada.',
     benefits: [
       'Identificação de Bloqueios Energéticos e Tendências Ocultas.',
+      'Revelação do seu Arquétipo Junguiano.',
       'Top 3 sugestões de nomes magnéticos e harmonizados.',
-      'Guia prático de 30 dias para implementar sua nova assinatura.',
-      'Guia de grafoscopia poderoso (como assinar sua vida nova).'
+      'Guia prático de 30 dias para implementar sua nova assinatura.'
     ],
     highlight: true,
   },

@@ -20,12 +20,12 @@ export function HeroSection() {
 
         {/* Super Headline */}
         <p className="text-[#D4AF37] text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-4">
-          O SEU NOME NÃO É APENAS UMA PALAVRA
+          A MATEMÁTICA DO SEU DESTINO
         </p>
 
         {/* Headline */}
         <h1 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-          Descubra a Frequência do Seu Nome e{' '}
+          O Seu Nome <br />
           <span
             style={{
               background: 'linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E)',
@@ -34,13 +34,13 @@ export function HeroSection() {
               backgroundClip: 'text',
             }}
           >
-            Destrave Seu Potencial
+            Define a Sua Realidade
           </span>
         </h1>
 
         {/* Subheadline */}
         <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-light">
-          A numerologia cabalística não é misticismo, é matemática pura. Entenda por que você trava em certas áreas da vida e descubra a variação exata do seu nome que dissolve esses bloqueios, alinhando sua Expressão ao seu Destino.
+          Tudo no universo é número e vibração. Descubra como a tradição milenar da Cabala revela os bloqueios invisíveis da sua vida — e como o nome certo alinha sua Expressão ao seu verdadeiro Destino.
         </p>
 
         {/* CTAs */}
