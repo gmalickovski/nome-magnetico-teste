@@ -5,17 +5,17 @@ import { supabase } from '../../../backend/db/supabase';
 // URL base é lida em runtime dentro do handler — evita módulo-level avaliação antes do env estar pronto
 
 const LABEL_MAP: Record<string, string> = {
-  'Bug': 'bug',
-  'Sugestão': 'sugestao',
-  'Primeiros Passos': 'primeiros-passos',
-  'Assinatura e Planos': 'assinatura-e-planos',
-  'Conta e Segurança': 'conta-e-seguranca',
-  'Solução de Problemas': 'solucao-de-problemas',
-  'Dúvida sobre os planos': 'duvida-sobre-planos',
-  'Como funciona a numerologia': 'como-funciona',
-  'Informações gerais': 'informacoes-gerais',
-  'Parceria ou imprensa': 'parceria',
-  'Outros': 'outros',
+  'Bug': 'nm-bug',
+  'Sugestão': 'nm-sugestao',
+  'Primeiros Passos': 'nm-primeiros-passos',
+  'Assinatura e Planos': 'nm-assinaturas-e-planos',
+  'Conta e Segurança': 'nm-conta-e-seguranca',
+  'Solução de Problemas': 'nm-solucao-de-problemas',
+  'Dúvida sobre os planos': 'nm-duvida-sobre-planos',
+  'Como funciona a numerologia': 'nm-como-funciona',
+  'Informações gerais': 'nm-informacoes-gerais',
+  'Parceria ou imprensa': 'nm-parceria',
+  'Outros': 'nm-outros',
 };
 
 const bodySchema = z.object({
@@ -175,15 +175,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }
     );
 
-    // 4. Aplicar label (assunto → slug) — falha silenciosa
-    const label = LABEL_MAP[assunto];
-    if (label) {
+    // 4. Aplicar labels (assunto → slug e nm-vip) — falha silenciosa
+    const tagsToApply: string[] = [];
+    if (LABEL_MAP[assunto]) tagsToApply.push(LABEL_MAP[assunto]);
+    
+    // Se a inbox selecionada foi a de clientes (tem assinatura ativa), anexa nm-vip
+    if (selectedInboxId === inboxIdClientes) {
+      tagsToApply.push('nm-vip');
+    }
+
+    if (tagsToApply.length > 0) {
       fetch(
         `${CHATWOOT_BASE}/accounts/${accountId}/conversations/${conversationId}/labels`,
         {
           method: 'POST',
           headers: chatwootHeaders(token),
-          body: JSON.stringify({ labels: [label] }),
+          body: JSON.stringify({ labels: tagsToApply }),
         }
       ).catch(() => {});
     }
