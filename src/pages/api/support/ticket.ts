@@ -24,11 +24,11 @@ const bodySchema = z.object({
   email: z.string().email().optional(),
 });
 
-function chatwootHeaders(token: string) {
-  return {
-    'Content-Type': 'application/json',
-    'api_access_token': token,
-  };
+// Nginx remove headers com underscore por padrão — token passado como query param
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
+
+function cwUrl(base: string, path: string, token: string, extra = ''): string {
+  return `${base}${path}?api_access_token=${encodeURIComponent(token)}${extra}`;
 }
 
 async function findOrCreateContact(
@@ -39,8 +39,8 @@ async function findOrCreateContact(
   name: string
 ): Promise<number> {
   const searchRes = await fetch(
-    `${base}/accounts/${accountId}/contacts/search?q=${encodeURIComponent(email)}&include_contacts=true`,
-    { headers: chatwootHeaders(token) }
+    cwUrl(base, `/accounts/${accountId}/contacts/search`, token, `&q=${encodeURIComponent(email)}&include_contacts=true`),
+    { headers: JSON_HEADERS }
   );
   if (searchRes.ok) {
     const searchData = await searchRes.json();
@@ -48,9 +48,9 @@ async function findOrCreateContact(
     if (found?.id) return found.id;
   }
 
-  const createRes = await fetch(`${base}/accounts/${accountId}/contacts`, {
+  const createRes = await fetch(cwUrl(base, `/accounts/${accountId}/contacts`, token), {
     method: 'POST',
-    headers: chatwootHeaders(token),
+    headers: JSON_HEADERS,
     body: JSON.stringify({ email, name }),
   });
   const createData = await createRes.json();
@@ -167,9 +167,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
           CHATWOOT_BASE, token, accountId, contactEmail, contactName
         );
 
-        const convRes = await fetch(`${CHATWOOT_BASE}/accounts/${accountId}/conversations`, {
+        const convRes = await fetch(cwUrl(CHATWOOT_BASE, `/accounts/${accountId}/conversations`, token), {
           method: 'POST',
-          headers: chatwootHeaders(token),
+          headers: JSON_HEADERS,
           body: JSON.stringify({
             inbox_id: Number(selectedInboxId || inboxIdGeral),
             contact_id: contactId,
@@ -184,10 +184,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
         // Mensagem do usuário
         await fetch(
-          `${CHATWOOT_BASE}/accounts/${accountId}/conversations/${conversationId}/messages`,
+          cwUrl(CHATWOOT_BASE, `/accounts/${accountId}/conversations/${conversationId}/messages`, token),
           {
             method: 'POST',
-            headers: chatwootHeaders(token),
+            headers: JSON_HEADERS,
             body: JSON.stringify({ content: mensagem, message_type: 'incoming', private: false }),
           }
         );
@@ -198,10 +198,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
         if (isVip) labels.push('nm-vip');
         if (labels.length > 0) {
           fetch(
-            `${CHATWOOT_BASE}/accounts/${accountId}/conversations/${conversationId}/labels`,
+            cwUrl(CHATWOOT_BASE, `/accounts/${accountId}/conversations/${conversationId}/labels`, token),
             {
               method: 'POST',
-              headers: chatwootHeaders(token),
+              headers: JSON_HEADERS,
               body: JSON.stringify({ labels }),
             }
           ).catch(() => {});

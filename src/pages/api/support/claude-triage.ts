@@ -26,11 +26,10 @@ Contexto do produto:
 - Pagamento único por ciclo de 30 dias (não é assinatura recorrente)
 - Suporte técnico e de produto apenas — sem aconselhamento espiritual pessoal`;
 
-function chatwootHeaders(token: string) {
-  return {
-    'Content-Type': 'application/json',
-    'api_access_token': token,
-  };
+// Nginx remove headers com underscore — token passado como query param
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
+function cwUrl(base: string, path: string, token: string): string {
+  return `${base}${path}?api_access_token=${encodeURIComponent(token)}`;
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -172,10 +171,10 @@ ${mensagem}`;
 ${triageResult.resposta}`;
 
     fetch(
-      `${CHATWOOT_BASE}/accounts/${accountId}/conversations/${conversation_id}/messages`,
+      cwUrl(CHATWOOT_BASE, `/accounts/${accountId}/conversations/${conversation_id}/messages`, token),
       {
         method: 'POST',
-        headers: chatwootHeaders(token),
+        headers: JSON_HEADERS,
         body: JSON.stringify({ content: nota, message_type: 'outgoing', private: true }),
       }
     ).catch(() => {});

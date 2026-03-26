@@ -25,11 +25,11 @@ const bodySchema = z.object({
   email: z.string().email().optional(),
 });
 
-function chatwootHeaders(token: string) {
-  return {
-    'Content-Type': 'application/json',
-    'api_access_token': token,
-  };
+// Nginx remove headers com underscore por padrão — token passado como query param
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
+
+function cwUrl(base: string, path: string, token: string, extra = ''): string {
+  return `${base}${path}?api_access_token=${encodeURIComponent(token)}${extra}`;
 }
 
 async function findOrCreateContact(
@@ -41,8 +41,8 @@ async function findOrCreateContact(
 ): Promise<number> {
   // 1. Buscar contato existente pelo email
   const searchRes = await fetch(
-    `${chatwootBase}/accounts/${accountId}/contacts/search?q=${encodeURIComponent(email)}&include_contacts=true`,
-    { headers: chatwootHeaders(token) }
+    cwUrl(chatwootBase, `/accounts/${accountId}/contacts/search`, token, `&q=${encodeURIComponent(email)}&include_contacts=true`),
+    { headers: JSON_HEADERS }
   );
   if (searchRes.ok) {
     const searchData = await searchRes.json();
@@ -52,10 +52,10 @@ async function findOrCreateContact(
 
   // 2. Criar novo contato
   const createRes = await fetch(
-    `${chatwootBase}/accounts/${accountId}/contacts`,
+    cwUrl(chatwootBase, `/accounts/${accountId}/contacts`, token),
     {
       method: 'POST',
-      headers: chatwootHeaders(token),
+      headers: JSON_HEADERS,
       body: JSON.stringify({ email, name }),
     }
   );
@@ -148,10 +148,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // 2. Criar conversa
     const convRes = await fetch(
-      `${CHATWOOT_BASE}/accounts/${accountId}/conversations`,
+      cwUrl(CHATWOOT_BASE, `/accounts/${accountId}/conversations`, token),
       {
         method: 'POST',
-        headers: chatwootHeaders(token),
+        headers: JSON_HEADERS,
         body: JSON.stringify({
           inbox_id: Number(selectedInboxId),
           contact_id: contactId,
@@ -167,10 +167,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // 3. Criar mensagem do usuário
     await fetch(
-      `${CHATWOOT_BASE}/accounts/${accountId}/conversations/${conversationId}/messages`,
+      cwUrl(CHATWOOT_BASE, `/accounts/${accountId}/conversations/${conversationId}/messages`, token),
       {
         method: 'POST',
-        headers: chatwootHeaders(token),
+        headers: JSON_HEADERS,
         body: JSON.stringify({
           content: mensagem,
           message_type: 'incoming',
@@ -182,7 +182,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // 4. Aplicar labels (assunto → slug e nm-vip) — falha silenciosa
     const tagsToApply: string[] = [];
     if (LABEL_MAP[assunto]) tagsToApply.push(LABEL_MAP[assunto]);
-    
+
     // Se a inbox selecionada foi a de clientes (tem assinatura ativa), anexa nm-vip
     if (selectedInboxId === inboxIdClientes) {
       tagsToApply.push('nm-vip');
@@ -190,10 +190,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     if (tagsToApply.length > 0) {
       fetch(
-        `${CHATWOOT_BASE}/accounts/${accountId}/conversations/${conversationId}/labels`,
+        cwUrl(CHATWOOT_BASE, `/accounts/${accountId}/conversations/${conversationId}/labels`, token),
         {
           method: 'POST',
-          headers: chatwootHeaders(token),
+          headers: JSON_HEADERS,
           body: JSON.stringify({ labels: tagsToApply }),
         }
       ).catch(() => {});
