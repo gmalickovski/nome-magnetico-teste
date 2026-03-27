@@ -3,10 +3,12 @@ import { Accordion } from '../ui/Accordion';
 
 export interface FaqItemProps {
   id: string;
-  pergunta: string;
-  answerHtml: string;
+  question: string;
+  answer: string;
+  answer_html?: string | null;
 }
 
+// Failsafe mínimo — exibido apenas se Supabase e Chatwoot estiverem indisponíveis
 const fallbackItems = [
   {
     id: '1',
@@ -22,18 +24,6 @@ const fallbackItems = [
   },
   {
     id: '3',
-    question: 'Qual a diferença para a numerologia comum?',
-    answer:
-      'Nosso motor processa velozmente os 4 triângulos completos, cruza a compatibilidade de destino e expressão e gera um score perfeito para o nível da sua vibração pessoal — alinhado aos Arquétipos Junguianos, algo inacessível em semanas de cálculos manuais.',
-  },
-  {
-    id: '4',
-    question: 'Preciso mudar meu nome na identidade?',
-    answer:
-      'Não necessariamente. O Nome Magnético pode ser adotado na sua assinatura do dia a dia, redes sociais e vida profissional para ativar magneticamente a vibração sem burocracias de cartório.',
-  },
-  {
-    id: '5',
     question: 'O que o relatório completo entrega?',
     answer:
       'Uma interpretação profunda dos 5 números, o caminho de transformação de cada bloqueio, top 3 Nomes Magnéticos personalizados com scoring numérico, além do Guia Executivo de Implementação de 30 dias em PDF premium.',
@@ -45,14 +35,14 @@ interface FAQSectionProps {
 }
 
 export function FAQSection({ items }: FAQSectionProps) {
-  const accordionItems = items && items.length > 0
-    ? items.map(item => ({
-        id: item.id,
-        question: item.pergunta,
-        answer: '',
-        answerHtml: item.answerHtml,
-      }))
-    : fallbackItems;
+  const source = items && items.length > 0 ? items : fallbackItems;
+
+  const accordionItems = source.map(item => ({
+    id: item.id,
+    question: item.question,
+    answer: (item as { answer?: string }).answer ?? '',
+    answerHtml: (item as FaqItemProps).answer_html ?? undefined,
+  }));
 
   return (
     <section id="faq" className="py-20 md:py-32 bg-[#111111]">

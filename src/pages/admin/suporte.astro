@@ -1,0 +1,124 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../backend/db/supabase';
+
+const statusFilter = Astro.url.searchParams.get('status') ?? 'open';
+
+const query = supabase
+  .from('support_tickets')
+  .select('id, subject, contact_name, contact_email, priority, status, created_at, resolved_at')
+  .order('created_at', { ascending: false })
+  .limit(50);
+
+if (statusFilter !== 'all') {
+  query.eq('status', statusFilter);
+}
+
+const { data: tickets } = await query;
+
+const { count: totalOpen } = await supabase
+  .from('support_tickets')
+  .select('*', { count: 'exact', head: true })
+  .eq('status', 'open');
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const { count: resolvedToday } = await supabase
+  .from('support_tickets')
+  .select('*', { count: 'exact', head: true })
+  .eq('status', 'resolved')
+  .gte('resolved_at', today.toISOString());
+
+const priorityLabel: Record<string, string> = {
+  urgent: 'Urgente',
+  normal: 'Normal',
+  low: 'Baixa',
+};
+const priorityColor: Record<string, string> = {
+  urgent: 'text-red-400 bg-red-400/10',
+  normal: 'text-yellow-400 bg-yellow-400/10',
+  low: 'text-gray-400 bg-gray-400/10',
+};
+const statusLabel: Record<string, string> = {
+  open: 'Aberto',
+  in_progress: 'Em andamento',
+  resolved: 'Resolvido',
+};
+const statusColor: Record<string, string> = {
+  open: 'text-blue-400 bg-blue-400/10',
+  in_progress: 'text-yellow-400 bg-yellow-400/10',
+  resolved: 'text-emerald-400 bg-emerald-400/10',
+};
+
+function timeAgo(date: string) {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}min atrás`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h atrás`;
+  return `${Math.floor(hrs / 24)}d atrás`;
+}
+---
+
+<AdminLayout title="Suporte">
+  <div class="space-y-6">
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+        <p class="text-gray-400 text-xs mb-1">Tickets abertos</p>
+        <p class="text-2xl font-bold text-white">{totalOpen ?? 0}</p>
+      </div>
+      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+        <p class="text-gray-400 text-xs mb-1">Resolvidos hoje</p>
+        <p class="text-2xl font-bold text-emerald-400">{resolvedToday ?? 0}</p>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="flex gap-2 flex-wrap">
+      {(['open', 'in_progress', 'resolved', 'all'] as const).map(s => (
+        <a
+          href={`?status=${s}`}
+          class={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+            statusFilter === s
+              ? 'bg-[#D4AF37] text-black font-medium'
+              : 'bg-white/5 text-gray-400 hover:text-gray-200 border border-white/10'
+          }`}
+        >
+          {s === 'all' ? 'Todos' : statusLabel[s] ?? s}
+        </a>
+      ))}
+    </div>
+
+    <!-- Lista -->
+    {!tickets?.length ? (
+      <div class="text-center py-16 text-gray-500">Nenhum ticket encontrado.</div>
+    ) : (
+      <div class="space-y-2">
+        {tickets.map(t => (
+          <a
+            href={`/admin/suporte/${t.id}`}
+            class="block bg-white/5 border border-white/10 rounded-xl p-4 hover:border-[#D4AF37]/40 hover:bg-white/8 transition-all"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <p class="text-gray-100 font-medium truncate">{t.subject}</p>
+                <p class="text-gray-400 text-sm mt-0.5">{t.contact_name} · {t.contact_email}</p>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${priorityColor[t.priority] ?? 'text-gray-400 bg-gray-400/10'}`}>
+                  {priorityLabel[t.priority] ?? t.priority}
+                </span>
+                <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[t.status] ?? 'text-gray-400 bg-gray-400/10'}`}>
+                  {statusLabel[t.status] ?? t.status}
+                </span>
+                <span class="text-gray-500 text-xs whitespace-nowrap">{timeAgo(t.created_at)}</span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</AdminLayout>

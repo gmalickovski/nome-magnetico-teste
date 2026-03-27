@@ -1,0 +1,232 @@
+{
+    "name": "Nome Magnético - Sync FAQs Supabase -> Chatwoot",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "sync-faq",
+                "options": {}
+            },
+            "id": "9d8eb283-7b6e-4f54-9ed1-e98886b0acf6",
+            "name": "Webhook (Supabase)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                -240,
+                560
+            ],
+            "webhookId": "sync-faq-chatwoot"
+        },
+        {
+            "parameters": {
+                "dataType": "string",
+                "value1": "={{ $json.body.type }}",
+                "rules": {
+                    "rules": [
+                        {
+                            "value2": "INSERT"
+                        },
+                        {
+                            "value2": "UPDATE",
+                            "output": 1
+                        },
+                        {
+                            "value2": "DELETE",
+                            "output": 2
+                        }
+                    ]
+                }
+            },
+            "id": "f525e121-8930-4770-98f8-d2d2f05746f1",
+            "name": "Tipo de Evento",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [
+                16,
+                528
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/articles",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_access_token",
+                            "value": "8FsqBLpvNJhZZ73XXiad2XvK"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"title\": {{ JSON.stringify($json.body.record.question) }},\n  \"content\": {{ JSON.stringify($json.body.record.answer) }},\n  \"category_id\": {{ Number($json.body.record.chatwoot_category_id) }},\n  \"author_id\": {{ 1 }},\n  \"status\": \"published\"\n}",
+                "options": {}
+            },
+            "id": "47c87752-c829-42d1-b5c4-8870b0a6ffe1",
+            "name": "Criar Artigo",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                256,
+                368
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "faq_items",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "id",
+                            "condition": "eq",
+                            "keyValue": "={{ $node[\"Webhook (Supabase)\"].json.body.record.id }}"
+                        }
+                    ]
+                },
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "chatwoot_article_id",
+                            "fieldValue": "={{ $json.payload.id }}"
+                        }
+                    ]
+                }
+            },
+            "id": "9c72d5ea-4014-45c6-b79c-6fa4f0d570a0",
+            "name": "Supabase - Salvar ID",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                464,
+                368
+            ],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "Q8FUTrO3QSkHxr8B",
+                    "name": "Supabase Cloude - Nome Magnético"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "PUT",
+                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/articles/{{ $json.body.record.chatwoot_article_id }}",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_access_token",
+                            "value": "8FsqBLpvNJhZZ73XXiad2XvK"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"title\": {{ JSON.stringify($json.body.record.question) }},\n  \"content\": {{ JSON.stringify($json.body.record.answer) }},\n  \"category_id\": {{ Number($json.body.record.chatwoot_category_id) }},\n  \"author_id\": {{ 1 }},\n  \"status\": \"published\"\n}",
+                "options": {}
+            },
+            "id": "3f147eb4-6468-4282-800d-583c4ed36f13",
+            "name": "Atualizar Artigo",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                256,
+                528
+            ]
+        },
+        {
+            "parameters": {
+                "method": "PUT",
+                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/articles/{{ $json.body.old_record.chatwoot_article_id }}",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_access_token",
+                            "value": "8FsqBLpvNJhZZ73XXiad2XvK"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "{\n  \"status\": \"archived\"\n}",
+                "options": {}
+            },
+            "id": "090e8872-1800-4e5c-b1f8-ce37b3835315",
+            "name": "Arquivar Artigo",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                256,
+                672
+            ]
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Webhook (Supabase)": {
+            "main": [
+                [
+                    {
+                        "node": "Tipo de Evento",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Tipo de Evento": {
+            "main": [
+                [
+                    {
+                        "node": "Criar Artigo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Atualizar Artigo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Arquivar Artigo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Criar Artigo": {
+            "main": [
+                [
+                    {
+                        "node": "Supabase - Salvar ID",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "versionId": "4ab31eca-58eb-4826-9645-04133dac1241",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "23eff0a49bd119e4a18afa8c0c7575eefe279312d40ead3f0f9b4dd1a181437f"
+    },
+    "id": "q5MDXTVHDxq1p9cT",
+    "tags": []
+}

@@ -95,7 +95,7 @@ export async function getMonthlyUsageStats(): Promise<MonthlyUsageStats> {
 
 export async function getAllTimeUsageStats(): Promise<number> {
   const { data: rows, error } = await supabase
-    
+
     .from('ai_usage')
     .select('model, tokens_input, tokens_output');
 
@@ -109,4 +109,61 @@ export async function getAllTimeUsageStats(): Promise<number> {
   }
 
   return totalCost;
+}
+
+export interface UsageLogEntry {
+  id: string;
+  createdAt: string;
+  isSystem: boolean; // user_id IS NULL = uso interno (ex: assistente suporte admin)
+  task: string;
+  provider: string;
+  model: string;
+  tokensInput: number;
+  tokensOutput: number;
+  tokensTotal: number;
+  estimatedCostUsd: number;
+}
+
+export async function getDetailedUsageLogs(limit = 50): Promise<UsageLogEntry[]> {
+  const { data: rows, error } = await supabase
+    .from('ai_usage')
+    .select('id, created_at, user_id, task, provider, model, tokens_input, tokens_output, tokens_total')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error || !rows) return [];
+
+  return rows.map(row => {
+    const input = row.tokens_input ?? 0;
+    const output = row.tokens_output ?? 0;
+    return {
+      id: row.id,
+      createdAt: row.created_at,
+      isSystem: row.user_id == null,
+      task: row.task ?? '',
+      provider: row.provider ?? '',
+      model: row.model ?? '',
+      tokensInput: input,
+      tokensOutput: output,
+      tokensTotal: row.tokens_total ?? (input + output),
+      estimatedCostUsd: estimateCost(row.model ?? '', input, output),
+    };
+  });
+}
+
+export interface CostProjections {
+  projectedMonthlyUsd: number;
+  projectedAnnualUsd: number;
+  daysElapsed: number;
+  daysInMonth: number;
+}
+
+export function getCostProjections(monthlyStats: MonthlyUsageStats): CostProjections {
+  const now = new Date();
+  const daysElapsed = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const dailyRate = daysElapsed > 0 ? monthlyStats.estimatedCostUsd / daysElapsed : 0;
+  const projectedMonthlyUsd = dailyRate * daysInMonth;
+  const projectedAnnualUsd = projectedMonthlyUsd * 12;
+  return { projectedMonthlyUsd, projectedAnnualUsd, daysElapsed, daysInMonth };
 }

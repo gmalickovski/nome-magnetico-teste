@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { supabase } from '../../../backend/db/supabase';
+import { getChatwootConfig, postMessage, toggleConversationStatus } from '../../../backend/support/chatwootClient';
 
 const bodySchema = z.object({
-  ticket_id: z.string().uuid(),
-  conversation_id: z.number().or(z.string()),
+  ticket_id:                z.string().uuid(),
+  chatwoot_conversation_id: z.number().nullable().optional(),
 });
 
 const SYSTEM_PROMPT = `Você é um assistente de suporte especializado do Nome Magnético, plataforma de numerologia cabalística.
@@ -26,12 +27,6 @@ Contexto do produto:
 - Pagamento único por ciclo de 30 dias (não é assinatura recorrente)
 - Suporte técnico e de produto apenas — sem aconselhamento espiritual pessoal`;
 
-// Nginx remove headers com underscore — token passado como query param
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
-function cwUrl(base: string, path: string, token: string): string {
-  return `${base}${path}?api_access_token=${encodeURIComponent(token)}`;
-}
-
 export const POST: APIRoute = async ({ request }) => {
   // Validar segredo interno
   const internalSecret = (process.env.INTERNAL_API_SECRET ?? '').trim();
@@ -47,9 +42,9 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Dados inválidos.' }), { status: 400 });
   }
 
-  const { ticket_id, conversation_id } = body;
+  const { ticket_id, chatwoot_conversation_id } = body;
 
-  // Ler ticket + mensagem do Supabase
+  // Ler ticket + mensagens do Supabase
   const { data: ticket } = await supabase
     .from('support_tickets')
     .select('subject, contact_name, contact_email, priority, user_id')
@@ -64,6 +59,7 @@ export const POST: APIRoute = async ({ request }) => {
     .from('support_messages')
     .select('content')
     .eq('ticket_id', ticket_id)
+    .eq('is_admin', false)
     .order('created_at', { ascending: true })
     .limit(5);
 
@@ -81,11 +77,6 @@ export const POST: APIRoute = async ({ request }) => {
     temPlano = (subs?.length ?? 0) > 0;
   }
 
-  // Verificar qual provider de IA usar
-  const anthropicKey = (process.env.ANTHROPIC_API_KEY ?? '').trim();
-  const groqKey = (process.env.GROQ_API_KEY ?? '').trim();
-  const appEnv = (process.env.APP_ENV ?? 'development').trim();
-
   const userContent = `Assunto: ${ticket.subject}
 Nome do usuário: ${ticket.contact_name ?? 'Desconhecido'}
 Tem plano ativo: ${temPlano ? 'Sim' : 'Não'}
@@ -96,21 +87,25 @@ ${mensagem}`;
 
   let triageResult: { tipo: string; urgencia: number; resposta: string; auto_resolve: boolean } | null = null;
 
-  // Tentar Claude primeiro em produção, Groq em dev
+  const anthropicKey = (process.env.ANTHROPIC_API_KEY ?? '').trim();
+  const groqKey      = (process.env.GROQ_API_KEY ?? '').trim();
+  const appEnv       = (process.env.APP_ENV ?? 'development').trim();
+
+  // Claude em produção (se configurado), Groq em dev
   if (appEnv === 'production' && anthropicKey && !anthropicKey.includes('PREENCHER')) {
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': anthropicKey,
+          'Content-Type':      'application/json',
+          'x-api-key':         anthropicKey,
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
+          model:      'claude-haiku-4-5-20251001',
           max_tokens: 1024,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: userContent }],
+          system:     SYSTEM_PROMPT,
+          messages:   [{ role: 'user', content: userContent }],
         }),
       });
       if (res.ok) {
@@ -129,15 +124,15 @@ ${mensagem}`;
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type':  'application/json',
           'Authorization': `Bearer ${groqKey}`,
         },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model:      'llama-3.1-8b-instant',
           max_tokens: 1024,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: userContent },
+            { role: 'user',   content: userContent },
           ],
           response_format: { type: 'json_object' },
         }),
@@ -156,38 +151,48 @@ ${mensagem}`;
     return new Response(JSON.stringify({ error: 'IA indisponível para triagem.' }), { status: 503 });
   }
 
-  // Postar nota privada no Chatwoot
-  const token    = (process.env.CHATWOOT_API_TOKEN ?? '').trim();
-  const accountId = (process.env.CHATWOOT_ACCOUNT_ID ?? '1').trim();
-  const baseUrl  = (process.env.CHATWOOT_BASE_URL ?? '').trim();
+  // ── Montar nota de triagem ────────────────────────────────────────────────
+  const nota = `🤖 **Triagem Automática**
+Tipo: ${triageResult.tipo} | Urgência: ${triageResult.urgencia}/5${triageResult.auto_resolve ? ' | ✅ Auto-resolve sugerido' : ''}
 
-  if (token && baseUrl) {
-    const CHATWOOT_BASE = `${baseUrl.replace(/\/$/, '')}/api/v1`;
-    const nota = `🤖 Triagem Automática | Tipo: ${triageResult.tipo} | Urgência: ${triageResult.urgencia}/5${triageResult.auto_resolve ? ' | ✅ Auto-resolve sugerido' : ''}
-
----
 **Rascunho de resposta:**
 
 ${triageResult.resposta}`;
 
-    fetch(
-      cwUrl(CHATWOOT_BASE, `/accounts/${accountId}/conversations/${conversation_id}/messages`, token),
-      {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ content: nota, message_type: 'outgoing', private: true }),
-      }
-    ).catch(() => {});
+  // ── Salvar no Supabase (histórico interno) ────────────────────────────────
+  supabase.from('support_messages').insert({
+    ticket_id,
+    author_id: null,
+    is_admin:  true,
+    content:   nota,
+  }).then(() => {}).catch(() => {});
+
+  // ── Postar como nota privada no Chatwoot (só agentes veem) ────────────────
+  const cwConvId = chatwoot_conversation_id ?? null;
+  if (cwConvId) {
+    const cwConfig = getChatwootConfig();
+    if (cwConfig) {
+      postMessage(cwConfig, cwConvId, nota, 'outgoing', true);
+    }
   }
 
-  // Se auto_resolve, marcar ticket como resolvido
+  // ── Atualizar prioridade no ticket ────────────────────────────────────────
+  supabase.from('support_tickets').update({
+    priority: triageResult.urgencia >= 4 ? 'urgent' : triageResult.urgencia >= 3 ? 'normal' : 'low',
+  }).eq('id', ticket_id).then(() => {}).catch(() => {});
+
+  // ── Auto-resolve ──────────────────────────────────────────────────────────
   if (triageResult.auto_resolve) {
     supabase
       .from('support_tickets')
       .update({ status: 'resolved', resolved_at: new Date().toISOString() })
       .eq('id', ticket_id)
-      .then(() => {})
-      .catch(() => {});
+      .then(() => {}).catch(() => {});
+
+    if (cwConvId) {
+      const cwConfig = getChatwootConfig();
+      if (cwConfig) toggleConversationStatus(cwConfig, cwConvId, 'resolved');
+    }
   }
 
   return new Response(JSON.stringify({ success: true, triage: triageResult }), { status: 200 });

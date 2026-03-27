@@ -17,6 +17,7 @@ type NotificationEvent =
   | 'subscription.expired'
   | 'support.ticket_created'
   | 'support.ticket_reply'
+  | 'support.ticket_resolved'
   | 'admin.new_user'
   | 'admin.new_payment';
 

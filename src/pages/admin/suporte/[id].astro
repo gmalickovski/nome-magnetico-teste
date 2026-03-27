@@ -1,0 +1,208 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { supabase } from '../../../backend/db/supabase';
+import { SupportAiPanel } from '../../../frontend/components/admin/SupportAiPanel';
+
+const { id } = Astro.params;
+
+const { data: ticket } = await supabase
+  .from('support_tickets')
+  .select('id, subject, contact_name, contact_email, priority, status, created_at, resolved_at, user_id, chatwoot_conversation_id')
+  .eq('id', id!)
+  .single();
+
+const chatwootBaseUrl = (import.meta.env.CHATWOOT_BASE_URL ?? '').replace(/\/$/, '');
+const chatwootAccountId = import.meta.env.CHATWOOT_ACCOUNT_ID ?? '1';
+
+if (!ticket) {
+  return Astro.redirect('/admin/suporte');
+}
+
+const { data: messages } = await supabase
+  .from('support_messages')
+  .select('id, content, is_admin, created_at, author_id')
+  .eq('ticket_id', id!)
+  .order('created_at', { ascending: true });
+
+const priorityColor: Record<string, string> = {
+  urgent: 'text-red-400 bg-red-400/10 border-red-400/20',
+  normal: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
+  low: 'text-gray-400 bg-gray-400/10 border-gray-400/20',
+};
+const priorityLabel: Record<string, string> = {
+  urgent: 'Urgente', normal: 'Normal', low: 'Baixa',
+};
+const statusLabel: Record<string, string> = {
+  open: 'Aberto', in_progress: 'Em andamento', resolved: 'Resolvido',
+};
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleString('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+const isResolved = ticket.status === 'resolved';
+---
+
+<AdminLayout title={`Ticket — ${ticket.subject}`}>
+  <!-- Layout duas colunas: conversa + assistente IA -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
+
+    <!-- Coluna esquerda: conversa (3/5) -->
+    <div class="lg:col-span-3 space-y-6">
+
+      <!-- Cabeçalho do ticket -->
+      <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-3">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <h2 class="text-lg font-semibold text-gray-100">{ticket.subject}</h2>
+          <div class="flex gap-2 flex-wrap">
+            <span class={`text-xs px-2 py-0.5 rounded-full border font-medium ${priorityColor[ticket.priority] ?? 'text-gray-400 bg-gray-400/10 border-gray-400/20'}`}>
+              {priorityLabel[ticket.priority] ?? ticket.priority}
+            </span>
+            <span class={`text-xs px-2 py-0.5 rounded-full border font-medium ${isResolved ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-blue-400 bg-blue-400/10 border-blue-400/20'}`}>
+              {statusLabel[ticket.status] ?? ticket.status}
+            </span>
+          </div>
+        </div>
+        <div class="text-sm text-gray-400 space-y-0.5">
+          <p><span class="text-gray-500">Contato:</span> {ticket.contact_name} · {ticket.contact_email}</p>
+          <p><span class="text-gray-500">Aberto em:</span> {formatDate(ticket.created_at)}</p>
+          {ticket.resolved_at && (
+            <p><span class="text-gray-500">Resolvido em:</span> {formatDate(ticket.resolved_at)}</p>
+          )}
+          {ticket.chatwoot_conversation_id && (
+            <p><span class="text-gray-500">Chatwoot:</span> <span class="text-gray-400">#{ticket.chatwoot_conversation_id}</span></p>
+          )}
+        </div>
+        {ticket.chatwoot_conversation_id && chatwootBaseUrl && (
+          <a
+            href={`${chatwootBaseUrl}/app/accounts/${chatwootAccountId}/conversations/${ticket.chatwoot_conversation_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 transition-colors self-start"
+          >
+            Abrir no Chatwoot ↗
+          </a>
+        )}
+      </div>
+
+      <!-- Thread de mensagens -->
+      <div class="space-y-3">
+        {(messages ?? []).map(msg => {
+          const isAi = msg.is_admin && msg.author_id === null;
+          return (
+            <div class={`rounded-xl p-4 border text-sm leading-relaxed ${
+              isAi
+                ? 'bg-purple-500/5 border-purple-500/20 text-gray-300'
+                : msg.is_admin
+                ? 'bg-[#D4AF37]/5 border-[#D4AF37]/20 text-gray-200 ml-8'
+                : 'bg-white/5 border-white/10 text-gray-300 mr-8'
+            }`}>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class={`text-xs font-medium ${isAi ? 'text-purple-400' : msg.is_admin ? 'text-[#D4AF37]' : 'text-gray-400'}`}>
+                  {isAi ? '🤖 Triagem IA' : msg.is_admin ? '👤 Admin' : `👤 ${ticket.contact_name}`}
+                </span>
+                <span class="text-gray-600 text-xs">{formatDate(msg.created_at)}</span>
+              </div>
+              <div class="whitespace-pre-wrap">{msg.content}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <!-- Formulário de resposta -->
+      {!isResolved && (
+        <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4" id="reply-form">
+          <h3 class="text-sm font-medium text-gray-300">Responder</h3>
+          <textarea
+            id="reply-content"
+            rows="5"
+            placeholder="Escreva a resposta para o usuário... (ou use 'Usar esta resposta' no assistente IA)"
+            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-gray-200 placeholder-gray-600 text-sm focus:outline-none focus:border-[#D4AF37]/50 resize-none"
+          ></textarea>
+          <div class="flex gap-3 flex-wrap">
+            <button
+              id="btn-reply"
+              class="px-4 py-2 bg-[#D4AF37] text-black text-sm font-medium rounded-lg hover:bg-[#f2ca50] transition-colors"
+            >
+              Enviar resposta
+            </button>
+            <button
+              id="btn-resolve"
+              class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-500 transition-colors"
+            >
+              Resolver ticket
+            </button>
+          </div>
+          <p id="reply-status" class="text-sm text-gray-500 hidden"></p>
+        </div>
+      )}
+
+      {isResolved && (
+        <div class="text-center py-6 text-emerald-400 text-sm">
+          ✅ Ticket resolvido
+        </div>
+      )}
+
+    </div>
+
+    <!-- Coluna direita: Assistente IA (2/5) — altura fixa para rolar internamente -->
+    <div class="lg:col-span-2 lg:sticky lg:top-6" style="height: calc(100vh - 8rem);">
+      <SupportAiPanel ticketId={ticket.id} client:load />
+    </div>
+
+  </div>
+</AdminLayout>
+
+<script define:vars={{ ticketId: ticket.id }}>
+  // Preencher textarea quando o assistente IA sugerir uma resposta
+  window.addEventListener('fill-reply', (e) => {
+    const textarea = document.getElementById('reply-content');
+    if (textarea && e.detail) {
+      textarea.value = e.detail;
+      textarea.focus();
+      textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  async function sendReply(resolve) {
+    const content = document.getElementById('reply-content')?.value?.trim();
+    const status = document.getElementById('reply-status');
+
+    if (!content && !resolve) {
+      if (status) { status.textContent = 'Escreva uma resposta antes de enviar.'; status.classList.remove('hidden', 'text-emerald-400'); status.classList.add('text-red-400'); }
+      return;
+    }
+
+    const btnReply = document.getElementById('btn-reply');
+    const btnResolve = document.getElementById('btn-resolve');
+    if (btnReply) btnReply.disabled = true;
+    if (btnResolve) btnResolve.disabled = true;
+    if (status) { status.textContent = 'Enviando...'; status.classList.remove('hidden', 'text-red-400', 'text-emerald-400'); status.classList.add('text-gray-400'); }
+
+    try {
+      const res = await fetch('/api/support/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticketId, content: content || '(Ticket resolvido sem resposta adicional)', resolve }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        if (status) { status.textContent = data.error ?? 'Erro ao enviar.'; status.classList.remove('hidden', 'text-gray-400'); status.classList.add('text-red-400'); }
+        if (btnReply) btnReply.disabled = false;
+        if (btnResolve) btnResolve.disabled = false;
+      }
+    } catch {
+      if (status) { status.textContent = 'Erro de conexão.'; status.classList.remove('hidden', 'text-gray-400'); status.classList.add('text-red-400'); }
+      if (btnReply) btnReply.disabled = false;
+      if (btnResolve) btnResolve.disabled = false;
+    }
+  }
+
+  document.getElementById('btn-reply')?.addEventListener('click', () => sendReply(false));
+  document.getElementById('btn-resolve')?.addEventListener('click', () => sendReply(true));
+</script>
