@@ -18,7 +18,7 @@ import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } 
 import { calcularExpressao, calcularDestino, calcularMotivacao } from './numbers';
 import { reduzirNumero, calcularValor, extrairLetras } from './core';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from './karmic';
-import { calcularScore } from './score';
+import { calcularScore, calcularScoreTeto } from './score';
 import type { Bloqueio } from './triangle';
 
 export interface AvaliacaoNome {
@@ -29,6 +29,8 @@ export interface AvaliacaoNome {
   sequenciasNegativas: string[];
   compatibilidadeDestino: 'total' | 'complementar' | 'aceitavel' | 'incompativel';
   score: number; // 0–100
+  /** Score máximo atingível para esta pessoa (100 - débitos fixos × 12). */
+  scoreTeto: number;
   justificativa: string[];
 }
 
@@ -110,14 +112,16 @@ export function avaliarNome(
   const tendenciasOcultas = detectarTendenciasOcultas(nomeCompleto);
   const debitosCarmicos = calcularDebitosCarmicos(dataNascimento, destino, motivacao, expressao);
 
+  const debitosFixosCount = debitosCarmicos.filter(d => d.fixo).length;
   const score = calcularScore({
     bloqueios: bloqueios.length,
     licoesCarmicas: licoesCarmicas.length,
     tendenciasOcultas: tendenciasOcultas.length,
     debitosCarmicos: debitosCarmicos.length,
-    debitosCarmicoFixos: debitosCarmicos.filter(d => d.fixo).length,
+    debitosCarmicoFixos: debitosFixosCount,
     compatibilidade,
   });
+  const scoreTeto = calcularScoreTeto(debitosFixosCount);
 
   const justificativa: string[] = [];
 
@@ -155,6 +159,7 @@ export function avaliarNome(
     sequenciasNegativas: sequencias,
     compatibilidadeDestino: compatibilidade,
     score,
+    scoreTeto,
     justificativa,
   };
 }

@@ -6,7 +6,7 @@ import { calcularTrianguloDaVida } from './triangle';
 import { calcularExpressao, calcularMotivacao, calcularImpressao } from './numbers';
 import { reduzirNumero } from './core';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from './karmic';
-import { calcularScore } from './score';
+import { calcularScore, calcularScoreTeto } from './score';
 import { avaliarCompatibilidade } from './harmonization';
 
 export interface VariacaoNome {
@@ -16,6 +16,8 @@ export interface VariacaoNome {
   impressao: number;
   temBloqueio: boolean;
   score: number;
+  /** Score máximo atingível para esta pessoa (100 - débitos fixos × 12). */
+  scoreTeto: number;
   justificativa: string;
 }
 
@@ -142,14 +144,16 @@ export function scoreVariacao(
     : [];
   const compatibilidade = avaliarCompatibilidade(expressao, numeroDestinoAlvo);
 
+  const debitosFixosCount = debitos.filter(d => d.fixo).length;
   const score = calcularScore({
     bloqueios: (triangulo.sequenciasNegativas ?? []).length,
     licoesCarmicas: licoes.length,
     tendenciasOcultas: tendencias.length,
     debitosCarmicos: debitos.length,
-    debitosCarmicoFixos: debitos.filter(d => d.fixo).length,
+    debitosCarmicoFixos: debitosFixosCount,
     compatibilidade,
   });
+  const scoreTeto = calcularScoreTeto(debitosFixosCount);
 
   const justificativas: string[] = [];
   if (temBloqueio) {
@@ -169,12 +173,17 @@ export function scoreVariacao(
     impressao,
     temBloqueio,
     score,
+    scoreTeto,
     justificativa: justificativas.join(' | '),
   };
 }
 
 /**
  * Gera e rankeia variações sem bloqueios.
+ *
+ * @param minScore Score mínimo desejado para as sugestões (padrão: 0).
+ *   Se não houver candidatos suficientes com score >= minScore, usa fallback
+ *   para as melhores disponíveis sem bloqueio.
  */
 export function gerarNomesMagneticos(
   nomeCompleto: string,
@@ -182,18 +191,30 @@ export function gerarNomesMagneticos(
   numeroDestino: number,
   gender: string,
   dataNascimento: string = '',
-  quantidade = 5
+  quantidade = 5,
+  minScore = 0
 ): VariacaoNome[] {
-  const variacoes = gerarVariacoes(nomeCompleto, quantidade * 3, gender);
+  // Pool ampliado para ter mais candidatos a filtrar
+  const poolSize = Math.max(quantidade * 6, 20);
+  const variacoes = gerarVariacoes(nomeCompleto, poolSize, gender);
   const scoredAll = variacoes.map(v => scoreVariacao(v, numeroExpressao, numeroDestino, dataNascimento));
 
-  const semBloqueio = scoredAll.filter(v => !v.temBloqueio).sort((a, b) => b.score - a.score);
+  // Preferência 1: sem bloqueio + score >= minScore
+  const primarios = scoredAll
+    .filter(v => !v.temBloqueio && v.score >= minScore)
+    .sort((a, b) => b.score - a.score);
 
+  if (primarios.length >= quantidade) {
+    return primarios.slice(0, quantidade);
+  }
+
+  // Fallback 1: sem bloqueio (qualquer score)
+  const semBloqueio = scoredAll.filter(v => !v.temBloqueio).sort((a, b) => b.score - a.score);
   if (semBloqueio.length >= quantidade) {
     return semBloqueio.slice(0, quantidade);
   }
 
-  // Fallback: completar com os melhores que têm bloqueio
+  // Fallback 2: completar com os melhores com bloqueio
   const comBloqueio = scoredAll.filter(v => v.temBloqueio).sort((a, b) => b.score - a.score);
   return [...semBloqueio, ...comBloqueio].slice(0, quantidade);
 }

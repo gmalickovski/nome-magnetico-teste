@@ -8,7 +8,7 @@ import { calcularCincoNumeros } from '../../backend/numerology/numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, mapearFrequencias, calcularDebitosCarmicos } from '../../backend/numerology/karmic';
 import { gerarNomesMagneticos } from '../../backend/numerology/suggestions';
 import { generateAnalysis, generateSuggestions, generateBabyAnalysis, generateCompanyAnalysis } from '../../backend/ai/brain';
-import { calcularScore } from '../../backend/numerology/score';
+import { calcularScore, calcularScoreTeto } from '../../backend/numerology/score';
 import { avaliarCompatibilidade } from '../../backend/numerology/harmonization';
 import { analisarNomesBebe } from '../../backend/numerology/products/nome-bebe';
 import { analisarNomesEmpresa } from '../../backend/numerology/products/nome-empresa';
@@ -282,13 +282,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
         );
 
         if (product_type === 'nome_social') {
+          // Score teto: melhor score que qualquer nome pode atingir para esta pessoa.
+          // Sugestões devem estar acima de 80% (ou do teto se teto < 80).
+          const debitosFixosCount = debitosCarmicos.filter(d => d.fixo).length;
+          const scoreTeto = calcularScoreTeto(debitosFixosCount);
+          const minScoreSugestoes = Math.min(80, scoreTeto);
+
           const variacoes = gerarNomesMagneticos(
             nome_completo,
             cincoNumeros.expressao,
             cincoNumeros.destino,
             gender,
             data_nascimento,
-            8
+            3,                  // apenas 3 sugestões finais
+            minScoreSugestoes   // mínimo 80% (ou teto se menor)
           );
 
           await generateSuggestions(

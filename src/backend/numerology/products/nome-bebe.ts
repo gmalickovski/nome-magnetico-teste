@@ -15,7 +15,7 @@ import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } 
 import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao, calcularImpressao } from '../numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../karmic';
 import { avaliarCompatibilidade } from '../harmonization';
-import { calcularScore } from '../score';
+import { calcularScore, calcularScoreTeto } from '../score';
 import type { LicaoCarmica, TendenciaOculta, DebitoCarmicoInfo } from '../karmic';
 import type { Bloqueio } from '../triangle';
 
@@ -58,6 +58,8 @@ export interface AnaliseNomeBebe {
   debitosCarmicos: DebitoCarmicoInfo[];
   compatibilidade: 'total' | 'complementar' | 'aceitavel' | 'incompativel';
   score: number;
+  /** Score máximo atingível para este bebê (100 - débitos fixos × 12). */
+  scoreTeto: number;
   justificativa: string[];
   /** Indica se foi sugerido pelo algoritmo (quando os candidatos do usuário têm scores baixos) */
   origemSugerida?: 'usuario' | 'ia';
@@ -96,14 +98,16 @@ export function analisarNomeBebe(
   const debitos = calcularDebitosCarmicos(dataNascimento, destino, motivacao, expressao);
   const compatibilidade = avaliarCompatibilidade(expressao, destino);
 
+  const debitosFixosCount = debitos.filter(d => d.fixo).length;
   const score = calcularScore({
     bloqueios: bloqueios.length,
     licoesCarmicas: licoes.length,
     tendenciasOcultas: tendencias.length,
     debitosCarmicos: debitos.length,
-    debitosCarmicoFixos: debitos.filter(d => d.fixo).length,
+    debitosCarmicoFixos: debitosFixosCount,
     compatibilidade,
   });
+  const scoreTeto = calcularScoreTeto(debitosFixosCount);
 
   const justificativa: string[] = [];
 
@@ -147,6 +151,7 @@ export function analisarNomeBebe(
     debitosCarmicos: debitos,
     compatibilidade,
     score,
+    scoreTeto,
     justificativa,
     origemSugerida: 'usuario',
   };

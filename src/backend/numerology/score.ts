@@ -3,15 +3,16 @@
  *
  * Fórmula determinística:
  *   score = 100
- *     - (bloqueios                  × 15)
- *     - (debitosCarmicoVariaveis    × 12)   ← apenas débitos variáveis (nome pode eliminar)
- *     - (tendenciasOcultas          × 2)
- *     - (licoesCarmicas             × 1)
- *     - penalidade_compat            ← 0 se total/complementar | -5 se aceitável | -15 se incompatível
+ *     - (bloqueios            × 15)
+ *     - (debitosCarmicos      × 12)   ← TODOS os débitos penalizam (fixos + variáveis)
+ *     - (tendenciasOcultas    × 2)
+ *     - (licoesCarmicas       × 1)
+ *     - penalidade_compat      ← 0 se total/complementar | -5 se aceitável | -15 se incompatível
  *
- * Débitos FIXOS (dia de nascimento + Destino) NÃO penalizam o score porque são
- * imutáveis — nenhuma variação de nome pode eliminá-los. Eles são exibidos ao
- * usuário como informação contextual separada.
+ * Débitos FIXOS (dia de nascimento + Destino) também penalizam o score, pois
+ * refletem a realidade kármica permanente da pessoa. O score máximo atingível
+ * por qualquer nome = calcularScoreTeto(debitosFixos).
+ * `debitosCarmicoFixos` em ScoreParams é mantido para que a UI possa mostrar o teto.
  *
  * Para nome_empresa: compatibilidadeSecundaria (destino da empresa) aplica penalidade / 2.
  */
@@ -22,7 +23,7 @@ export interface ScoreParams {
   tendenciasOcultas: number;
   /** Total de débitos kármicos (para exibição). */
   debitosCarmicos: number;
-  /** Débitos que vêm APENAS de dia de nascimento e/ou Destino — não penalizam o score. */
+  /** Débitos que vêm APENAS de dia de nascimento e/ou Destino (imutáveis). Usado para calcular o scoreTeto. */
   debitosCarmicoFixos?: number;
   compatibilidade: 'total' | 'complementar' | 'aceitavel' | 'incompativel';
   /** Usado apenas no produto nome_empresa (destino da empresa). */
@@ -39,11 +40,8 @@ const COMPAT_PENALTY: Record<string, number> = {
 export function calcularScore(p: ScoreParams): number {
   let score = 100;
 
-  const fixos = p.debitosCarmicoFixos ?? 0;
-  const variaveis = Math.max(0, p.debitosCarmicos - fixos);
-
   score -= p.bloqueios * 15;
-  score -= variaveis * 12;
+  score -= p.debitosCarmicos * 12; // todos os débitos penalizam (fixos + variáveis)
   score -= p.tendenciasOcultas * 2;
   score -= p.licoesCarmicas * 1;
   score += COMPAT_PENALTY[p.compatibilidade] ?? -15;
@@ -59,12 +57,15 @@ export function calcularScore(p: ScoreParams): number {
  * Retorna o score máximo possível para uma pessoa, considerando seus
  * débitos kármicos fixos (imutáveis pela data de nascimento).
  *
- * Se o usuário tem 1 débito fixo → teto = 100.
- * (Débitos fixos não penalizam o score — são excluídos da fórmula.)
+ * O teto representa o melhor score que qualquer nome pode atingir para esta
+ * pessoa — mesmo com o nome perfeito (sem bloqueios, sem débitos variáveis,
+ * compatibilidade total), os débitos fixos já estão "embutidos" no teto.
+ *
+ * Exemplos:
+ *   0 débitos fixos → teto = 100
+ *   1 débito fixo   → teto = 88
+ *   2 débitos fixos → teto = 76
  */
-export function calcularScoreTeto(_debitosFixos: number): number {
-  // Com a nova lógica, débitos fixos não penalizam o score.
-  // O teto é sempre 100 — mas chamamos esta função para comunicar ao usuário
-  // quantos débitos permanentes ele carrega independente do nome.
-  return 100;
+export function calcularScoreTeto(debitosFixos: number): number {
+  return Math.max(0, 100 - debitosFixos * 12);
 }

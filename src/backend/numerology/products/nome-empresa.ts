@@ -17,7 +17,7 @@ import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } 
 import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao, calcularImpressao } from '../numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../karmic';
 import { avaliarCompatibilidade } from '../harmonization';
-import { calcularScore } from '../score';
+import { calcularScore, calcularScoreTeto } from '../score';
 import type { LicaoCarmica, TendenciaOculta, DebitoCarmicoInfo } from '../karmic';
 import type { Bloqueio } from '../triangle';
 
@@ -146,6 +146,8 @@ export interface AnaliseNomeEmpresa {
   compatibilidadeSocio: 'total' | 'complementar' | 'aceitavel' | 'incompativel';
   compatibilidadeEmpresa: 'total' | 'complementar' | 'aceitavel' | 'incompativel' | null;
   score: number;
+  /** Score máximo atingível para este sócio (100 - débitos fixos × 12). */
+  scoreTeto: number;
   justificativa: string[];
   origemSugerida?: 'usuario' | 'ia';
 }
@@ -193,15 +195,17 @@ export function analisarNomeEmpresa(
     ? avaliarCompatibilidade(expressao, destinoEmpresa)
     : null;
 
+  const debitosFixosCount = debitos.filter(d => d.fixo).length;
   const score = calcularScore({
     bloqueios: bloqueios.length,
     licoesCarmicas: licoes.length,
     tendenciasOcultas: tendencias.length,
     debitosCarmicos: debitos.length,
-    debitosCarmicoFixos: debitos.filter(d => d.fixo).length,
+    debitosCarmicoFixos: debitosFixosCount,
     compatibilidade: compatibilidadeSocio,
     compatibilidadeSecundaria: compatibilidadeEmpresa ?? undefined,
   });
+  const scoreTeto = calcularScoreTeto(debitosFixosCount);
 
   const justificativa: string[] = [];
 
@@ -246,6 +250,7 @@ export function analisarNomeEmpresa(
     compatibilidadeSocio,
     compatibilidadeEmpresa,
     score,
+    scoreTeto,
     justificativa,
     origemSugerida: 'usuario' as const,
   };
