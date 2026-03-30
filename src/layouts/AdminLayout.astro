@@ -117,4 +117,16 @@ const isActive = (path: string) => pathname === path || pathname.startsWith(path
 
   </div>
 
+  <!-- Ocultar balão do Chatwoot nas páginas admin -->
+  <script is:inline>
+    function _hideChatwootAdmin() {
+      if (window.$chatwoot) window.$chatwoot.toggleBubbleVisibility('hide');
+    }
+    if (window.$chatwoot) {
+      _hideChatwootAdmin();
+    } else {
+      window.addEventListener('chatwoot:ready', _hideChatwootAdmin);
+    }
+  </script>
+
 </BaseLayout>

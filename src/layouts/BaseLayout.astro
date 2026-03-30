@@ -69,6 +69,12 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
     {chatwootBaseUrl && chatwootToken && (
       <script is:inline define:vars={{ chatwootBaseUrl, chatwootToken }}>
         (function(d,t) {
+          // Configurar antes de carregar o SDK para ocultar o balão por padrão
+          window.chatwootSettings = {
+            hideMessageBubble: false,
+            position: 'right',
+            locale: 'pt_BR',
+          };
           var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
           g.src=chatwootBaseUrl+"/packs/js/sdk.js";
           g.async=true;
@@ -77,7 +83,7 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
             window.chatwootSDK.run({
               websiteToken: chatwootToken,
               baseUrl: chatwootBaseUrl
-            })
+            });
           }
         })(document,"script");
       </script>
@@ -87,4 +93,19 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
 
 <style is:global>
   @import '../styles/global.css';
+
+  /* Chatwoot: reposicionar balão acima da bottom nav no mobile.
+     Usa is:global para ser injetado no <head> com alta prioridade. */
+  @media (max-width: 768px) {
+    .woot-widget-bubble,
+    .woot--bubble-holder,
+    .woot-widget-wrap {
+      bottom: 80px !important;
+    }
+    .woot-widget-bubble {
+      width: 48px !important;
+      height: 48px !important;
+      min-height: 48px !important;
+    }
+  }
 </style>

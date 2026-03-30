@@ -102,7 +102,15 @@ try {
     </main>
   </div>
 
-  <script>
-    // Logout disponível via URL direta se necessário
+  <!-- Ocultar balão do Chatwoot nas páginas de resultado -->
+  <script is:inline>
+    function _hideChatwootResultado() {
+      if (window.$chatwoot) window.$chatwoot.toggleBubbleVisibility('hide');
+    }
+    if (window.$chatwoot) {
+      _hideChatwootResultado();
+    } else {
+      window.addEventListener('chatwoot:ready', _hideChatwootResultado);
+    }
   </script>
 </BaseLayout>
