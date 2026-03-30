@@ -1771,10 +1771,10 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Estudo das Variações de Nome Social</Text>
             <Text style={{ ...styles.bodyText, marginBottom: 14, lineHeight: 1.5 }}>
-              Abaixo estão as principais variações numerológicas geradas para o seu nome. Cada opção foi calculada para reduzir bloqueios e aumentar a harmonia entre os números de Expressão e Destino. Compare os scores e escolha a variação que mais ressoa com você.
+              Abaixo estão as 3 melhores variações numerológicas geradas para o seu nome. Cada opção foi calculada para reduzir bloqueios, eliminar débitos variáveis e aumentar a harmonia entre os números de Expressão e Destino.
             </Text>
 
-            {magneticNames.slice(0, 8).map((name, i) => {
+            {magneticNames.slice(0, 3).map((name, i) => {
               const scoreColor = name.score >= 70 ? '#059669' : name.score >= 40 ? '#D97706' : '#DC2626';
               const isTop = i === 0;
               return (
