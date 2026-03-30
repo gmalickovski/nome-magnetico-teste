@@ -1,6 +1,9 @@
+---
 import BaseLayout from './BaseLayout.astro';
 import { createUserClient } from '../backend/db/supabase';
 import AvatarMenu from '../frontend/components/app/AvatarMenu';
+
+export interface Props {
   title: string;
   description?: string;
 }
