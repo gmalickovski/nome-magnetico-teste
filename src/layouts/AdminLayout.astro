@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import { supabase } from '../backend/db/supabase';
+import AvatarMenu from '../frontend/components/app/AvatarMenu';
 
 export interface Props {
   title: string;
@@ -50,37 +51,35 @@ const isActive = (path: string) => pathname === path || pathname.startsWith(path
         <a href="/app" class="font-cinzel text-base sm:text-lg md:text-xl font-bold text-[#D4AF37] tracking-wider whitespace-nowrap absolute left-1/2 -translate-x-1/2">
           NOME MAGNÉTICO
         </a>
-        <button id="mobileAdminMenuBtn" class="text-[#D4AF37] hover:text-[#f2ca50] transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
+        <div class="flex items-center justify-end w-8">
+          <AvatarMenu client:load nome="Admin" />
+        </div>
       </div>
     </header>
 
-    <!-- Mobile Menu Overlay -->
-    <div id="mobileAdminMenu" class="fixed inset-0 bg-[#111111]/95 backdrop-blur-xl z-50 transform translate-x-full transition-transform duration-300 md:hidden flex flex-col">
-      <div class="px-4 py-4 flex items-center justify-between border-b border-[#D4AF37]/20">
-        <span class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider">ADMIN</span>
-        <button id="closeAdminMenuBtn" class="text-[#D4AF37] hover:text-[#f2ca50] transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      </div>
-      <nav class="flex flex-col p-6 gap-6">
-        {adminNavItems.map(item => (
-          <a
-            href={item.href}
-            class={`text-lg transition-colors ${
-              Astro.url.pathname === item.href ? 'text-[#D4AF37]' : 'text-gray-300'
-            }`}
-          >
-            {item.label}
-          </a>
-        ))}
-        <div class="h-px bg-[#D4AF37]/20 my-2"></div>
-        <a href="/app" class="text-left text-lg text-purple-400 hover:text-purple-300 transition-colors mt-2">
-          Voltar ao App
-        </a>
-      </nav>
-    </div>
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-[#111111]/95 backdrop-blur-xl border-t border-[#D4AF37]/20 z-50 flex items-center justify-around pb-2 pt-2">
+      <a href="/admin" class={`flex flex-col items-center p-2 transition-colors ${isActive('/admin') && !isActive('/admin/usuarios') && !isActive('/admin/suporte') && !isActive('/admin/ia') ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-[#D4AF37]'}`}>
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <span class="text-[10px] font-medium tracking-wide">Dashboard</span>
+      </a>
+      <a href="/admin/usuarios" class={`flex flex-col items-center p-2 transition-colors ${isActive('/admin/usuarios') ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-[#D4AF37]'}`}>
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <span class="text-[10px] font-medium tracking-wide">Usuários</span>
+      </a>
+      <a href="/admin/suporte" class={`flex flex-col items-center p-2 transition-colors ${isActive('/admin/suporte') ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-[#D4AF37]'}`}>
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        <span class="text-[10px] font-medium tracking-wide">Suporte</span>
+      </a>
+      <a href="/admin/ia" class={`flex flex-col items-center p-2 transition-colors ${isActive('/admin/ia') ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-[#D4AF37]'}`}>
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <span class="text-[10px] font-medium tracking-wide">Config. IA</span>
+      </a>
+      <a href="/app" class="flex flex-col items-center p-2 text-gray-500 hover:text-purple-400 transition-colors">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+        <span class="text-[10px] font-medium tracking-wide">Voltar App</span>
+      </a>
+    </nav>
 
     <!-- Desktop Sidebar -->
     <aside class="hidden md:flex w-64 border-r border-[#D4AF37]/20 bg-[#0a0a0a] flex-shrink-0 flex-col fixed inset-y-0 left-0 z-40">
@@ -116,21 +115,6 @@ const isActive = (path: string) => pathname === path || pathname.startsWith(path
       </div>
     </main>
 
-
   </div>
 
-  <script>
-    const btnOpen = document.getElementById('mobileAdminMenuBtn');
-    const btnClose = document.getElementById('closeAdminMenuBtn');
-    const menu = document.getElementById('mobileAdminMenu');
-
-    if (btnOpen && btnClose && menu) {
-      btnOpen.addEventListener('click', () => {
-        menu.classList.remove('translate-x-full');
-      });
-      btnClose.addEventListener('click', () => {
-        menu.classList.add('translate-x-full');
-      });
-    }
-  </script>
 </BaseLayout>
