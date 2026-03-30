@@ -12,7 +12,7 @@
  */
 
 import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from '../triangle';
-import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao, calcularPersonalidade } from '../numbers';
+import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao, calcularImpressao } from '../numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../karmic';
 import { avaliarCompatibilidade } from '../harmonization';
 import { calcularScore } from '../score';
@@ -88,8 +88,8 @@ export function analisarNomeBebe(
   const sequencias = todasSequenciasNegativas(todos);
   const expressao = calcularExpressao(nomeCompleto);
   const motivacao = calcularMotivacao(nomeCompleto);
-  const missao = calcularMissao(nomeCompleto);
-  const impressao = calcularPersonalidade(nomeCompleto);
+  const missao = calcularMissao(nomeCompleto, dataNascimento);
+  const impressao = calcularImpressao(nomeCompleto);
   const destino = calcularDestino(dataNascimento);
   const licoes = detectarLicoesCarmicas(nomeCompleto);
   const tendencias = detectarTendenciasOcultas(nomeCompleto);
@@ -101,6 +101,7 @@ export function analisarNomeBebe(
     licoesCarmicas: licoes.length,
     tendenciasOcultas: tendencias.length,
     debitosCarmicos: debitos.length,
+    debitosCarmicoFixos: debitos.filter(d => d.fixo).length,
     compatibilidade,
   });
 

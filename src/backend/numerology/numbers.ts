@@ -1,5 +1,5 @@
 /**
- * Cálculo dos 5 números principais da numerologia cabalística.
+ * Cálculo dos números principais da numerologia cabalística.
  */
 
 import {
@@ -8,15 +8,14 @@ import {
   ehVogal,
   ehConsoante,
   extrairLetras,
-  extrairPrimeiroNome,
 } from './core';
 
 export interface CincoNumeros {
   expressao: number;
   destino: number;
   motivacao: number;
+  impressao: number;
   missao: number;
-  personalidade: number;
 }
 
 /**
@@ -49,27 +48,28 @@ export function calcularMotivacao(nomeCompleto: string): number {
 }
 
 /**
- * 4. Número de Missão/Impressão: apenas consoantes do nome completo
+ * 4. Número de Impressão: apenas consoantes do nome completo
+ *    ATENÇÃO: Não existe Impressão 11 e 22 — masters NÃO são preservados.
  */
-export function calcularMissao(nomeCompleto: string): number {
+export function calcularImpressao(nomeCompleto: string): number {
   const letras = extrairLetras(nomeCompleto);
   const consoantes = letras.filter(l => ehConsoante(l));
   const soma = consoantes.reduce((acc, l) => acc + calcularValor(l), 0);
-  return reduzirNumero(soma, true);
-}
-
-/**
- * 5. Número de Personalidade: apenas o primeiro nome
- */
-export function calcularPersonalidade(nomeCompleto: string): number {
-  const primeiroNome = extrairPrimeiroNome(nomeCompleto);
-  const letras = extrairLetras(primeiroNome);
-  const soma = letras.reduce((acc, l) => acc + calcularValor(l), 0);
   return reduzirNumero(soma, false);
 }
 
 /**
- * Calcula todos os 5 números de uma vez.
+ * 5. Número de Missão/Vocação: Destino + Expressão
+ *    Preserva masters 11 e 22.
+ */
+export function calcularMissao(nomeCompleto: string, dataNascimento: string): number {
+  const expressao = calcularExpressao(nomeCompleto);
+  const destino = calcularDestino(dataNascimento);
+  return reduzirNumero(expressao + destino, true);
+}
+
+/**
+ * Calcula todos os números de uma vez.
  */
 export function calcularCincoNumeros(
   nomeCompleto: string,
@@ -79,7 +79,7 @@ export function calcularCincoNumeros(
     expressao: calcularExpressao(nomeCompleto),
     destino: calcularDestino(dataNascimento),
     motivacao: calcularMotivacao(nomeCompleto),
-    missao: calcularMissao(nomeCompleto),
-    personalidade: calcularPersonalidade(nomeCompleto),
+    impressao: calcularImpressao(nomeCompleto),
+    missao: calcularMissao(nomeCompleto, dataNascimento),
   };
 }

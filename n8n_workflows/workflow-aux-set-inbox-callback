@@ -1,0 +1,56 @@
+{
+    "name": "AUX - Configurar Callback URL Inbox 2 (one-time)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "GET",
+                "path": "aux-set-inbox-callback",
+                "options": {}
+            },
+            "id": "aux-cb-0001",
+            "name": "Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [0, 300],
+            "webhookId": "aux-set-inbox-callback"
+        },
+        {
+            "parameters": {
+                "method": "PATCH",
+                "url": "https://suporte.studiomlk.com.br/api/v1/accounts/1/inboxes/2",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        { "name": "api_access_token", "value": "8FsqBLpvNJhZZ73XXiad2XvK" },
+                        { "name": "Content-Type", "value": "application/json" }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "{\n  \"channel\": {\n    \"callback_webhook_url\": \"\"\n  }\n}",
+                "options": {}
+            },
+            "id": "aux-cb-0002",
+            "name": "Definir Callback URL",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [256, 300]
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Trigger": {
+            "main": [[{ "node": "Definir Callback URL", "type": "main", "index": 0 }]]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "aux-inbox-callback-v1",
+    "meta": {
+        "instanceId": "23eff0a49bd119e4a18afa8c0c7575eefe279312d40ead3f0f9b4dd1a181437f"
+    },
+    "id": "aux-set-inbox-callback-v1",
+    "tags": []
+}

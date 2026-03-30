@@ -1,155 +1,205 @@
-# Sistema de Suporte Profissional — Guia de Arquitetura
+# Sistema de Suporte — Guia de Arquitetura
 
 > Documento de referência para replicar este sistema em outros SaaS do portfólio.
-> Criado para: Nome Magnético | Plataforma: Chatwoot + Supabase + Claude AI
+> Criado para: Nome Magnético | Stack: Chatwoot + Supabase + N8N + Claude AI
 
 ---
 
 ## Visão Geral
 
-Sistema de suporte multi-canal centralizado no **Chatwoot** como master de conversas,
-com **Supabase** como banco de dados da aplicação e **Claude AI** integrado ao painel admin.
+Sistema de suporte com arquitetura **Supabase-first**: os formulários da aplicação escrevem apenas no Supabase. O N8N faz a ponte assíncrona para o Chatwoot via Supabase DB Webhooks. Agentes trabalham exclusivamente no Chatwoot.
 
 ### Princípios
 
-- **Chatwoot = master das conversas** — agentes trabalham EXCLUSIVAMENTE no Chatwoot
-- **Supabase = banco da aplicação** — lógica de negócio, referências, contexto do cliente
-- **Event-driven sync** — webhooks bidirecionais, sem replicação PostgreSQL direta
-- **Graceful degradation** — se Chatwoot cair, tickets continuam no Supabase
+- **Supabase é o master de tickets** — toda criação acontece aqui primeiro
+- **Chatwoot = interface dos agentes** — recebe os dados via N8N (assíncrono)
+- **N8N = ponte bidirecional** — Supabase → Chatwoot (tickets/mensagens) e Supabase → Chatwoot Help Center (FAQ)
+- **Graceful degradation** — se Chatwoot cair, tickets continuam no Supabase; `chatwoot_conversation_id` fica vazio e pode ser sincronizado depois
 
 ---
 
 ## Arquitetura
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         CHATWOOT (Docker/VPS)                               │
-│   ┌──────────────────────┐           ┌──────────────────────────────────┐   │
-│   │  Conversas (suporte) │           │  Help Center (artigos FAQ)       │   │
-│   └──────────┬───────────┘           └────────────────┬─────────────────┘   │
-│              │ webhooks outbound                       │ webhooks outbound   │
-└──────────────┼─────────────────────────────────────────┼────────────────────┘
-               │                                         │
-               ▼                                         │ (artigos criados pelo N8N)
-┌──────────────────────────────────┐                     │
-│  NOSSA APLICAÇÃO (Astro/Node)    │                     │
-│                                  │         ┌───────────▼──────────────────┐
-│  /api/support/chatwoot-webhook   │         │         N8N (VPS)            │
-│   ├─ message_created             │         │  workflow: sync-faq          │
-│   │   → update Supabase + email  │         │  /webhook/sync-faq           │
-│   ├─ conversation_resolved       │         │   ├─ INSERT → criar artigo   │
-│   │   → update Supabase + email  │         │   │   + salvar article_id    │
-│   ├─ article_published           │         │   ├─ UPDATE → editar artigo  │
-│   └─ article_updated/archived    │         │   └─ DELETE → arquivar       │
-│      → sync faq_items            │         └──────────────┬───────────────┘
-└──────────────────┬───────────────┘                        │ Supabase DB Webhook
-                   │                                        │
-                   └──────────────────┬─────────────────────┘
-                                      │
-                   ┌──────────────────▼──────────────────────┐
-                   │            SUPABASE CLOUD                │
-                   │  support_tickets + support_messages      │
-                   │  faq_items + faq_categories              │
-                   │    ↑ master de FAQs — toda edição        │
-                   │      começa aqui                         │
-                   │  profiles + subscriptions + analyses     │
-                   └─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                     APLICAÇÃO ASTRO (nomemagnetico.com.br)               │
+│                                                                          │
+│  /suporte ou /app/suporte                                                │
+│    └─ POST /api/support/ticket                                           │
+│         ├─ Supabase: INSERT support_tickets                              │
+│         ├─ Supabase: INSERT support_messages (mensagem inicial)          │
+│         ├─ N8N notify('support.ticket_created') → email confirmação      │
+│         └─ Async: POST /api/support/claude-triage (triagem IA)           │
+│                                                                          │
+│  /api/support/chatwoot-webhook  ◄── Chatwoot integration webhook         │
+│    ├─ message_created (outgoing) → Supabase + email ao usuário           │
+│    ├─ conversation_resolved → Supabase resolved                          │
+│    ├─ conversation_status_changed → sync status                          │
+│    └─ article_* → sync faq_items                                         │
+│                                                                          │
+│  /api/support/reply  (admin responde pelo painel)                        │
+│    ├─ Supabase: INSERT support_messages                                  │
+│    └─ Chatwoot API: postMessage via chatwootClient.ts                    │
+└──────────────────────────────┬───────────────────────────────────────────┘
+                               │ Supabase DB Webhooks (automático)
+                               ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         N8N  (n8n.studiomlk.com.br)                      │
+│                                                                          │
+│  workflow-sync-suporte-tickets-chatwoot                                  │
+│    ← /webhook/sync-suporte-tickets (support_tickets INSERT/UPDATE/DELETE)│
+│    INSERT → busca/cria contato → atualiza nome → cria conversa           │
+│             → aplica labels → salva chatwoot_conversation_id             │
+│    UPDATE → se status mudou para resolved → resolve conversa             │
+│    DELETE → arquiva conversa                                             │
+│                                                                          │
+│  workflow-sync-suporte-mensagens-chatwoot                                │
+│    ← /webhook/sync-suporte-mensagens (support_messages INSERT)           │
+│    Filtra: is_admin=false + content não vazio + tipo INSERT              │
+│    → aguarda 8s → busca ticket → se tem conv_id → posta incoming         │
+│                                                                          │
+│  workflow-sync-help-center-chatwoot  (FAQ)                               │
+│    ← /webhook/sync-faq (faq_items INSERT/UPDATE/DELETE)                  │
+│    → cria/edita/arquiva artigos no Chatwoot Help Center                  │
+└──────────────────────────────┬───────────────────────────────────────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                   CHATWOOT  (suporte.studiomlk.com.br)                   │
+│                                                                          │
+│  Inbox 1: Channel::WebWidget — live chat widget                          │
+│  Inbox 2: Channel::Api — "Nome Magnético - Formulários"                  │
+│    └─ callback_webhook_url: VAZIO (obrigatório — ver seção crítica)      │
+│                                                                          │
+│  Integration Webhook → https://nomemagnetico.com.br/api/support/         │
+│                         chatwoot-webhook                                 │
+└──────────────────────────────┬───────────────────────────────────────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                       SUPABASE CLOUD                                     │
+│  support_tickets + support_messages                                      │
+│  faq_categories + faq_items                                              │
+│  profiles + subscriptions + analyses                                     │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Fluxos Completos
 
-### 1. Usuário abre um ticket (formulário)
+### 1. Usuário abre um ticket
 
 ```
-Usuário preenche formulário
+Usuário preenche formulário (/suporte ou /app/suporte)
   ↓
 POST /api/support/ticket
-  ├─ Supabase: INSERT support_tickets (status: open)
-  ├─ Supabase: INSERT support_messages (mensagem inicial)
-  ├─ Chatwoot API:
-  │    ├─ findOrCreateContact (por email)
-  │    ├─ createConversation (inbox: geral ou clientes VIP)
-  │    ├─ postMessage (mensagem incoming)
-  │    ├─ applyLabels ([assunto-slug, nm-produto, nm-vip?])
-  │    └─ UPDATE support_tickets SET chatwoot_conversation_id
-  ├─ N8N notify('support.ticket_created') → email confirmação para usuário
-  └─ Async: POST /api/support/claude-triage
-               ├─ Claude/Groq analisa ticket
-               ├─ Supabase: INSERT support_messages (nota triagem)
-               └─ Chatwoot: postMessage (nota PRIVADA — só agentes veem)
+  ├─ Identidade: logado → usa email/nome do perfil Supabase Auth
+  │              anônimo → usa email/nome do formulário
+  ├─ Prioridade: assinatura ativa → urgent | logado → normal | anônimo → low
+  ├─ Supabase: INSERT support_tickets { status: open, priority }
+  ├─ Supabase: INSERT support_messages { is_admin: false, content: mensagem }
+  ├─ N8N notify('support.ticket_created') → email confirmação (fire-and-forget)
+  └─ Async: POST /api/support/claude-triage (com X-Internal-Secret)
+
+  [Em paralelo, via Supabase DB Webhook → N8N:]
+
+  support_tickets INSERT → workflow-sync-suporte-tickets-chatwoot
+    ├─ Preparar Dados: mapeia subject → label, priority → label de tier
+    ├─ GET /contacts/search?q=email → busca contato existente
+    ├─ Se não existe → POST /contacts (criar)
+    ├─ PATCH /contacts/{id} { name } → garante nome atualizado
+    ├─ POST /conversations { inbox_id: 2, contact_id, priority, attributes }
+    ├─ POST /conversations/{id}/labels { labels: [assunto, tier] }
+    └─ Supabase UPDATE support_tickets SET chatwoot_conversation_id
+
+  support_messages INSERT → workflow-sync-suporte-mensagens-chatwoot
+    ├─ Filtra: is_admin=false + content não vazio + tipo=INSERT
+    ├─ Wait 8s (aguarda tickets workflow salvar conversation_id)
+    ├─ Supabase: GET support_tickets WHERE id = ticket_id
+    ├─ Se chatwoot_conversation_id > 0:
+    └─ POST /conversations/{id}/messages { message_type: "incoming" }
 ```
 
-### 2. Agente responde no Chatwoot
+### 2. Triagem automática por IA
+
+```
+POST /api/support/claude-triage  (chamado internamente com X-Internal-Secret)
+  ├─ Lê ticket + mensagens do Supabase
+  ├─ Verifica plano ativo do usuário
+  ├─ Claude Haiku (produção) ou Groq llama-3 (dev) analisam o ticket
+  ├─ Resultado: { tipo, urgencia 1-5, resposta sugerida, auto_resolve }
+  ├─ Supabase: INSERT support_messages (nota interna da triagem)
+  ├─ Chatwoot: postMessage (nota PRIVADA — só agentes veem)
+  ├─ Supabase: UPDATE support_tickets SET priority (baseado em urgencia)
+  └─ Se auto_resolve=true → resolve ticket + Chatwoot
+```
+
+### 3. Agente responde no Chatwoot
 
 ```
 Agente digita resposta no Chatwoot → clica Enviar
   ↓
-Chatwoot dispara webhook: event=message_created, message_type=outgoing
+Chatwoot dispara integration webhook: event=message_created, type=outgoing
   ↓
 POST /api/support/chatwoot-webhook
-  ├─ Ignorar se private=true (notas internas)
-  ├─ Ignorar se sender.type=agent_bot (anti-loop)
-  ├─ Supabase: UPDATE support_tickets SET status=in_progress
+  ├─ Ignora: private=true (notas internas, triagem IA)
+  ├─ Ignora: sender.type=agent_bot (anti-loop)
+  ├─ Busca ticket pelo chatwoot_conversation_id
+  ├─ Supabase: UPDATE support_tickets SET status=in_progress (se era open)
   ├─ Supabase: INSERT support_messages (espelho da resposta)
   └─ N8N notify('support.ticket_reply') → email para o usuário
 ```
 
-### 3. Admin responde pelo painel da aplicação
+### 4. Admin responde pelo painel da aplicação
 
 ```
 Admin abre /admin/suporte/[id]
-  ├─ Usa assistente Claude (SupportAiPanel) para obter sugestão
-  ├─ Clica "Usar esta resposta" → textarea preenchido
+  ├─ Usa SupportAiPanel (Claude) para sugestão de resposta
   └─ Clica "Enviar resposta"
        ↓
-       POST /api/support/reply
-         ├─ Supabase: INSERT support_messages (is_admin=true)
-         ├─ Supabase: UPDATE support_tickets SET status=in_progress
-         └─ Chatwoot API: postMessage (outgoing, public=true)
-              ↓ (Chatwoot dispara webhook de volta)
+       POST /api/support/reply { ticket_id, content, resolve? }
+         ├─ Supabase: INSERT support_messages { is_admin: true }
+         ├─ Supabase: UPDATE support_tickets SET status=in_progress|resolved
+         └─ Chatwoot API: postMessage(outgoing) via chatwootClient.ts
+              ↓ Chatwoot dispara integration webhook de volta
               POST /api/support/chatwoot-webhook
-                └─ Detecta que ticket já é in_progress → sem N8N duplicado
+                └─ Ignora: ticket já está in_progress → sem N8N duplicado
 ```
 
-### 4. Ticket resolvido
+### 5. Ticket resolvido
 
 ```
-Agente clica "Resolver" no Chatwoot
-  ↓
-Chatwoot: event=conversation_resolved
-  ↓
-POST /api/support/chatwoot-webhook
-  ├─ Supabase: UPDATE support_tickets SET status=resolved, resolved_at=NOW()
-  └─ N8N notify('support.ticket_resolved') → email de resolução para o usuário
+Via Chatwoot (agente clica Resolver):
+  Chatwoot: event=conversation_resolved
+  → POST /api/support/chatwoot-webhook
+    ├─ Supabase: UPDATE status=resolved, resolved_at=NOW()
+    └─ N8N notify('support.ticket_resolved') → email ao usuário
 
-OU: Admin clica "Resolver ticket" no painel
-  ↓
-POST /api/support/reply { resolve: true }
-  ├─ Supabase: UPDATE support_tickets SET status=resolved
-  └─ Chatwoot API: toggleConversationStatus('resolved')
+Via painel admin (POST /api/support/reply { resolve: true }):
+  ├─ Supabase: UPDATE status=resolved, resolved_at=NOW()
+  └─ Chatwoot: toggleConversationStatus('resolved')
+
+Via Supabase UPDATE (qualquer origem):
+  support_tickets UPDATE → workflow-sync-suporte-tickets-chatwoot (path UPDATE)
+    └─ Se status=resolved E old_record.status≠resolved E chatwoot_conv_id existe
+       → POST /conversations/{id}/toggle_status { status: resolved }
 ```
 
-### 5. FAQ — Supabase → Chatwoot Help Center (fluxo principal)
+### 6. FAQ — Supabase → Chatwoot Help Center
 
 ```
-Admin cria/edita/deleta faq_item no Supabase (painel admin ou diretamente)
+Admin cria/edita/deleta faq_item no Supabase (painel admin)
   ↓
-Supabase Database Webhook dispara automaticamente
-  ↓ POST https://n8n.studiomlk.com.br/webhook/sync-faq
+Supabase Database Webhook → POST https://n8n.studiomlk.com.br/webhook/sync-faq
   ↓
-N8N workflow "Nome Magnético - Sync FAQs Supabase -> Chatwoot"
-  ├─ INSERT → POST Chatwoot /portals/nome-magnetico/articles
-  │            → N8N salva chatwoot_article_id de volta no Supabase
-  ├─ UPDATE → PUT Chatwoot /portals/nome-magnetico/articles/{id}
-  └─ DELETE → PUT Chatwoot /portals/nome-magnetico/articles/{id} { status: archived }
+N8N workflow-sync-help-center-chatwoot
+  ├─ INSERT → POST /portals/nome-magnetico/articles → salva chatwoot_article_id
+  ├─ UPDATE → PUT /portals/nome-magnetico/articles/{id}
+  └─ DELETE → PUT /portals/nome-magnetico/articles/{id} { status: archived }
 ```
 
-> **Supabase é o master de FAQs.** Toda criação/edição acontece no Supabase.
-> O N8N propaga as mudanças automaticamente para o Chatwoot Help Center.
-
-### 6. FAQ — Chatwoot Help Center → Supabase (reverso / leitura)
+### 7. FAQ — Chatwoot → Supabase (reverso/fallback)
 
 ```
 Admin edita artigo diretamente no Chatwoot Help Center
@@ -160,25 +210,37 @@ POST /api/support/chatwoot-webhook
   └─ Supabase: UPSERT faq_items (match por chatwoot_article_id)
 ```
 
-> **Atenção:** este sentido existe como fallback. O fluxo preferido é sempre editar
-> no Supabase e deixar o N8N propagar para o Chatwoot.
+> Preferir sempre editar no Supabase (fluxo 6). O reverso existe como fallback.
 
-### 7. Assistente Claude no painel admin
+---
 
-```
-Admin abre ticket → SupportAiPanel carrega (client:load)
-  ↓
-Admin clica "Sugerir resposta" ou digita pergunta
-  ↓
-POST /api/support/ai-assistant { ticket_id, message, history }
-  ├─ Carrega: ticket + últimas 10 mensagens + perfil + subscriptions + análises
-  ├─ Carrega: FAQs relevantes (contexto adicional)
-  └─ Claude Haiku responde com análise e/ou resposta sugerida
-       ↓
-       Se resposta sugerida → botão "Usar esta resposta"
-         ↓ CustomEvent('fill-reply')
-         ↓ Preenche textarea → admin revisa → envia
-```
+## Labels e Prioridades
+
+### Mapeamento subject → label
+
+| Assunto do formulário | Label Chatwoot |
+|---|---|
+| Bug | `nm-bug` |
+| Sugestão | `nm-sugestao` |
+| Primeiros Passos | `nm-primeiros-passos` |
+| Assinatura e Planos | `nm-assinaturas-e-planos` |
+| Conta e Segurança | `nm-conta-e-seguranca` |
+| Solução de Problemas | `nm-solucao-de-problemas` |
+| Dúvida sobre os planos | `nm-duvida-sobre-planos` |
+| Como funciona a numerologia | `nm-como-funciona` |
+| Informações gerais | `nm-informacoes-gerais` |
+| Parceria ou imprensa | `nm-parceria` |
+| Outros | `nm-outros` |
+
+### Mapeamento prioridade → label de tier
+
+| Priority no Supabase | Condição | Label Chatwoot |
+|---|---|---|
+| `urgent` | Assinatura ativa | `nm-vip` |
+| `normal` | Usuário logado sem assinatura | `nm-usuario` |
+| `low` | Visitante anônimo | `nm-visitante` |
+
+A prioridade é calculada em `ticket.ts` com base em `locals.user` + consulta em `subscriptions`.
 
 ---
 
@@ -187,27 +249,25 @@ POST /api/support/ai-assistant { ticket_id, message, history }
 ### Tabelas de suporte
 
 ```sql
--- Tickets de suporte
 support_tickets (
   id UUID PK,
-  user_id UUID NULL,              -- FK auth.users (nullable = anônimo)
+  user_id UUID NULL,              -- FK auth.users (null = anônimo)
   contact_email TEXT,
   contact_name TEXT,
   subject TEXT,
   status TEXT,                    -- open | in_progress | resolved | closed
   priority TEXT,                  -- low | normal | urgent
-  chatwoot_conversation_id TEXT,  -- FK para conversa no Chatwoot
+  chatwoot_conversation_id TEXT,  -- preenchido pelo N8N após criar conversa
   created_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   resolved_at TIMESTAMPTZ NULL
 )
 
--- Mensagens do ticket
 support_messages (
   id UUID PK,
   ticket_id UUID FK support_tickets,
   author_id UUID NULL,            -- NULL = sistema/IA
-  is_admin BOOLEAN,
+  is_admin BOOLEAN,               -- false = usuário | true = admin/IA
   content TEXT,
   created_at TIMESTAMPTZ
 )
@@ -229,8 +289,8 @@ faq_items (
   category_id UUID FK faq_categories,
   question TEXT,
   answer TEXT,                    -- plain text
-  answer_html TEXT,               -- HTML rico (do Chatwoot)
-  chatwoot_article_id TEXT UNIQUE, -- ID do artigo no Chatwoot Help Center
+  answer_html TEXT,               -- HTML do Chatwoot Help Center
+  chatwoot_article_id TEXT UNIQUE,
   chatwoot_category_id TEXT,
   slug TEXT,
   order_index INTEGER,
@@ -246,254 +306,223 @@ faq_items (
 
 ```bash
 # Chatwoot
-CHATWOOT_BASE_URL=https://suporte.seudominio.com.br
-CHATWOOT_WEBSITE_TOKEN=token_do_widget_live_chat
-CHATWOOT_API_TOKEN=token_da_api_do_agente
+CHATWOOT_BASE_URL=https://suporte.studiomlk.com.br
+CHATWOOT_API_TOKEN=8FsqBLpvNJhZZ73XXiad2XvK   # token do agente (server-side only)
 CHATWOOT_ACCOUNT_ID=1
-CHATWOOT_INBOX_ID=1                    # Inbox geral
-CHATWOOT_INBOX_ID_CLIENTES=2           # Inbox VIP (opcional)
-CHATWOOT_PORTAL_SLUG=meu-produto       # Slug do Help Center
-CHATWOOT_WEBHOOK_SECRET=string_aleatoria  # HMAC para verificar webhooks
+CHATWOOT_INBOX_ID=2                             # Inbox API "Nome Magnético - Formulários"
+CHATWOOT_PORTAL_SLUG=nome-magnetico             # Help Center slug
+CHATWOOT_WEBHOOK_SECRET=string_aleatoria        # HMAC para verificar webhooks recebidos
 
-# N8N (notificações por email + FAQ sync)
-N8N_WEBHOOK_SUPORTE=https://n8n.seudominio.com.br/webhook/suporte
-N8N_WEBHOOK_TRANSACIONAL=https://n8n.seudominio.com.br/webhook/transacional
-N8N_WEBHOOK_FAQ_SYNC=https://n8n.seudominio.com.br/webhook/sync-faq  # Supabase DB Webhook → N8N → Chatwoot Help Center
+# N8N (webhooks de notificação por email)
+N8N_WEBHOOK_SUPORTE=https://n8n.studiomlk.com.br/webhook/suporte
+N8N_WEBHOOK_TRANSACIONAL=https://n8n.studiomlk.com.br/webhook/transacional
 
 # Internos
-INTERNAL_API_SECRET=string_aleatoria   # Para chamar /api/support/claude-triage
-PRODUCT_SLUG=nm-nome-magnetico         # Label identificador do produto no Chatwoot
+INTERNAL_API_SECRET=string_aleatoria   # protege /api/support/claude-triage
+APP_ENV=production                     # production | development
+APP_URL=https://nomemagnetico.com.br
 
 # IA
-ANTHROPIC_API_KEY=sk-ant-...           # Para Claude no triage + assistente admin
+ANTHROPIC_API_KEY=sk-ant-...           # Claude Haiku para triagem + assistente
 GROQ_API_KEY=gsk_...                   # Fallback em development
-
-# App
-APP_ENV=production                     # production | development
-APP_URL=https://seudominio.com.br
 ```
 
 ---
 
-## Configuração do Chatwoot (passo a passo)
+## Configuração Chatwoot (passo a passo)
 
-### 1. Labels (Settings → Labels)
+### 1. Nginx no servidor Chatwoot
 
-Criar todas as labels antes de receber tickets:
+**CRÍTICO:** O nginx remove headers HTTP com underscore por padrão, bloqueando o `api_access_token`. Adicionar ao bloco `server` do Chatwoot:
 
-```
-nm-bug                    # Bugs técnicos
-nm-sugestao               # Sugestões de melhoria
-nm-primeiros-passos       # Onboarding
-nm-assinaturas-e-planos   # Financeiro/planos
-nm-conta-e-seguranca      # Conta do usuário
-nm-solucao-de-problemas   # Suporte técnico geral
-nm-duvida-sobre-planos    # Perguntas sobre preços
-nm-como-funciona          # Educacional/produto
-nm-informacoes-gerais     # Geral
-nm-parceria               # B2B / imprensa
-nm-outros                 # Demais
-nm-vip                    # Clientes com plano ativo
-nm-nome-magnetico         # Identificador do produto (multi-SaaS)
+```nginx
+underscores_in_headers on;
 ```
 
-### 2. Inboxes (Settings → Inboxes)
+Arquivo de referência: `scripts/nginx-chatwoot.conf`
 
-**Inbox Geral (formulário + live chat):**
+Também é necessário o bloco `/cable` para WebSocket (ActionCable):
+
+```nginx
+location /cable {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+    proxy_read_timeout 86400;
+}
+```
+
+### 2. Labels (Settings → Labels)
+
+Criar todas antes de receber tickets:
+
+```
+nm-bug               nm-sugestao           nm-primeiros-passos
+nm-assinaturas-e-planos                    nm-conta-e-seguranca
+nm-solucao-de-problemas                    nm-duvida-sobre-planos
+nm-como-funciona     nm-informacoes-gerais  nm-parceria
+nm-outros            nm-vip                nm-usuario
+nm-visitante
+```
+
+### 3. Inboxes (Settings → Inboxes)
+
+**Inbox 1 — Live Chat (opcional):**
+- Type: Website (Web Widget)
+- Name: Nome Magnético
+- Salvar o Website Token em `CHATWOOT_WEBSITE_TOKEN` (para o widget no site)
+
+**Inbox 2 — Formulários (obrigatório):**
 - Type: API
-- Name: Nome Magnético — Geral
+- Name: Nome Magnético - Formulários
+- **`callback_webhook_url`: deixar VAZIO** ← crítico (ver seção abaixo)
 - Salvar o `inbox_id` em `CHATWOOT_INBOX_ID`
 
-**Inbox Clientes VIP (opcional):**
-- Type: API
-- Name: Nome Magnético — Clientes
-- Salvar em `CHATWOOT_INBOX_ID_CLIENTES`
-
-**Inbox Email:**
-- Type: Email
-- Name: Nome Magnético — Email
-- Email address: suporte@nomemagnetico.com.br
-- SMTP: Amazon SES (já configurado no Chatwoot)
-  - Host: email-smtp.us-east-1.amazonaws.com
-  - Port: 587
-  - Username/Password: credenciais SES
-- Incoming: configurar forwarding de suporte@seudominio.com.br para o handler do Chatwoot
-
-### 3. Webhook de saída (Settings → Integrations → Webhooks)
+### 4. Integration Webhook (Settings → Integrations → Webhooks)
 
 ```
-URL: https://seudominio.com.br/api/support/chatwoot-webhook
+URL: https://nomemagnetico.com.br/api/support/chatwoot-webhook
 Subscribed Events:
   ✅ message_created
   ✅ conversation_resolved
   ✅ conversation_status_changed
-  ✅ article_published       (para FAQ sync)
+  ✅ article_published
   ✅ article_updated
   ✅ article_archived
 ```
 
-> Após criar, copiar o webhook secret e salvar em `CHATWOOT_WEBHOOK_SECRET`
+Copiar o webhook secret e salvar em `CHATWOOT_WEBHOOK_SECRET`.
 
-### 4. Help Center (Settings → Help Center)
+### 5. Help Center (Settings → Help Center)
 
 ```
 Name: Centro de Ajuda Nome Magnético
-Slug: nome-magnetico          → salvar em CHATWOOT_PORTAL_SLUG
-Color: #D4AF37 (gold)
-Homepage: ativar
-```
-
-Criar categorias correspondendo às `faq_categories` do Supabase.
-
----
-
-## Configuração do Supabase
-
-### Database Webhooks (Settings → Database → Webhooks)
-
-Para sincronizar edições feitas no Supabase → Chatwoot Help Center:
-
-```
-Name: faq-items-to-n8n
-Table: faq_items
-Events: INSERT, UPDATE, DELETE
-URL: https://n8n.seudominio.com.br/webhook/sync-faq
-HTTP Method: POST
-(sem headers adicionais — o N8N webhook é público)
-```
-
-O N8N recebe o payload `{ type, table, schema, record, old_record }` e propaga para o Chatwoot Help Center API automaticamente conforme o workflow `n8n_workflows/workflow-sync-help-center-chatwoot`.
-
-### RLS (já configurado nas migrations)
-
-- `support_tickets`: usuários veem apenas os próprios | admins veem tudo
-- `support_messages`: idem
-- `faq_items`: leitura pública para `is_active=true` | escrita apenas admin
-- `faq_categories`: idem
-
----
-
-## Migração Inicial de FAQ
-
-Se há FAQ no Notion ou hardcoded, migrar para Chatwoot:
-
-```bash
-# 1. Garantir que faq_items do Supabase estão populados
-
-# 2. Migrar Supabase → Chatwoot Help Center
-curl -X POST https://seudominio.com.br/api/admin/faq-sync \
-  -H "Cookie: session=..." \
-  -H "Content-Type: application/json" \
-  -d '{"action": "migrate-to-chatwoot"}'
-
-# 3. Verificar no Chatwoot Help Center se os artigos apareceram
-
-# 4. Sincronizar de volta (opcional — garante chatwoot_article_id nos registros)
-curl "https://seudominio.com.br/api/admin/faq-sync?source=chatwoot" \
-  -H "Cookie: session=..."
+Slug: nome-magnetico   → salvar em CHATWOOT_PORTAL_SLUG
+Color: #D4AF37
 ```
 
 ---
 
-## Como Replicar em Outro SaaS
+## Configuração Supabase DB Webhooks
 
-### Checklist de implementação
+Criar 3 webhooks em Supabase → Settings → Database → Webhooks:
 
-**Backend (copiar e adaptar):**
+| Nome | Tabela | Eventos | URL N8N |
+|---|---|---|---|
+| `support-tickets-to-n8n` | `support_tickets` | INSERT, UPDATE, DELETE | `https://n8n.studiomlk.com.br/webhook/sync-suporte-tickets` |
+| `support-messages-to-n8n` | `support_messages` | INSERT | `https://n8n.studiomlk.com.br/webhook/sync-suporte-mensagens` |
+| `faq-items-to-n8n` | `faq_items` | INSERT, UPDATE, DELETE | `https://n8n.studiomlk.com.br/webhook/sync-faq` |
 
-- [ ] `src/backend/support/chatwootClient.ts` — copiar integralmente
-  - Atualizar `LABEL_MAP` com labels do novo produto
-- [ ] `src/pages/api/support/ticket.ts` — copiar, ajustar `PRODUCT_SLUG`
-- [ ] `src/pages/api/support/chatwoot-webhook.ts` — copiar integralmente
-- [ ] `src/pages/api/support/claude-triage.ts` — copiar, ajustar system prompt
-- [ ] `src/pages/api/support/reply.ts` — copiar integralmente
-- [ ] `src/pages/api/support/ai-assistant.ts` — copiar, ajustar system prompt e campos do cliente
-- [ ] `src/pages/api/support/chatwoot-webhook.ts` — copiar integralmente
-- [ ] `src/pages/api/faq.ts` — copiar integralmente
-- [ ] `src/pages/api/admin/faq-sync.ts` — copiar integralmente
-- [ ] `n8n_workflows/workflow-sync-help-center-chatwoot` — importar no N8N e configurar credenciais (Chatwoot API token + Supabase)
-- [ ] `src/backend/notifications/notify.ts` — garantir eventos `support.*`
+Payload enviado automaticamente: `{ type, table, schema, record, old_record }`
 
-**Frontend:**
+---
 
-- [ ] `src/frontend/components/admin/SupportAiPanel.tsx` — copiar, ajustar QUICK_ACTIONS
-- [ ] `src/frontend/components/landing/FAQSection.tsx` — copiar integralmente
-- [ ] Painel admin `[id].astro` — copiar layout duas colunas
+## Configuração N8N
 
-**Banco de dados:**
+### Workflows a importar (pasta `n8n_workflows/`)
 
-- [ ] Aplicar migrations: `001_nome_magnetico.sql` (tabelas base) + `013_faq_chatwoot.sql`
-- [ ] Configurar RLS policies
-- [ ] Configurar Supabase Database Webhook para `faq_items`
+| Arquivo | Função |
+|---|---|
+| `workflow-sync-suporte-tickets-chatwoot` | Tickets Supabase → Chatwoot |
+| `workflow-sync-suporte-mensagens-chatwoot` | Mensagens Supabase → Chatwoot |
+| `workflow-sync-help-center-chatwoot` | FAQ Supabase → Chatwoot Help Center |
 
-**Variáveis de ambiente:**
+**Credenciais necessárias em cada workflow:**
+- Supabase node: credencial `Supabase Cloude - Nome Magnético`
+- HTTP Request nodes: header `api_access_token: TOKEN` (token vai no **header**, não na query string)
 
-- [ ] Todas as variáveis `CHATWOOT_*` com valores do novo produto/inbox
-- [ ] `PRODUCT_SLUG=meu-novo-produto`
-- [ ] `CHATWOOT_PORTAL_SLUG=meu-novo-produto`
-- [ ] `INTERNAL_API_SECRET` (pode ser o mesmo da plataforma)
-- [ ] `ANTHROPIC_API_KEY` (pode compartilhar entre SaaS)
+**N8N workflows de email** (criar manualmente ou importar se existirem):
+- `support.ticket_created` → email de confirmação ao usuário
+- `support.ticket_reply` → email notificando nova resposta do agente
+- `support.ticket_resolved` → email de resolução
 
-**Configuração Chatwoot:**
+---
 
-- [ ] Criar labels com prefixo do produto (`meu-produto-bug`, etc.)
-- [ ] Criar inbox(es) para o produto
-- [ ] Configurar webhook de saída
-- [ ] Criar portal Help Center com slug correto
+## ⚠️ Seção Crítica — Erros Comuns
 
-**Configuração N8N:**
+### 1. `callback_webhook_url` DEVE estar vazio no inbox API
 
-- [ ] Criar workflow para `support.ticket_created` → email confirmação
-- [ ] Criar workflow para `support.ticket_reply` → email notificação
-- [ ] Criar workflow para `support.ticket_resolved` → email resolução
+**Comportamento:** Se `callback_webhook_url` for preenchido em um inbox do tipo API, o Chatwoot tenta chamar essa URL para confirmar a entrega de cada mensagem recebida. Qualquer erro (301, 404, timeout) faz a mensagem aparecer como **"Falha ao enviar"** (em vermelho).
+
+**Regra:** Deixar **sempre vazio**. As notificações de respostas dos agentes funcionam pelo integration webhook global, que é independente.
+
+**Fonte:** Issues #12294 e #9965 do GitHub Chatwoot.
+
+### 2. nginx `underscores_in_headers` é obrigatório
+
+O nginx remove por padrão headers com underscore. Sem `underscores_in_headers on;`, todas as chamadas à API do Chatwoot retornam `401 Unauthorized` porque o header `api_access_token` é descartado.
+
+### 3. Race condition no workflow de mensagens
+
+O workflow `sync-suporte-mensagens` dispara quando a mensagem é inserida no Supabase, mas o workflow `sync-suporte-tickets` ainda pode estar processando (criando a conversa no Chatwoot e salvando o `chatwoot_conversation_id`). O Wait node de **8 segundos** compensa esse atraso. Se o tempo não for suficiente, aumentar o wait.
+
+### 4. Loop de atualização no workflow de tickets
+
+O passo final do workflow de tickets faz `UPDATE support_tickets SET chatwoot_conversation_id`, que dispara o webhook novamente (tipo UPDATE). O nó "Ticket Resolvido?" tem a condição `old_record.status ≠ resolved` para evitar que esse UPDATE acidental resolva a conversa.
+
+### 5. `message_type: "incoming"` para mensagens do usuário
+
+Mensagens do usuário devem ser postadas com `message_type: "incoming"` (aparece à esquerda, lado do cliente). Se usar `"outgoing"`, aparece à direita (lado do agente) e o Chatwoot tenta entregar via `callback_webhook_url` — gerando "Falha ao enviar" se a URL estiver vazia.
 
 ---
 
 ## Arquivos do Sistema (referência rápida)
 
 | Arquivo | Responsabilidade |
-|---------|-----------------|
-| `src/backend/support/chatwootClient.ts` | Funções HTTP do Chatwoot (módulo compartilhado) |
-| `src/pages/api/support/ticket.ts` | Criar ticket (Supabase + Chatwoot) |
-| `src/pages/api/support/chatwoot-webhook.ts` | Receber eventos do Chatwoot |
-| `src/pages/api/support/claude-triage.ts` | Triagem automática por IA |
-| `src/pages/api/support/reply.ts` | Admin responde (Supabase + Chatwoot) |
-| `src/pages/api/support/ai-assistant.ts` | Claude como assistente do admin |
-| `src/pages/api/faq.ts` | Endpoint público de FAQ |
-| `src/pages/api/admin/faq-sync.ts` | Sync manual Chatwoot ↔ Supabase |
-| `src/pages/api/admin/chatwoot-article-sync.ts` | Supabase DB Webhook → Chatwoot |
-| `src/frontend/components/admin/SupportAiPanel.tsx` | Chat IA no painel admin |
-| `src/frontend/components/landing/FAQSection.tsx` | Seção FAQ pública |
-| `src/pages/admin/suporte/[id].astro` | Painel admin: ticket + IA |
-| `src/layouts/BaseLayout.astro` | Widget live chat Chatwoot |
+|---|---|
+| `src/pages/api/support/ticket.ts` | Cria ticket no Supabase (Astro API route) |
+| `src/pages/api/support/chatwoot-webhook.ts` | Recebe eventos Chatwoot → atualiza Supabase + envia emails |
+| `src/pages/api/support/claude-triage.ts` | Triagem IA automática (Claude/Groq) |
+| `src/pages/api/support/reply.ts` | Admin responde via painel |
+| `src/pages/api/support/ai-assistant.ts` | Claude como assistente do admin (streaming) |
+| `src/backend/support/chatwootClient.ts` | HTTP helpers para Chatwoot API (reply + triage) |
+| `src/backend/notifications/notify.ts` | Dispara eventos N8N (email) |
+| `n8n_workflows/workflow-sync-suporte-tickets-chatwoot` | N8N: tickets → Chatwoot |
+| `n8n_workflows/workflow-sync-suporte-mensagens-chatwoot` | N8N: mensagens → Chatwoot |
+| `n8n_workflows/workflow-sync-help-center-chatwoot` | N8N: FAQ → Chatwoot Help Center |
+| `scripts/nginx-chatwoot.conf` | Config nginx do servidor Chatwoot |
 
 ---
 
-## Pontos de Atenção
+## Como Replicar em Outro SaaS
 
-### Segurança
+### Backend (copiar e adaptar)
 
-- `CHATWOOT_API_TOKEN`: nunca expor no frontend. Usado apenas server-side.
-- `CHATWOOT_WEBHOOK_SECRET`: verificar assinatura HMAC em todos os webhooks recebidos.
-- `INTERNAL_API_SECRET`: para comunicação interna entre rotas da aplicação.
-- Supabase RLS: sempre validar permissões no banco, não só na API.
+- [ ] `src/pages/api/support/ticket.ts` — ajustar lógica de VIP conforme o produto
+- [ ] `src/pages/api/support/chatwoot-webhook.ts` — copiar integralmente
+- [ ] `src/pages/api/support/claude-triage.ts` — ajustar SYSTEM_PROMPT para o produto
+- [ ] `src/pages/api/support/reply.ts` — copiar integralmente
+- [ ] `src/pages/api/support/ai-assistant.ts` — ajustar SYSTEM_PROMPT e contexto
+- [ ] `src/backend/support/chatwootClient.ts` — copiar integralmente
+- [ ] `src/backend/notifications/notify.ts` — garantir eventos `support.*`
 
-### Nginx / Proxy
+### N8N (importar e adaptar)
 
-Nginx remove headers HTTP com underscore por padrão. O Chatwoot API token vai **sempre como query param**:
-```
-?api_access_token=TOKEN
-```
-Isso é tratado automaticamente em `cwUrl()` no `chatwootClient.ts`.
+- [ ] `workflow-sync-suporte-tickets-chatwoot` — atualizar LABEL_MAP no nó "Preparar Dados"
+- [ ] `workflow-sync-suporte-mensagens-chatwoot` — copiar integralmente
+- [ ] `workflow-sync-help-center-chatwoot` — copiar integralmente
+- [ ] Criar workflows de email para `support.ticket_created/reply/resolved`
 
-### Anti-loop (webhooks)
+### Supabase
 
-Quando o admin responde pelo painel → `reply.ts` → Chatwoot API → Chatwoot dispara webhook de volta.
-O webhook handler detecta que o ticket já está `in_progress` e não dispara N8N novamente.
-Para mensagens de agentes bot, verificar `message.sender.type === 'agent_bot'` e ignorar.
+- [ ] Aplicar migration com tabelas `support_tickets`, `support_messages`, `faq_categories`, `faq_items`
+- [ ] Configurar 3 DB Webhooks (tickets, messages, faq_items)
+- [ ] Configurar RLS policies
 
-### Chatwoot Downtime
+### Chatwoot
 
-O `ticket.ts` tem graceful degradation: se o Chatwoot estiver offline, o ticket é salvo no Supabase
-normalmente. O `chatwoot_conversation_id` ficará vazio, mas o ticket existe e pode ser respondido
-pelo painel admin. A conversa no Chatwoot pode ser criada manualmente depois.
+- [ ] Aplicar nginx com `underscores_in_headers on`
+- [ ] Criar labels com prefixo do produto
+- [ ] Criar inbox API com `callback_webhook_url` **vazio**
+- [ ] Configurar integration webhook global
+- [ ] Criar Help Center com slug correto
+
+### Variáveis de ambiente
+
+- [ ] `CHATWOOT_BASE_URL`, `CHATWOOT_API_TOKEN`, `CHATWOOT_ACCOUNT_ID`
+- [ ] `CHATWOOT_INBOX_ID` (inbox API), `CHATWOOT_PORTAL_SLUG`
+- [ ] `CHATWOOT_WEBHOOK_SECRET`
+- [ ] `N8N_WEBHOOK_SUPORTE`, `N8N_WEBHOOK_TRANSACIONAL`
+- [ ] `INTERNAL_API_SECRET`, `APP_ENV`, `APP_URL`
+- [ ] `ANTHROPIC_API_KEY`, `GROQ_API_KEY`

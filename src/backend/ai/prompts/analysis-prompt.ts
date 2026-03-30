@@ -91,8 +91,8 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
 | Expressão (todas as letras) | ${cincoNumeros.expressao} |
 | Destino (data de nascimento) | ${cincoNumeros.destino} |
 | Motivação/Alma (vogais) | ${cincoNumeros.motivacao} |
-| Missão/Impressão (consoantes) | ${cincoNumeros.missao} |
-| Impressão (primeiro nome) | ${cincoNumeros.personalidade} |
+| Impressão (consoantes) | ${cincoNumeros.impressao} |
+| Missão (Destino + Expressão) | ${cincoNumeros.missao} |
 | Arcano Regente (Triângulo da Vida) | ${arcanoRegente ?? '—'} |
 
 ## Arcanos Regentes dos 4 Triângulos
@@ -145,11 +145,11 @@ O que o número **${cincoNumeros.destino}** representa como missão de vida. Qua
 ### 2.3 Motivação — O Desejo Mais Profundo
 O número **${cincoNumeros.motivacao}** revela o que move ${primeiroNome} por dentro — o desejo da alma que nem sempre é dito. Como isso influencia as escolhas.
 
-### 2.4 Missão — A Impressão que Deixa no Mundo
-O número **${cincoNumeros.missao}** mostra como ${primeiroNome} é percebido pelas pessoas e qual missão carrega nas consoantes do nome.
+### 2.4 Impressão — A Energia das Consoantes
+O número **${cincoNumeros.impressao}** revela como ${primeiroNome} é percebido pelas outras pessoas — a impressão que deixa, a "máscara social" e a força estrutural do nome.
 
-### 2.5 Impressão — A Energia do Primeiro Nome
-O número **${cincoNumeros.personalidade}** descreve a energia que ${primeiroNome} projeta ao entrar em um ambiente — a "roupa energética" do primeiro nome.
+### 2.5 Missão — A Vocação de Vida
+O número **${cincoNumeros.missao}** (soma de Destino + Expressão) representa a grande missão e vocação que ${primeiroNome} veio cumprir — a síntese entre quem é e para onde está indo.
 
 ---
 

@@ -54,7 +54,7 @@ type BloqueioCard = {
 };
 type LicaoCard   = { numero: number; titulo: string; descricao: string; comoTrabalhar: string };
 type TendenciaCard = { numero: number; frequencia: number; titulo: string; descricao: string; comoEquilibrar: string };
-type DebitoCard  = { numero: number; titulo: string; descricao: string };
+type DebitoCard  = { numero: number; titulo: string; descricao: string; fontes?: string[]; fixo?: boolean };
 
 // ── Dados dos triângulos ─────────────────────────────────────────────
 const tVida    = (analysis as any).triangulo_vida    as TData | null;
@@ -128,8 +128,8 @@ const cinco_numeros = [
   { label: 'Expressão',   sublabel: 'O Dom', value: analysis.numero_expressao,    icon: '✦' },
   { label: 'Destino',     sublabel: 'O Chamado', value: analysis.numero_destino,  icon: '◈' },
   { label: 'Motivação',   sublabel: 'A Alma', value: analysis.numero_motivacao,   icon: '♡' },
-  { label: 'Missão',      sublabel: 'A Impressão', value: analysis.numero_missao, icon: '◎' },
-  { label: 'Impressão', sublabel: 'Primeiro Nome', value: analysis.numero_personalidade, icon: '◇' },
+  { label: 'Impressão',   sublabel: 'As Consoantes', value: analysis.numero_impressao, icon: '◎' },
+  { label: 'Missão',      sublabel: 'A Vocação', value: analysis.numero_missao, icon: '◇' },
 ];
 
 // ── 5 Números empresa (lidos do rankingEmpresa, não do analysis) ──────
@@ -138,7 +138,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
   { label: 'Destino',    sublabel: 'O Chamado',    value: rankingEmpresa.destinoSocio,          icon: '◈' },
   { label: 'Motivação',  sublabel: 'A Alma',       value: rankingEmpresa.melhorNome.motivacao,  icon: '♡' },
   { label: 'Missão',     sublabel: 'O Propósito',  value: rankingEmpresa.melhorNome.missao,     icon: '◎' },
-  { label: 'Impressão',  sublabel: '1ª Palavra',   value: rankingEmpresa.melhorNome.impressao,  icon: '◉' },
+  { label: 'Impressão',  sublabel: 'As Consoantes', value: rankingEmpresa.melhorNome.impressao,  icon: '◉' },
 ] : cinco_numeros;
 ---
 

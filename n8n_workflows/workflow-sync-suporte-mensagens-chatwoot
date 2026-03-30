@@ -46,7 +46,7 @@
         {
             "parameters": {
                 "resume": "timeInterval",
-                "amount": 3,
+                "amount": 8,
                 "unit": "seconds"
             },
             "id": "m1a2b3c4-d5e6-7890-abcd-ef1234560003",
@@ -86,10 +86,11 @@
         {
             "parameters": {
                 "conditions": {
-                    "string": [
+                    "number": [
                         {
-                            "value1": "={{ $json.chatwoot_conversation_id }}",
-                            "operation": "isNotEmpty"
+                            "value1": "={{ Number($json.chatwoot_conversation_id) }}",
+                            "operation": "larger",
+                            "value2": 0
                         }
                     ]
                 }
@@ -103,10 +104,11 @@
         {
             "parameters": {
                 "method": "POST",
-                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/conversations/{{ $json.chatwoot_conversation_id }}/messages?api_access_token=8FsqBLpvNJhZZ73XXiad2XvK",
+                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/conversations/{{ $json.chatwoot_conversation_id }}/messages",
                 "sendHeaders": true,
                 "headerParameters": {
                     "parameters": [
+                        { "name": "api_access_token", "value": "8FsqBLpvNJhZZ73XXiad2XvK" },
                         { "name": "Content-Type", "value": "application/json" }
                     ]
                 },

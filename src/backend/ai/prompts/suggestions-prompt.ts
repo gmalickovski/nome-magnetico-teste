@@ -15,7 +15,7 @@ export function buildSuggestionsPrompt(params: SuggestionsPromptParams): string 
     .slice(0, 8)
     .map(
       v =>
-        `- **${v.nome}** | Expressão: ${v.numerosExpressao} | Motivação: ${v.motivacao} | Missão: ${v.missao} | Score: ${v.score}/100 | ${v.justificativa}`
+        `- **${v.nome}** | Expressão: ${v.numerosExpressao} | Motivação: ${v.motivacao} | Impressão: ${v.impressao} | Score: ${v.score}/100 | ${v.justificativa}`
     )
     .join('\n');
 

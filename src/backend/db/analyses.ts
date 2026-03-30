@@ -13,6 +13,7 @@ export interface Analysis {
   numero_destino: number | null;
   numero_motivacao: number | null;
   numero_missao: number | null;
+  numero_impressao: number | null;
   numero_personalidade: number | null;
   arcano_regente: number | null;
   bloqueios: unknown[];
@@ -42,6 +43,7 @@ export interface MagneticName {
   numero_expressao: number | null;
   numero_motivacao: number | null;
   numero_missao: number | null;
+  numero_impressao: number | null;
   tem_bloqueio: boolean;
   score: number;
   justificativa: string | null;
@@ -136,6 +138,7 @@ export async function saveMagneticNames(
     numeroExpressao?: number;
     motivacao?: number;
     missao?: number;
+    impressao?: number;
     temBloqueio: boolean;
     score: number;
     justificativa?: string;
@@ -148,6 +151,7 @@ export async function saveMagneticNames(
     numero_expressao: n.numeroExpressao,
     numero_motivacao: n.motivacao,
     numero_missao: n.missao,
+    numero_impressao: n.impressao,
     tem_bloqueio: n.temBloqueio,
     score: n.score,
     justificativa: n.justificativa,

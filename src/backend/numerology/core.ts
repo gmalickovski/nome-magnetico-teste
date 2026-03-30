@@ -16,9 +16,11 @@ export const TABELA_CONVERSAO: Record<string, number> = {
 };
 
 // Diacríticos (modificadores)
-const DIACRITICO_AGUDO = '\u0301';   // ´ → +2
-const DIACRITICO_TIL = '\u0303';    // ~ → +3
-const DIACRITICO_GRAVE = '\u0300';  // ` → ×3
+const DIACRITICO_AGUDO = '\u0301';        // ´ → +2
+const DIACRITICO_TIL = '\u0303';         // ~ → +3
+const DIACRITICO_GRAVE = '\u0300';       // ` → ×2
+const DIACRITICO_TREMA = '\u0308';       // ¨ → ×2
+const DIACRITICO_CIRCUNFLEXO = '\u0302'; // ^ → +7
 
 /**
  * Calcula o valor numerológico de uma única letra.
@@ -42,7 +44,13 @@ export function calcularValor(letra: string): number {
         valor += 3;
         break;
       case DIACRITICO_GRAVE:
-        valor *= 3;
+        valor *= 2;
+        break;
+      case DIACRITICO_TREMA:
+        valor *= 2;
+        break;
+      case DIACRITICO_CIRCUNFLEXO:
+        valor += 7;
         break;
     }
   }

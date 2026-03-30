@@ -1,8 +1,6 @@
----
 import BaseLayout from './BaseLayout.astro';
 import { createUserClient } from '../backend/db/supabase';
-
-export interface Props {
+import AvatarMenu from '../frontend/components/app/AvatarMenu';
   title: string;
   description?: string;
 }
@@ -64,10 +62,10 @@ const isActive = (path: string) =>
           NOME MAGNÉTICO
         </a>
 
-        <!-- Hamburger Icon (Mobile) -->
-        <button id="mobileMenuBtn" class="text-[#D4AF37] hover:text-[#f2ca50] transition-colors md:hidden">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
+        <!-- Mobile Avatar (Right side) -->
+        <div class="md:hidden flex items-center justify-end w-8">
+          <AvatarMenu client:load nome={userNome} />
+        </div>
 
         <!-- Desktop Nav -->
         <nav class="hidden md:flex items-center gap-6">
@@ -115,47 +113,34 @@ const isActive = (path: string) =>
               Admin
             </a>
           )}
-          <button
-            id="logoutBtnDesktop"
-            class="relative text-gray-500 hover:text-red-400 transition-colors text-sm pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-red-400 after:transition-all after:duration-300 after:w-0 hover:after:w-full"
-          >
-            Sair
-          </button>
+          <AvatarMenu client:load nome={userNome} />
         </nav>
       </div>
     </header>
 
-    <!-- Mobile Menu Overlay -->
-    <div id="mobileMenu" class="fixed inset-0 bg-[#111111]/95 backdrop-blur-xl z-50 transform translate-x-full transition-transform duration-300 md:hidden flex flex-col">
-      <div class="px-4 py-4 flex items-center justify-between border-b border-[#D4AF37]/20">
-        <span class="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider">MENU</span>
-        <button id="closeMenuBtn" class="text-[#D4AF37] hover:text-[#f2ca50] transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      </div>
-      <nav class="flex flex-col p-6 gap-6">
-        <a href="/app" class={'text-lg transition-colors ' + (isActive('/app') && !isActive('/app/analises') ? 'text-[#D4AF37]' : 'text-gray-300')}>
-          Meus Produtos
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-[#111111]/95 backdrop-blur-xl border-t border-[#D4AF37]/20 z-50 flex items-center justify-around pb-2 pt-2">
+      <a href="/app" class={`flex flex-col items-center p-2 transition-colors ${isActive('/app') && !isActive('/app/analises') && !isActive('/app/resultado') && !isActive('/app/suporte') ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-[#D4AF37]'}`}>
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <span class="text-[10px] font-medium tracking-wide">Início</span>
+      </a>
+      {(isAdmin || hasAnyActive) && (
+        <a href="/app/analises" class={`flex flex-col items-center p-2 transition-colors ${isActive('/app/analises') || isActive('/app/resultado') ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-[#D4AF37]'}`}>
+          <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          <span class="text-[10px] font-medium tracking-wide">Análises</span>
         </a>
-        {(isAdmin || hasAnyActive) && (
-          <a href="/app/analises" class={'text-lg transition-colors ' + (isActive('/app/analises') || isActive('/app/resultado') ? 'text-[#D4AF37]' : 'text-gray-300')}>
-            Minhas Análises
-          </a>
-        )}
-        <a href="/app/suporte" class={'text-lg transition-colors ' + (isActive('/app/suporte') ? 'text-[#D4AF37]' : 'text-gray-300')}>
-          Suporte
+      )}
+      <a href="/app/suporte" class={`flex flex-col items-center p-2 transition-colors ${isActive('/app/suporte') ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-[#D4AF37]'}`}>
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        <span class="text-[10px] font-medium tracking-wide">Suporte</span>
+      </a>
+      {isAdmin && (
+        <a href="/admin" class={`flex flex-col items-center p-2 transition-colors ${isActive('/admin') ? 'text-purple-400' : 'text-gray-500 hover:text-purple-400'}`}>
+          <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <span class="text-[10px] font-medium tracking-wide">Admin</span>
         </a>
-        {isAdmin && (
-          <a href="/admin" class={'text-lg transition-colors ' + (isActive('/admin') ? 'text-purple-400' : 'text-purple-500')}>
-            Painel Admin
-          </a>
-        )}
-        <div class="h-px bg-[#D4AF37]/20 my-2"></div>
-        <button id="logoutBtnMobile" class="text-left text-lg text-gray-500 hover:text-red-400 transition-colors mt-2">
-          Sair da Conta
-        </button>
-      </nav>
-    </div>
+      )}
+    </nav>
 
     <!-- Conteúdo principal -->
     <main class="max-w-6xl mx-auto px-4 py-8 pb-24 md:pb-8">
@@ -164,37 +149,7 @@ const isActive = (path: string) =>
 
   </div>
 
-  <script>
-    const setupLogout = (id) => {
-      document.getElementById(id)?.addEventListener('click', async () => {
-        const { supabaseBrowser } = await import('../frontend/lib/supabase-browser');
-        await supabaseBrowser.auth.signOut();
-        // Limpar cookies de auth
-        document.cookie = 'nome-magnetico-auth-access-token=; path=/; max-age=0';
-        document.cookie = 'nome-magnetico-auth-refresh-token=; path=/; max-age=0';
-        window.$chatwoot?.reset();
-        window.location.href = '/auth/login';
-      });
-    };
-
-    setupLogout('logoutBtnDesktop');
-    setupLogout('logoutBtnMobile');
-
-    // Menu Mobile
-    const btnOpen = document.getElementById('mobileMenuBtn');
-    const btnClose = document.getElementById('closeMenuBtn');
-    const menu = document.getElementById('mobileMenu');
-
-    if (btnOpen && btnClose && menu) {
-      btnOpen.addEventListener('click', () => {
-        menu.classList.remove('translate-x-full');
-      });
-      btnClose.addEventListener('click', () => {
-        menu.classList.add('translate-x-full');
-      });
-    }
-  </script>
-
+  <!-- Layout Scripts Removered: Logout forms are handled by React (AvatarMenu) -->
   <script define:vars={{ _uid: user.id, _email: user.email ?? '', _name: userNome, _showBubble: pathname.startsWith('/app/suporte') }}>
     function _syncChatwoot() {
       window.$chatwoot.setUser(_uid, { email: _email, name: _name });

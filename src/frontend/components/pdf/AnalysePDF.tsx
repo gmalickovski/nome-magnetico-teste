@@ -842,6 +842,7 @@ interface Analysis {
   numero_destino: number | null;
   numero_motivacao: number | null;
   numero_missao: number | null;
+  numero_impressao: number | null;
   numero_personalidade: number | null;
   bloqueios: Bloqueio[];
   debitos_carmicos?: DebitoCarmicoInfo[] | null;
@@ -935,8 +936,8 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
     { label: 'Expressão', value: analysis.numero_expressao },
     { label: 'Destino', value: analysis.numero_destino },
     { label: 'Motivação', value: analysis.numero_motivacao },
+    { label: 'Impressão', value: analysis.numero_impressao },
     { label: 'Missão', value: analysis.numero_missao },
-    { label: 'Impressão', value: analysis.numero_personalidade },
   ];
 
   const bloqueios: Bloqueio[] = Array.isArray(analysis.bloqueios)

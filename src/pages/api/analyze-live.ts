@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { calcularTodosTriangulos, detectarBloqueios } from '@/backend/numerology/triangle';
-import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao } from '@/backend/numerology/numbers';
+import { calcularExpressao, calcularDestino, calcularMotivacao, calcularImpressao, calcularMissao } from '@/backend/numerology/numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '@/backend/numerology/karmic';
 import { avaliarCompatibilidade } from '@/backend/numerology/harmonization';
 import { calcularScore } from '@/backend/numerology/score';
@@ -34,7 +34,8 @@ export const POST: APIRoute = async ({ request }) => {
     const expressao = calcularExpressao(body.nome_candidato);
     const destino = calcularDestino(bdDataStr);
     const motivacao = calcularMotivacao(body.nome_candidato);
-    const missao = calcularMissao(body.nome_candidato);
+    const impressao = calcularImpressao(body.nome_candidato);
+    const missao = calcularMissao(body.nome_candidato, bdDataStr);
 
     // Kármico
     const licoesCarmicas = detectarLicoesCarmicas(body.nome_candidato);
@@ -48,6 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
       licoesCarmicas: licoesCarmicas.length,
       tendenciasOcultas: tendenciasOcultas.length,
       debitosCarmicos: debitosCarmicos.length,
+      debitosCarmicoFixos: debitosCarmicos.filter(d => d.fixo).length,
       compatibilidade,
     });
 
@@ -58,6 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
         expressao,
         destino,
         motivacao,
+        impressao,
         missao
       },
       licoesCarmicas,

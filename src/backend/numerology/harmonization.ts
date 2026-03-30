@@ -115,6 +115,7 @@ export function avaliarNome(
     licoesCarmicas: licoesCarmicas.length,
     tendenciasOcultas: tendenciasOcultas.length,
     debitosCarmicos: debitosCarmicos.length,
+    debitosCarmicoFixos: debitosCarmicos.filter(d => d.fixo).length,
     compatibilidade,
   });
 

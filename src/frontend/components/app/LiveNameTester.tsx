@@ -195,8 +195,12 @@ export function LiveNameTester({ birthName, birthDate }: Props) {
                     <span className="block text-2xl font-bold text-purple-400">{result.numeros.motivacao}</span>
                   </div>
                   <div className="text-center">
+                    <span className="block text-xs text-gray-400 uppercase">Impressão</span>
+                    <span className="block text-2xl font-bold text-white">{result.numeros.impressao}</span>
+                  </div>
+                  <div className="text-center">
                     <span className="block text-xs text-gray-400 uppercase">Missão</span>
-                    <span className="block text-2xl font-bold text-white">{result.numeros.missao}</span>
+                    <span className="block text-2xl font-bold text-yellow-400">{result.numeros.missao}</span>
                   </div>
               </div>
            </div>

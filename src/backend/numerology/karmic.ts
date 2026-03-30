@@ -222,10 +222,20 @@ export function detectarTendenciasOcultas(nomeCompleto: string): TendenciaOculta
 // DÉBITOS KÁRMICOS (13, 14, 16, 19)
 // ================================================================
 
+export type DebitoFonte = 'dia_natalicio' | 'destino' | 'motivacao' | 'expressao';
+
 export interface DebitoCarmicoInfo {
   numero: number; // 13, 14, 16 ou 19
   titulo: string;
   descricao: string;
+  /** Origens que geraram este débito */
+  fontes: DebitoFonte[];
+  /**
+   * true  → vem APENAS do dia de nascimento e/ou Destino (imutáveis).
+   *         Nenhuma variação de nome pode eliminar este débito.
+   * false → vem também de Motivação ou Expressão (mutáveis pelo nome).
+   */
+  fixo: boolean;
 }
 
 export const DEBITOS_CARMICOS_MAP: Record<number, Omit<DebitoCarmicoInfo, 'numero'>> = {
@@ -262,8 +272,14 @@ const NUMERO_PARA_DEBITO: Record<number, number> = {
 /**
  * Calcula os débitos kármicos presentes na pessoa.
  * Fontes:
- *   1. Dia de nascimento ∈ {13, 14, 16, 19} → débito direto
- *   2. Destino, Motivação ou Expressão ∈ {4, 5, 7, 1} → débito correspondente
+ *   1. Dia de nascimento ∈ {13, 14, 16, 19} → débito direto (FIXO)
+ *   2. Destino ∈ {1, 4, 5, 7} → débito correspondente (FIXO)
+ *   3. Motivação ∈ {1, 4, 5, 7} → débito correspondente (variável)
+ *   4. Expressão ∈ {1, 4, 5, 7} → débito correspondente (variável)
+ *
+ * Um débito é `fixo = true` quando sua única origem é dia_natalicio e/ou destino
+ * (imutáveis pela data de nascimento). Se também vier de Motivação ou Expressão,
+ * `fixo = false` — pode ser eliminado por uma variação do nome.
  */
 export function calcularDebitosCarmicos(
   dataNascimento: string, // DD/MM/YYYY
@@ -271,27 +287,45 @@ export function calcularDebitosCarmicos(
   numeroMotivacao: number,
   numeroExpressao: number
 ): DebitoCarmicoInfo[] {
-  const debitos = new Set<number>();
+  // Acumula as fontes de cada débito
+  const debitoFontes = new Map<number, Set<DebitoFonte>>();
 
-  // 1. Dia de nascimento
+  const adicionar = (numero: number, fonte: DebitoFonte) => {
+    if (!debitoFontes.has(numero)) debitoFontes.set(numero, new Set());
+    debitoFontes.get(numero)!.add(fonte);
+  };
+
+  // 1. Dia de nascimento (fixo)
   const partes = dataNascimento.split('/');
   const dia = partes[0] ? parseInt(partes[0], 10) : 0;
   if ([13, 14, 16, 19].includes(dia)) {
-    debitos.add(dia);
+    adicionar(dia, 'dia_natalicio');
   }
 
-  // 2. Destino, Motivação, Expressão
-  for (const num of [numeroDestino, numeroMotivacao, numeroExpressao]) {
-    const reduzido = reduzirNumero(num, false);
-    const debito = NUMERO_PARA_DEBITO[reduzido];
-    if (debito !== undefined) {
-      debitos.add(debito);
-    }
-  }
+  // 2. Destino (fixo — deriva da data de nascimento)
+  const dDebito = NUMERO_PARA_DEBITO[reduzirNumero(numeroDestino, false)];
+  if (dDebito !== undefined) adicionar(dDebito, 'destino');
 
-  return Array.from(debitos)
-    .sort((a, b) => a - b)
-    .map(n => ({ numero: n, ...DEBITOS_CARMICOS_MAP[n]! }));
+  // 3. Motivação (variável — depende das vogais do nome)
+  const mDebito = NUMERO_PARA_DEBITO[reduzirNumero(numeroMotivacao, false)];
+  if (mDebito !== undefined) adicionar(mDebito, 'motivacao');
+
+  // 4. Expressão (variável — depende de todas as letras do nome)
+  const eDebito = NUMERO_PARA_DEBITO[reduzirNumero(numeroExpressao, false)];
+  if (eDebito !== undefined) adicionar(eDebito, 'expressao');
+
+  return Array.from(debitoFontes.entries())
+    .sort(([a], [b]) => a - b)
+    .map(([numero, fontesSet]) => {
+      const fontes = Array.from(fontesSet) as DebitoFonte[];
+      const fixo = fontes.every(f => f === 'dia_natalicio' || f === 'destino');
+      return {
+        numero,
+        ...DEBITOS_CARMICOS_MAP[numero]!,
+        fontes,
+        fixo,
+      };
+    });
 }
 
 /**

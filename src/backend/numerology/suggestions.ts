@@ -3,7 +3,7 @@
  */
 
 import { calcularTrianguloDaVida } from './triangle';
-import { calcularExpressao, calcularMotivacao, calcularMissao } from './numbers';
+import { calcularExpressao, calcularMotivacao, calcularImpressao } from './numbers';
 import { reduzirNumero } from './core';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from './karmic';
 import { calcularScore } from './score';
@@ -13,7 +13,7 @@ export interface VariacaoNome {
   nome: string;
   numerosExpressao: number;
   motivacao: number;
-  missao: number;
+  impressao: number;
   temBloqueio: boolean;
   score: number;
   justificativa: string;
@@ -132,7 +132,7 @@ export function scoreVariacao(
   const triangulo = calcularTrianguloDaVida(nomeSugerido);
   const expressao = calcularExpressao(nomeSugerido);
   const motivacao = calcularMotivacao(nomeSugerido);
-  const missao = calcularMissao(nomeSugerido);
+  const impressao = calcularImpressao(nomeSugerido);
   const temBloqueio = (triangulo.sequenciasNegativas ?? []).length > 0;
 
   const licoes = detectarLicoesCarmicas(nomeSugerido);
@@ -147,6 +147,7 @@ export function scoreVariacao(
     licoesCarmicas: licoes.length,
     tendenciasOcultas: tendencias.length,
     debitosCarmicos: debitos.length,
+    debitosCarmicoFixos: debitos.filter(d => d.fixo).length,
     compatibilidade,
   });
 
@@ -165,7 +166,7 @@ export function scoreVariacao(
     nome: nomeSugerido,
     numerosExpressao: expressao,
     motivacao,
-    missao,
+    impressao,
     temBloqueio,
     score,
     justificativa: justificativas.join(' | '),

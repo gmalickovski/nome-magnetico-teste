@@ -1,0 +1,52 @@
+{
+    "name": "AUX - Listar Inboxes Chatwoot (obter IDs)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "GET",
+                "path": "aux-get-inbox-id",
+                "options": {}
+            },
+            "id": "aux-0001-webhook",
+            "name": "Trigger Manual",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [0, 300],
+            "webhookId": "aux-get-inbox-id"
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "https://suporte.studiomlk.com.br/api/v1/accounts/1/inboxes",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        { "name": "api_access_token", "value": "8FsqBLpvNJhZZ73XXiad2XvK" }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "aux-0002-inboxes",
+            "name": "Listar Inboxes",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [256, 300]
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Trigger Manual": {
+            "main": [[{ "node": "Listar Inboxes", "type": "main", "index": 0 }]]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "aux-inbox-id-v1",
+    "meta": {
+        "instanceId": "23eff0a49bd119e4a18afa8c0c7575eefe279312d40ead3f0f9b4dd1a181437f"
+    },
+    "id": "aux-get-inbox-id-v1",
+    "tags": []
+}

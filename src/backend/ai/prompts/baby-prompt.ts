@@ -114,7 +114,7 @@ ${isSurpresa
 
 ## 🎭 5. O Temperamento da Criança
 
-Com base nos números de **Motivação (${melhorNome?.motivacao ?? destino})** e **Impressão (${melhorNome?.missao ?? '—'})** do nome escolhido, descreva como esta criança naturalmente será:
+Com base nos números de **Motivação (${melhorNome?.motivacao ?? destino})** e **Impressão (${melhorNome?.impressao ?? '—'})** do nome escolhido, descreva como esta criança naturalmente será:
 
 - **Mundo Emocional:** Como ela processa emoções, lida com frustrações e demonstra afeto
 - **Aprendizado e Estudos:** Qual estilo de aprendizagem favorece este temperamento, como ela absorve conhecimento

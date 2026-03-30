@@ -14,7 +14,7 @@
  */
 
 import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from '../triangle';
-import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao, calcularPersonalidade } from '../numbers';
+import { calcularExpressao, calcularDestino, calcularMotivacao, calcularMissao, calcularImpressao } from '../numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../karmic';
 import { avaliarCompatibilidade } from '../harmonization';
 import { calcularScore } from '../score';
@@ -181,8 +181,8 @@ export function analisarNomeEmpresa(
   const sequencias = todasSequenciasNegativas(todos);
   const expressao = calcularExpressao(nomeEmpresa);
   const motivacao = calcularMotivacao(nomeEmpresa);
-  const missao = calcularMissao(nomeEmpresa);
-  const impressao = calcularPersonalidade(nomeEmpresa); // 1ª palavra da empresa
+  const missao = calcularMissao(nomeEmpresa, dataNascimentoSocio);
+  const impressao = calcularImpressao(nomeEmpresa);
   const destinoSocio = calcularDestino(dataNascimentoSocio);
   const destinoEmpresa = dataFundacao ? calcularDestino(dataFundacao) : null;
   const licoes = detectarLicoesCarmicas(nomeEmpresa);
@@ -198,6 +198,7 @@ export function analisarNomeEmpresa(
     licoesCarmicas: licoes.length,
     tendenciasOcultas: tendencias.length,
     debitosCarmicos: debitos.length,
+    debitosCarmicoFixos: debitos.filter(d => d.fixo).length,
     compatibilidade: compatibilidadeSocio,
     compatibilidadeSecundaria: compatibilidadeEmpresa ?? undefined,
   });
