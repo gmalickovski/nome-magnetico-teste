@@ -1,0 +1,203 @@
+{
+    "name": "Nome Magnético - Sync FAQ RAG Embeddings",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "sync-faq-rag",
+                "options": {}
+            },
+            "id": "wh-001",
+            "name": "Webhook (Supabase DB)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [-700, 300],
+            "webhookId": "sync-faq-rag"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Extrai faq_item_id e dados independente do tipo de evento\n// DELETE usa old_record; INSERT/UPDATE usa record\nconst body = $json.body;\nconst type = body.type;\nconst record = type === 'DELETE' ? body.old_record : body.record;\n\nif (!record?.id) return [];\n\nreturn [{\n  json: {\n    type,\n    faq_item_id: record.id,\n    record\n  }\n}];"
+            },
+            "id": "code-extract",
+            "name": "Extrair Evento",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [-460, 300]
+        },
+        {
+            "parameters": {
+                "operation": "delete",
+                "tableId": "faq_embeddings",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "faq_item_id",
+                            "condition": "eq",
+                            "keyValue": "={{ $json.faq_item_id }}"
+                        }
+                    ]
+                }
+            },
+            "id": "sup-del",
+            "name": "Remover Embedding Antigo",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [-220, 300],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "Q8FUTrO3QSkHxr8B",
+                    "name": "Supabase Cloude - Nome Magnético"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": { "caseSensitive": true },
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $('Extrair Evento').item.json.type }}",
+                            "rightValue": "DELETE",
+                            "operator": { "type": "string", "operation": "notEquals" }
+                        },
+                        {
+                            "leftValue": "={{ $('Extrair Evento').item.json.record?.is_active }}",
+                            "rightValue": false,
+                            "operator": { "type": "boolean", "operation": "notEquals" }
+                        }
+                    ],
+                    "combinator": "and"
+                }
+            },
+            "id": "if-embed",
+            "name": "Deve Embedar?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [20, 300]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Monta o documento para o Default Data Loader\n// pageContent = texto completo para embedding\n// metadata    = campos auxiliares salvos no JSONB (facilitam filtros e rastreamento)\nconst r = $('Extrair Evento').item.json.record;\n\n// Texto rico: pergunta + resposta markdown completa\nconst pageContent = `Pergunta: ${r.question}\\n\\nResposta:\\n${r.answer_markdown ?? ''}`;\n\n// Metadata salvo no JSONB da tabela faq_embeddings\n// Permite ao agente filtrar por categoria, slug, destaque etc.\nconst metadata = {\n  faq_item_id:  r.id,\n  slug:         r.slug             ?? null,\n  category_id:  r.category_id      ?? null,\n  is_featured:  r.is_featured      ?? false,\n  meta_title:   r.meta_title       ?? r.question,\n  meta_tags:    r.meta_tags        ?? []\n};\n\nreturn [{ json: { pageContent, metadata } }];"
+            },
+            "id": "code-doc",
+            "name": "Montar Documento",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [260, 180]
+        },
+        {
+            "parameters": {
+                "mode": "insert",
+                "tableName": {
+                    "__rl": true,
+                    "value": "faq_embeddings",
+                    "mode": "id"
+                },
+                "options": {
+                    "queryName": "match_faq_embeddings"
+                }
+            },
+            "id": "vs-insert",
+            "name": "Supabase Vector Store",
+            "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+            "typeVersion": 1,
+            "position": [500, 180],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "Q8FUTrO3QSkHxr8B",
+                    "name": "Supabase Cloude - Nome Magnético"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "model": "text-embedding-3-small",
+                "options": {}
+            },
+            "id": "emb-openai",
+            "name": "OpenAI Embeddings",
+            "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+            "typeVersion": 1,
+            "position": [600, 420],
+            "credentials": {
+                "openAiApi": {
+                    "id": "",
+                    "name": "OpenAI — Nome Magnético"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "dataType": "json",
+                "jsonMode": "expressionData",
+                "expression": "={{ $json.pageContent }}",
+                "options": {
+                    "metadata": {
+                        "metadataValues": [
+                            { "name": "faq_item_id",  "value": "={{ $json.metadata.faq_item_id }}" },
+                            { "name": "slug",          "value": "={{ $json.metadata.slug }}" },
+                            { "name": "category_id",   "value": "={{ $json.metadata.category_id }}" },
+                            { "name": "is_featured",   "value": "={{ $json.metadata.is_featured }}" },
+                            { "name": "meta_title",    "value": "={{ $json.metadata.meta_title }}" },
+                            { "name": "meta_tags",     "value": "={{ $json.metadata.meta_tags?.join(', ') }}" }
+                        ]
+                    }
+                }
+            },
+            "id": "doc-loader",
+            "name": "Default Data Loader",
+            "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+            "typeVersion": 1,
+            "position": [380, 420]
+        },
+        {
+            "parameters": {
+                "chunkSize": 1500,
+                "chunkOverlap": 150,
+                "options": {}
+            },
+            "id": "splitter",
+            "name": "Recursive Character Text Splitter",
+            "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+            "typeVersion": 1,
+            "position": [380, 600]
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Webhook (Supabase DB)": {
+            "main": [[{ "node": "Extrair Evento", "type": "main", "index": 0 }]]
+        },
+        "Extrair Evento": {
+            "main": [[{ "node": "Remover Embedding Antigo", "type": "main", "index": 0 }]]
+        },
+        "Remover Embedding Antigo": {
+            "main": [[{ "node": "Deve Embedar?", "type": "main", "index": 0 }]]
+        },
+        "Deve Embedar?": {
+            "main": [
+                [{ "node": "Montar Documento", "type": "main", "index": 0 }],
+                []
+            ]
+        },
+        "Montar Documento": {
+            "main": [[{ "node": "Supabase Vector Store", "type": "main", "index": 0 }]]
+        },
+        "OpenAI Embeddings": {
+            "ai_embedding": [[{ "node": "Supabase Vector Store", "type": "ai_embedding", "index": 0 }]]
+        },
+        "Default Data Loader": {
+            "ai_document": [[{ "node": "Supabase Vector Store", "type": "ai_document", "index": 0 }]]
+        },
+        "Recursive Character Text Splitter": {
+            "ai_text_splitter": [[{ "node": "Default Data Loader", "type": "ai_text_splitter", "index": 0 }]]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "id": "",
+    "tags": []
+}

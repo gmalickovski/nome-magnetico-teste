@@ -34,12 +34,16 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response('OK', { status: 200 });
   }
 
-  const articleId = String(article.id ?? '');
-  const title     = String(article.title ?? '');
-  const content   = String(article.content ?? ''); // Chatwoot armazena markdown
-  const status    = String(article.status ?? 'published');
-  const isActive  = status === 'published';
-  const slug      = article.slug ? String(article.slug) : null;
+  const articleId      = String(article.id ?? '');
+  const title          = String(article.title ?? '');
+  const content        = String(article.content ?? ''); // Chatwoot armazena markdown
+  const status         = String(article.status ?? 'published');
+  const isActive       = status === 'published';
+  const slug           = article.slug ? String(article.slug) : null;
+  const meta           = article.meta as Record<string, unknown> | null;
+  const metaTitle      = meta?.title ? String(meta.title) : null;
+  const metaDesc       = meta?.description ? String(meta.description) : null;
+  const metaTags       = Array.isArray(meta?.tags) ? (meta!.tags as unknown[]).map(String) : null;
 
   if (!articleId || !title) return new Response('OK', { status: 200 });
 
@@ -74,8 +78,11 @@ export const POST: APIRoute = async ({ request }) => {
     is_active:           isActive,
     updated_at:          new Date().toISOString(),
   };
-  if (slug) upsertData.slug = slug;
-  if (categoryId) upsertData.category_id = categoryId;
+  if (slug)        upsertData.slug             = slug;
+  if (categoryId)  upsertData.category_id      = categoryId;
+  if (metaTitle)   upsertData.meta_title        = metaTitle;
+  if (metaDesc)    upsertData.meta_description  = metaDesc;
+  if (metaTags)    upsertData.meta_tags         = metaTags;
 
   const { error } = await supabase
     .from('faq_items')

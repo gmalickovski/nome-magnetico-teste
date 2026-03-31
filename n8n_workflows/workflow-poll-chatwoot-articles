@@ -1,0 +1,222 @@
+{
+    "name": "Nome Magnético - Poll Chatwoot Articles → Supabase",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [{ "field": "minutes", "minutesInterval": 15 }]
+                }
+            },
+            "id": "sch-001",
+            "name": "A cada 15 minutos",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1,
+            "position": [-400, 300]
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/articles",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        { "name": "api_access_token", "value": "8FsqBLpvNJhZZ73XXiad2XvK" }
+                    ]
+                },
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        { "name": "locale", "value": "pt_BR" },
+                        { "name": "page",   "value": "1" }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "fetch-001",
+            "name": "Buscar Artigos (pág 1)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [-160, 300]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Extrai array de artigos do payload Chatwoot\nconst payload = $input.first().json;\nconst articles = payload.payload ?? [];\n\nif (!articles.length) return [];\n\n// Retorna cada artigo como item separado\nreturn articles.map(a => ({\n  json: {\n    chatwoot_article_id: String(a.id),\n    question:            a.title ?? '',\n    answer_markdown:     a.content ?? '',\n    slug:                a.slug ?? null,\n    is_active:           a.status === 'published',\n    meta_title:          a.meta?.title ?? null,\n    meta_description:    a.meta?.description ?? null,\n    meta_tags:           Array.isArray(a.meta?.tags) ? a.meta.tags : null,\n    chatwoot_updated_at: a.updated_at ?? null,\n    chatwoot_category_id: a.category?.id ?? null\n  }\n}));"
+            },
+            "id": "code-001",
+            "name": "Normalizar Artigos",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [80, 300]
+        },
+        {
+            "parameters": {
+                "operation": "select",
+                "tableId": "faq_items",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "chatwoot_article_id",
+                            "condition": "eq",
+                            "keyValue": "={{ $json.chatwoot_article_id }}"
+                        }
+                    ]
+                },
+                "returnAll": false,
+                "limit": 1
+            },
+            "id": "sup-001",
+            "name": "Buscar no Supabase",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [320, 300],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "Q8FUTrO3QSkHxr8B",
+                    "name": "Supabase Cloude - Nome Magnético"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Decide se precisa atualizar:\n// - Artigo novo (não existe no Supabase) → sempre atualiza\n// - Artigo existente → só se updated_at do Chatwoot for mais recente\nconst article    = $('Normalizar Artigos').item.json;\nconst existing   = $input.first().json ?? null;\n\nif (!existing || !existing.id) {\n  // Artigo novo\n  return [{ json: { ...article, needs_update: true, is_new: true } }];\n}\n\nconst cwUpdated  = article.chatwoot_updated_at ? new Date(article.chatwoot_updated_at) : null;\nconst dbUpdated  = existing.updated_at ? new Date(existing.updated_at) : null;\n\nconst needsUpdate = !cwUpdated || !dbUpdated || cwUpdated > dbUpdated;\n\nreturn [{ json: { ...article, existing_id: existing.id, needs_update: needsUpdate, is_new: false } }];"
+            },
+            "id": "code-002",
+            "name": "Verificar se Mudou",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [560, 300]
+        },
+        {
+            "parameters": {
+                "dataType": "boolean",
+                "value1": "={{ $json.needs_update }}",
+                "rules": {
+                    "rules": [
+                        { "value2": true, "output": 0 }
+                    ]
+                },
+                "fallbackOutput": 1
+            },
+            "id": "sw-001",
+            "name": "Precisa Atualizar?",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 1,
+            "position": [800, 300]
+        },
+        {
+            "parameters": {
+                "operation": "select",
+                "tableId": "faq_categories",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "chatwoot_category_id",
+                            "condition": "eq",
+                            "keyValue": "={{ $json.chatwoot_category_id }}"
+                        }
+                    ]
+                },
+                "returnAll": false,
+                "limit": 1
+            },
+            "id": "sup-002",
+            "name": "Mapear Categoria",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [1040, 180],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "Q8FUTrO3QSkHxr8B",
+                    "name": "Supabase Cloude - Nome Magnético"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Monta o objeto para upsert no Supabase\nconst article  = $('Verificar se Mudou').item.json;\nconst catRow   = $input.first().json ?? null;\n\nconst upsert = {\n  chatwoot_article_id: article.chatwoot_article_id,\n  question:            article.question,\n  answer_markdown:     article.answer_markdown,\n  is_active:           article.is_active,\n  updated_at:          new Date().toISOString(),\n};\n\nif (article.slug)             upsert.slug             = article.slug;\nif (article.meta_title)       upsert.meta_title        = article.meta_title;\nif (article.meta_description) upsert.meta_description  = article.meta_description;\nif (article.meta_tags)        upsert.meta_tags         = article.meta_tags;\nif (catRow?.id)               upsert.category_id       = catRow.id;\n\nreturn [{ json: upsert }];"
+            },
+            "id": "code-003",
+            "name": "Montar Upsert",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [1280, 180]
+        },
+        {
+            "parameters": {
+                "operation": "upsert",
+                "tableId": "faq_items",
+                "conflictColumns": "chatwoot_article_id",
+                "fieldsUi": {
+                    "fieldValues": [
+                        { "fieldId": "chatwoot_article_id", "fieldValue": "={{ $json.chatwoot_article_id }}" },
+                        { "fieldId": "question",            "fieldValue": "={{ $json.question }}" },
+                        { "fieldId": "answer_markdown",     "fieldValue": "={{ $json.answer_markdown }}" },
+                        { "fieldId": "is_active",           "fieldValue": "={{ $json.is_active }}" },
+                        { "fieldId": "updated_at",          "fieldValue": "={{ $json.updated_at }}" },
+                        { "fieldId": "slug",                "fieldValue": "={{ $json.slug }}" },
+                        { "fieldId": "meta_title",          "fieldValue": "={{ $json.meta_title }}" },
+                        { "fieldId": "meta_description",    "fieldValue": "={{ $json.meta_description }}" },
+                        { "fieldId": "meta_tags",           "fieldValue": "={{ $json.meta_tags }}" },
+                        { "fieldId": "category_id",         "fieldValue": "={{ $json.category_id }}" }
+                    ]
+                }
+            },
+            "id": "sup-003",
+            "name": "Upsert no Supabase",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [1520, 180],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "Q8FUTrO3QSkHxr8B",
+                    "name": "Supabase Cloude - Nome Magnético"
+                }
+            }
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "A cada 15 minutos": {
+            "main": [[{ "node": "Buscar Artigos (pág 1)", "type": "main", "index": 0 }]]
+        },
+        "Buscar Artigos (pág 1)": {
+            "main": [[{ "node": "Normalizar Artigos", "type": "main", "index": 0 }]]
+        },
+        "Normalizar Artigos": {
+            "main": [[{ "node": "Buscar no Supabase", "type": "main", "index": 0 }]]
+        },
+        "Buscar no Supabase": {
+            "main": [[{ "node": "Verificar se Mudou", "type": "main", "index": 0 }]]
+        },
+        "Verificar se Mudou": {
+            "main": [[{ "node": "Precisa Atualizar?", "type": "main", "index": 0 }]]
+        },
+        "Precisa Atualizar?": {
+            "main": [
+                [{ "node": "Mapear Categoria", "type": "main", "index": 0 }],
+                []
+            ]
+        },
+        "Mapear Categoria": {
+            "main": [[{ "node": "Montar Upsert", "type": "main", "index": 0 }]]
+        },
+        "Montar Upsert": {
+            "main": [[{ "node": "Upsert no Supabase", "type": "main", "index": 0 }]]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "versionId": "poll-chatwoot-v1",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "23eff0a49bd119e4a18afa8c0c7575eefe279312d40ead3f0f9b4dd1a181437f"
+    },
+    "id": "",
+    "tags": []
+}

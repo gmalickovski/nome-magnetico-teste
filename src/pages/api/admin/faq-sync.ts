@@ -83,6 +83,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const status     = String(article.status ?? 'published');
     const isActive   = status === 'published';
     const slug       = article.slug != null ? String(article.slug) : null;
+    const meta       = article.meta as Record<string, unknown> | null;
+    const metaTitle  = meta?.title ? String(meta.title) : null;
+    const metaDesc   = meta?.description ? String(meta.description) : null;
+    const metaTags   = Array.isArray(meta?.tags) ? (meta!.tags as unknown[]).map(String) : null;
 
     if (!articleId || !title) continue;
 
@@ -103,6 +107,9 @@ export const GET: APIRoute = async ({ url, locals }) => {
           is_active:           isActive,
           category_id:         supabaseCategoryId,
           updated_at:          new Date().toISOString(),
+          ...(metaTitle  && { meta_title:       metaTitle }),
+          ...(metaDesc   && { meta_description: metaDesc }),
+          ...(metaTags   && { meta_tags:        metaTags }),
         },
         { onConflict: 'chatwoot_article_id' },
       );

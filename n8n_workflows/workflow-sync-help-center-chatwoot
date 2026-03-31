@@ -76,7 +76,7 @@
                 },
                 "sendBody": true,
                 "specifyBody": "json",
-                "jsonBody": "={\n  \"title\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.question) }},\n  \"content\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.answer_markdown) }},\n  \"category_id\": {{ Number($json[0].chatwoot_category_id) || null }},\n  \"author_id\": 1,\n  \"status\": \"published\"\n}",
+                "jsonBody": "={\n  \"title\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.question) }},\n  \"content\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.answer_markdown) }},\n  \"category_id\": {{ Number($json[0].chatwoot_category_id) || null }},\n  \"author_id\": 1,\n  \"status\": \"published\",\n  \"meta\": {\n    \"title\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.meta_title || $node[\"Webhook (Supabase)\"].json.body.record.question) }},\n    \"description\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.meta_description || '') }},\n    \"tags\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.meta_tags || []) }}\n  }\n}",
                 "options": {}
             },
             "id": "47c87752-c829-42d1-b5c4-8870b0a6ffe1",
@@ -164,7 +164,7 @@
                 },
                 "sendBody": true,
                 "specifyBody": "json",
-                "jsonBody": "={\n  \"title\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.question) }},\n  \"content\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.answer_markdown) }},\n  \"category_id\": {{ Number($json[0].chatwoot_category_id) || null }},\n  \"author_id\": 1,\n  \"status\": \"published\"\n}",
+                "jsonBody": "={\n  \"title\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.question) }},\n  \"content\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.answer_markdown) }},\n  \"category_id\": {{ Number($json[0].chatwoot_category_id) || null }},\n  \"author_id\": 1,\n  \"status\": \"published\",\n  \"meta\": {\n    \"title\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.meta_title || $node[\"Webhook (Supabase)\"].json.body.record.question) }},\n    \"description\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.meta_description || '') }},\n    \"tags\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.meta_tags || []) }}\n  }\n}",
                 "options": {}
             },
             "id": "3f147eb4-6468-4282-800d-583c4ed36f13",

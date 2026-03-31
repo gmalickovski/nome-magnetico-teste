@@ -1,0 +1,59 @@
+{
+    "name": "AUX - Listar Categorias Chatwoot Help Center",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "trigger-manual",
+            "name": "Executar Manualmente",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [-400, 300]
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/categories",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "api_access_token",
+                            "value": "8FsqBLpvNJhZZ73XXiad2XvK"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "http-categories",
+            "name": "Buscar Categorias",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [-160, 300]
+        },
+        {
+            "parameters": {
+                "jsCode": "const data = $input.first().json;\nconst cats = data.payload ?? data ?? [];\n\nreturn cats.map(c => ({\n  json: {\n    chatwoot_id:  c.id,\n    nome:         c.name,\n    slug_chatwoot: c.slug ?? null,\n    locale:       c.locale ?? null,\n    posicao:      c.position ?? null\n  }\n}));"
+            },
+            "id": "code-extract",
+            "name": "Extrair IDs",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [80, 300]
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Executar Manualmente": {
+            "main": [[{ "node": "Buscar Categorias", "type": "main", "index": 0 }]]
+        },
+        "Buscar Categorias": {
+            "main": [[{ "node": "Extrair IDs", "type": "main", "index": 0 }]]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "id": "",
+    "tags": []
+}

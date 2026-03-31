@@ -3,10 +3,31 @@
 -- Formato: Markdown (renderizado em runtime via `marked`)
 
 -- ================================================================
+-- COLUNAS SEO (idempotente — não quebra se já existirem)
+-- ================================================================
+
+ALTER TABLE public.faq_items
+  ADD COLUMN IF NOT EXISTS meta_title        text,
+  ADD COLUMN IF NOT EXISTS meta_description  text,
+  ADD COLUMN IF NOT EXISTS meta_tags         text[];
+
+-- ================================================================
+-- CATEGORIAS (idempotente — garante que existem antes dos itens)
+-- ================================================================
+
+INSERT INTO public.faq_categories (title, slug, order_index, is_active)
+VALUES
+  ('Sobre a Análise',          'sobre-analise',    1, true),
+  ('Numerologia Cabalística',  'numerologia',      2, true),
+  ('Pagamento e Acesso',       'pagamento-acesso', 3, true),
+  ('Suporte Técnico',          'suporte',          4, true)
+ON CONFLICT (slug) DO NOTHING;
+
+-- ================================================================
 -- CATEGORIA: Sobre a Análise
 -- ================================================================
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'sobre-analise'),
   'O que é o Nome Magnético?',
@@ -17,10 +38,17 @@ O sistema calcula **5 números principais**, constrói **4 Triângulos Numeroló
 A partir dessa análise, o Nome Magnético sugere variações do nome que eliminam esses bloqueios, mantendo harmonia com o seu Número de Destino. O resultado é um relatório profundo gerado por IA, disponível também em **PDF premium**.
 
 São 3 produtos: **Nome Social** (transformação pessoal), **Nome Bebê** (escolha do nome do filho) e **Nome Empresa** (branding vibracional).$$,
-  1, true, true, 'o-que-e-nome-magnetico'
-ON CONFLICT (slug) DO NOTHING;
+  1, true, true, 'o-que-e-nome-magnetico',
+  'O que é o Nome Magnético? — Análise Numerológica Cabalística',
+  'Descubra o que é o Nome Magnético: análise numerológica cabalística que revela bloqueios energéticos no seu nome e sugere variações harmoniosas.',
+  ARRAY['nome magnetico', 'numerologia cabalistica', 'analise numerologica', 'bloqueios energeticos', 'nome social']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'sobre-analise'),
   'Para quem é indicado o Nome Magnético?',
@@ -32,10 +60,17 @@ $$O Nome Magnético é ideal para pessoas que buscam autoconhecimento aplicado:
 - **Pessoas em transição de vida** buscando um novo começo alinhado numerologicamente
 
 Não é necessário conhecimento prévio de numerologia. O relatório explica cada cálculo de forma clara e acessível.$$,
-  2, true, false, 'para-quem-e-indicado'
-ON CONFLICT (slug) DO NOTHING;
+  2, true, false, 'para-quem-e-indicado',
+  'Para quem é indicado o Nome Magnético?',
+  'O Nome Magnético é para profissionais, empreendedores, pais e pessoas em transição de vida que buscam autoconhecimento numerológico.',
+  ARRAY['para quem e o nome magnetico', 'numerologia para profissionais', 'nome empresa numerologia', 'nome bebe numerologia']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'sobre-analise'),
   'O relatório é gerado por IA? É confiável?',
@@ -46,10 +81,17 @@ O processo ocorre em duas etapas:
 2. **IA** recebe os resultados estruturados e cria uma narrativa personalizada de 3.000+ palavras, integrando todos os dados
 
 Isso garante que os números são exatos e verificáveis, enquanto a IA entrega uma interpretação profunda e humanizada.$$,
-  3, true, true, 'relatorio-ia-confiavel'
-ON CONFLICT (slug) DO NOTHING;
+  3, true, true, 'relatorio-ia-confiavel',
+  'O relatório do Nome Magnético é gerado por IA? É confiável?',
+  'Os cálculos numerológicos são 100% matemáticos e determinísticos. A IA apenas cria a narrativa — os números são exatos e verificáveis.',
+  ARRAY['relatorio ia numerologia', 'inteligencia artificial numerologia', 'confiabilidade analise', 'claude anthropic']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'sobre-analise'),
   'O que está incluído na análise do Nome Social?',
@@ -64,10 +106,17 @@ $$A análise do **Nome Social** é a análise completa do seu nome de nascimento
 - **Top 3 Nomes Magnéticos**: variações do nome sem bloqueios, rankeadas por score de harmonia
 - **Guia de 30 dias**: plano prático para adotar o novo nome progressivamente
 - **PDF premium** para download$$,
-  4, true, true, 'o-que-inclui-nome-social'
-ON CONFLICT (slug) DO NOTHING;
+  4, true, true, 'o-que-inclui-nome-social',
+  'O que está incluído na análise do Nome Social? — Nome Magnético',
+  'A análise do Nome Social inclui 5 números, 4 triângulos numerológicos, bloqueios kármicos, top 3 nomes harmoniosos, guia de 30 dias e PDF premium.',
+  ARRAY['nome social analise', 'o que inclui analise numerologica', 'triangulos numerologicos', 'bloqueios karmicos', 'pdf numerologia']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'sobre-analise'),
   'O que é o produto Nome Bebê?',
@@ -80,10 +129,17 @@ Você informa o **sobrenome da família**, a **data de nascimento do bebê** e u
 - **Arquétipo da Criança**: "Que herói esse filho será?" com referências culturais e mitológicas
 - **Perfil de temperamento** da criança a partir dos números
 - **Guia de criação personalizado**: como educar respeitando a natureza numérica da criança$$,
-  5, true, false, 'o-que-e-nome-bebe'
-ON CONFLICT (slug) DO NOTHING;
+  5, true, false, 'o-que-e-nome-bebe',
+  'O que é o Nome Bebê? — Escolha o Melhor Nome para Seu Filho',
+  'O Nome Bebê analisa nomes candidatos e rankeia por harmonia numerológica, garantindo um nome livre de bloqueios e alinhado ao Destino da criança.',
+  ARRAY['nome bebe numerologia', 'escolher nome filho numerologia', 'melhor nome para bebe', 'arquetipo crianca', 'harmonia numerologica']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'sobre-analise'),
   'O que é o produto Nome Empresa?',
@@ -96,10 +152,17 @@ Você informa o **nome e data de nascimento do sócio principal**, a **data de f
 - **Bloqueios de risco**: sequências que podem se manifestar como riscos operacionais ou financeiros
 - **Compatibilidade com o Destino do sócio** e com a data de fundação da empresa
 - **Orientação estratégica**: tom de voz, paleta e tipografia alinhados numerologicamente$$,
-  6, true, false, 'o-que-e-nome-empresa'
-ON CONFLICT (slug) DO NOTHING;
+  6, true, false, 'o-que-e-nome-empresa',
+  'O que é o Nome Empresa? — Branding Vibracional por Numerologia',
+  'O Nome Empresa analisa candidatos de nome empresarial pela numerologia cabalística, identificando riscos de bloqueio e o arquétipo da marca.',
+  ARRAY['nome empresa numerologia', 'branding vibracional', 'escolher nome empresa numerologia', 'arquetipo marca', 'numerologia empresarial']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'sobre-analise'),
   'O que é o arquétipo na análise?',
@@ -113,24 +176,38 @@ O número de Expressão calculado na numerologia cabalística revela naturalment
 No relatório você recebe não apenas "seu número é X", mas uma narrativa completa: qual arquétipo você carrega, figuras históricas que representam sua jornada, e como a **sombra** desse arquétipo pode estar criando bloqueios.
 
 Para empresas, o Arquétipo da Marca identifica matematicamente o posicionamento natural do nome no mercado — o mesmo trabalho que consultorias de branding cobram dezenas de milhares de reais para entregar.$$,
-  7, true, false, 'o-que-e-arquetipo'
-ON CONFLICT (slug) DO NOTHING;
+  7, true, false, 'o-que-e-arquetipo',
+  'O que é o arquétipo na análise numerológica? — Nome Magnético',
+  'Os arquétipos de Jung são revelados pelo número de Expressão. Descubra qual padrão universal seu nome carrega: Herói, Sábio, Criador ou Guardião.',
+  ARRAY['arquetipo jung numerologia', 'arquetipo numerologico', 'numero expressao', 'sombra arquetipo', 'arquetipo marca']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'sobre-analise'),
   'Posso baixar a análise em PDF?',
 $$Sim. Toda análise inclui um **PDF premium** disponível para download, com identidade visual cuidadosa e personalizado com seu nome e análise completa.
 
 O PDF fica acessível diretamente na página de resultados, no botão **"Baixar PDF"**, durante todo o período de acesso (30 dias).$$,
-  8, true, false, 'posso-baixar-pdf'
-ON CONFLICT (slug) DO NOTHING;
+  8, true, false, 'posso-baixar-pdf',
+  'Posso baixar minha análise numerológica em PDF? — Nome Magnético',
+  'Sim! Toda análise do Nome Magnético inclui um PDF premium personalizado disponível para download durante os 30 dias de acesso.',
+  ARRAY['baixar pdf numerologia', 'relatorio pdf', 'download analise numerologica', 'pdf premium']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
 -- ================================================================
 -- CATEGORIA: Numerologia Cabalística
 -- ================================================================
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'numerologia'),
   'O que é a numerologia cabalística?',
@@ -143,10 +220,17 @@ Diferentemente da numerologia popular de revistas, a versão cabalística usada 
 - **Lógica piramidal** de redução que revela padrões ocultos nas sequências numéricas
 
 O princípio fundamental é que cada letra carrega uma frequência vibratória. Quando essas frequências se combinam no nome, formam um padrão matemático único que pode revelar bloqueios, potenciais e qualidades da alma.$$,
-  1, true, true, 'o-que-e-numerologia-cabalistica'
-ON CONFLICT (slug) DO NOTHING;
+  1, true, true, 'o-que-e-numerologia-cabalistica',
+  'O que é a numerologia cabalística? — Como funciona o método',
+  'A numerologia cabalística tem 2.000 anos de origem na Cabala judaica. Aprenda como o sistema converte letras em frequências numéricas para revelar bloqueios no nome.',
+  ARRAY['numerologia cabalistica', 'cabala judaica', 'o que e numerologia', 'frequencia vibracional nome', 'reducao piramidal']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'numerologia'),
   'O que são os bloqueios numerológicos?',
@@ -165,10 +249,17 @@ Cada sequência tem um significado:
 - **999** — Bloqueio de Compaixão Universal: dificuldade de encerrar ciclos
 
 Mudar a forma como você assina o nome altera a equação numerológica e pode dissolver esses padrões.$$,
-  2, true, true, 'o-que-sao-bloqueios'
-ON CONFLICT (slug) DO NOTHING;
+  2, true, true, 'o-que-sao-bloqueios',
+  'O que são bloqueios numerológicos? — 111 a 999 explicados',
+  'Bloqueios numerológicos são sequências repetidas (111 a 999) nos triângulos do nome que indicam travamentos em saúde, relacionamentos, carreira e criatividade.',
+  ARRAY['bloqueios numerologicos', '111 numerologia', '333 bloqueio', '888 numerologia', 'sequencias repetidas nome', 'triangulo numerologico bloqueio']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'numerologia'),
   'Como funcionam os 4 Triângulos Numerológicos?',
@@ -182,10 +273,17 @@ $$O Nome Magnético analisa seu nome através de **4 Triângulos Numerológicos*
 | **Destino** | Resultados práticos, missão, previsões de longo prazo |
 
 Os bloqueios são detectados em todos os 4 triângulos e consolidados na análise. Isso garante uma visão completa — não apenas o padrão superficial, mas as camadas mais profundas do nome.$$,
-  3, true, false, 'como-funcionam-triangulos'
-ON CONFLICT (slug) DO NOTHING;
+  3, true, false, 'como-funcionam-triangulos',
+  'Como funcionam os 4 Triângulos Numerológicos? — Nome Magnético',
+  'O Nome Magnético usa 4 Triângulos Numerológicos (Vida, Pessoal, Social e Destino) para revelar bloqueios em cada dimensão da sua jornada.',
+  ARRAY['triangulos numerologicos', 'triangulo da vida', 'triangulo do destino', 'numerologia cabalistica triangulos', '4 triangulos nome']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'numerologia'),
   'Quais são os 5 números principais calculados?',
@@ -198,10 +296,17 @@ $$O Nome Magnético calcula **5 números principais** a partir do nome completo 
 5. **Personalidade**: calculado a partir do *primeiro nome* apenas — revela sua face social
 
 A harmonia entre Expressão e Destino é um dos critérios centrais para a seleção do Nome Magnético ideal.$$,
-  4, true, false, 'quais-sao-5-numeros'
-ON CONFLICT (slug) DO NOTHING;
+  4, true, false, 'quais-sao-5-numeros',
+  'Quais são os 5 números principais da numerologia cabalística?',
+  'A numerologia cabalística calcula 5 números: Expressão, Destino, Motivação (vogais), Missão (consoantes) e Personalidade (primeiro nome).',
+  ARRAY['5 numeros numerologia', 'numero expressao', 'numero destino', 'numero motivacao alma', 'numero missao impressao', 'numero personalidade']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'numerologia'),
   'O que são as Lições Kármicas?',
@@ -215,10 +320,17 @@ Exemplos:
 - Ausência do **2**: desafios em parceria, diplomacia e sensibilidade
 
 O relatório identifica suas lições kármicas e oferece orientações práticas para trabalhar cada uma delas de forma consciente.$$,
-  5, true, false, 'o-que-sao-licoes-karmicas'
-ON CONFLICT (slug) DO NOTHING;
+  5, true, false, 'o-que-sao-licoes-karmicas',
+  'O que são as Lições Kármicas na numerologia? — Nome Magnético',
+  'Lições Kármicas são os números ausentes no nome (de 1 a 8), indicando qualidades não desenvolvidas que a alma veio aprender nesta vida.',
+  ARRAY['licoes karmicas numerologia', 'numeros ausentes nome', 'karma numerologia', 'qualidades karmicas', 'encarnacao numerologia']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'numerologia'),
   'O que são as Tendências Ocultas?',
@@ -232,14 +344,21 @@ Exemplos:
 - Excesso do **8**: obsessão por resultados materiais, workaholism
 
 O Nome Magnético identifica suas tendências ocultas, explica seus impactos e sugere como o novo nome pode ajudar a equilibrar esses padrões.$$,
-  6, true, false, 'o-que-sao-tendencias-ocultas'
-ON CONFLICT (slug) DO NOTHING;
+  6, true, false, 'o-que-sao-tendencias-ocultas',
+  'O que são as Tendências Ocultas na numerologia? — Nome Magnético',
+  'Tendências Ocultas são números que aparecem 4+ vezes no nome, representando excessos que se tornam limitações sem equilíbrio.',
+  ARRAY['tendencias ocultas numerologia', 'excesso numerologico', 'numeros repetidos nome', 'desequilibrio numerologico', 'padrao oculto nome']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
 -- ================================================================
 -- CATEGORIA: Pagamento e Acesso
 -- ================================================================
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'pagamento-acesso'),
   'Quais são os preços de cada produto?',
@@ -252,10 +371,17 @@ $$O Nome Magnético oferece **pagamento único** por análise, sem assinatura me
 | **Nome Empresa** | R$ 147 | 30 dias |
 
 O acesso inclui a análise completa, o PDF premium e todos os recursos da plataforma pelo período contratado.$$,
-  1, true, true, 'quais-sao-os-precos'
-ON CONFLICT (slug) DO NOTHING;
+  1, true, true, 'quais-sao-os-precos',
+  'Quanto custa o Nome Magnético? — Preços dos produtos',
+  'Nome Social R$97, Nome Bebê R$127, Nome Empresa R$147 — pagamento único com 30 dias de acesso. Sem assinatura mensal.',
+  ARRAY['preco nome magnetico', 'quanto custa analise numerologica', 'nome social preco', 'nome bebe preco', 'nome empresa preco', 'pagamento unico numerologia']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'pagamento-acesso'),
   'Por que o pagamento é único e não uma assinatura?',
@@ -264,10 +390,17 @@ $$O modelo de pagamento único foi escolhido porque o produto **entrega valor co
 O ciclo natural do produto é: analisar → adotar o nome → perceber mudanças → querer reavaliar meses ou anos depois. Por isso, o acesso tem **validade de 30 dias**: tempo suficiente para absorver a análise e implementar as mudanças.
 
 Quando quiser uma nova análise — após adotar o nome, por exemplo, ou para uma ocasião especial — simplesmente adquire um novo acesso.$$,
-  2, true, false, 'por-que-pagamento-unico'
-ON CONFLICT (slug) DO NOTHING;
+  2, true, false, 'por-que-pagamento-unico',
+  'Por que o pagamento é único e não uma assinatura? — Nome Magnético',
+  'O Nome Magnético usa pagamento único porque entrega valor completo em uma análise. Sem cobrança recorrente — 30 dias de acesso por análise.',
+  ARRAY['pagamento unico numerologia', 'sem assinatura mensal', 'acesso 30 dias', 'compra unica analise']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'pagamento-acesso'),
   'Por quanto tempo tenho acesso após a compra?',
@@ -279,10 +412,17 @@ Durante esse período você pode:
 - Revisar todos os detalhes do relatório
 
 Após os 30 dias o acesso expira. Para novas análises, basta adquirir um novo acesso.$$,
-  3, true, false, 'por-quanto-tempo-acesso'
-ON CONFLICT (slug) DO NOTHING;
+  3, true, false, 'por-quanto-tempo-acesso',
+  'Por quanto tempo tenho acesso após comprar o Nome Magnético?',
+  'O acesso ao Nome Magnético é válido por 30 dias a partir da compra, com downloads ilimitados do PDF e acesso completo ao relatório.',
+  ARRAY['acesso 30 dias nome magnetico', 'validade acesso numerologia', 'tempo de acesso analise', 'expiracao acesso']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'pagamento-acesso'),
   'Quais formas de pagamento são aceitas?',
@@ -294,14 +434,21 @@ Formas de pagamento aceitas:
 - **Google Pay / Apple Pay** (quando disponível no dispositivo)
 
 Os dados do cartão são processados diretamente pelo Stripe e nunca armazenados em nossos servidores.$$,
-  4, true, false, 'formas-de-pagamento'
-ON CONFLICT (slug) DO NOTHING;
+  4, true, false, 'formas-de-pagamento',
+  'Quais formas de pagamento são aceitas no Nome Magnético?',
+  'Aceitamos cartão de crédito, débito, Google Pay e Apple Pay via Stripe. Seus dados nunca são armazenados em nossos servidores.',
+  ARRAY['formas de pagamento nome magnetico', 'pagar com cartao numerologia', 'stripe pagamento', 'google pay apple pay', 'pagamento seguro']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
 -- ================================================================
 -- CATEGORIA: Suporte Técnico
 -- ================================================================
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'suporte'),
   'Não consigo acessar minha análise. O que fazer?',
@@ -314,10 +461,17 @@ $$Se você está com dificuldades de acesso, experimente os seguintes passos:
 5. **Confirme o email de cadastro** — se é seu primeiro acesso, pode ser necessário confirmar o email recebido
 
 Se o problema persistir, entre em contato pelo chat ou pelo email **suporte@nomemagnetico.com.br**.$$,
-  1, true, false, 'nao-consigo-acessar'
-ON CONFLICT (slug) DO NOTHING;
+  1, true, false, 'nao-consigo-acessar',
+  'Não consigo acessar minha análise — o que fazer? — Nome Magnético',
+  'Não consegue acessar? Verifique o email de cadastro, redefina sua senha e confirme o email de ativação. Suporte disponível via chat ou email.',
+  ARRAY['nao consigo acessar nome magnetico', 'problema acesso analise', 'recuperar senha numerologia', 'suporte tecnico nome magnetico']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
 
-INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug)
+INSERT INTO public.faq_items (category_id, question, answer_markdown, order_index, is_active, is_featured, slug, meta_title, meta_description, meta_tags)
 SELECT
   (SELECT id FROM public.faq_categories WHERE slug = 'suporte'),
   'Como entro em contato com o suporte?',
@@ -328,5 +482,12 @@ $$Nossa equipe está disponível por três canais:
 - **Email direto**: suporte@nomemagnetico.com.br para questões urgentes.
 
 Se você é cliente com plano ativo, acesse a [Central de Suporte](/app/suporte) para atendimento prioritário.$$,
-  2, true, false, 'como-contatar-suporte'
-ON CONFLICT (slug) DO NOTHING;
+  2, true, false, 'como-contatar-suporte',
+  'Como entrar em contato com o suporte do Nome Magnético?',
+  'Fale com o suporte via chat ao vivo, formulário de contato ou email suporte@nomemagnetico.com.br. Resposta em até 24 horas úteis.',
+  ARRAY['contato suporte nome magnetico', 'email suporte numerologia', 'chat suporte', 'atendimento nome magnetico', 'suporte@nomemagnetico.com.br']
+ON CONFLICT (slug) DO UPDATE SET
+  answer_markdown   = EXCLUDED.answer_markdown,
+  meta_title        = EXCLUDED.meta_title,
+  meta_description  = EXCLUDED.meta_description,
+  meta_tags         = EXCLUDED.meta_tags;
