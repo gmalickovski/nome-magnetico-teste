@@ -1,10 +1,9 @@
 /**
- * Sistema de notificações via n8n + Resend.
+ * Sistema de notificações via n8n.
  * NUNCA enviar email diretamente — sempre via este módulo.
  *
  * Roteamento:
- *   eventos support.* → N8N_WEBHOOK_SUPORTE
- *   todos os outros   → N8N_WEBHOOK_TRANSACIONAL
+ *   todos os eventos → N8N_WEBHOOK_TRANSACIONAL
  */
 
 type NotificationEvent =
@@ -15,9 +14,6 @@ type NotificationEvent =
   | 'payment.failed'
   | 'subscription.expiring_soon'
   | 'subscription.expired'
-  | 'support.ticket_created'
-  | 'support.ticket_reply'
-  | 'support.ticket_resolved'
   | 'admin.new_user'
   | 'admin.new_payment';
 
@@ -31,18 +27,10 @@ interface NotificationPayload {
   analysisUrl?: string;
   amount?: number;
   productName?: string;
-  ticketId?: string;
-  ticketSubject?: string;
   daysLeft?: number;
   renewUrl?: string;
   userId?: string;
   productType?: string;
-  nome?: string;
-  assunto?: string;
-  mensagem?: string;
-  tipo_dispositivo?: string;
-  versao_app?: string;
-  user_id?: string;
   [key: string]: unknown;
 }
 
@@ -74,14 +62,10 @@ export async function notify(
   event: NotificationEvent,
   payload: NotificationPayload
 ): Promise<void> {
-  const isSupport = event.startsWith('support.');
-  const webhookUrl = isSupport
-    ? process.env.N8N_WEBHOOK_SUPORTE
-    : process.env.N8N_WEBHOOK_TRANSACIONAL;
+  const webhookUrl = process.env.N8N_WEBHOOK_TRANSACIONAL;
 
   if (!webhookUrl) {
-    const varName = isSupport ? 'N8N_WEBHOOK_SUPORTE' : 'N8N_WEBHOOK_TRANSACIONAL';
-    console.warn(`[notify] ${varName} não configurado — notificação ignorada`);
+    console.warn('[notify] N8N_WEBHOOK_TRANSACIONAL não configurado — notificação ignorada');
     return;
   }
 

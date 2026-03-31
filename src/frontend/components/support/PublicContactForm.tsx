@@ -28,7 +28,7 @@ export function PublicContactForm() {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/support/ticket', {
+      const res = await fetch('/api/support/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -41,7 +41,6 @@ export function PublicContactForm() {
 
       if (res.ok) {
         setSent(true);
-        addToast('Mensagem enviada! Retornaremos em até 24 horas.', 'success');
       } else {
         const data = await res.json().catch(() => ({}));
         addToast(data.error ?? 'Erro ao enviar. Tente novamente.', 'error');

@@ -15,7 +15,6 @@ export function SupportForm() {
   const [form, setForm] = useState({ assunto: '', mensagem: '' });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [ticketId, setTicketId] = useState<number | null>(null);
   const { toasts, addToast, removeToast } = useToast();
 
   const isValid = form.assunto.trim() !== '' && form.mensagem.trim().length >= 10;
@@ -26,7 +25,7 @@ export function SupportForm() {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/support/ticket', {
+      const res = await fetch('/api/support/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -36,13 +35,10 @@ export function SupportForm() {
       });
 
       if (res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setTicketId(data.conversationId ?? null);
         setSent(true);
-        addToast('Conversa aberta! Nossa equipe responderá em breve.', 'success');
       } else {
         const data = await res.json().catch(() => ({}));
-        addToast(data.error ?? 'Erro ao enviar ticket. Tente novamente.', 'error');
+        addToast(data.error ?? 'Erro ao enviar mensagem. Tente novamente.', 'error');
       }
     } catch {
       addToast('Erro de conexão. Tente novamente.', 'error');
@@ -55,19 +51,13 @@ export function SupportForm() {
     return (
       <div className="bg-white/5 border border-emerald-500/30 rounded-2xl p-8 text-center">
         <div className="text-4xl mb-4">✅</div>
-        <h3 className="font-cinzel text-xl font-bold text-white mb-2">Conversa aberta!</h3>
-        {ticketId && (
-          <p className="text-xs text-[#D4AF37]/70 font-mono mb-2">
-            Ticket #{ticketId}
-          </p>
-        )}
+        <h3 className="font-cinzel text-xl font-bold text-white mb-2">Mensagem enviada!</h3>
         <p className="text-gray-400 text-sm">
           Nossa equipe responderá em breve. Acompanhe pelo chat no canto da tela.
         </p>
         <button
           onClick={() => {
             setSent(false);
-            setTicketId(null);
             setForm({ assunto: '', mensagem: '' });
           }}
           className="mt-6 text-sm text-[#D4AF37] hover:underline"
@@ -87,7 +77,7 @@ export function SupportForm() {
         <div className="flex items-center gap-3 mb-4">
           <div className="text-2xl">📋</div>
           <div>
-            <h3 className="font-cinzel text-xl font-bold text-white">Abrir Ticket</h3>
+            <h3 className="font-cinzel text-xl font-bold text-white">Enviar Mensagem</h3>
             <p className="text-gray-500 text-sm">Resposta em até 24h</p>
           </div>
         </div>
@@ -111,7 +101,7 @@ export function SupportForm() {
                 backgroundSize: '1em',
               }}
             >
-              <option value="" disabled>Selecione uma opção ou crie uma</option>
+              <option value="" disabled>Selecione uma opção</option>
               {SUBJECT_OPTIONS.map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
@@ -134,9 +124,9 @@ export function SupportForm() {
           />
         </div>
 
-        <Button 
-          type="submit" 
-          loading={loading} 
+        <Button
+          type="submit"
+          loading={loading}
           disabled={!isValid || loading}
           className={`w-full py-3 ${!isValid ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
         >
