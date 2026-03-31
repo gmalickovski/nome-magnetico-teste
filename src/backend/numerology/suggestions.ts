@@ -199,7 +199,7 @@ export function gerarNomesMagneticos(
   const variacoes = gerarVariacoes(nomeCompleto, poolSize, gender);
   const scoredAll = variacoes.map(v => scoreVariacao(v, numeroExpressao, numeroDestino, dataNascimento));
 
-  // Preferência 1: sem bloqueio + score >= minScore
+  // Preferência 1: sem bloqueio + score >= minScore (alvo: excelente alto)
   const primarios = scoredAll
     .filter(v => !v.temBloqueio && v.score >= minScore)
     .sort((a, b) => b.score - a.score);
@@ -208,13 +208,17 @@ export function gerarNomesMagneticos(
     return primarios.slice(0, quantidade);
   }
 
-  // Fallback 1: sem bloqueio (qualquer score)
-  const semBloqueio = scoredAll.filter(v => !v.temBloqueio).sort((a, b) => b.score - a.score);
-  if (semBloqueio.length >= quantidade) {
-    return semBloqueio.slice(0, quantidade);
+  // Fallback 1: sem bloqueio + score >= 70 (mínimo "Excelente" no ScoreDisplay)
+  const SCORE_EXCELENTE = 70;
+  const excelentes = scoredAll
+    .filter(v => !v.temBloqueio && v.score >= SCORE_EXCELENTE)
+    .sort((a, b) => b.score - a.score);
+
+  if (excelentes.length >= quantidade) {
+    return excelentes.slice(0, quantidade);
   }
 
-  // Fallback 2: completar com os melhores com bloqueio
-  const comBloqueio = scoredAll.filter(v => v.temBloqueio).sort((a, b) => b.score - a.score);
-  return [...semBloqueio, ...comBloqueio].slice(0, quantidade);
+  // Fallback 2: sem bloqueio (qualquer score) — NUNCA retornar nomes com bloqueio
+  const semBloqueio = scoredAll.filter(v => !v.temBloqueio).sort((a, b) => b.score - a.score);
+  return semBloqueio.slice(0, quantidade);
 }

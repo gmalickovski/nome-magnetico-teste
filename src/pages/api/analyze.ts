@@ -286,7 +286,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           // Sugestões devem estar acima de 80% (ou do teto se teto < 80).
           const debitosFixosCount = debitosCarmicos.filter(d => d.fixo).length;
           const scoreTeto = calcularScoreTeto(debitosFixosCount);
-          const minScoreSugestoes = Math.min(80, scoreTeto);
+          const minScoreSugestoes = Math.min(80, Math.max(70, scoreTeto));
 
           const variacoes = gerarNomesMagneticos(
             nome_completo,

@@ -94,18 +94,44 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
 <style is:global>
   @import '../styles/global.css';
 
-  /* Chatwoot: reposicionar balão acima da bottom nav no mobile.
-     Usa is:global para ser injetado no <head> com alta prioridade. */
+  /* Chatwoot: reposicionar balão acima da bottom nav no mobile. */
   @media (max-width: 768px) {
     .woot-widget-bubble,
     .woot--bubble-holder,
     .woot-widget-wrap {
       bottom: 80px !important;
     }
-    .woot-widget-bubble {
-      width: 48px !important;
-      height: 48px !important;
-      min-height: 48px !important;
-    }
+  }
+
+  /* Transparência ao rolar — balão Chatwoot */
+  body.is-scrolling .woot-widget-bubble,
+  body.is-scrolling .woot--bubble-holder {
+    opacity: 0.25 !important;
+    transition: opacity 0.3s ease !important;
+  }
+
+  /* Transparência ao rolar — botão PDF mobile */
+  body.is-scrolling #mobile-pdf-btn {
+    opacity: 0.25;
+    transition: opacity 0.3s ease;
+  }
+
+  .woot-widget-bubble,
+  .woot--bubble-holder,
+  #mobile-pdf-btn {
+    transition: opacity 0.3s ease;
   }
 </style>
+
+<script is:inline>
+  (function () {
+    var scrollTimer;
+    window.addEventListener('scroll', function () {
+      document.body.classList.add('is-scrolling');
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(function () {
+        document.body.classList.remove('is-scrolling');
+      }, 1000);
+    }, { passive: true });
+  })();
+</script>

@@ -18,6 +18,10 @@ export const TASK_CONFIG: Record<AITask, TaskConfig> = {
     temperature: 0.6,
     maxTokens: 3000,
   },
+  support_polish: {
+    temperature: 0.4,
+    maxTokens: 1024,
+  },
 };
 
 export function getTaskConfig(task: AITask): TaskConfig {

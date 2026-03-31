@@ -11,7 +11,7 @@ import { buildSuggestionsPrompt, type SuggestionsPromptParams } from './prompts/
 import { buildGuidePrompt, type GuidePromptParams } from './prompts/guide-prompt';
 import { buildBabyAnalysisPrompt, type BabyPromptParams } from './prompts/baby-prompt';
 import { buildCompanyAnalysisPrompt, type CompanyPromptParams } from './prompts/company-prompt';
-import { getModel } from './config/models';
+import { getModel, type AITask } from './config/models';
 import { getArquetipo } from '../numerology/archetypes';
 
 // ================================================================
@@ -20,20 +20,22 @@ import { getArquetipo } from '../numerology/archetypes';
 
 async function runWithGuard(
   buildPrompt: () => string,
-  task: 'analysis' | 'suggestions' | 'guide',
+  task: AITask,
   userId: string | null,
-  analysisId: string | null
+  analysisId: string | null,
+  systemPromptOverride?: string
 ): Promise<string> {
   const guard = new LoopGuard();
   const provider = await getActiveProvider(task);
   const model = getModel(provider, task);
+  const systemPrompt = systemPromptOverride ?? SYSTEM_KABBALISTIC;
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     guard.canAttempt(attempt);
 
     try {
       const userPrompt = buildPrompt();
-      const response = await callAI(SYSTEM_KABBALISTIC, userPrompt, task, provider);
+      const response = await callAI(systemPrompt, userPrompt, task, provider);
 
       guard.recordResponse(response.content, response.tokensInput + response.tokensOutput);
 
@@ -63,7 +65,7 @@ async function runWithGuard(
         console.warn('[Brain] Groq rate limited — fallback automático para OpenAI');
         try {
           const userPrompt = buildPrompt();
-          const fallback = await callAI(SYSTEM_KABBALISTIC, userPrompt, task, 'openai');
+          const fallback = await callAI(systemPrompt, userPrompt, task, 'openai');
           guard.recordResponse(fallback.content, fallback.tokensInput + fallback.tokensOutput);
           await logAIUsage({
             userId,
@@ -206,4 +208,31 @@ export async function generateCompanyAnalysis(
     ? { ...params, arquetipo: getArquetipo(expressaoEmpresa) }
     : params;
   return runWithGuard(() => buildCompanyAnalysisPrompt(paramsWithArquetipo), 'analysis', userId, analysisId);
+}
+
+// ================================================================
+// SUPORTE — POLIMENTO DE RESPOSTA
+// ================================================================
+
+const SYSTEM_SUPPORT_POLISH = `Você é especialista em comunicação ao cliente do Nome Magnético, plataforma premium de numerologia cabalística. Polir mensagens de suporte escritas por agentes humanos antes de enviá-las por e-mail ao cliente.
+
+REGRAS OBRIGATÓRIAS:
+1. Mantenha TODA a informação, instruções e orientações do agente — não omita nada
+2. Corrija gramática, pontuação e clareza
+3. Tom: profissional, empático e acolhedor — condizente com serviço espiritual premium
+4. Se não houver saudação, comece com "Olá, [nome do cliente],"
+5. Se não houver encerramento, finalize com "Atenciosamente,\nEquipe Nome Magnético"
+6. Português brasileiro correto e natural
+7. Retorne APENAS o texto melhorado — sem aspas externas, sem explicações adicionais`;
+
+/**
+ * Polir resposta do agente de suporte antes de enviar ao cliente.
+ * Chamada de sistema (user_id = null) — registrada em ai_usage com task = 'support_polish'.
+ */
+export async function generateSupportPolish(
+  mensagem: string,
+  nomeCliente: string = 'Cliente',
+): Promise<string> {
+  const userPrompt = `Nome do cliente: ${nomeCliente}\n\nTexto do agente para polir:\n\n${mensagem}`;
+  return runWithGuard(() => userPrompt, 'support_polish', null, null, SYSTEM_SUPPORT_POLISH);
 }

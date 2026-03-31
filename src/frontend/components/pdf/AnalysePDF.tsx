@@ -1051,9 +1051,34 @@ export function AnalysePDF({ analysis, magneticNames, userName }: Props) {
               </View>
             ) : (
               debitos.map((d, i) => (
-                <View key={i} style={styles.debitoRow}>
-                  <Text style={styles.debitoTitle}>{capitalizeTitle(d.titulo)}</Text>
+                <View key={i} style={{
+                  ...styles.debitoRow,
+                  borderLeftColor: (d as any).fixo ? '#F59E0B' : '#7C3AED',
+                  backgroundColor: (d as any).fixo ? 'rgba(245,158,11,0.04)' : undefined,
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
+                    <Text style={styles.debitoTitle}>{capitalizeTitle(d.titulo)}</Text>
+                    {(d as any).fixo && (
+                      <View style={{
+                        paddingHorizontal: 5,
+                        paddingVertical: 2,
+                        borderRadius: 3,
+                        backgroundColor: 'rgba(245,158,11,0.15)',
+                        borderWidth: 0.5,
+                        borderColor: '#F59E0B',
+                      }}>
+                        <Text style={{ fontSize: 7, color: '#D97706', fontFamily: 'Helvetica-Bold', letterSpacing: 0.5 }}>
+                          PERMANENTE
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                   <Text style={styles.debitoDesc}>{d.descricao}</Text>
+                  {(d as any).fixo && (
+                    <Text style={{ fontSize: 8, color: '#92400E', marginTop: 4, fontStyle: 'italic' }}>
+                      Ligado ao dia natalício / Destino — não pode ser eliminado por mudança de nome.
+                    </Text>
+                  )}
                 </View>
               ))
             )}
