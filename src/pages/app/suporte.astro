@@ -3,7 +3,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import { FAQSection } from '../../frontend/components/landing/FAQSection';
 import type { FaqItemProps } from '../../frontend/components/landing/FAQSection';
 import { SupportForm } from '../../frontend/components/support/SupportForm';
-import { getFaqs } from '../../backend/notion/faqs';
+import { getSupabaseFaqs } from '../../backend/faqs/getSupabaseFaqs';
 
 const user = Astro.locals.user;
 if (!user) {
@@ -12,9 +12,9 @@ if (!user) {
 
 let faqItems: FaqItemProps[] = [];
 try {
-  faqItems = await getFaqs();
+  faqItems = await getSupabaseFaqs();
 } catch (err) {
-  console.warn('[suporte] Falha ao carregar FAQs do Notion — usando fallback:', err);
+  console.warn('[suporte] Falha ao carregar FAQs do Supabase — usando fallback:', err);
 }
 ---
 

@@ -3,6 +3,16 @@ import LandingLayout from '../layouts/LandingLayout.astro';
 import { LandingHeader } from '../frontend/components/landing/LandingHeader';
 import { LandingFooter } from '../frontend/components/landing/LandingFooter';
 import { PublicContactForm } from '../frontend/components/support/PublicContactForm';
+import { FAQSection } from '../frontend/components/landing/FAQSection';
+import type { FaqItemProps } from '../frontend/components/landing/FAQSection';
+import { getSupabaseFaqs } from '../backend/faqs/getSupabaseFaqs';
+
+let faqItems: FaqItemProps[] = [];
+try {
+  faqItems = await getSupabaseFaqs();
+} catch (err) {
+  console.warn('[suporte] Falha ao carregar FAQs:', err);
+}
 ---
 
 <LandingLayout
@@ -93,6 +103,8 @@ import { PublicContactForm } from '../frontend/components/support/PublicContactF
 
     </div>
   </main>
+
+  <FAQSection items={faqItems} client:visible />
 
   <LandingFooter client:visible />
 </LandingLayout>

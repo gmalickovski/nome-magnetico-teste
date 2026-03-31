@@ -10,14 +10,14 @@ import type { StripePrices } from '../frontend/components/landing/PricingSection
 import { FAQSection } from '../frontend/components/landing/FAQSection';
 import type { FaqItemProps } from '../frontend/components/landing/FAQSection';
 import { LandingFooter } from '../frontend/components/landing/LandingFooter';
-import { getFaqs } from '../backend/notion/faqs';
+import { getSupabaseFaqs } from '../backend/faqs/getSupabaseFaqs';
 import { getStripePrices } from '../backend/payments/prices';
 
 let faqItems: FaqItemProps[] = [];
 try {
-  faqItems = await getFaqs();
+  faqItems = await getSupabaseFaqs({ featuredOnly: true });
 } catch (err) {
-  console.warn('[index] Falha ao carregar FAQs do Notion — usando fallback:', err);
+  console.warn('[index] Falha ao carregar FAQs do Supabase — usando fallback:', err);
 }
 
 let stripePrices: StripePrices | undefined;

@@ -1,22 +1,26 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../backend/db/supabase';
-import { getChatwootConfig, cwUrl } from '../../../backend/support/chatwootClient';
 
 // GET  ?source=chatwoot  → importa artigos do Chatwoot Help Center → UPSERT no Supabase
-//                          (usado para importação inicial ou re-sincronização manual)
-//
-// POST { action: 'migrate-to-chatwoot' }
-//   → dispara o workflow N8N (sync-faq) para cada faq_item sem chatwoot_article_id
-//   → N8N cria o artigo no Chatwoot e salva o chatwoot_article_id de volta no Supabase
-//
-// Fluxo automático (não precisa desta rota):
-//   Supabase DB Webhook → N8N /webhook/sync-faq → Chatwoot API
+// POST { action: 'migrate-to-chatwoot' } → envia FAQs do Supabase → Chatwoot via N8N
 
 async function requireAdmin(locals: App.Locals) {
   const user = locals.user;
   if (!user) return null;
   const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
   return data?.role === 'admin' ? user : null;
+}
+
+function getChatwootCfg() {
+  const base = (process.env.CHATWOOT_BASE_URL ?? '').replace(/\/$/, '');
+  const token = process.env.CHATWOOT_API_TOKEN ?? '';
+  const accountId = process.env.CHATWOOT_ACCOUNT_ID ?? '';
+  if (!base || !token || !accountId) return null;
+  return { base, token, accountId };
+}
+
+function cwUrl(cfg: { base: string; token: string; accountId: string }, path: string, extra = '') {
+  return `${cfg.base}/api/v1/accounts/${cfg.accountId}${path}?api_access_token=${cfg.token}${extra}`;
 }
 
 // ── GET: importar artigos do Chatwoot → Supabase ─────────────────────────────
@@ -31,12 +35,12 @@ export const GET: APIRoute = async ({ url, locals }) => {
     return new Response(JSON.stringify({ error: 'source inválido (use: chatwoot)' }), { status: 400 });
   }
 
-  const cfg = getChatwootConfig();
+  const cfg = getChatwootCfg();
   const portalSlug = (process.env.CHATWOOT_PORTAL_SLUG ?? '').trim();
 
   if (!cfg || !portalSlug) {
     return new Response(
-      JSON.stringify({ error: 'CHATWOOT_PORTAL_SLUG não configurado.' }),
+      JSON.stringify({ error: 'Chatwoot não configurado.' }),
       { status: 503 },
     );
   }
@@ -74,10 +78,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
   for (const article of allArticles) {
     const articleId  = String(article.id ?? '');
     const title      = String(article.title ?? '');
+    // Chatwoot armazena conteúdo em markdown
     const content    = String(article.content ?? '');
     const status     = String(article.status ?? 'published');
     const isActive   = status === 'published';
-    const categoryId = article.category_id != null ? String(article.category_id) : null;
     const slug       = article.slug != null ? String(article.slug) : null;
 
     if (!articleId || !title) continue;
@@ -92,15 +96,13 @@ export const GET: APIRoute = async ({ url, locals }) => {
       .from('faq_items')
       .upsert(
         {
-          chatwoot_article_id:  articleId,
-          chatwoot_category_id: categoryId,
-          question:             title,
-          answer:               content.replace(/<[^>]*>/g, ''),
-          answer_html:          content,
+          chatwoot_article_id: articleId,
+          question:            title,
+          answer_markdown:     content,
           slug,
-          is_active:            isActive,
-          category_id:          supabaseCategoryId,
-          updated_at:           new Date().toISOString(),
+          is_active:           isActive,
+          category_id:         supabaseCategoryId,
+          updated_at:          new Date().toISOString(),
         },
         { onConflict: 'chatwoot_article_id' },
       );
@@ -116,7 +118,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
   return new Response(JSON.stringify({ synced, errors, total: allArticles.length }), { status: 200 });
 };
 
-// ── POST: migrar itens existentes do Supabase → Chatwoot via N8N ─────────────
+// ── POST: migrar itens do Supabase → Chatwoot via N8N ────────────────────────
 export const POST: APIRoute = async ({ request, locals }) => {
   const admin = await requireAdmin(locals);
   if (!admin) {
@@ -142,10 +144,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     );
   }
 
-  // Buscar itens que ainda não foram sincronizados com o Chatwoot
   const { data: items, error: fetchErr } = await supabase
     .from('faq_items')
-    .select('id, question, answer, answer_html, chatwoot_article_id, chatwoot_category_id, is_active, order_index, category_id')
+    .select('id, question, answer_markdown, chatwoot_article_id, is_active, order_index, category_id, slug')
     .is('chatwoot_article_id', null)
     .eq('is_active', true);
 
@@ -164,9 +165,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   let errors = 0;
 
   for (const item of items) {
-    // Simula o payload que o Supabase Database Webhook enviaria ao N8N
-    // N8N espera: POST body = { type, table, record, old_record }
-    // N8N Webhook node expõe como $json.body.*
     const payload = {
       type:       'INSERT',
       table:      'faq_items',
@@ -188,7 +186,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       errors++;
     }
 
-    // Pequeno delay para não sobrecarregar o N8N
     await new Promise(r => setTimeout(r, 200));
   }
 
