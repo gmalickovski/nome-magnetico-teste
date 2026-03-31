@@ -4,6 +4,7 @@ export interface Props {
   description?: string;
   ogImage?: string;
   noIndex?: boolean;
+  hasBottomNav?: boolean;
 }
 
 const {
@@ -11,6 +12,7 @@ const {
   description = 'Descubra os segredos do seu nome com numerologia cabalística. Detecte bloqueios energéticos e encontre seu Nome Magnético.',
   ogImage = '/og-image.jpg',
   noIndex = false,
+  hasBottomNav = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
@@ -23,7 +25,7 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- SEO -->
@@ -64,7 +66,7 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
       rel="stylesheet"
     />
   </head>
-  <body class="bg-[#1a1a1a] text-gray-200 min-h-screen font-inter antialiased">
+  <body class:list={['bg-[#1a1a1a] text-gray-200 min-h-screen font-inter antialiased', { 'has-bottom-nav': hasBottomNav }]}>
     <slot />
     {chatwootBaseUrl && chatwootToken && (
       <script is:inline define:vars={{ chatwootBaseUrl, chatwootToken }}>
@@ -94,11 +96,11 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
 <style is:global>
   @import '../styles/global.css';
 
-  /* Chatwoot: reposicionar balão acima da bottom nav no mobile. */
+  /* Chatwoot: reposicionar balão acima da bottom nav no mobile (apenas páginas com nav). */
   @media (max-width: 768px) {
-    .woot-widget-bubble,
-    .woot--bubble-holder,
-    .woot-widget-wrap {
+    body.has-bottom-nav .woot-widget-bubble,
+    body.has-bottom-nav .woot--bubble-holder,
+    body.has-bottom-nav .woot-widget-wrap {
       bottom: 80px !important;
     }
   }
