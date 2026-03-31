@@ -11,10 +11,7 @@
             "name": "Webhook (Supabase)",
             "type": "n8n-nodes-base.webhook",
             "typeVersion": 1,
-            "position": [
-                -240,
-                560
-            ],
+            "position": [-240, 560],
             "webhookId": "sync-faq-chatwoot"
         },
         {
@@ -23,17 +20,9 @@
                 "value1": "={{ $json.body.type }}",
                 "rules": {
                     "rules": [
-                        {
-                            "value2": "INSERT"
-                        },
-                        {
-                            "value2": "UPDATE",
-                            "output": 1
-                        },
-                        {
-                            "value2": "DELETE",
-                            "output": 2
-                        }
+                        { "value2": "INSERT" },
+                        { "value2": "UPDATE", "output": 1 },
+                        { "value2": "DELETE",  "output": 2 }
                     ]
                 }
             },
@@ -41,10 +30,36 @@
             "name": "Tipo de Evento",
             "type": "n8n-nodes-base.switch",
             "typeVersion": 1,
-            "position": [
-                16,
-                528
-            ]
+            "position": [16, 528]
+        },
+        {
+            "parameters": {
+                "operation": "select",
+                "tableId": "faq_categories",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "id",
+                            "condition": "eq",
+                            "keyValue": "={{ $node[\"Webhook (Supabase)\"].json.body.record.category_id }}"
+                        }
+                    ]
+                },
+                "returnAll": false,
+                "limit": 1
+            },
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "name": "Buscar Categoria (INSERT)",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [256, 368],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "Q8FUTrO3QSkHxr8B",
+                    "name": "Supabase Cloude - Nome Magnético"
+                }
+            }
         },
         {
             "parameters": {
@@ -61,17 +76,14 @@
                 },
                 "sendBody": true,
                 "specifyBody": "json",
-                "jsonBody": "={\n  \"title\": {{ JSON.stringify($json.body.record.question) }},\n  \"content\": {{ JSON.stringify($json.body.record.answer) }},\n  \"category_id\": {{ Number($json.body.record.chatwoot_category_id) }},\n  \"author_id\": {{ 1 }},\n  \"status\": \"published\"\n}",
+                "jsonBody": "={\n  \"title\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.question) }},\n  \"content\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.answer_markdown) }},\n  \"category_id\": {{ Number($json[0].chatwoot_category_id) || null }},\n  \"author_id\": 1,\n  \"status\": \"published\"\n}",
                 "options": {}
             },
             "id": "47c87752-c829-42d1-b5c4-8870b0a6ffe1",
             "name": "Criar Artigo",
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4,
-            "position": [
-                256,
-                368
-            ]
+            "position": [496, 368]
         },
         {
             "parameters": {
@@ -97,13 +109,39 @@
                 }
             },
             "id": "9c72d5ea-4014-45c6-b79c-6fa4f0d570a0",
-            "name": "Supabase - Salvar ID",
+            "name": "Salvar ID Chatwoot",
             "type": "n8n-nodes-base.supabase",
             "typeVersion": 1,
-            "position": [
-                464,
-                368
-            ],
+            "position": [736, 368],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "Q8FUTrO3QSkHxr8B",
+                    "name": "Supabase Cloude - Nome Magnético"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "select",
+                "tableId": "faq_categories",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "id",
+                            "condition": "eq",
+                            "keyValue": "={{ $node[\"Webhook (Supabase)\"].json.body.record.category_id }}"
+                        }
+                    ]
+                },
+                "returnAll": false,
+                "limit": 1
+            },
+            "id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+            "name": "Buscar Categoria (UPDATE)",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [256, 528],
             "credentials": {
                 "supabaseApi": {
                     "id": "Q8FUTrO3QSkHxr8B",
@@ -114,7 +152,7 @@
         {
             "parameters": {
                 "method": "PUT",
-                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/articles/{{ $json.body.record.chatwoot_article_id }}",
+                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/articles/{{ $node[\"Webhook (Supabase)\"].json.body.record.chatwoot_article_id }}",
                 "sendHeaders": true,
                 "headerParameters": {
                     "parameters": [
@@ -126,22 +164,19 @@
                 },
                 "sendBody": true,
                 "specifyBody": "json",
-                "jsonBody": "={\n  \"title\": {{ JSON.stringify($json.body.record.question) }},\n  \"content\": {{ JSON.stringify($json.body.record.answer) }},\n  \"category_id\": {{ Number($json.body.record.chatwoot_category_id) }},\n  \"author_id\": {{ 1 }},\n  \"status\": \"published\"\n}",
+                "jsonBody": "={\n  \"title\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.question) }},\n  \"content\": {{ JSON.stringify($node[\"Webhook (Supabase)\"].json.body.record.answer_markdown) }},\n  \"category_id\": {{ Number($json[0].chatwoot_category_id) || null }},\n  \"author_id\": 1,\n  \"status\": \"published\"\n}",
                 "options": {}
             },
             "id": "3f147eb4-6468-4282-800d-583c4ed36f13",
             "name": "Atualizar Artigo",
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4,
-            "position": [
-                256,
-                528
-            ]
+            "position": [496, 528]
         },
         {
             "parameters": {
                 "method": "PUT",
-                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/articles/{{ $json.body.old_record.chatwoot_article_id }}",
+                "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/portals/nome-magnetico/articles/{{ $node[\"Webhook (Supabase)\"].json.body.old_record.chatwoot_article_id }}",
                 "sendHeaders": true,
                 "headerParameters": {
                     "parameters": [
@@ -160,60 +195,29 @@
             "name": "Arquivar Artigo",
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4,
-            "position": [
-                256,
-                672
-            ]
+            "position": [256, 688]
         }
     ],
     "pinData": {},
     "connections": {
         "Webhook (Supabase)": {
-            "main": [
-                [
-                    {
-                        "node": "Tipo de Evento",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
+            "main": [[{ "node": "Tipo de Evento", "type": "main", "index": 0 }]]
         },
         "Tipo de Evento": {
             "main": [
-                [
-                    {
-                        "node": "Criar Artigo",
-                        "type": "main",
-                        "index": 0
-                    }
-                ],
-                [
-                    {
-                        "node": "Atualizar Artigo",
-                        "type": "main",
-                        "index": 0
-                    }
-                ],
-                [
-                    {
-                        "node": "Arquivar Artigo",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
+                [{ "node": "Buscar Categoria (INSERT)", "type": "main", "index": 0 }],
+                [{ "node": "Buscar Categoria (UPDATE)", "type": "main", "index": 0 }],
+                [{ "node": "Arquivar Artigo",           "type": "main", "index": 0 }]
             ]
         },
+        "Buscar Categoria (INSERT)": {
+            "main": [[{ "node": "Criar Artigo", "type": "main", "index": 0 }]]
+        },
         "Criar Artigo": {
-            "main": [
-                [
-                    {
-                        "node": "Supabase - Salvar ID",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
+            "main": [[{ "node": "Salvar ID Chatwoot", "type": "main", "index": 0 }]]
+        },
+        "Buscar Categoria (UPDATE)": {
+            "main": [[{ "node": "Atualizar Artigo", "type": "main", "index": 0 }]]
         }
     },
     "active": true,
@@ -222,7 +226,7 @@
         "binaryMode": "separate",
         "availableInMCP": false
     },
-    "versionId": "4ab31eca-58eb-4826-9645-04133dac1241",
+    "versionId": "4ab31eca-58eb-4826-9645-04133dac1242",
     "meta": {
         "templateCredsSetupCompleted": true,
         "instanceId": "23eff0a49bd119e4a18afa8c0c7575eefe279312d40ead3f0f9b4dd1a181437f"
