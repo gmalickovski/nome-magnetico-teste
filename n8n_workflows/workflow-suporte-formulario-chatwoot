@@ -16,7 +16,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Normaliza dados do formulário, mapeia labels e prepara conteúdos\nconst body = $json.body || $json;\n\nconst nome     = body.nome     || body.email?.split('@')[0] || 'Usuário';\nconst email    = body.email    || '';\nconst assunto  = body.assunto  || 'Outros';\nconst mensagem = body.mensagem || '';\nconst origem   = body.origem   || 'publico';\nconst userId   = body.user_id  || null;\nconst ts       = body.timestamp || new Date().toISOString();\n\n// Mapeamento assunto → label Chatwoot\n// Crie essas labels em: Chatwoot → Configurações → Labels\nconst labelMap = {\n  // PublicContactForm\n  'Dúvida sobre os planos':       'planos',\n  'Como funciona a numerologia':  'numerologia',\n  'Informações gerais':           'geral',\n  'Parceria ou imprensa':         'parceria',\n  'Outros':                       'outros',\n  // SupportForm (app)\n  'Bug':                          'bug',\n  'Sugestão':                     'sugestao',\n  'Primeiros Passos':             'primeiros-passos',\n  'Assinatura e Planos':          'assinatura',\n  'Conta e Segurança':            'conta',\n  'Solução de Problemas':         'suporte',\n};\n\nconst assuntoLabel = labelMap[assunto] || 'outros';\nconst origemLabel  = origem === 'app' ? 'usuario-app' : 'site-publico';\n\n// Mensagem formatada para o Chatwoot (aparece como primeira msg da conversa)\nconst dataHora = new Date(ts).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });\nconst mensagemChatwoot = [\n  `📋 *Assunto:* ${assunto}`,\n  `🌐 *Origem:* ${origem === 'app' ? 'Área do cliente' : 'Site público'}`,\n  userId ? `👤 *User ID:* ${userId}` : null,\n  `📅 *Enviado em:* ${dataHora}`,\n  ``,\n  mensagem\n].filter(Boolean).join('\\n');\n\n// Email HTML de confirmação para o usuário\nconst emailHtml = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head>\n<body style=\"margin:0;padding:0;background:#0f0f0f;font-family:Arial,sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#0f0f0f;padding:40px 20px;\">\n    <tr><td align=\"center\">\n      <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.2);\">\n        <!-- Header -->\n        <tr><td style=\"background:linear-gradient(135deg,#1a1a1a 0%,#111 100%);padding:40px 40px 30px;text-align:center;border-bottom:1px solid rgba(212,175,55,0.2);\">\n          <h1 style=\"margin:0;color:#D4AF37;font-size:28px;letter-spacing:2px;\">NOME MAGNÉTICO</h1>\n          <p style=\"margin:8px 0 0;color:#a0a0a0;font-size:14px;\">Central de Suporte</p>\n        </td></tr>\n        <!-- Body -->\n        <tr><td style=\"padding:40px;\">\n          <p style=\"color:#e5e7eb;font-size:16px;margin:0 0 20px;\">Olá, <strong style=\"color:#D4AF37;\">${nome}</strong>!</p>\n          <p style=\"color:#a0a0a0;font-size:15px;line-height:1.6;margin:0 0 24px;\">Recebemos sua mensagem e nossa equipe de suporte irá analisá-la em breve.</p>\n          <!-- Assunto Box -->\n          <div style=\"background:#111;border-left:3px solid #D4AF37;border-radius:4px;padding:16px 20px;margin:0 0 24px;\">\n            <p style=\"margin:0;color:#a0a0a0;font-size:12px;text-transform:uppercase;letter-spacing:1px;\">Assunto recebido</p>\n            <p style=\"margin:4px 0 0;color:#e5e7eb;font-size:15px;font-weight:bold;\">${assunto}</p>\n          </div>\n          <p style=\"color:#a0a0a0;font-size:15px;line-height:1.6;margin:0 0 32px;\">Você receberá nossa resposta em até <strong style=\"color:#e5e7eb;\">24 horas úteis</strong>. Para acompanhar, basta responder este email.</p>\n          <p style=\"color:#e5e7eb;font-size:14px;margin:0;\">Atenciosamente,<br><strong style=\"color:#D4AF37;\">Equipe Nome Magnético</strong></p>\n        </td></tr>\n        <!-- Footer -->\n        <tr><td style=\"padding:20px 40px;border-top:1px solid #2a2a2a;text-align:center;\">\n          <p style=\"margin:0;color:#555;font-size:12px;\">suporte@nomemagnetico.com.br</p>\n        </td></tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    nome, email, assunto, mensagem, mensagemChatwoot,\n    emailHtml, origem, userId,\n    labels: [assuntoLabel, origemLabel]\n  }\n}];"
+        "jsCode": "// Normaliza dados do formulário, mapeia labels e prepara conteúdos\nconst body = $json.body || $json;\n\nconst nome     = body.nome     || body.email?.split('@')[0] || 'Usuário';\nconst email    = body.email    || '';\nconst assunto  = body.assunto  || 'Outros';\nconst mensagem = body.mensagem || '';\nconst origem   = body.origem   || 'publico';\nconst userId   = body.user_id  || null;\nconst ts       = body.timestamp || new Date().toISOString();\n\nconst labelMap = {\n  'Dúvida sobre os planos':       'planos',\n  'Como funciona a numerologia':  'numerologia',\n  'Informações gerais':           'geral',\n  'Parceria ou imprensa':         'parceria',\n  'Outros':                       'outros',\n  'Bug':                          'bug',\n  'Sugestão':                     'sugestao',\n  'Primeiros Passos':             'primeiros-passos',\n  'Assinatura e Planos':          'assinatura',\n  'Conta e Segurança':            'conta',\n  'Solução de Problemas':         'suporte',\n};\n\nconst assuntoLabel = labelMap[assunto] || 'outros';\nconst origemLabel  = origem === 'app' ? 'usuario-app' : 'site-publico';\n\nconst dataHora = new Date(ts).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });\nconst mensagemChatwoot = [\n  `📋 *Assunto:* ${assunto}`,\n  `🌐 *Origem:* ${origem === 'app' ? 'Área do cliente' : 'Site público'}`,\n  userId ? `👤 *User ID:* ${userId}` : null,\n  `📅 *Enviado em:* ${dataHora}`,\n  ``,\n  mensagem\n].filter(Boolean).join('\\n');\n\nconst mensagemPreview = mensagem.length > 220\n  ? mensagem.slice(0, 220).trimEnd() + '...'\n  : mensagem;\n\nconst emailHtml = `<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'></head><body style='margin:0;padding:0;background:#f5f5f0;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;'><table width='100%' cellpadding='0' cellspacing='0' style='background:#f5f5f0;padding:48px 0;'><tr><td align='center'><table width='560' cellpadding='0' cellspacing='0' style='background:#ffffff;border-radius:12px;overflow:hidden;'><tr><td style='background:#1a1a1a;padding:32px 40px;text-align:center;'><p style='margin:0;font-family:Georgia,serif;color:#D4AF37;font-size:22px;letter-spacing:3px;font-weight:400;text-transform:uppercase;'>Nome Magn\u00e9tico</p><p style='margin:8px 0 0;color:#a0a0a0;font-size:11px;letter-spacing:2px;text-transform:uppercase;'>Numerologia Cabal\u00edstica</p></td></tr><tr><td style='padding:40px 40px 28px;'><p style='margin:0 0 20px;color:#111;font-size:17px;font-weight:500;'>Ol\u00e1, ${nome}!</p><p style='margin:0 0 24px;color:#444;font-size:15px;line-height:1.7;'>Recebemos sua mensagem e nossa equipe j\u00e1 foi notificada. Faremos o poss\u00edvel para responder o mais breve poss\u00edvel \u2014 geralmente em at\u00e9 1 dia \u00fatil.</p><table width='100%' cellpadding='0' cellspacing='0' style='background:#faf8f2;border-left:4px solid #D4AF37;border-radius:0 6px 6px 0;margin-bottom:28px;'><tr><td style='padding:18px 22px;'><p style='margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Assunto</p><p style='margin:0 0 14px;color:#222;font-size:14px;font-weight:600;'>${assunto}</p><p style='margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Sua mensagem</p><p style='margin:0;color:#555;font-size:14px;line-height:1.6;'>${mensagemPreview}</p></td></tr></table><p style='margin:0;color:#666;font-size:14px;line-height:1.7;'>Caso queira acrescentar alguma informa\u00e7\u00e3o, basta responder diretamente a este email.</p></td></tr><tr><td style='padding:0 40px;'><hr style='border:none;border-top:1px solid #eee;margin:0;'></td></tr><tr><td style='padding:24px 40px 40px;'><p style='margin:0 0 2px;color:#222;font-size:14px;font-weight:600;'>Equipe Nome Magn\u00e9tico</p><p style='margin:0;color:#999;font-size:13px;'>suporte@nomemagnetico.com.br</p></td></tr></table><table width='560' cellpadding='0' cellspacing='0'><tr><td style='padding:20px 0;text-align:center;'><p style='margin:0;color:#aaa;font-size:12px;'>\u00a9 2025 Nome Magn\u00e9tico \u00b7 Todos os direitos reservados</p></td></tr></table></td></tr></table></body></html>`;\n\nreturn [{\n  json: {\n    nome, email, assunto, mensagem, mensagemPreview,\n    mensagemChatwoot, origem, userId,\n    labels: [assuntoLabel, origemLabel],\n    emailHtml\n  }\n}];"
       },
       "id": "code-preparar",
       "name": "Preparar Dados",
@@ -26,23 +26,26 @@
     },
     {
       "parameters": {
-        "operation": "create",
-        "tableId": "leads",
-        "fieldsUi": {
-          "fieldValues": [
-            { "fieldId": "email",   "fieldValue": "={{ $json.email }}" },
-            { "fieldId": "nome",    "fieldValue": "={{ $json.nome }}" },
-            { "fieldId": "saas",    "fieldValue": "nome-magnetico" },
-            { "fieldId": "assunto", "fieldValue": "={{ $json.assunto }}" },
-            { "fieldId": "origem",  "fieldValue": "={{ $json.origem }}" }
+        "operation": "getAll",
+        "tableId": "profiles",
+        "returnAll": false,
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $json.email }}"
+            }
           ]
-        }
+        },
+        "options": {}
       },
-      "id": "sup-lead",
-      "name": "Salvar Lead",
+      "id": "sup-buscar-perfil",
+      "name": "Buscar Perfil",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [-420, 300],
+      "position": [-420, 120],
       "continueOnFail": true,
       "credentials": {
         "supabaseApi": {
@@ -53,13 +56,116 @@
     },
     {
       "parameters": {
-        "jsCode": "// Busca contato no Chatwoot por email; cria se não existir\n// Sempre referencia 'Preparar Dados' para ignorar possível erro em 'Salvar Lead'\nconst dados = $('Preparar Dados').item.json;\n\nconst BASE  = 'https://suporte.studiomlk.com.br/api/v1/accounts/1';\nconst TOKEN = '8FsqBLpvNJhZZ73XXiad2XvK';\nconst headers = {\n  'api_access_token': TOKEN,\n  'Content-Type': 'application/json'\n};\n\n// 1. Buscar contato existente pelo email\nconst searchRes  = await fetch(\n  `${BASE}/contacts/search?q=${encodeURIComponent(dados.email)}&include_contacts=true`,\n  { headers }\n);\nconst searchData = await searchRes.json();\n\nconst contacts = searchData.payload?.contacts ?? [];\nconst match    = contacts.find(c => c.email === dados.email);\n\nlet contactId;\nif (match) {\n  // Contato já existe — reutiliza para manter histórico unificado\n  contactId = match.id;\n} else {\n  // Cria novo contato no Chatwoot\n  const createRes  = await fetch(`${BASE}/contacts`, {\n    method: 'POST',\n    headers,\n    body: JSON.stringify({ name: dados.nome, email: dados.email })\n  });\n  const createData = await createRes.json();\n  contactId = createData.id;\n}\n\nreturn [{ json: { ...dados, contact_id: contactId, inbox_id: 2 } }];"
+        "jsCode": "// Lê resultado do node 'Buscar Perfil' e normaliza para 1 item\n// Recebe 1 item de 'Preparar Dados' (conexão paralela) — nunca recebe 0 itens\n// Acessa resultado do Supabase via expressão $('Buscar Perfil').all()\nconst dadosForm = $input.item.json;\nconst perfis = $('Buscar Perfil').all();\nconst profile = perfis.length > 0 && !perfis[0].json.error ? perfis[0].json : null;\n\nreturn [{\n  json: {\n    ...dadosForm,\n    profileFound: !!profile,\n    profileId: profile?.id || null\n  }\n}];"
+      },
+      "id": "code-verificar-perfil",
+      "name": "Verificar Perfil",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-420, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.profileFound }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-tem-perfil",
+      "name": "Tem Perfil?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [-180, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "subscriptions",
+        "returnAll": false,
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.profileId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sup-buscar-assinatura",
+      "name": "Buscar Assinatura",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [60, 120],
+      "continueOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "Q8FUTrO3QSkHxr8B",
+          "name": "Supabase Cloude - Nome Magnético"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lê resultado de 'Buscar Assinatura' e define label nm-vip ou nm-usuario\n// Recebe 1 item de IF TRUE — nunca 0 itens\n// Acessa subscriptions via $('Buscar Assinatura').all()\nconst dados = $input.item.json;\nconst assinaturas = $('Buscar Assinatura').all();\nconst temAtivo = assinaturas.length > 0 &&\n  !assinaturas[0].json.error &&\n  assinaturas.some(s => s.json.is_active === true);\n\nconst tipoUsuario  = temAtivo ? 'vip'      : 'usuario';\nconst labelUsuario = temAtivo ? 'nm-vip'   : 'nm-usuario';\nconst labelsComStatus = [...(dados.labels || []), labelUsuario];\n\nreturn [{\n  json: {\n    ...dados,\n    tipoUsuario,\n    labelUsuario,\n    labels: labelsComStatus\n  }\n}];"
+      },
+      "id": "code-definir-label",
+      "name": "Definir Label",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [60, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "email",   "fieldValue": "={{ $json.email }}" },
+            { "fieldId": "nome",    "fieldValue": "={{ $json.nome }}" },
+            { "fieldId": "assunto", "fieldValue": "={{ $json.assunto }}" },
+            { "fieldId": "origem",  "fieldValue": "={{ $json.origem }}" }
+          ]
+        }
+      },
+      "id": "sup-salvar-lead",
+      "name": "Salvar Lead",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [60, 480],
+      "continueOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "Q8FUTrO3QSkHxr8B",
+          "name": "Supabase Cloude - Nome Magnético"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepara dados do visitante após salvar lead\n// O Supabase Create retorna o registro criado — recupera dados do formulário via expressão\nconst dadosForm = $('Preparar Dados').item.json;\nconst labelUsuario = 'nm-visitante';\nconst labelsComStatus = [...(dadosForm.labels || []), labelUsuario];\n\nreturn [{\n  json: {\n    ...dadosForm,\n    tipoUsuario: 'visitante',\n    labelUsuario,\n    labels: labelsComStatus\n  }\n}];"
+      },
+      "id": "code-dados-visitante",
+      "name": "Dados Visitante",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Busca contato no Chatwoot por email; cria se não existir\n// Recebe dados completos de 'Definir Label' (usuário/vip) ou 'Dados Visitante'\nconst dados = $input.item.json;\n\nconst BASE  = 'https://suporte.studiomlk.com.br/api/v1/accounts/1';\nconst TOKEN = '8FsqBLpvNJhZZ73XXiad2XvK';\nconst headers = {\n  'api_access_token': TOKEN,\n  'Content-Type': 'application/json'\n};\n\nconst searchRes  = await fetch(\n  `${BASE}/contacts/search?q=${encodeURIComponent(dados.email)}&include_contacts=true`,\n  { headers }\n);\nconst searchData = await searchRes.json();\n\nconst contacts = searchData.payload?.contacts ?? [];\nconst match    = contacts.find(c => c.email === dados.email);\n\nlet contactId;\nif (match) {\n  contactId = match.id;\n} else {\n  const createRes  = await fetch(`${BASE}/contacts`, {\n    method: 'POST',\n    headers,\n    body: JSON.stringify({ name: dados.nome, email: dados.email })\n  });\n  const createData = await createRes.json();\n  contactId = createData.id;\n}\n\nreturn [{ json: { ...dados, contact_id: contactId, inbox_id: 2 } }];"
       },
       "id": "code-contato",
       "name": "Buscar ou Criar Contato",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-180, 300]
+      "position": [300, 300]
     },
     {
       "parameters": {
@@ -73,14 +179,14 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"inbox_id\": {{ $json.inbox_id }},\n  \"contact_id\": {{ $json.contact_id }},\n  \"additional_attributes\": {\n    \"assunto\": {{ JSON.stringify($json.assunto) }},\n    \"origem\": {{ JSON.stringify($json.origem) }}\n  }\n}",
+        "jsonBody": "={\n  \"inbox_id\": {{ $json.inbox_id }},\n  \"contact_id\": {{ $json.contact_id }},\n  \"additional_attributes\": {\n    \"assunto\": {{ JSON.stringify($json.assunto) }},\n    \"origem\": {{ JSON.stringify($json.origem) }},\n    \"tipo_usuario\": {{ JSON.stringify($json.tipoUsuario) }}\n  }\n}",
         "options": {}
       },
       "id": "http-conversa",
       "name": "Criar Conversa",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [60, 300]
+      "position": [540, 300]
     },
     {
       "parameters": {
@@ -101,7 +207,7 @@
       "name": "Enviar Mensagem",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [300, 300]
+      "position": [780, 300]
     },
     {
       "parameters": {
@@ -122,7 +228,7 @@
       "name": "Adicionar Labels",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [540, 300]
+      "position": [1020, 300]
     },
     {
       "parameters": {
@@ -137,7 +243,7 @@
       "name": "Email de Confirmação",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
-      "position": [780, 300],
+      "position": [1260, 300],
       "credentials": {
         "smtp": {
           "id": "",
@@ -152,9 +258,34 @@
       "main": [[{ "node": "Preparar Dados", "type": "main", "index": 0 }]]
     },
     "Preparar Dados": {
-      "main": [[{ "node": "Salvar Lead", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          { "node": "Buscar Perfil",    "type": "main", "index": 0 },
+          { "node": "Verificar Perfil", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Verificar Perfil": {
+      "main": [[{ "node": "Tem Perfil?", "type": "main", "index": 0 }]]
+    },
+    "Tem Perfil?": {
+      "main": [
+        [
+          { "node": "Buscar Assinatura", "type": "main", "index": 0 },
+          { "node": "Definir Label",     "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Salvar Lead", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Definir Label": {
+      "main": [[{ "node": "Buscar ou Criar Contato", "type": "main", "index": 0 }]]
     },
     "Salvar Lead": {
+      "main": [[{ "node": "Dados Visitante", "type": "main", "index": 0 }]]
+    },
+    "Dados Visitante": {
       "main": [[{ "node": "Buscar ou Criar Contato", "type": "main", "index": 0 }]]
     },
     "Buscar ou Criar Contato": {
