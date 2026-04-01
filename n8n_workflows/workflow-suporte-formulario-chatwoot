@@ -1,0 +1,125 @@
+{
+  "name": "Nome Magnético - Suporte: Formulário → Chatwoot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "suport-formulario-nm",
+        "options": {}
+      },
+      "id": "wh-suporte",
+      "name": "Webhook Formulário",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-700, 300],
+      "webhookId": "suport-formulario-nm"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normaliza dados do formulário e prepara labels + mensagem formatada\nconst body = $json.body || $json;\n\nconst nome    = body.nome    || body.email?.split('@')[0] || 'Usuário';\nconst email   = body.email   || 'sem-email@nome-magnetico.com.br';\nconst assunto = body.assunto || 'Outros';\nconst mensagem= body.mensagem|| '';\nconst origem  = body.origem  || 'publico';\nconst userId  = body.user_id || null;\nconst ts      = body.timestamp || new Date().toISOString();\n\n// Mapeamento assunto → label Chatwoot (crie essas labels no Chatwoot antes)\nconst labelMap = {\n  // PublicContactForm\n  'Dúvida sobre os planos':       'planos',\n  'Como funciona a numerologia':  'numerologia',\n  'Informações gerais':           'geral',\n  'Parceria ou imprensa':         'parceria',\n  'Outros':                       'outros',\n  // SupportForm (app)\n  'Bug':                          'bug',\n  'Sugestão':                     'sugestao',\n  'Primeiros Passos':             'primeiros-passos',\n  'Assinatura e Planos':          'assinatura',\n  'Conta e Segurança':            'conta',\n  'Solução de Problemas':         'suporte',\n};\n\nconst assuntoLabel = labelMap[assunto] || 'outros';\nconst origemLabel  = origem === 'app' ? 'usuario-app' : 'site-publico';\n\n// Mensagem formatada que vai aparecer na conversa do Chatwoot\nconst dataHora = new Date(ts).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });\nconst mensagemFormatada = [\n  `📋 *Assunto:* ${assunto}`,\n  `🌐 *Origem:* ${origem === 'app' ? 'Área do cliente' : 'Site público'}`,\n  userId ? `👤 *User ID:* ${userId}` : null,\n  `📅 *Enviado em:* ${dataHora}`,\n  ``,\n  mensagem\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    nome,\n    email,\n    assunto,\n    mensagem,\n    mensagemFormatada,\n    origem,\n    userId,\n    labels: [assuntoLabel, origemLabel]\n  }\n}];"
+      },
+      "id": "code-preparar",
+      "name": "Preparar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Busca contato no Chatwoot por email; cria se não existir\n// Retorna todos os dados + contact_id pronto para o próximo node\nconst dados = $input.first().json;\nconst BASE   = 'https://suporte.studiomlk.com.br/api/v1/accounts/1';\nconst TOKEN  = '8FsqBLpvNJhZZ73XXiad2XvK';\nconst INBOX_ID = 2;\n\nconst headers = {\n  'api_access_token': TOKEN,\n  'Content-Type': 'application/json'\n};\n\n// 1. Buscar contato por email\nconst searchRes  = await fetch(`${BASE}/contacts/search?q=${encodeURIComponent(dados.email)}&include_contacts=true`, { headers });\nconst searchData = await searchRes.json();\n\nconst contacts = searchData.payload?.contacts ?? [];\nconst match    = contacts.find(c => c.email === dados.email);\n\nlet contactId;\nif (match) {\n  contactId = match.id;\n} else {\n  // 2. Criar novo contato\n  const createRes  = await fetch(`${BASE}/contacts`, {\n    method: 'POST',\n    headers,\n    body: JSON.stringify({\n      name:  dados.nome,\n      email: dados.email\n    })\n  });\n  const createData = await createRes.json();\n  contactId = createData.id;\n}\n\nreturn [{ json: { ...dados, contact_id: contactId, inbox_id: INBOX_ID } }];"
+      },
+      "id": "code-contato",
+      "name": "Buscar ou Criar Contato",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/conversations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "8FsqBLpvNJhZZ73XXiad2XvK" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"inbox_id\": {{ $json.inbox_id }},\n  \"contact_id\": {{ $json.contact_id }},\n  \"additional_attributes\": {\n    \"assunto\": {{ JSON.stringify($json.assunto) }},\n    \"origem\": {{ JSON.stringify($json.origem) }}\n  }\n}",
+        "options": {}
+      },
+      "id": "http-conversa",
+      "name": "Criar Conversa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [20, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/conversations/{{ $json.id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "8FsqBLpvNJhZZ73XXiad2XvK" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": {{ JSON.stringify($node[\"Buscar ou Criar Contato\"].json.mensagemFormatada) }},\n  \"message_type\": \"incoming\",\n  \"private\": false\n}",
+        "options": {}
+      },
+      "id": "http-mensagem",
+      "name": "Enviar Mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [260, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://suporte.studiomlk.com.br/api/v1/accounts/1/conversations/{{ $node[\"Criar Conversa\"].json.id }}/labels",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api_access_token", "value": "8FsqBLpvNJhZZ73XXiad2XvK" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"labels\": {{ JSON.stringify($node[\"Buscar ou Criar Contato\"].json.labels) }}\n}",
+        "options": {}
+      },
+      "id": "http-labels",
+      "name": "Adicionar Labels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 300]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Formulário": {
+      "main": [[{ "node": "Preparar Dados", "type": "main", "index": 0 }]]
+    },
+    "Preparar Dados": {
+      "main": [[{ "node": "Buscar ou Criar Contato", "type": "main", "index": 0 }]]
+    },
+    "Buscar ou Criar Contato": {
+      "main": [[{ "node": "Criar Conversa", "type": "main", "index": 0 }]]
+    },
+    "Criar Conversa": {
+      "main": [[{ "node": "Enviar Mensagem", "type": "main", "index": 0 }]]
+    },
+    "Enviar Mensagem": {
+      "main": [[{ "node": "Adicionar Labels", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "",
+  "tags": []
+}
