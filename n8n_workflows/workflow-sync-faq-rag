@@ -44,6 +44,7 @@
             "type": "n8n-nodes-base.supabase",
             "typeVersion": 1,
             "position": [-220, 300],
+            "alwaysOutputData": true,
             "credentials": {
                 "supabaseApi": {
                     "id": "Q8FUTrO3QSkHxr8B",

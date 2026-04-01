@@ -52,6 +52,32 @@ CREATE POLICY "faq_embeddings_auth_read" ON public.faq_embeddings
 -- query_embedding, match_count, filter jsonb
 -- ================================================================
 
+-- ================================================================
+-- Trigger: extrai faq_item_id do metadata JSONB automaticamente
+-- O n8n Supabase Vector Store só insere content/metadata/embedding —
+-- o trigger preenche faq_item_id para satisfazer o NOT NULL constraint
+-- ================================================================
+
+CREATE OR REPLACE FUNCTION public.faq_embeddings_set_faq_item_id()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.faq_item_id IS NULL AND NEW.metadata IS NOT NULL THEN
+    NEW.faq_item_id := (NEW.metadata->>'faq_item_id')::uuid;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS faq_embeddings_before_insert ON public.faq_embeddings;
+
+CREATE TRIGGER faq_embeddings_before_insert
+  BEFORE INSERT ON public.faq_embeddings
+  FOR EACH ROW EXECUTE FUNCTION public.faq_embeddings_set_faq_item_id();
+
+-- ================================================================
+-- Função de busca semântica
+-- ================================================================
+
 CREATE OR REPLACE FUNCTION public.match_faq_embeddings(
   query_embedding vector(1536),
   match_count     int     DEFAULT 5,
