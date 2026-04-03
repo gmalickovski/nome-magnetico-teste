@@ -1,0 +1,318 @@
+---
+/**
+ * NomeEmpresaResultado — seções de conteúdo da análise de Nome Empresarial.
+ * Importado e renderizado por src/pages/app/resultado/[id].astro.
+ *
+ * Ordem das seções (ênfase estratégica — Expressão como magnetismo):
+ *   1. A Estrela de 5 Pontas (Expressão em destaque)
+ *   2. O Melhor Nome Empresarial (score + compatibilidade)
+ *   3. Sinergia Sócio-Empresa
+ *   4. Ranking dos Candidatos
+ *   5. Os 4 Triângulos + Bloqueios
+ *   6. Karma Empresarial
+ *   7. Arquétipo da Marca
+ *   8. Análise Completa da IA
+ */
+import ArquetipoCard from '../ArquetipoCard';
+import TriangleVisualization from '../TriangleVisualization';
+import BlockAnalysisCard from '../BlockAnalysisCard';
+import KarmicDebts from '../KarmicDebts';
+import KarmicLessons from '../KarmicLessons';
+import CompatibilityBadge from '../CompatibilityBadge';
+import ScoreDisplay from '../ScoreDisplay';
+
+interface Props {
+  analysis: any;
+  nomeExibido: string;
+  cincoNumerosEmpresa: Array<{ label: string; sublabel: string; value: number | null; icon: string }>;
+  arquetipoData: any;
+  rankingEmpresa: any;
+  tVida: any;
+  tPessoal: any;
+  tSocial: any;
+  tDestino: any;
+  hasTriangulos: boolean;
+  bloqueios: any[];
+  analiseHtml: string | null;
+}
+
+const {
+  analysis,
+  nomeExibido,
+  cincoNumerosEmpresa,
+  arquetipoData,
+  rankingEmpresa,
+  tVida, tPessoal, tSocial, tDestino,
+  hasTriangulos,
+  bloqueios,
+  analiseHtml,
+} = Astro.props;
+
+const melhorNome = rankingEmpresa?.melhorNome;
+const expressaoEmpresa = melhorNome?.expressao ?? analysis.numero_expressao;
+const outrosNumerosEmpresa = cincoNumerosEmpresa.filter(n => n.label !== 'Expressão');
+const nomesCandidatos: any[] = rankingEmpresa?.nomesCandidatos ?? [];
+---
+
+{/* ── SEÇÃO 1: A ESTRELA DE 5 PONTAS — EXPRESSÃO EM DESTAQUE ───────────── */}
+<section class="mb-12">
+  <div class="mb-3 px-1">
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Identidade Numérica</p>
+    <h2 class="font-cinzel text-2xl font-bold text-white">A Estrela de 5 Pontas da Empresa</h2>
+  </div>
+
+  {/* Expressão em destaque — magnetismo do negócio */}
+  <div class="flex justify-center mb-4">
+    <div class="rounded-2xl bg-[#4A7FC1]/10 border-2 border-[#4A7FC1] p-6 text-center flex flex-col items-center gap-1 w-64 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/10">
+      <p class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#4A7FC1]/70 mb-1">O Magnetismo do Negócio</p>
+      <div class="font-cinzel text-7xl font-bold text-[#4A7FC1] leading-none">{expressaoEmpresa ?? '?'}</div>
+      <div class="text-white text-sm font-semibold mt-1">Expressão</div>
+      <div class="text-[#D4AF37] text-xs">O Dom — O Magnetismo</div>
+    </div>
+  </div>
+
+  {/* 4 números secundários */}
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    {outrosNumerosEmpresa.map(n => (
+      <div class="rounded-2xl bg-white/5 p-4 text-center flex flex-col items-center gap-1">
+        <span class="text-[#4A7FC1]/60 text-lg leading-none">{n.icon}</span>
+        <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{n.value ?? '?'}</div>
+        <div class="text-white text-xs font-medium">{n.label}</div>
+        <div class="text-gray-600 text-[10px]">{n.sublabel}</div>
+      </div>
+    ))}
+  </div>
+</section>
+
+{/* ── SEÇÃO 2: O MELHOR NOME EMPRESARIAL ──────────────────────────────── */}
+{melhorNome && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Nome de Maior Magnetismo</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Nome Empresarial Mais Indicado</h2>
+    </div>
+
+    <div class="rounded-2xl bg-[#4A7FC1]/5 border border-[#4A7FC1]/30 p-6 md:p-8">
+      <div class="text-center mb-6">
+        <span class="text-[10px] text-[#4A7FC1] font-bold uppercase tracking-wider block mb-2">★ Recomendado</span>
+        <div class="font-cinzel text-3xl font-bold text-white">{melhorNome.nomeEmpresa}</div>
+      </div>
+
+      <div class="max-w-xs mx-auto mb-6">
+        <ScoreDisplay client:load score={melhorNome.score} size="lg" />
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4 mb-4 text-sm text-gray-500">
+        <span>Expressão: <span class="text-[#4A7FC1] font-bold">{melhorNome.expressao}</span></span>
+        <span>Motivação: <span class="text-gray-300 font-medium">{melhorNome.motivacao}</span></span>
+        <span>Missão: <span class="text-gray-300 font-medium">{melhorNome.missao}</span></span>
+        <span>Impressão: <span class="text-gray-300 font-medium">{melhorNome.impressao}</span></span>
+      </div>
+
+      <div class="flex flex-col items-center gap-2">
+        <div class="flex flex-wrap gap-2 justify-center">
+          <CompatibilityBadge client:load compatibilidade={melhorNome.compatibilidadeSocio} size="sm" />
+          {melhorNome.compatibilidadeEmpresa && (
+            <CompatibilityBadge client:load compatibilidade={melhorNome.compatibilidadeEmpresa} size="sm" />
+          )}
+        </div>
+        {melhorNome.temBloqueio ? (
+          <span class="text-xs text-red-400">⚠ {melhorNome.bloqueios?.length ?? 1} bloqueio(s) detectado(s)</span>
+        ) : (
+          <span class="text-xs text-emerald-400">✓ Sem bloqueios energéticos</span>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 3: SINERGIA SÓCIO-EMPRESA ────────────────────────────────── */}
+{rankingEmpresa && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Sinergia Numerológica</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Perfil dos Sócios & Destinos</h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="rounded-2xl bg-white/5 p-5 flex flex-col gap-2">
+        <p class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#76746a]">Destino do Sócio Principal</p>
+        <div class="font-cinzel text-5xl font-bold text-[#4A7FC1] leading-none">{rankingEmpresa.destinoSocio ?? '?'}</div>
+        <p class="text-sm text-gray-400">{rankingEmpresa.nomeSocioPrincipal ?? analysis.nome_completo}</p>
+        {melhorNome?.compatibilidadeSocio && (
+          <div class="mt-1">
+            <CompatibilityBadge client:load compatibilidade={melhorNome.compatibilidadeSocio} size="sm" />
+            <p class="text-[10px] text-gray-600 mt-1">Compatibilidade com o nome escolhido</p>
+          </div>
+        )}
+      </div>
+
+      {rankingEmpresa.nomeSocio2 && (
+        <div class="rounded-2xl bg-white/5 p-5 flex flex-col gap-2">
+          <p class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#76746a]">Destino do 2º Sócio</p>
+          <div class="font-cinzel text-5xl font-bold text-[#c084fc] leading-none">{rankingEmpresa.destinoSocio2 ?? '?'}</div>
+          <p class="text-sm text-gray-400">{rankingEmpresa.nomeSocio2}</p>
+        </div>
+      )}
+
+      {rankingEmpresa.destinoEmpresa != null && (
+        <div class="rounded-2xl bg-black/20 border border-[#D4AF37]/20 p-5 flex flex-col gap-2">
+          <p class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#76746a]">Destino da Empresa</p>
+          <div class="font-cinzel text-5xl font-bold text-[#D4AF37] leading-none">{rankingEmpresa.destinoEmpresa}</div>
+          <p class="text-[10px] text-gray-600">Baseado na data de fundação</p>
+          {melhorNome?.compatibilidadeEmpresa && (
+            <div class="mt-1">
+              <CompatibilityBadge client:load compatibilidade={melhorNome.compatibilidadeEmpresa} size="sm" />
+              <p class="text-[10px] text-gray-600 mt-1">Compat. nome ↔ empresa</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 4: RANKING DOS CANDIDATOS ─────────────────────────────────── */}
+{nomesCandidatos.length > 0 && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Análise Comparativa</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Estudo dos Nomes Candidatos</h2>
+    </div>
+    <div class="space-y-4">
+      {nomesCandidatos.map((c: any, idx: number) => (
+        <div class={`rounded-2xl p-5 md:p-6 ${idx === 0 ? 'bg-[#4A7FC1]/5 border border-[#4A7FC1]/20' : 'bg-white/5'}`}>
+          <div class="flex items-start justify-between gap-4 mb-3">
+            <div>
+              {idx === 0 && <span class="text-[10px] text-[#4A7FC1] font-bold uppercase tracking-wider block mb-1">★ Recomendado</span>}
+              {c.origemSugerida === 'ia' && idx !== 0 && <span class="text-[10px] text-[#c084fc] font-bold uppercase tracking-wider block mb-1">✨ Sugestão Numerológica</span>}
+              <span class="font-cinzel text-xl font-bold text-white">{c.nomeEmpresa}</span>
+            </div>
+            <div class="flex flex-col items-end gap-1 shrink-0">
+              <CompatibilityBadge client:load compatibilidade={c.compatibilidadeSocio} size="sm" />
+              {c.compatibilidadeEmpresa && (
+                <CompatibilityBadge client:load compatibilidade={c.compatibilidadeEmpresa} size="sm" />
+              )}
+            </div>
+          </div>
+          <div class="mb-4 max-w-xs">
+            <ScoreDisplay client:load score={c.score} size="sm" />
+          </div>
+          <div class="flex flex-wrap gap-4 text-xs text-gray-500 mb-3">
+            <span>Expressão: <span class="text-[#4A7FC1] font-medium">{c.expressao}</span></span>
+            <span>Motivação: <span class="text-gray-300">{c.motivacao}</span></span>
+            <span>Missão: <span class="text-gray-300">{c.missao}</span></span>
+            <span>Impressão: <span class="text-gray-300">{c.impressao}</span></span>
+          </div>
+          <div class="flex flex-wrap gap-3 text-xs">
+            {c.temBloqueio
+              ? <span class="text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>
+              : <span class="text-emerald-400">✓ Sem bloqueios</span>
+            }
+            {c.debitosCarmicos?.length > 0
+              ? <span class="text-amber-400">⚠ {c.debitosCarmicos.length} Débito(s) Kármico(s)</span>
+              : <span class="text-emerald-400">✓ Sem Débitos Kármicos</span>
+            }
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 5: OS 4 TRIÂNGULOS ────────────────────────────────────────── */}
+{hasTriangulos && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Mapa de Triângulos</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Os 4 Triângulos Numerológicos</h2>
+    </div>
+    <TriangleVisualization
+      client:load
+      nome={nomeExibido}
+      vida={tVida!}
+      pessoal={tPessoal!}
+      social={tSocial!}
+      destino={tDestino!}
+      bloqueios={bloqueios as any}
+      productType="nome_empresa"
+    />
+  </section>
+)}
+
+{/* ── SEÇÃO 5b: MAPEAMENTO DE RISCOS (BLOQUEIOS) ───────────────────────── */}
+{bloqueios.length > 0 && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Mapeamento de Riscos</p>
+      <h2 class="font-cinzel text-2xl font-bold text-red-400">
+        {bloqueios.length} Bloqueio{bloqueios.length > 1 ? 's' : ''} Energético{bloqueios.length > 1 ? 's' : ''}
+      </h2>
+    </div>
+    <div class="space-y-3">
+      {bloqueios.map((b, i) => (
+        <BlockAnalysisCard client:load bloqueio={b as any} defaultOpen={i === 0} />
+      ))}
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 6: KARMA EMPRESARIAL ──────────────────────────────────────── */}
+{((rankingEmpresa?.melhorNome?.debitosCarmicos?.length > 0) || (rankingEmpresa?.melhorNome?.licoesCarmicas?.length > 0)) && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Karma Empresarial</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Padrões Kármicos do Sócio</h2>
+    </div>
+    {rankingEmpresa?.melhorNome?.debitosCarmicos?.length > 0 && (
+      <KarmicDebts
+        client:load
+        debitos={rankingEmpresa.melhorNome.debitosCarmicos as any}
+        nomeCompleto={analysis.nome_completo}
+      />
+    )}
+    {rankingEmpresa?.melhorNome?.licoesCarmicas?.length > 0 && (
+      <div class="mt-4">
+        <KarmicLessons
+          client:load
+          licoes={rankingEmpresa.melhorNome.licoesCarmicas as any}
+          nomeCompleto={nomeExibido}
+        />
+      </div>
+    )}
+  </section>
+)}
+
+{/* ── SEÇÃO 7: ARQUÉTIPO DA MARCA ─────────────────────────────────────── */}
+{arquetipoData && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Personalidade da Marca</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Arquétipo da Empresa</h2>
+    </div>
+    <ArquetipoCard client:visible arquetipo={arquetipoData} mode="empresa" />
+  </section>
+)}
+
+{/* ── SEÇÃO 8: ANÁLISE COMPLETA DA IA ─────────────────────────────────── */}
+{analiseHtml && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Análise Estratégica — Nome de Empresa</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo</h2>
+    </div>
+    <div class="rounded-2xl bg-white/5 p-6 md:p-8">
+      <div
+        class="prose prose-invert prose-lg max-w-none
+               prose-headings:font-cinzel
+               prose-h2:text-xl prose-h2:text-[#4A7FC1] prose-h2:!mt-10 prose-h2:!mb-4
+               prose-h3:text-lg prose-h3:text-[#c084fc] prose-h3:!mt-7 prose-h3:!mb-3
+               prose-h4:text-base prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-5 prose-h4:!mb-2
+               prose-strong:text-white prose-a:text-[#4A7FC1]
+               prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-5
+               prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
+               prose-ul:!mt-2 prose-ul:!mb-5 prose-ol:!mt-2 prose-ol:!mb-5"
+        set:html={analiseHtml}
+      />
+    </div>
+  </section>
+)}

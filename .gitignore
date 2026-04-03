@@ -35,9 +35,26 @@ secretkey-*.tx
 # TypeScript
 *.tsbuildinfo
 
-# Claude
+# Claude e Agentes (Evitar loop de IA lendo IA)
 .claude/
+.agents/
 
 # temp / scripts locais
 tmp/
 
+# ==========================================
+# REGRAS PARA EVITAR TRAVAMENTO DA IA
+# ==========================================
+
+# Arquivos Binários e PDFs (Causam crash no parser)
+docs/PDF/
+*.pdf
+
+# Logs pesados gerados no desenvolvimento
+tsc-output.txt
+tsc-errors.txt
+astro-errors.txt
+logicas_analises_produtos.txt
+
+# Workflows (JSONs massivos que estouram a janela de contexto)
+n8n_workflows/

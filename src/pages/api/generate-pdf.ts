@@ -2,7 +2,9 @@ import type { APIRoute } from 'astro';
 import { getAnalysis, getMagneticNames } from '../../backend/db/analyses';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
-import { AnalysePDF } from '../../frontend/components/pdf/AnalysePDF';
+import { NomeSocialPDF } from '../../frontend/components/pdf/NomeSocialPDF';
+import { NomeBebePDF } from '../../frontend/components/pdf/NomeBebePDF';
+import { NomeEmpresaPDF } from '../../frontend/components/pdf/NomeEmpresaPDF';
 
 export const GET: APIRoute = async ({ url, locals }) => {
   const user = locals.user;
@@ -53,8 +55,15 @@ export const GET: APIRoute = async ({ url, locals }) => {
     filename = `analise-nome-social-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
   }
 
+  const PDFComponent =
+    productType === 'nome_bebe'
+      ? NomeBebePDF
+      : productType === 'nome_empresa'
+        ? NomeEmpresaPDF
+        : NomeSocialPDF;
+
   const pdfBuffer = await renderToBuffer(
-    React.createElement(AnalysePDF, {
+    React.createElement(PDFComponent, {
       analysis: analysis as any,
       magneticNames,
       userName: firstName,

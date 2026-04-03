@@ -1,0 +1,89 @@
+/**
+ * PDFTheme — paletas e configurações de identidade visual por produto.
+ * Cada produto tem cores primárias, acento, fundo de capa e número destaque.
+ */
+
+export type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
+export type FeaturedNumberKey = 'expressao' | 'destino';
+export type CoverShapeStyle = 'social' | 'bebe' | 'empresa';
+
+export interface ProductTheme {
+  /** Cor primária do produto (headings, bordas de destaque) */
+  primaryColor: string;
+  /** Cor de acento (detalhes, subheadings) */
+  accentColor: string;
+  /** Cor de fundo da capa */
+  coverBgColor: string;
+  /** Cor do nome em destaque na capa */
+  coverTitleColor: string;
+  /** Cor do logotipo / texto de marca na capa */
+  coverLogoColor: string;
+  /** Estilo de shapes SVG da capa */
+  coverShapeStyle: CoverShapeStyle;
+  /** Qual dos 5 números recebe o card em destaque */
+  featuredNumberKey: FeaturedNumberKey;
+  /** Label legível do número destaque */
+  featuredNumberLabel: string;
+  /** Descrição do número destaque para o sublabel */
+  featuredNumberSublabel: string;
+  /** Label do tipo de análise para capa */
+  productLabel: string;
+  /** Subtítulo da capa */
+  coverSubtitle: string;
+}
+
+export const THEMES: Record<ProductType, ProductTheme> = {
+  nome_social: {
+    primaryColor: '#D4AF37',       // Gold
+    accentColor: '#c084fc',        // Purple
+    coverBgColor: '#1a1a1a',       // Dark
+    coverTitleColor: '#FFFFFF',
+    coverLogoColor: '#D4AF37',
+    coverShapeStyle: 'social',
+    featuredNumberKey: 'expressao',
+    featuredNumberLabel: 'Expressão',
+    featuredNumberSublabel: 'O Dom',
+    productLabel: 'Análise de Nome Social',
+    coverSubtitle: 'Numerologia Cabalística',
+  },
+  nome_bebe: {
+    primaryColor: '#C97B63',       // Rose-gold escuro (legível em branco)
+    accentColor: '#E8A598',        // Rose-gold claro
+    coverBgColor: '#FFF5F0',       // Creme rosado
+    coverTitleColor: '#5C2D1E',    // Marrom quente
+    coverLogoColor: '#C97B63',
+    coverShapeStyle: 'bebe',
+    featuredNumberKey: 'destino',
+    featuredNumberLabel: 'Destino',
+    featuredNumberSublabel: 'O Chamado do Céu',
+    productLabel: 'Análise de Nome para Bebê',
+    coverSubtitle: 'O Portal do Nascimento',
+  },
+  nome_empresa: {
+    primaryColor: '#4A7FC1',       // Azul corporativo
+    accentColor: '#D4AF37',        // Gold acento
+    coverBgColor: '#0F1C2E',       // Navy escuro
+    coverTitleColor: '#E2F0FF',    // Azul claro
+    coverLogoColor: '#4A7FC1',
+    coverShapeStyle: 'empresa',
+    featuredNumberKey: 'expressao',
+    featuredNumberLabel: 'Expressão',
+    featuredNumberSublabel: 'O Magnetismo',
+    productLabel: 'Análise de Nome Empresarial',
+    coverSubtitle: 'Numerologia Cabalística Aplicada',
+  },
+};
+
+/** Cores comuns a todos os PDFs (conteúdo, não capa) */
+export const PDF_COLORS = {
+  gold: '#D4AF37',
+  dark: '#1a1a1a',
+  gray: '#4B5563',
+  lightGray: '#E5E7EB',
+  text: '#1a1a1a',
+  purple: '#a78bfa',
+  red: '#DC2626',
+  green: '#059669',
+  amber: '#D97706',
+  blue: '#4A7FC1',
+} as const;

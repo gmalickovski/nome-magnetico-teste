@@ -1,0 +1,233 @@
+---
+/**
+ * NomeBebResultado — seções de conteúdo da análise de Nome para Bebê.
+ * Importado e renderizado por src/pages/app/resultado/[id].astro.
+ *
+ * Ordem das seções (ênfase no Destino — ponto fixo imutável):
+ *   1. A Estrela de 5 Pontas (Destino em destaque)
+ *   2. O Melhor Nome — score + compatibilidade
+ *   3. Ranking dos Candidatos
+ *   4. Arquétipo da Criança
+ *   5. Análise Completa da IA
+ */
+import ArquetipoCard from '../ArquetipoCard';
+import CompatibilityBadge from '../CompatibilityBadge';
+import ScoreDisplay from '../ScoreDisplay';
+import TriangleVisualization from '../TriangleVisualization';
+import BlockAnalysisCard from '../BlockAnalysisCard';
+
+interface Props {
+  analysis: any;
+  nomeExibido: string;
+  rankingBebe: any;
+  arquetipoData: any;
+  analiseHtml: string | null;
+  tVida: any;
+  tPessoal: any;
+  tSocial: any;
+  tDestino: any;
+  hasTriangulos: boolean;
+  bloqueios: any[];
+}
+
+const { analysis, nomeExibido, rankingBebe, arquetipoData, analiseHtml,
+        tVida, tPessoal, tSocial, tDestino, hasTriangulos, bloqueios } = Astro.props;
+
+const destinoBebe = rankingBebe?.destino ?? analysis.numero_destino;
+const melhorNome = rankingBebe?.melhorNome;
+const nomesCandidatos: any[] = rankingBebe?.nomesCandidatos ?? [];
+
+// 4 números secundários do melhor nome (Destino é o destaque)
+const numSecundarios = [
+  { label: 'Expressão', sublabel: 'O Dom', value: melhorNome?.expressao ?? analysis.numero_expressao, icon: '✦' },
+  { label: 'Motivação', sublabel: 'A Alma', value: melhorNome?.motivacao ?? analysis.numero_motivacao, icon: '♡' },
+  { label: 'Missão', sublabel: 'A Vocação', value: melhorNome?.missao ?? analysis.numero_missao, icon: '◇' },
+  { label: 'Impressão', sublabel: 'As Consoantes', value: melhorNome?.impressao ?? analysis.numero_impressao, icon: '◎' },
+];
+---
+
+{/* ── SEÇÃO 1: A ESTRELA DE 5 PONTAS — DESTINO EM DESTAQUE ────────────── */}
+<section class="mb-12">
+  <div class="mb-3 px-1">
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">A Estrela de 5 Pontas</p>
+    <h2 class="font-cinzel text-2xl font-bold text-white">O Mapa Numerológico</h2>
+  </div>
+
+  {/* Destino do bebê — card herói */}
+  <div class="flex justify-center mb-4">
+    <div class="rounded-2xl bg-[#C97B63]/10 border-2 border-[#C97B63] p-6 text-center flex flex-col items-center gap-1 w-64 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#C97B63]/10">
+      <p class="font-cinzel text-[10px] uppercase tracking-[0.12em] text-[#C97B63]/70 mb-1">O Destino que o Céu Escolheu</p>
+      <div class="font-cinzel text-7xl font-bold text-[#C97B63] leading-none">{destinoBebe ?? '?'}</div>
+      <div class="text-white text-sm font-semibold mt-1">Destino</div>
+      <div class="text-[#C97B63]/70 text-xs">O Chamado do Céu</div>
+      {analysis.data_nascimento && (
+        <p class="text-gray-600 text-[10px] mt-1">
+          {new Date(analysis.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'long', year: 'numeric' })}
+        </p>
+      )}
+    </div>
+  </div>
+
+  {/* 4 números secundários */}
+  {melhorNome && (
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {numSecundarios.map(n => (
+        <div class="rounded-2xl bg-white/5 p-4 text-center flex flex-col items-center gap-1">
+          <span class="text-[#C97B63]/60 text-lg leading-none">{n.icon}</span>
+          <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{n.value ?? '?'}</div>
+          <div class="text-white text-xs font-medium">{n.label}</div>
+          <div class="text-gray-600 text-[10px]">{n.sublabel}</div>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
+{/* ── SEÇÃO 2: O MELHOR NOME ───────────────────────────────────────────── */}
+{melhorNome && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Nome de Ouro</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Nome Mais Indicado Numericamente</h2>
+    </div>
+
+    <div class="rounded-2xl bg-[#C97B63]/5 border border-[#C97B63]/30 p-6 md:p-8">
+      <div class="text-center mb-6">
+        <span class="text-[10px] text-[#C97B63] font-bold uppercase tracking-wider block mb-2">⭐ Nome de Ouro</span>
+        <div class="font-cinzel text-3xl font-bold text-white">{melhorNome.nomeCompleto}</div>
+      </div>
+
+      <div class="max-w-xs mx-auto mb-6">
+        <ScoreDisplay client:load score={melhorNome.score} size="lg" />
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4 mb-4 text-sm text-gray-500">
+        <span>Expressão: <span class="text-gray-300 font-medium">{melhorNome.expressao}</span></span>
+        <span>Motivação: <span class="text-gray-300 font-medium">{melhorNome.motivacao}</span></span>
+        <span>Missão: <span class="text-gray-300 font-medium">{melhorNome.missao}</span></span>
+        <span>Impressão: <span class="text-gray-300 font-medium">{melhorNome.impressao}</span></span>
+      </div>
+
+      <div class="flex flex-col items-center gap-2">
+        <CompatibilityBadge client:load compatibilidade={melhorNome.compatibilidade} size="md" />
+        {melhorNome.temBloqueio ? (
+          <span class="text-xs text-red-400">⚠ {melhorNome.bloqueios?.length ?? 1} bloqueio(s) detectado(s)</span>
+        ) : (
+          <span class="text-xs text-emerald-400">✓ Sem bloqueios energéticos</span>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 3: RANKING DOS CANDIDATOS ─────────────────────────────────── */}
+{nomesCandidatos.length > 0 && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Tabela Comparativa</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Ranking dos Nomes Candidatos</h2>
+    </div>
+    <div class="space-y-4">
+      {nomesCandidatos.map((c: any, idx: number) => (
+        <div class={`rounded-2xl p-5 md:p-6 ${idx === 0 ? 'bg-[#C97B63]/5 border border-[#C97B63]/20' : 'bg-white/5'}`}>
+          <div class="flex items-start justify-between gap-4 mb-3">
+            <div>
+              {idx === 0 && <span class="text-[10px] text-[#C97B63] font-bold uppercase tracking-wider block mb-1">⭐ Nome de Ouro</span>}
+              {c.origemSugerida === 'ia' && idx !== 0 && <span class="text-[10px] text-[#c084fc] font-bold uppercase tracking-wider block mb-1">Sugestão Numerológica</span>}
+              <span class="font-cinzel text-xl font-bold text-white">{c.nomeCompleto}</span>
+            </div>
+            <div class="shrink-0">
+              <CompatibilityBadge client:load compatibilidade={c.compatibilidade} size="sm" />
+            </div>
+          </div>
+          <div class="mb-4 max-w-xs">
+            <ScoreDisplay client:load score={c.score} size="sm" />
+          </div>
+          <div class="flex flex-wrap gap-4 text-xs text-gray-500 mb-4">
+            <span>Expressão: <span class="text-gray-300">{c.expressao}</span></span>
+            <span>Motivação: <span class="text-gray-300">{c.motivacao}</span></span>
+            <span>Missão: <span class="text-gray-300">{c.missao}</span></span>
+            <span>Impressão: <span class="text-gray-300">{c.impressao}</span></span>
+            {c.temBloqueio && <span class="text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>}
+          </div>
+          {Array.isArray(c.justificativa) && (
+            <div class="text-xs text-gray-500 space-y-2 border-t border-white/5 pt-3">
+              {(c.justificativa as string[]).slice(0, 2).map((j: string) => <p class="leading-relaxed">{j}</p>)}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 4: OS 4 TRIÂNGULOS ────────────────────────────────────────── */}
+{hasTriangulos && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Mapa de Triângulos</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Os 4 Triângulos Numerológicos</h2>
+    </div>
+    <TriangleVisualization
+      client:load
+      nome={nomeExibido}
+      vida={tVida!}
+      pessoal={tPessoal!}
+      social={tSocial!}
+      destino={tDestino!}
+      bloqueios={bloqueios as any}
+    />
+  </section>
+)}
+
+{/* ── SEÇÃO 4b: BLOQUEIOS ENERGÉTICOS ─────────────────────────────────── */}
+{bloqueios.length > 0 && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Raio-X dos Bloqueios</p>
+      <h2 class="font-cinzel text-2xl font-bold text-red-400">
+        {bloqueios.length} Bloqueio{bloqueios.length > 1 ? 's' : ''} Detectado{bloqueios.length > 1 ? 's' : ''}
+      </h2>
+    </div>
+    <div class="space-y-3">
+      {bloqueios.map((b, i) => (
+        <BlockAnalysisCard client:load bloqueio={b as any} defaultOpen={i === 0} />
+      ))}
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 5: ARQUÉTIPO DA CRIANÇA ───────────────────────────────────── */}
+{arquetipoData && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Identidade Mítica</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Arquétipo da Criança</h2>
+    </div>
+    <ArquetipoCard client:visible arquetipo={arquetipoData} mode="bebe" />
+  </section>
+)}
+
+{/* ── SEÇÃO 5: ANÁLISE COMPLETA DA IA ─────────────────────────────────── */}
+{analiseHtml && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Análise Cabalística — Nome de Bebê</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo para os Pais</h2>
+    </div>
+    <div class="rounded-2xl bg-white/5 p-6 md:p-8">
+      <div
+        class="prose prose-invert prose-lg max-w-none
+               prose-headings:font-cinzel
+               prose-h2:text-xl prose-h2:text-[#C97B63] prose-h2:!mt-14 prose-h2:!mb-4
+               prose-h3:text-lg prose-h3:text-[#c084fc] prose-h3:!mt-10 prose-h3:!mb-3
+               prose-h4:text-base prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-6 prose-h4:!mb-2
+               prose-strong:text-white prose-a:text-[#C97B63]
+               prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-5
+               prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
+               prose-ul:!mt-2 prose-ul:!mb-6 prose-ol:!mt-2 prose-ol:!mb-6"
+        set:html={analiseHtml}
+      />
+    </div>
+  </section>
+)}

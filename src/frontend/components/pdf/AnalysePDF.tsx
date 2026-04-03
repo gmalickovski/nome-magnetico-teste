@@ -1,6 +1,16 @@
 /**
- * AnalysePDF — documento PDF profissional A4 gerado com @react-pdf/renderer.
- * Usado exclusivamente no server-side pelo endpoint /api/generate-pdf.ts.
+ * AnalysePDF — LEGADO: arquivo mantido como referência histórica.
+ *
+ * O gerador de PDF foi refatorado em:
+ *   NomeSocialPDF.tsx  — análise de Nome Social
+ *   NomeBebePDF.tsx    — análise de Nome para Bebê
+ *   NomeEmpresaPDF.tsx — análise de Nome Empresarial
+ *
+ * Componentes compartilhados em shared/:
+ *   PDFTheme.ts, PDFCover.tsx, PDFNumbersGrid.tsx, PDFPageHeader.tsx,
+ *   PDFFooter.tsx, PDFMarkdownRenderer.tsx, PDFKarmicBlock.tsx
+ *
+ * Endpoint de geração: /api/generate-pdf.ts (roteia por product_type)
  */
 
 import {

@@ -1,0 +1,280 @@
+---
+/**
+ * NomeSocialResultado — seções de conteúdo da análise de Nome Social.
+ * Importado e renderizado por src/pages/app/resultado/[id].astro.
+ *
+ * Ordem das seções (ênfase na identidade vibracional — Expressão):
+ *   1. A Estrela de 5 Pontas (Expressão em destaque)
+ *   2. Arquétipo
+ *   3. Os 4 Triângulos
+ *   4. Arcano Regente
+ *   5. O Raio-X dos Bloqueios
+ *   6. O Peso do Passado (Karma + Lições)
+ *   7. Tendências Ocultas
+ *   8. Análise Completa da IA
+ *   9. Variações de Nome Social
+ */
+import ArquetipoCard from '../ArquetipoCard';
+import TriangleVisualization from '../TriangleVisualization';
+import KarmicLessons from '../KarmicLessons';
+import KarmicDebts from '../KarmicDebts';
+import HiddenTendencies from '../HiddenTendencies';
+import ScoreDisplay from '../ScoreDisplay';
+import BlockAnalysisCard from '../BlockAnalysisCard';
+import ArcanoCard from '../ArcanoCard';
+import ActionBox from '../ActionBox';
+
+interface Props {
+  analysis: any;
+  nomeExibido: string;
+  cincoNumeros: Array<{ label: string; sublabel: string; value: number | null; icon: string }>;
+  /** Número de Expressão para destaque */
+  expressao: number | null;
+  arquetipoData: any;
+  tVida: any;
+  tPessoal: any;
+  tSocial: any;
+  tDestino: any;
+  hasTriangulos: boolean;
+  bloqueios: any[];
+  arcanoData: any;
+  licoesRaw: any[] | null;
+  debitosRaw: any[] | null;
+  tendenciasRaw: any[] | null;
+  frequenciasRaw: Record<number, number> | null;
+  analiseHtml: string | null;
+  topNames: any[];
+}
+
+const {
+  analysis,
+  nomeExibido,
+  cincoNumeros,
+  expressao,
+  arquetipoData,
+  tVida, tPessoal, tSocial, tDestino,
+  hasTriangulos,
+  bloqueios,
+  arcanoData,
+  licoesRaw,
+  debitosRaw,
+  tendenciasRaw,
+  frequenciasRaw,
+  analiseHtml,
+  topNames,
+} = Astro.props;
+
+const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
+---
+
+{/* ── SEÇÃO 1: A ESTRELA DE 5 PONTAS — EXPRESSÃO EM DESTAQUE ───────────── */}
+<section class="mb-12">
+  <div class="mb-3 px-1">
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">A Estrela de 5 Pontas</p>
+    <h2 class="font-cinzel text-2xl font-bold text-white">Os 5 Números do Nome Social</h2>
+  </div>
+
+  {/* Expressão em destaque */}
+  <div class="flex justify-center mb-4">
+    <div class="rounded-2xl bg-[#D4AF37]/10 border-2 border-[#D4AF37] p-6 text-center flex flex-col items-center gap-1 w-56 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-yellow-500/10">
+      <span class="text-[#D4AF37]/50 text-2xl leading-none">✦</span>
+      <div class="font-cinzel text-6xl font-bold text-[#D4AF37] leading-none">{expressao ?? '?'}</div>
+      <div class="text-white text-sm font-semibold mt-1">Expressão</div>
+      <div class="text-[#c084fc] text-xs">O Dom</div>
+    </div>
+  </div>
+
+  {/* Outros 4 números */}
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    {outrosNumeros.map(n => (
+      <div class="rounded-2xl bg-white/5 p-4 text-center flex flex-col items-center gap-1">
+        <span class="text-[#D4AF37]/60 text-lg leading-none">{n.icon}</span>
+        <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{n.value ?? '?'}</div>
+        <div class="text-white text-xs font-medium">{n.label}</div>
+        <div class="text-gray-600 text-[10px]">{n.sublabel}</div>
+      </div>
+    ))}
+  </div>
+</section>
+
+{/* ── SEÇÃO 2: ARQUÉTIPO ───────────────────────────────────────────────── */}
+{arquetipoData && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Identidade Mítica</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Seu Arquétipo</h2>
+    </div>
+    <ArquetipoCard client:visible arquetipo={arquetipoData} mode="pessoa" />
+  </section>
+)}
+
+{/* ── SEÇÃO 3: OS 4 TRIÂNGULOS ────────────────────────────────────────── */}
+{hasTriangulos && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Mapa de Triângulos</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Os 4 Triângulos Numerológicos</h2>
+    </div>
+    <TriangleVisualization
+      client:load
+      nome={nomeExibido}
+      vida={tVida!}
+      pessoal={tPessoal!}
+      social={tSocial!}
+      destino={tDestino!}
+      bloqueios={bloqueios as any}
+    />
+  </section>
+)}
+
+{/* ── SEÇÃO 4: ARCANO REGENTE ─────────────────────────────────────────── */}
+{arcanoData && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Ciclo Atual</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Arcano Regente</h2>
+    </div>
+    <ArcanoCard
+      client:load
+      arcano={{
+        numero: arcanoData.numero,
+        nome: arcanoData.nome,
+        palavraChave: arcanoData.palavraChave,
+        descricao: arcanoData.descricao,
+      }}
+      label="Arcano que governa seu ciclo de vida"
+    />
+  </section>
+)}
+
+{/* ── SEÇÃO 5: O RAIO-X DOS BLOQUEIOS ─────────────────────────────────── */}
+<section class="mb-12">
+  <div class="mb-3 px-1">
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Raio-X dos Bloqueios</p>
+    <h2 class={`font-cinzel text-2xl font-bold ${bloqueios.length > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+      {bloqueios.length > 0
+        ? `${bloqueios.length} Bloqueio${bloqueios.length > 1 ? 's' : ''} Energético${bloqueios.length > 1 ? 's' : ''} Detectado${bloqueios.length > 1 ? 's' : ''}`
+        : 'Energia Limpa — Sem Bloqueios'}
+    </h2>
+  </div>
+  {bloqueios.length > 0 ? (
+    <div class="space-y-3">
+      {bloqueios.map((b, i) => (
+        <BlockAnalysisCard client:load bloqueio={b as any} defaultOpen={i === 0} />
+      ))}
+      <ActionBox client:load title="Antídotos Práticos">
+        Os antídotos detalhados para cada bloqueio estão na análise completa abaixo. Leia atentamente a seção "Os 4 Triângulos" para as orientações específicas.
+      </ActionBox>
+    </div>
+  ) : (
+    <div class="rounded-2xl bg-emerald-500/5 p-6 text-center">
+      <div class="text-4xl mb-3">✦</div>
+      <p class="text-emerald-400 font-medium mb-1">Todos os 4 triângulos estão limpos</p>
+      <p class="text-gray-400 text-sm">Nenhuma sequência energética negativa foi detectada no seu nome. Isso indica um fluxo energético natural e desobstruído.</p>
+    </div>
+  )}
+</section>
+
+{/* ── SEÇÃO 6: O PESO DO PASSADO — KARMA E LIÇÕES ─────────────────────── */}
+{(licoesRaw !== null || debitosRaw !== null) && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Peso do Passado</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Karma e Lições</h2>
+    </div>
+    {debitosRaw !== null && (
+      <div class="mb-4">
+        <KarmicDebts client:load debitos={debitosRaw as any} nomeCompleto={nomeExibido} />
+      </div>
+    )}
+    {licoesRaw !== null && (
+      <KarmicLessons client:load licoes={licoesRaw as any} nomeCompleto={nomeExibido} />
+    )}
+  </section>
+)}
+
+{/* ── SEÇÃO 7: TENDÊNCIAS OCULTAS ─────────────────────────────────────── */}
+{(tendenciasRaw !== null || (frequenciasRaw && Object.keys(frequenciasRaw).length > 0)) && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Frequências Numéricas</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Tendências Ocultas</h2>
+    </div>
+    <HiddenTendencies
+      client:load
+      tendencias={tendenciasRaw as any}
+      frequencias={frequenciasRaw ?? {}}
+      nomeCompleto={nomeExibido}
+    />
+  </section>
+)}
+
+{/* ── SEÇÃO 8: ANÁLISE COMPLETA DA IA ─────────────────────────────────── */}
+{analiseHtml && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Análise Cabalística</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo</h2>
+    </div>
+    <div class="rounded-2xl bg-white/5 p-6 md:p-8">
+      <div
+        class="prose prose-invert prose-lg max-w-none
+               prose-headings:font-cinzel
+               prose-h1:text-2xl prose-h1:text-[#D4AF37] prose-h1:!mt-10 prose-h1:!mb-4
+               prose-h2:text-xl prose-h2:text-[#D4AF37] prose-h2:!mt-10 prose-h2:!mb-4
+               prose-h3:text-lg prose-h3:text-[#c084fc] prose-h3:!mt-7 prose-h3:!mb-3
+               prose-h4:text-base prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-5 prose-h4:!mb-2
+               prose-strong:text-white prose-a:text-[#D4AF37]
+               prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-5
+               prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
+               prose-ul:!mt-2 prose-ul:!mb-5
+               prose-ol:!mt-2 prose-ol:!mb-5"
+        set:html={analiseHtml}
+      />
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 9: VARIAÇÕES DE NOME SOCIAL ───────────────────────────────── */}
+{topNames.length > 0 && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Harmonização</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Variações de Nome Social</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+      {topNames.map((name, idx) => (
+        <button
+          type="button"
+          data-variation-nome={name.nome_sugerido}
+          data-variation-data={analysis.data_nascimento ? new Date(analysis.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : ''}
+          class={`w-full text-left h-full rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 relative group cursor-pointer
+            ${idx === 0 ? 'bg-[#D4AF37]/5' : 'bg-white/5'}`}
+        >
+          {idx === 0 && (
+            <div class="text-[10px] text-[#D4AF37] font-bold mb-2 uppercase tracking-wider">⭐ Recomendado</div>
+          )}
+          <div class="font-cinzel text-lg font-bold text-white mb-3 pr-6 group-hover:text-[#D4AF37] transition-colors">
+            {name.nome_sugerido}
+          </div>
+          <div class="mb-3">
+            <ScoreDisplay client:load score={name.score} size="sm" />
+          </div>
+          <div class="flex flex-wrap gap-2 mb-3 text-xs text-gray-500">
+            <span>Expr: <span class="text-gray-300">{name.numero_expressao}</span></span>
+            <span>Mot: <span class="text-gray-300">{name.numero_motivacao}</span></span>
+          </div>
+          {name.justificativa && (
+            <p class="text-gray-500 text-xs leading-relaxed">{name.justificativa}</p>
+          )}
+          <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span class="text-xs text-[#D4AF37] font-medium">Ver análise completa →</span>
+          </div>
+          <div id={`variation-loading-${idx}`} class="hidden absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center">
+            <span class="w-5 h-5 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin"></span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </section>
+)}
