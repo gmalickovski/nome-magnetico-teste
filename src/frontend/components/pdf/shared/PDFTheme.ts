@@ -36,7 +36,7 @@ export const THEMES: Record<ProductType, ProductTheme> = {
   nome_social: {
     primaryColor: '#D4AF37',       // Gold
     accentColor: '#c084fc',        // Purple
-    coverBgColor: '#1a1a1a',       // Dark
+    coverBgColor: '#131313',       // Void (Celestial Alchemist)
     coverTitleColor: '#FFFFFF',
     coverLogoColor: '#D4AF37',
     coverShapeStyle: 'social',
@@ -77,7 +77,7 @@ export const THEMES: Record<ProductType, ProductTheme> = {
 /** Cores comuns a todos os PDFs (conteúdo, não capa) */
 export const PDF_COLORS = {
   gold: '#D4AF37',
-  dark: '#1a1a1a',
+  dark: '#131313',
   gray: '#4B5563',
   lightGray: '#E5E7EB',
   text: '#1a1a1a',

@@ -13,7 +13,7 @@ const LIGHT_GRAY = PDF_COLORS.lightGray;
 
 const styles = StyleSheet.create({
   sectionBlock: {
-    marginTop: 4,
+    marginTop: 16,
     marginBottom: 16,
   },
   sectionLabel: {
@@ -33,24 +33,24 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   bloqueioTitle: {
-    fontSize: 9,
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#DC2626',
     marginBottom: 2,
   },
   bloqueioDesc: {
-    fontSize: 8,
+    fontSize: 10,
     color: GRAY,
     lineHeight: 1.4,
   },
   bloqueioSaude: {
-    fontSize: 7,
+    fontSize: 9,
     color: '#7f1d1d',
     marginTop: 3,
     fontStyle: 'italic',
   },
   bloqueioTriangulos: {
-    fontSize: 7,
+    fontSize: 9,
     color: '#991b1b',
     marginTop: 2,
   },
@@ -72,19 +72,19 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   debitoTitle: {
-    fontSize: 9,
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#92400E',
     marginBottom: 2,
   },
   debitoTitleVariable: {
-    fontSize: 9,
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#5B21B6',
     marginBottom: 2,
   },
   debitoDesc: {
-    fontSize: 8,
+    fontSize: 10,
     color: GRAY,
     lineHeight: 1.4,
   },
@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   licaoTitle: {
-    fontSize: 9,
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#0369a1',
     marginBottom: 2,
   },
   licaoDesc: {
-    fontSize: 8,
+    fontSize: 10,
     color: GRAY,
     lineHeight: 1.4,
   },
@@ -142,13 +142,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   tendenciaTitle: {
-    fontSize: 9,
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#6d28d9',
     marginBottom: 2,
   },
   tendenciaDesc: {
-    fontSize: 8,
+    fontSize: 10,
     color: GRAY,
     lineHeight: 1.4,
   },
@@ -258,11 +258,8 @@ export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
   }
   return (
     <View style={styles.sectionBlock}>
-      <Text style={[styles.sectionLabel, { color: '#DC2626' }]}>
-        Bloqueios Detectados ({bloqueios.length})
-      </Text>
       {bloqueios.map((b, i) => (
-        <View key={i} style={styles.bloqueioRow}>
+        <View key={i} style={styles.bloqueioRow} wrap={false}>
           <Text style={styles.bloqueioTitle}>{b.codigo} — {b.titulo}</Text>
           <Text style={styles.bloqueioDesc}>{b.descricao}</Text>
           {b.aspectoSaude ? (
@@ -292,13 +289,10 @@ export function DebitosBlock({ debitos }: { debitos: DebitoData[] }) {
   }
   return (
     <View style={styles.sectionBlock}>
-      <Text style={[styles.sectionLabel, { color: '#D97706' }]}>
-        Débitos Kármicos Identificados
-      </Text>
       {debitos.map((d, i) => {
         const isFixed = d.fixo === true;
         return (
-          <View key={i} style={isFixed ? styles.debitoRow : styles.debitoRowVariable}>
+          <View key={i} style={isFixed ? styles.debitoRow : styles.debitoRowVariable} wrap={false}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 3 }}>
               <Text style={isFixed ? styles.debitoTitle : styles.debitoTitleVariable}>
                 {d.titulo}
@@ -335,11 +329,8 @@ export function LicoesBlock({ licoes }: { licoes: LicaoData[] }) {
   }
   return (
     <View style={styles.sectionBlock}>
-      <Text style={[styles.sectionLabel, { color: '#0369a1' }]}>
-        Lições Kármicas — Qualidades a Desenvolver
-      </Text>
       {licoes.map((l, i) => (
-        <View key={i} style={styles.licaoRow}>
+        <View key={i} style={styles.licaoRow} wrap={false}>
           <Text style={styles.licaoTitle}>{l.titulo}</Text>
           <Text style={styles.licaoDesc}>{l.descricao}</Text>
         </View>
@@ -357,9 +348,12 @@ function FrequencyBar({ frequencias }: { frequencias: Record<string, number> }) 
   if (entries.length === 0) return null;
   const max = Math.max(...entries.map(e => e.count), 1);
   return (
-    <View style={{ marginBottom: 10 }}>
-      <Text style={[styles.sectionLabel, { color: '#6d28d9', marginBottom: 4 }]}>
-        Frequência dos Números
+    <View style={{ marginBottom: 24 }}>
+      <Text style={[styles.sectionLabel, { color: '#6d28d9', fontSize: 11, marginBottom: 4, textTransform: 'none' }]}>
+        Mapeamento de Repetição Energética
+      </Text>
+      <Text style={{ fontSize: 10, color: GRAY, marginBottom: 12, lineHeight: 1.4 }}>
+        Este gráfico tangibiliza o ímpeto magnético presente em seu nome. As barras mais densas indicam talentos que você vivencia em extremo excesso, apontando com exatidão onde o seu potencial transborda para a desordem.
       </Text>
       {entries.map(({ num, count }) => {
         const pct = (count / max) * 100;
@@ -398,11 +392,8 @@ export function TendenciasBlock({
         </View>
       ) : (
         <>
-          <Text style={[styles.sectionLabel, { color: '#6d28d9' }]}>
-            Tendências Ocultas (excesso)
-          </Text>
           {tendencias.map((t, i) => (
-            <View key={i} style={styles.tendenciaRow}>
+            <View key={i} style={styles.tendenciaRow} wrap={false}>
               <Text style={styles.tendenciaTitle}>
                 {t.titulo} — {t.frequencia}x no nome
               </Text>

@@ -12,13 +12,13 @@
 import { View, Text, StyleSheet, Svg, Polygon } from '@react-pdf/renderer';
 
 // ── Dimensões fixas ────────────────────────────────────────────────────────────
-const W = 500;       // largura do container (coincide com área útil do PDF)
-const H = 295;       // altura do container
-const CX = W / 2;   // 250 — centro horizontal da estrela
-const CY = 152;     // centro vertical da estrela
-const R_OUTER = 100; // raio das pontas externas
-const R_INNER = 40;  // raio dos vértices internos
-const LABEL_OFFSET = 24; // distância extra além da ponta para o centro do label
+const W = 490;       // largura do container 
+const H = 280;       // altura do container
+const CX = W / 2;    // centro horizontal da estrela
+const CY = 140;      // centro vertical da estrela
+const R_OUTER = 92;  // raio das pontas externas
+const R_INNER = 38;  // raio dos vértices internos
+const LABEL_OFFSET = 32; // distância extra além da ponta para o centro do label
 const BOX_W = 72;    // largura da caixa de texto
 const BOX_H = 54;    // altura da caixa de texto (número + label + sublabel)
 
@@ -27,8 +27,9 @@ const styles = StyleSheet.create({
     width: W,
     height: H,
     position: 'relative',
-    marginTop: 6,
-    marginBottom: 4,
+    alignSelf: 'center',
+    marginTop: 12,
+    marginBottom: 20,
   },
   labelBox: {
     position: 'absolute',

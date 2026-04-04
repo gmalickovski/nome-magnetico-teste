@@ -40,6 +40,8 @@ function loadFont(name: string, filename: string): boolean {
 
 const cinzelOk = loadFont('Cinzel', 'Cinzel-Regular.ttf');
 const cinzelBoldOk = loadFont('CinzelBold', 'Cinzel-Bold.ttf');
+const interOk = loadFont('Inter', 'Inter-Regular.ttf');
+const interBoldOk = loadFont('InterBold', 'Inter-Bold.ttf');
 
 export const LOGO_FONT = cinzelOk ? 'Cinzel' : 'Helvetica-Bold';
 export const TITLE_FONT = cinzelBoldOk
@@ -47,6 +49,8 @@ export const TITLE_FONT = cinzelBoldOk
   : cinzelOk
     ? 'Cinzel'
     : 'Helvetica-Bold';
+export const BODY_FONT = interOk ? 'Inter' : 'Helvetica';
+export const BODY_FONT_BOLD = interBoldOk ? 'InterBold' : 'Helvetica-Bold';
 
 /** Tenta carregar o logo como data URI base64 */
 export function loadLogoSrc(): string {

@@ -15,18 +15,78 @@ import { PDFCover } from './shared/PDFCover';
 import { PDFPageHeader } from './shared/PDFPageHeader';
 import { PDFFooter } from './shared/PDFFooter';
 import { PDFNumbersGrid } from './shared/PDFNumbersGrid';
+import { PDFNumbersStar } from './shared/PDFNumbersStar';
 import { RenderMarkdownChunks } from './shared/PDFMarkdownRenderer';
 import { BloqueiosBlock, DebitosBlock, LicoesBlock, TendenciasBlock } from './shared/PDFKarmicBlock';
-import { LOGO_FONT, TITLE_FONT, loadLogoSrc, formatDate } from './shared/PDFFonts';
+import { LOGO_FONT, TITLE_FONT, BODY_FONT, BODY_FONT_BOLD, loadLogoSrc, formatDate } from './shared/PDFFonts';
 import { formatAnalysisText } from '../../../utils/textFormatter';
 import type { ProductPDFProps } from './shared/PDFTypes';
+import { getArquetipo, type Arquetipo } from '../../../backend/numerology/archetypes';
+
+function ArquetipoCardPDF({ arquetipo }: { arquetipo: Arquetipo }) {
+  return (
+    <View style={{
+      borderWidth: 1, borderColor: '#D4AF37', borderRadius: 8, padding: 16, backgroundColor: '#FFFDF0', marginTop: 12
+    }} wrap={false}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+        <View style={{ 
+          width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(212, 175, 55, 0.1)',
+          borderWidth: 1, borderColor: '#D4AF37',
+          justifyContent: 'center', alignItems: 'center',
+          marginRight: 12
+        }}>
+          <Text style={{ fontSize: 18, fontFamily: TITLE_FONT, color: '#D4AF37' }}>{arquetipo.numero}</Text>
+        </View>
+        <View>
+          <Text style={{ fontSize: 9, color: '#D4AF37', textTransform: 'uppercase', marginBottom: 2 }}>
+            Sua Identidade Mítica
+          </Text>
+          <Text style={{ fontSize: 16, fontFamily: TITLE_FONT, color: '#D4AF37', fontWeight: 'bold' }}>
+            {arquetipo.nome}
+          </Text>
+        </View>
+      </View>
+
+      <View style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: 10, borderRadius: 6, marginBottom: 12 }}>
+        <Text style={{ fontSize: 10, fontFamily: TITLE_FONT, color: '#D4AF37', textAlign: 'center' }}>
+          "{arquetipo.essencia}"
+        </Text>
+      </View>
+
+      <Text style={{ fontSize: 10, fontFamily: BODY_FONT, color: '#4B5563', lineHeight: 1.6, marginBottom: 12 }}>
+        {arquetipo.descricao}
+      </Text>
+
+      <View style={{ marginBottom: 10 }}>
+        <Text style={{ fontSize: 10, color: '#10b981', fontFamily: BODY_FONT_BOLD, marginBottom: 4 }}>
+          LUZ (Expressão Positiva)
+        </Text>
+        {arquetipo.expressaoPositiva.map((item, i) => (
+          <Text key={i} style={{ fontSize: 9, fontFamily: BODY_FONT, color: '#4B5563', marginBottom: 2, marginLeft: 8 }}>
+            • {item}
+          </Text>
+        ))}
+      </View>
+      <View>
+        <Text style={{ fontSize: 10, color: '#FF6B6B', fontFamily: BODY_FONT_BOLD, marginBottom: 4 }}>
+          SOMBRA (Desafios)
+        </Text>
+        {arquetipo.expressaoSombra.map((item, i) => (
+          <Text key={i} style={{ fontSize: 9, fontFamily: BODY_FONT, color: '#4B5563', marginBottom: 2, marginLeft: 8 }}>
+            • {item}
+          </Text>
+        ))}
+      </View>
+    </View>
+  );
+}
 
 const theme = THEMES.nome_social;
 
 const GOLD = theme.primaryColor;
 const GRAY = '#4B5563';
 const LIGHT_GRAY = '#E5E7EB';
-const DARK = '#1a1a1a';
+const DARK = '#131313';
 
 const styles = StyleSheet.create({
   page: {
@@ -34,27 +94,54 @@ const styles = StyleSheet.create({
     paddingTop: 56,
     paddingBottom: 56,
     paddingHorizontal: 48,
-    fontFamily: 'Helvetica',
+    fontFamily: BODY_FONT,
     color: DARK,
+  },
+  darkPage: {
+    backgroundColor: DARK,
+    paddingTop: 56,
+    paddingBottom: 56,
+    paddingHorizontal: 48,
+    fontFamily: BODY_FONT,
+    color: '#e5e2e1',
   },
   assinaturaPage: {
     backgroundColor: '#FFFFFF',
     paddingTop: 36,
     paddingBottom: 36,
     paddingHorizontal: 48,
-    fontFamily: 'Helvetica',
+    fontFamily: BODY_FONT,
     color: DARK,
   },
   section: { marginBottom: 24 },
   sectionTitle: {
     fontSize: 13,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: TITLE_FONT,
     color: GOLD,
     borderBottomWidth: 1,
     borderBottomColor: GOLD,
     paddingBottom: 4,
     marginBottom: 12,
     letterSpacing: 0.5,
+  },
+  hugeTitle: {
+    fontSize: 18,
+    fontFamily: TITLE_FONT,
+    color: GOLD,
+    textAlign: 'center',
+    marginBottom: 24,
+    letterSpacing: 0.5,
+  },
+  fixedText: {
+    fontSize: 10,
+    fontFamily: BODY_FONT,
+    color: GRAY,
+    lineHeight: 1.6,
+    marginBottom: 16,
+    marginTop: 6,
+    padding: 0,
+    backgroundColor: 'transparent',
+    textAlign: 'justify',
   },
   bodyText: {
     fontSize: 10,
@@ -129,8 +216,8 @@ const styles = StyleSheet.create({
   },
   // Assinatura
   assinaturaTitle: {
-    fontSize: 16,
-    fontFamily: 'Helvetica-Bold',
+    fontSize: 18,
+    fontFamily: TITLE_FONT,
     color: GOLD,
     textAlign: 'center',
     marginBottom: 6,
@@ -138,7 +225,7 @@ const styles = StyleSheet.create({
   },
   assinaturaNome: {
     fontSize: 22,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: TITLE_FONT,
     color: DARK,
     textAlign: 'center',
     marginBottom: 16,
@@ -149,18 +236,19 @@ const styles = StyleSheet.create({
     borderColor: GOLD,
     borderRadius: 6,
     padding: 12,
-    backgroundColor: '#FFFDF0',
+    backgroundColor: 'rgba(212, 175, 55, 0.05)',
     marginBottom: 20,
   },
   assinaturaInstrucoesTitle: {
     fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: BODY_FONT_BOLD,
     color: GOLD,
     marginBottom: 6,
   },
   assinaturaInstrucaoItem: {
     fontSize: 8,
-    color: '#374151',
+    fontFamily: BODY_FONT,
+    color: GRAY,
     lineHeight: 1.6,
     marginBottom: 3,
   },
@@ -171,9 +259,9 @@ const styles = StyleSheet.create({
   },
 });
 
-/** Extrai o bloco de conclusão da análise textual */
+/** Extrai estritamente o bloco de Conclusão Final do texto */
 function extractConclusao(text: string): string | null {
-  const match = text.match(/##[^\n]*(?:6\.|conclus)/i);
+  const match = text.match(/##[^\n]*(?:8\.|conclus[aã]o)/i);
   if (!match || match.index === undefined) return null;
   return text.slice(match.index).trim();
 }
@@ -228,13 +316,15 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
     : undefined;
 
   const analiseFormatado = analysis.analise_texto
-    ? formatAnalysisText(analysis.analise_texto)
-    : null;
-
-  const conclusaoTexto = analiseFormatado ? extractConclusao(analiseFormatado) : null;
-  const analiseCorpo = analiseFormatado && conclusaoTexto
-    ? analiseFormatado.slice(0, analiseFormatado.indexOf(conclusaoTexto)).trim()
-    : analiseFormatado;
+  let analiseCorpo = analiseFormatado;
+  let conclusaoTexto: string | null = null;
+  
+  if (analiseFormatado) {
+    conclusaoTexto = extractConclusao(analiseFormatado);
+    if (conclusaoTexto) {
+      analiseCorpo = analiseFormatado.slice(0, analiseFormatado.indexOf(conclusaoTexto)).trim();
+    }
+  }
 
   return (
     <Document title={`Nome Magnetico — ${nomeParaExibir}`} author="Nome Magnetico">
@@ -250,68 +340,139 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
         titleFont={TITLE_FONT}
       />
 
-      {/* ── PÁGINA 2: A ESTRELA DE 5 PONTAS + BLOQUEIOS ───────────────────── */}
+      {/* ── PÁGINA 2: O PODER DO NOME SOCIAL E DA ASSINATURA ───────────────── */}
+      <Page size="A4" style={styles.darkPage}>
+        <PDFPageHeader subtitle="Introdução" />
+        <View style={styles.section}>
+          <Text style={styles.hugeTitle}>O Poder do Nome Social e da Assinatura</Text>
+          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#e5e2e1', marginBottom: 14, lineHeight: 1.6 }}>
+            Desde as antigas escolas de mistério do Oriente e as tradições secretas da Cabala, compreende-se que o universo não é feito apenas de matéria, mas de frequência, geometria e som. Os sábios já ensinavam que cada letra do alfabeto é um símbolo gráfico que oculta um código vibratório rigoroso. Quando essas letras formam o seu nome, criam um acorde invisível que ecoa repetidas vezes, magnetizando e moldando, silenciosamente, a realidade ao seu redor.
+          </Text>
+          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#e5e2e1', marginBottom: 14, lineHeight: 1.6 }}>
+            Na Numerologia Cabalística, o seu nome de batismo não é um acaso: ele define o seu Destino — a rota kármica da sua existência e ancestralidade. No entanto, o seu poder de cocriar a própria realidade (o sagrado livre-arbítrio) manifesta-se essencialmente através do seu Nome Social e da sua Assinatura. É através deles que você comunica ao mundo quem escolheu ser. A assinatura atua como o selo de poder da sua alma, ativando energeticamente todos os seus relacionamentos e negócios.
+          </Text>
+          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#e5e2e1', marginBottom: 14, lineHeight: 1.6 }}>
+            Mas atenção: uma assinatura repleta de sequências negativas ou arcanos conflitantes atua como um escudo opaco, travando a fluidez financeira e minando as suas interações. Ao harmonizar a geometria vibracional do seu nome de apresentação, desencadeia-se uma verdadeira alquimia interior: as resistências kármicas são quebradas e uma nova frequência de atração é intencionalmente ancorada no seu campo magnético.
+          </Text>
+          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#e5e2e1', marginBottom: 14, lineHeight: 1.6 }}>
+            A partir desta página, mergulharemos no Raio-X definitivo da sua essência numérica. Desvendaremos seus triângulos cabalísticos, seus maiores dons e entregaremos o mapa tático de alinhamento da sua nova assinatura. Prepare-se para reescrever o seu código cósmico e inaugurar o capítulo mais próspero da sua jornada.
+          </Text>
+        </View>
+        <PDFFooter />
+      </Page>
+
+      {/* ── PÁGINA 3: A ESTRELA DE 5 PONTAS + BLOQUEIOS ───────────────────── */}
       <Page size="A4" style={styles.page}>
-        <PDFPageHeader subtitle={`${nomeParaExibir} — Análise de Nome Social`} />
+        <PDFPageHeader subtitle={`${nomeParaExibir} — O Pentagrama Pessoal`} />
+
+        <View style={{ marginTop: 20, marginBottom: 8 }}>
+          <Text style={styles.hugeTitle}>A ESSÊNCIA E O PERSONAGEM</Text>
+        </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>A Estrela das 5 Pontas</Text>
-          <PDFNumbersGrid
+          <Text style={[styles.sectionTitle, { fontSize: 13, color: '#8A661C', borderBottomColor: '#8A661C', borderBottomWidth: 0.5 }]}>O Pentagrama Pessoal</Text>
+          <PDFNumbersStar
             nums={nums}
             featuredLabel="Expressão"
             primaryColor={theme.primaryColor}
             accentColor={theme.accentColor}
           />
+          <Text style={{ ...styles.bodyText, marginTop: 16 }}>
+            Na geometria sagrada e na numerologia cabalística, a sua energia vital está ancorada em 5 frequências principais, formando o seu Pentagrama Pessoal de luz. 
+          </Text>
+          <Text style={{ ...styles.bodyText, marginTop: 4 }}>
+            A <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Expressão</Text> define suas qualidades inatas, enquanto a <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Motivação</Text> revela o combustível espiritual da sua Alma. Sua <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Impressão</Text> é o invólucro do seu carisma no plano social; e na base, moldando sua jornada e resultados a longo prazo, está o número do <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Destino</Text>. Somente quando estes 5 polos operam em total alinhamento e ressonância cósmica, a estrela desperta — transmutando esforço em potência, fluidez e prosperidade manifesta em seu caminho e na sua Missão.
+          </Text>
+        </View>
+
+        <View style={styles.section} wrap={false}>
+          <Text style={[styles.sectionTitle, { fontSize: 13, color: '#8A661C', borderBottomColor: '#8A661C', borderBottomWidth: 0.5 }]}>
+            O Arquétipo - Sua Identidade Mítica
+          </Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
+            Os arquétipos são energias primordiais que governam o comportamento humano. Na metodologia do Nome Magnético, o seu número de Expressão revela o seu Arquétipo Regente: o 'personagem' que você interpreta no palco da vida. Conhecer seu arquétipo permite que você use seus talentos naturais com maestria e neutralize as sombras que impedem seu crescimento.
+          </Text>
+          <ArquetipoCardPDF arquetipo={getArquetipo(analysis.numero_expressao ?? 1)} />
         </View>
 
         {/* Bloqueios logo abaixo dos números */}
-        {bloqueios.length > 0 && (
+        {bloqueios.length > 0 ? (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626' }]}>
               Bloqueios Energéticos ({bloqueios.length})
             </Text>
             <BloqueiosBlock bloqueios={bloqueios} />
           </View>
+        ) : (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: '#059669', borderBottomColor: '#059669' }]}>
+              Bloqueios Energéticos (0)
+            </Text>
+            <View style={{ backgroundColor: '#ecfdf5', padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#34d399', marginTop: 8 }}>
+              <Text style={{ fontFamily: TITLE_FONT, color: '#065f46', fontSize: 13, marginBottom: 6 }}>
+                Parabéns! Fluxo Livre Detectado
+              </Text>
+              <Text style={{ fontFamily: BODY_FONT, color: '#064e3b', fontSize: 11, lineHeight: 1.5 }}>
+                Os cálculos cabalísticos mapearam a totalidade do seu nome e confirmaram que a sua arquitetura vibratória atual está completamente livre de sequências numéricas travadas (bloqueios). Sem as antigas amarras magnéticas para obstruir o seu campo, a sua energia flui de maneira cristalina pelas áreas de finanças, saúde e relacionamentos. O universo abraça e impulsiona o seu livre-arbítrio sem exigir pedágios mecânicos, refletindo um fluxo limpo rumo ao seu Destino.
+              </Text>
+            </View>
+          </View>
         )}
 
         <PDFFooter />
       </Page>
 
-      {/* ── PÁGINA 3: KARMA — DÉBITOS + LIÇÕES + TENDÊNCIAS ──────────────── */}
+      {/* ── PÁGINA 4/5: KARMA E TENDÊNCIAS ─────────────────────────────────── */}
       <Page size="A4" style={styles.page}>
-        <PDFPageHeader subtitle={`${nomeParaExibir} — Karma & Tendências`} />
+        <PDFPageHeader subtitle={`${nomeParaExibir} — O Peso do Passado`} />
+        
+        <View style={{ marginTop: 20, marginBottom: 8 }}>
+          <Text style={styles.hugeTitle}>O PESO DO PASSADO (KARMA E TENDÊNCIAS)</Text>
+        </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706' }]}>
+        <View style={{ ...styles.section, marginTop: 12 }}>
+          <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706', fontSize: 13 }]}>
             Débitos Kármicos
           </Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Na visão da numerologia cabalística, a jornada da Alma não é uma linha reta, mas um espiral transcendente de ciclos evolutivos. Os Débitos Kármicos emergem como ecos das suas vidas anteriores, marcando áreas da sua existência onde o livre-arbítrio foi utilizado em desequilíbrio — seja pelo excesso de autoridade cega, rebeldia irresponsável, estagnação ou puro materialismo. Destaca-se que eles não são punições de um universo severo, mas puras leis de compensação exigindo reintegração espiritual.</Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Ao carregar estas pendências em seu código de nascimento, os mesmos cenários de traição, perda ou esforço redobrado tenderão a se repetir até que a lição moral matriz seja integrada. Identificar e compreender seus débitos através deste cálculo liberta você das prisões repetitivas; ao adotar a resposta consciente baseada na antítese dessa sombra, esse fardo se transmuta e você conquista a verdadeira sabedoria atemporal que liberta o seu fluxo.</Text>
           <DebitosBlock debitos={debitos} />
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: '#0369a1', borderBottomColor: '#0369a1' }]}>
+        <View style={{ ...styles.section, marginTop: 0 }}>
+          <Text style={[styles.sectionTitle, { color: '#0369a1', borderBottomColor: '#0369a1', fontSize: 13 }]}>
             Lições Kármicas
           </Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>As Lições Kármicas funcionam como os "quartos vazios" da sua grandiosa arquitetura energética: elas determinam exatamente quais virtudes, habilidades sutis ou atributos de maestria estão ausentes no momento de sua encarnação. Sendo traços que você não experenciou ou se negou a desenvolver nas vidas que precederam esta, você tenderá a se sentir inapto ou vulnerável sempre que uma situação de grande peso demandar o sacrifício destas características.</Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Entretanto, encarar essa constatação como uma fraqueza permanente seria um engano. Uma lição não é um atestado de ausência, mas um convite vibrante à expansão prática. O seu próprio Destino frequentemente orquestrará desafios propositais com a missão velada de forçar você a dominar essas ferramentas ocultas. Aplicar a ação disciplinada e paciente frente a esses números ausentes tornará este "déficit" inicial em um de seus maiores trunfos maduros no pico da sua jornada.</Text>
           <LicoesBlock licoes={licoes} />
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: '#6d28d9', borderBottomColor: '#6d28d9' }]}>
+        <View style={{ ...styles.section, marginTop: 0 }}>
+          <Text style={[styles.sectionTitle, { color: '#6d28d9', borderBottomColor: '#6d28d9', fontSize: 13 }]}>
             Tendências Ocultas
           </Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Se as lições evidenciam aquilo que falta em seu arcabouço letal, as Tendências Ocultas escancaram exatamente aquilo que lhe sobra. Elas apontam para habilidades instintivas levadas ao absurdo; um talento e um foco de energia vital herdados cujas frequências, acumuladas e repetidas nos agrupamentos de memórias do seu nome, formaram um rio selvagem de grande ímpeto interno. Essa sobrecarga magnética, muitas vezes sutil e inquestionada, provoca uma inclinação subconsciente a focar inteiramente em determinado comportamento reativo.</Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Apesar destas vibrações concederem facilidade impressionante para comunicação ardente, ambição material intensa, poder de manipulação ou até altruísmo desgastante, é o excesso incontrolado que obscurece a clareza, convertendo sua habilidade primária em desequilíbrio e sabotando os resultados a longo prazo. O trunfo fundamental desta análise geométrica de repetição reside no mapeamento preciso dessas forças indomadas: ao compreendê-las sob as lentes da razão, você as direciona conscientemente, fazendo o rio trabalhar pelas turbinas a seu favor em vez de deixá-lo inundar o seu sucesso.</Text>
           <TendenciasBlock tendencias={tendencias} frequencias={frequencias} />
         </View>
 
         <PDFFooter />
       </Page>
 
-      {/* ── PÁGINA(S) 4+: ANÁLISE IA COMPLETA ────────────────────────────── */}
+      {/* ── PÁGINAS 6+: ANÁLISE IA COMPLETA COM INJEÇÕES DE QUEBRA E TEXTOS ─── */}
       {analiseCorpo && (
         <Page size="A4" style={styles.page}>
-          <PDFPageHeader subtitle={`${nomeParaExibir} — Análise Completa`} />
+          <PDFPageHeader subtitle={`${nomeParaExibir} — Análise Profunda`} />
+
+          <View style={{ marginTop: 20, marginBottom: 8 }}>
+            <Text style={styles.hugeTitle}>SUA ANÁLISE PROFUNDA</Text>
+            <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 24 }}>
+               ESTUDO NUMEROLÓGICO COMPLETO
+            </Text>
+          </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Análise Completa</Text>
             <RenderMarkdownChunks
               text={analiseCorpo}
               styles={styles}
@@ -319,6 +480,14 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
               triangleMap={triangleMap}
               triCellSize={triCellSize}
               letrasNome={letrasNome}
+              pageBreaks={['Os 4 Triângulos', 'Triângulo Pessoal', 'Triângulo Social', 'Triângulo do Destino', 'Bloqueios e', 'Como Harmonizar']}
+              injections={{
+                'Triângulo da Vida': <Text style={styles.bodyText}>O Triângulo da Vida materializa os alicerces de sua sobrevivência e ambição prática. É a bússola dourada da sua vitalidade biológica, da sua resiliência e de todo o seu potencial de atração financeira. Ele dita os limites palpáveis da sua expansão material sob o sol.</Text>,
+                'Triângulo Pessoal': <Text style={styles.bodyText}>Este triângulo desvenda as profundezas da sua vida íntima. Ele atua sobre o subconsciente, curando ou criando fissuras no amor-próprio e nas reações sentimentais. Através dele visualizamos se você é movido por clareza emocional ou por tempestades invisíveis do seu afeto.</Text>,
+                'Triângulo Social': <Text style={styles.bodyText}>Aqui mapeamos a arquitetura do seu magnetismo de grupo. Este vértice define o peso do seu networking, a fluidez das parcerias de negócios e como a sociedade em geral curva-se perante os seus argumentos e dons de comunicação. É a arte do posicionamento projetada em numerologia pura.</Text>,
+                'Triângulo do Destino': <Text style={styles.bodyText}>O ápice sagrado: sua convergência final. O Triângulo do Destino revela as circunstâncias incontornáveis e o fluxo principal do projeto que o universo exige de você nesta Era. É para cá que os ventos sopram; é a grande força gravitacional em direção ao topo da sua montanha evolutiva.</Text>,
+                'Como Harmonizar': <Text style={styles.bodyText}>Radiografar os desafios é o primeiro elo; instaurar a transmutação é o movimento de mestre. Detalharemos com precisão cirúrgica a tática exata de adequação da sua nova assinatura, desconstruindo resíduos limitantes para consagrar de forma orgânica a sua verdadeira frequência de poder.</Text>
+              }}
             />
           </View>
 
@@ -326,88 +495,32 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
         </Page>
       )}
 
-      {/* ── PÁGINA: CONCLUSÃO ─────────────────────────────────────────────── */}
-      {conclusaoTexto && conclusaoTexto.length > 100 && (
-        <Page size="A4" style={styles.page}>
-          <PDFPageHeader subtitle={`${nomeParaExibir} — Conclusão`} />
-          <View style={styles.conclusaoCard}>
-            <RenderMarkdownChunks text={conclusaoTexto} styles={styles} GOLD={GOLD} />
+      {/* ── PÁGINA: CONCLUSÃO (FUNDO ESCURO) ─────────────────────────────── */}
+      {conclusaoTexto && conclusaoTexto.length > 50 && (
+        <Page size="A4" style={styles.darkPage}>
+          <PDFPageHeader subtitle={`${nomeParaExibir} — O Encerramento`} />
+          <View style={{ marginTop: 24, marginBottom: 16 }}>
+             <Text style={styles.hugeTitle}>CONCLUSÃO FINAL</Text>
+             <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 24 }}>
+               A SÍNTESE DO SEU MAPA
+             </Text>
           </View>
-          <PDFFooter />
-        </Page>
-      )}
-
-      {/* ── PÁGINA: VARIAÇÕES DE NOME MAGNÉTICO ───────────────────────────── */}
-      {magneticNames.length > 0 && (
-        <Page size="A4" style={styles.page}>
-          <PDFPageHeader subtitle={`${nomeParaExibir} — Variações Numerológicas`} />
-
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Estudo das Variações de Nome Social</Text>
-            <Text style={{ ...styles.bodyText, marginBottom: 14, lineHeight: 1.5 }}>
-              As 3 melhores variações numerológicas geradas para o seu nome. Cada opção foi calculada para reduzir bloqueios, eliminar débitos variáveis e aumentar a harmonia entre Expressão e Destino.
-            </Text>
-
-            {magneticNames.slice(0, 3).map((name, i) => {
-              const sc = scoreColor(name.score);
-              const isTop = i === 0;
-              return (
-                <View key={i} style={isTop ? styles.variationCardTop : styles.variationCard}>
-                  <View style={styles.variationHeader}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      {isTop && (
-                        <Text style={{ fontSize: 8, color: GOLD, fontFamily: 'Helvetica-Bold' }}>
-                          ★ RECOMENDADO{'  '}
-                        </Text>
-                      )}
-                      <Text style={[styles.variationName, { color: isTop ? DARK : '#374151' }]}>
-                        {name.nome_sugerido}
-                      </Text>
-                    </View>
-                    <Text style={[styles.variationScore, { color: sc }]}>{name.score}/100</Text>
-                  </View>
-
-                  <View style={styles.variationBar}>
-                    <View
-                      style={[
-                        styles.variationBarFill,
-                        { width: `${Math.min(100, name.score)}%`, backgroundColor: sc },
-                      ]}
-                    />
-                  </View>
-
-                  <View style={styles.variationMeta}>
-                    {name.numero_expressao != null && (
-                      <Text style={styles.variationMetaText}>
-                        Expressão:{' '}
-                        <Text style={{ fontFamily: 'Helvetica-Bold', color: GOLD }}>
-                          {name.numero_expressao}
-                        </Text>
-                      </Text>
-                    )}
-                    {name.numero_motivacao != null && (
-                      <Text style={styles.variationMetaText}>
-                        Motivação: <Text style={{ fontFamily: 'Helvetica-Bold' }}>{name.numero_motivacao}</Text>
-                      </Text>
-                    )}
-                  </View>
-
-                  {name.justificativa && (
-                    <Text style={styles.variationJustificativa}>{name.justificativa}</Text>
-                  )}
-                </View>
-              );
-            })}
+            <RenderMarkdownChunks 
+               text={conclusaoTexto.replace(/##[^\n]*(?:8\.|conclus[aã]o)/gi, '').trim()} // Retira o "## 8. Conclusão" para não duplicar com nosso Header
+               styles={{...styles, bodyText: { ...styles.bodyText, color: '#e5e2e1' }}} 
+               GOLD={GOLD} 
+            />
           </View>
-
           <PDFFooter />
         </Page>
       )}
+
+      {/* A seção de Variações Numerológicas foi removida do PDF (só aparece no HTML) */}
 
       {/* ── PÁGINA FINAL: FOLHA DE TREINO DE ASSINATURA ───────────────────── */}
       <Page size="A4" style={styles.assinaturaPage}>
         <Text style={styles.assinaturaTitle}>Folha de Treino de Assinatura</Text>
-        <Text style={styles.assinaturaNome}>{nomeParaExibir}</Text>
 
         <View style={styles.assinaturaInstrucoesBox}>
           <Text style={styles.assinaturaInstrucoesTitle}>
@@ -433,7 +546,9 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
           </Text>
         </View>
 
-        {Array.from({ length: 13 }).map((_, i) => (
+        <Text style={styles.assinaturaNome}>{nomeParaExibir}</Text>
+
+        {Array.from({ length: 16 }).map((_, i) => (
           <View key={i} style={styles.assinaturaLinha} />
         ))}
 

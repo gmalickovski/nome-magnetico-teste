@@ -18,6 +18,7 @@ import {
   type LicaoData,
   type TendenciaData,
 } from './PDFKarmicBlock';
+import { TITLE_FONT } from './PDFFonts';
 
 // ── Helpers de texto ──────────────────────────────────────────────────────────
 
@@ -329,6 +330,9 @@ interface RenderMarkdownChunksProps {
   licoes?: LicaoData[];
   tendencias?: TendenciaData[];
   frequencias?: Record<string, number> | null;
+  // Controle de páginas
+  pageBreaks?: string[];
+  injections?: Record<string, React.ReactNode>;
 }
 
 export function RenderMarkdownChunks({
@@ -343,6 +347,8 @@ export function RenderMarkdownChunks({
   licoes,
   tendencias,
   frequencias,
+  pageBreaks,
+  injections,
 }: RenderMarkdownChunksProps) {
   if (!text) return null;
 
@@ -356,7 +362,12 @@ export function RenderMarkdownChunks({
     tendenciasInjetadas: false,
   };
 
-  const blocks = text.split(/\n\s*\n/);
+  // FORÇA BRUTA INTERNA: Assegura que toda e qualquer linha com ### tenha linhas em branco antes e depois.
+  // Isso resolve definitivamente arquivos que vêm colados por falha do LLM e bypassaram o textFormatter.
+  let textParsed = text.replace(/(^|\n)[ \t]*(#{1,6}\s+[^\n]+)/g, '$1\n\n$2\n\n');
+  textParsed = textParsed.replace(/\n{3,}/g, '\n\n');
+
+  const blocks = textParsed.split(/\n\s*\n/);
 
   blocks.forEach((block, idx) => {
     const trimmed = block.trim();
@@ -366,26 +377,101 @@ export function RenderMarkdownChunks({
     const matchHeader = trimmed.match(/^(#{1,6})\s+(.*)$/);
     if (matchHeader) {
       const level = matchHeader[1].length;
-      const content = stripEmojiTrim(matchHeader[2]);
-      const fontSize = level === 1 ? 20 : level === 2 ? 15 : level === 3 ? 12 : 10;
-      const color = level >= 3 ? (level === 4 ? '#F59E0B' : '#a78bfa') : GOLD;
+      const content = stripEmojiTrim(matchHeader[2]).replace(/\*\*/g, '');
+      
+      const isTrianguloTitle = detectTriangleKey(content) !== null;
+
+      const isAntidotoTitle = level === 3 && normalizeStr(content).startsWith('bloqueio');
+
+      if (isAntidotoTitle) {
+        let antidotoText = '';
+        const nextBlock = blocks[idx + 1];
+        if (nextBlock) {
+          const trimmedNext = nextBlock.trim();
+          if (!trimmedNext.match(/^(#{1,6})\s+/)) {
+            antidotoText = stripEmojiTrim(trimmedNext);
+            // Marcar para pular a próxima iteração
+            (blocks as string[])[idx + 1] = '';
+          }
+        }
+
+        const renderBoldText = (rawStr: string, clr: string) => {
+          let str = rawStr.replace(/^[-*•]\s*/, '');
+          str = str.replace(/\*\*(.*?)\*\*/g, (_, p1) => `<bold>${p1}</bold>`);
+          const parts = str.split(/(<bold>.*?<\/bold>)/g);
+          return parts.map((pt, i) => {
+            if (pt.startsWith('<bold>')) {
+              return <Text key={i} style={{ fontFamily: 'Helvetica-Bold', color: clr }}>{pt.replace(/<\/?bold>/g, '')}</Text>;
+            }
+            return <Text key={i} style={{ fontFamily: 'Helvetica', color: clr }}>{pt}</Text>;
+          });
+        };
+
+        const shouldBreak = pageBreaks?.some(b => normalizeStr(content).includes(normalizeStr(b)));
+
+        result.push(
+          <View key={`antidoto-${idx}`} wrap={false} break={shouldBreak} style={{ backgroundColor: '#292524', padding: 14, borderRadius: 8, borderLeftWidth: 4, borderLeftColor: '#ea580c', marginBottom: 16, marginTop: 4 }}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 13, color: '#fed7aa', marginBottom: 8 }}>
+              {content}
+            </Text>
+            {antidotoText ? (
+              <Text style={{ fontSize: 10.5, lineHeight: 1.6 }}>
+                {renderBoldText(antidotoText, '#e7e5e4')}
+              </Text>
+            ) : null}
+          </View>
+        );
+        return;
+      }
+
+      let fontSize = level === 1 ? 20 : level === 2 ? 15 : level === 3 ? 12 : 10;
+      let fontColor = level >= 3 ? (level === 4 ? '#F59E0B' : '#a78bfa') : GOLD;
+      let fontFam = 'Helvetica-Bold';
+      let textTransform: any = 'none';
+      let letterSpacing = level <= 2 ? 0.4 : 0;
+      let borderBottomWidth = 0;
+      let borderBottomColor = 'transparent';
+      let paddingBottom = 0;
+      let textAlign: any = 'left';
+
+      if (level === 2) {
+        fontSize = 13;
+        fontFam = TITLE_FONT;
+        fontColor = '#8A661C'; // Dourado mais escuro e castanho
+        textTransform = 'uppercase';
+        letterSpacing = 0.5;
+        borderBottomWidth = 1;
+        borderBottomColor = '#8A661C';
+        paddingBottom = 4;
+      }
+
       const marginTop = level === 1 ? 20 : level === 2 ? 14 : level === 3 ? 10 : 6;
-      const marginBottom = level === 1 ? 10 : level === 2 ? 7 : level === 3 ? 5 : 3;
+      const marginBottom = level === 1 ? 10 : level === 2 ? 12 : level === 3 ? 8 : 3;
+
+      const shouldBreak = pageBreaks?.some(b => normalizeStr(content).includes(normalizeStr(b)));
+      const injectionKey = injections ? Object.keys(injections).find(k => normalizeStr(content).includes(normalizeStr(k))) : undefined;
 
       result.push(
-        <Text
-          key={idx}
-          style={{
-            fontSize,
-            fontFamily: 'Helvetica-Bold',
-            color,
-            marginTop: result.length === 0 ? 0 : marginTop,
-            marginBottom,
-            letterSpacing: level <= 2 ? 0.4 : 0,
-          }}
-        >
-          {content}
-        </Text>
+        <View key={idx} break={shouldBreak}>
+          <Text
+            style={{
+              fontSize,
+              fontFamily: fontFam,
+              color: fontColor,
+              marginTop: result.length === 0 && !injectionKey && !shouldBreak ? 0 : marginTop,
+              marginBottom,
+              letterSpacing,
+              textTransform,
+              borderBottomWidth,
+              borderBottomColor,
+              paddingBottom,
+              textAlign,
+            }}
+          >
+            {content}
+          </Text>
+          {injectionKey && injections ? injections[injectionKey] : null}
+        </View>
       );
 
       // ── Injeção: Triângulos ───────────────────────────────────────────────

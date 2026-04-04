@@ -16,11 +16,9 @@ import type { ProductTheme, CoverShapeStyle } from './PDFTheme';
 
 // ── Shapes SVG ────────────────────────────────────────────────────────────────
 
-/** Estrela de 5 pontas — Nome Social */
 function SocialShapes({ color }: { color: string }) {
-  // Pontos de uma estrela de 5 pontas centrada em (297, 420) — centro da página A4
-  // Raio externo: 180, raio interno: 75
-  const cx = 297;
+  // Pontos de uma estrela de 5 pontas centrada no padding-box (499px de área útil)
+  const cx = 249.5;
   const cy = 400;
   const R = 180;
   const r = 75;
@@ -33,18 +31,15 @@ function SocialShapes({ color }: { color: string }) {
   const starPoints = pts.map(([x, y]) => `${x},${y}`).join(' ');
 
   return (
-    <Svg
-      width="595"
-      height="842"
-      style={{ position: 'absolute', top: 0, left: 0 }}
-    >
-      {/* Estrela central translúcida */}
+    <View style={{ position: 'absolute', top: -72, alignSelf: 'center', height: 842 }}>
+      <Svg width={499} height={842}>
+        {/* Estrela central translúcida */}
       <Polygon
         points={starPoints}
         fill={color}
-        fillOpacity={0.05}
+        fillOpacity={0.015}
         stroke={color}
-        strokeOpacity={0.15}
+        strokeOpacity={0.05}
         strokeWidth={1}
       />
       {/* Círculo externo */}
@@ -54,7 +49,7 @@ function SocialShapes({ color }: { color: string }) {
         r={R + 20}
         fill="none"
         stroke={color}
-        strokeOpacity={0.08}
+        strokeOpacity={0.02}
         strokeWidth={0.8}
       />
       {/* Círculo interno */}
@@ -64,7 +59,7 @@ function SocialShapes({ color }: { color: string }) {
         r={r - 10}
         fill="none"
         stroke={color}
-        strokeOpacity={0.12}
+        strokeOpacity={0.03}
         strokeWidth={0.8}
       />
       {/* Segundo anel externo */}
@@ -74,7 +69,7 @@ function SocialShapes({ color }: { color: string }) {
         r={R + 55}
         fill="none"
         stroke={color}
-        strokeOpacity={0.05}
+        strokeOpacity={0.015}
         strokeWidth={0.5}
       />
       {/* Mandala: 8 linhas radiais */}
@@ -92,24 +87,22 @@ function SocialShapes({ color }: { color: string }) {
             x2={x2}
             y2={y2}
             stroke={color}
-            strokeOpacity={0.07}
+            strokeOpacity={0.02}
             strokeWidth={0.5}
           />
         );
       })}
-    </Svg>
+      </Svg>
+    </View>
   );
 }
 
 /** Lua crescente + círculos suaves — Nome Bebê */
 function BebeShapes({ color }: { color: string }) {
   return (
-    <Svg
-      width="595"
-      height="842"
-      style={{ position: 'absolute', top: 0, left: 0 }}
-    >
-      {/* Círculos concêntricos suaves no canto superior direito */}
+    <View style={{ position: 'absolute', top: 0, left: 0, width: 595, height: 842, opacity: 0.6 }}>
+      <Svg width="595" height="842">
+        {/* Círculos concêntricos suaves no canto superior direito */}
       <Circle cx={480} cy={120} r={160} fill={color} fillOpacity={0.05} stroke={color} strokeOpacity={0.08} strokeWidth={0.8} />
       <Circle cx={480} cy={120} r={110} fill={color} fillOpacity={0.04} stroke={color} strokeOpacity={0.06} strokeWidth={0.6} />
       <Circle cx={480} cy={120} r={60} fill={color} fillOpacity={0.06} stroke={color} strokeOpacity={0.10} strokeWidth={0.8} />
@@ -148,7 +141,8 @@ function BebeShapes({ color }: { color: string }) {
       <Circle cx={115} cy={720} r={130} fill="none" stroke={color} strokeOpacity={0.06} strokeWidth={0.6} />
       <Circle cx={115} cy={720} r={80} fill="none" stroke={color} strokeOpacity={0.08} strokeWidth={0.6} />
       <Circle cx={115} cy={720} r={40} fill={color} fillOpacity={0.05} stroke={color} strokeOpacity={0.1} strokeWidth={0.8} />
-    </Svg>
+      </Svg>
+    </View>
   );
 }
 
@@ -163,12 +157,9 @@ function EmpresaShapes({ color, accentColor }: { color: string; accentColor: str
   }
 
   return (
-    <Svg
-      width="595"
-      height="842"
-      style={{ position: 'absolute', top: 0, left: 0 }}
-    >
-      {/* Linhas diagonais de grade */}
+    <View style={{ position: 'absolute', top: 0, left: 0, width: 595, height: 842, opacity: 0.6 }}>
+      <Svg width="595" height="842">
+        {/* Linhas diagonais de grade */}
       {[-60, 0, 60, 120, 180, 240, 300, 360, 420].map((y, i) => (
         <Line
           key={`line-${i}`}
@@ -198,7 +189,8 @@ function EmpresaShapes({ color, accentColor }: { color: string; accentColor: str
 
       {/* Ponto accent central */}
       <Circle cx={297} cy={421} r={3} fill={accentColor} fillOpacity={0.15} />
-    </Svg>
+      </Svg>
+    </View>
   );
 }
 

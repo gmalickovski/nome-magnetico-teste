@@ -14,7 +14,7 @@
 export function formatAnalysisText(text: string | null | undefined): string {
   if (!text) return '';
 
-  let f = text.trim();
+  let f = text.trim().replace(/\r/g, '');
 
   // 0a. Remover negrito de qualquer coisa que NÃO seja termo técnico de numerologia ou número isolado.
   //    Estratégia: preservar apenas bold em palavras/números permitidos; strip em tudo o mais.
@@ -75,11 +75,9 @@ export function formatAnalysisText(text: string | null | undefined): string {
   // 4b. Remover headers vazios (##, ###, etc. sem texto após — emitidos pela IA como separadores)
   f = f.replace(/^#{1,6}\s*$/gm, '');
 
-  // 5. Garantir \n\n ANTES de qualquer header #
-  f = f.replace(/([^\n])\n(#{1,6}\s)/g, '$1\n\n$2');
-
-  // 6. Garantir \n\n DEPOIS de qualquer header #
-  f = f.replace(/(#{1,6}\s[^\n]*)\n([^\n#])/g, '$1\n\n$2');
+  // 5 e 6. Garantir \n\n ANTES e DEPOIS de qualquer header # (isolar o bloco perfeitamente)
+  // Ignora \n, aceita possíveis espaços no começo e isola forçadamente:
+  f = f.replace(/(^|\n)[ \t]*(#{1,6}\s+[^\n]+)/g, '$1\n\n$2\n\n');
 
   // 7. Garantir \n\n entre parágrafos — após ponto, exclamação, interrogação seguido de letra
   f = f.replace(/([.!?])\n(?!\n)(?=[A-ZÁÉÍÓÚÂÊÔÃÕÇ0-9\-*•])/gi, '$1\n\n');
