@@ -100,7 +100,7 @@ function SocialShapes({ color }: { color: string }) {
 /** Lua crescente + círculos suaves — Nome Bebê */
 function BebeShapes({ color }: { color: string }) {
   return (
-    <View style={{ position: 'absolute', top: 0, left: 0, width: 595, height: 842, opacity: 0.6 }}>
+    <View style={{ position: 'absolute', top: -72, left: -48, width: 595, height: 842, opacity: 0.6 }}>
       <Svg width="595" height="842">
         {/* Círculos concêntricos suaves no canto superior direito */}
       <Circle cx={480} cy={120} r={160} fill={color} fillOpacity={0.05} stroke={color} strokeOpacity={0.08} strokeWidth={0.8} />
@@ -157,7 +157,7 @@ function EmpresaShapes({ color, accentColor }: { color: string; accentColor: str
   }
 
   return (
-    <View style={{ position: 'absolute', top: 0, left: 0, width: 595, height: 842, opacity: 0.6 }}>
+    <View style={{ position: 'absolute', top: -72, left: -48, width: 595, height: 842, opacity: 0.6 }}>
       <Svg width="595" height="842">
         {/* Linhas diagonais de grade */}
       {[-60, 0, 60, 120, 180, 240, 300, 360, 420].map((y, i) => (

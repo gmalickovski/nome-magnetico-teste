@@ -45,12 +45,13 @@ const styles = StyleSheet.create({
   section: { marginBottom: 24 },
   sectionTitle: {
     fontSize: 13,
-    fontFamily: 'Helvetica-Bold',
-    color: PRIMARY,
+    fontFamily: TITLE_FONT,
+    color: '#8A661C',
     borderBottomWidth: 1,
-    borderBottomColor: PRIMARY,
+    borderBottomColor: '#8A661C',
     paddingBottom: 4,
     marginBottom: 12,
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   bodyText: {
@@ -58,6 +59,16 @@ const styles = StyleSheet.create({
     color: DARK,
     lineHeight: 1.75,
     marginBottom: 8,
+  },
+  hugeTitle: {
+    fontSize: 22,
+    fontFamily: TITLE_FONT,
+    color: PRIMARY,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 20,
+    marginTop: 10,
+    textAlign: 'center',
   },
   conclusaoCard: {
     borderWidth: 1,
@@ -251,23 +262,34 @@ export function NomeBebePDF({ analysis, magneticNames }: ProductPDFProps) {
         titleFont={TITLE_FONT}
       />
 
-      {/* ── PÁGINA 2: DESTINO DESTAQUE + MELHOR NOME + 5 NÚMEROS ─────────── */}
+      {/* ── PÁGINA 2: INTRODUÇÃO ────────────────────────────────────────────── */}
+      <Page size="A4" style={{ ...styles.page, backgroundColor: theme.coverBgColor }}>
+        <PDFPageHeader subtitle="Introdução" />
+        <View style={styles.section}>
+          <Text style={styles.hugeTitle}>O Primeiro Presente: O Nome</Text>
+          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#5C2D1E', marginBottom: 14, lineHeight: 1.6 }}>
+            A chegada de um bebê marca o início de uma nova constelação de energia na sua família. Na visão milenar da Numerologia Cabalística, o nome escolhido não é uma simples preferência sonora ou combinação estética; é o primeiro grande legado espiritual que você entrega à sua criança. O nome atua como um campo magnético, uma roupagem vibracional que irá acompanhá-la por toda a vida, atraindo experiências, abrindo portas e moldando as frequências do seu dia a dia.
+          </Text>
+          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#5C2D1E', marginBottom: 14, lineHeight: 1.6 }}>
+            Enquanto a data de nascimento determina o Destino (o chamado natural e imutável da alma, repleto de propósitos a serem cumpridos), o Nome determina a Expressão e os talentos com as quais o seu bebê percorrerá o caminho. Quando as energias do nome estão em desarmonia com o Destino, a criança pode enfrentar bloqueios internos e atritos. Em contrapartida, quando harmonizadas, o nome torna-se um escudo protetor e um propulsor de fluidez, potencializando o seu brilho inato.
+          </Text>
+          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#5C2D1E', marginBottom: 14, lineHeight: 1.6 }}>
+            Nesta análise delicada e profunda, cruzamos a geometria sagrada da data de nascimento prevista e os sobrenomes familiares com os nomes eleitos por vocês. Cada candidato foi dissecado nos Quatro Triângulos Cabalísticos e varrido por um meticuloso scanner de vibrações, na busca da combinação mais pura e destituída de bloqueios kármicos (sequências numéricas que dificultam áreas da vida).
+          </Text>
+          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#5C2D1E', marginBottom: 14, lineHeight: 1.6 }}>
+            Abaixo, apresentamos o mapa de navegação cósmica desta jornada. Com precisão técnica e sensibilidade espiritual, apontamos qual desses nomes constrói o portal mais harmonioso, próspero e iluminado para a chegada do seu bebê. Sintam a paz de uma escolha divinamente guiada e bem-vinda a esse novo capítulo.
+          </Text>
+        </View>
+        <PDFFooter />
+      </Page>
+
+        {/* ── PÁGINA 3: DESTINO DESTAQUE + 5 NÚMEROS ─────────── */}
       <Page size="A4" style={styles.page}>
         <PDFPageHeader subtitle={`${nomeParaExibir} — O Portal do Nascimento`} />
 
-        {/* Destino do bebê — card herói */}
-        <View style={[styles.section, { alignItems: 'center' }]}>
-          <Text style={styles.sectionTitle}>O Destino que o Céu Escolheu</Text>
-          <View style={[styles.destinoBox, { borderColor: PRIMARY }]}>
-            <Text style={styles.destinoLabel}>NÚMERO DE DESTINO DO BEBÊ</Text>
-            <Text style={[styles.destinoNumber, { color: PRIMARY }]}>{destinoBebe ?? '?'}</Text>
-            <Text style={styles.destinoMeta}>Data de nascimento: {dataNascimento}</Text>
-          </View>
-        </View>
-
-        {/* Estrela dos 5 números — Destino destacado */}
+        {/* Os 5 números — Destino destacado */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>A Estrela das 5 Pontas</Text>
+          <Text style={styles.sectionTitle}>Essência da Criança</Text>
           <PDFNumbersGrid
             nums={nums}
             featuredLabel="Destino"
@@ -338,6 +360,9 @@ export function NomeBebePDF({ analysis, magneticNames }: ProductPDFProps) {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ranking Numerológico dos Candidatos</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 12 }}>
+              Abaixo encontra-se a classificação vibratória dos nomes avaliados, ordenados do maior para o menor potencial de fluidez. A pontuação reflete a harmonia entre as frequências do nome e o plano original do Destino do seu bebê. O nome no topo é a recomendação de ouro para garantir um portal energético limpo e auspicioso, livre de bloqueios constritores.
+            </Text>
 
             <View style={styles.tableHeader}>
               <Text style={[styles.tableHeaderCell, { width: '28%' }]}>Nome Completo</Text>
@@ -391,8 +416,11 @@ export function NomeBebePDF({ analysis, magneticNames }: ProductPDFProps) {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Estudo dos 4 Triângulos</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
+              Os Triângulos Numerológicos formam a anatomia vibratória do nome. Eles revelam, em camadas progressivas, a energia intrínseca que revestirá a identidade da sua criança em todas as fases do desenvolvimento humano.
+            </Text>
             <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
-              Os Quatro Triângulos Numerológicos revelam a estrutura energética profunda do nome escolhido para esta criança. Cada triângulo rege uma dimensão específica da vida.
+              Enquanto o Triângulo da Vida ditará os aspectos gerais de saúde e brilho no mundo, o Triângulo Pessoal mostrará como o seu bebê lidará com suas emoções e medos internos. O Triângulo Social revelará a forma como os amiguinhos, professores e a sociedade o perceberão, e o Triângulo do Destino confirmará a sua imensa força direcionadora para o futuro.
             </Text>
 
             {([
@@ -434,20 +462,29 @@ export function NomeBebePDF({ analysis, magneticNames }: ProductPDFProps) {
             <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706' }]}>
               Débitos Kármicos
             </Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
+              Na ótica reencarnacionista da Cabala, um Bebê não é uma "página em branco", mas um espírito sábio e antigo assumindo um novo corpo para evoluir. Os Débitos Kármicos revelam excessos cometidos em aprendizados passados e mostram aos pais exatamente onde precisarão agir com mais doçura, limite e direcionamento, evitando que a criança repita os mesmos padrões de autossabotagem no futuro.
+            </Text>
             <DebitosBlock debitos={debitos} />
           </View>
 
-          <View style={styles.section}>
+          <View style={{ ...styles.section, marginTop: 0 }}>
             <Text style={[styles.sectionTitle, { color: '#0369a1', borderBottomColor: '#0369a1' }]}>
               Lições Kármicas
+            </Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
+              As Lições Kármicas são identificadas pelas frequências numéricas "ausentes" no nome escolhido. Elas indicam certas virtudes ou campos de domínio que a criança deverá desenvolver organicamente ao longo da vida. Conhecê-las agora é providencial: pois permite que vocês estimulem essas exatas habilidades através do esporte, da arte e da educação desde a mais tenra idade.
             </Text>
             <LicoesBlock licoes={licoes} />
           </View>
 
           {tendencias.length > 0 && (
-            <View style={styles.section}>
+            <View style={{ ...styles.section, marginTop: 0 }}>
               <Text style={[styles.sectionTitle, { color: '#6d28d9', borderBottomColor: '#6d28d9' }]}>
                 Tendências Ocultas
+              </Text>
+              <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
+                As Tendências Ocultas são frequências massivamente repetidas nas letras do nome, agindo como um imenso rio de energia herdada. Elas representam talentos instintivos formidáveis que a criança possui — mas que, se não dosados, podem resultar em exageros comportamentais. Cabe a vocês canalizar essa força vulcânica para caminhos criativos e seguros.
               </Text>
               <TendenciasBlock tendencias={tendencias} frequencias={frequencias} />
             </View>
@@ -461,8 +498,15 @@ export function NomeBebePDF({ analysis, magneticNames }: ProductPDFProps) {
       {analiseCorpo && (
         <Page size="A4" style={styles.page}>
           <PDFPageHeader subtitle={`${nomeParaExibir} — Análise Completa`} />
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Análise Completa</Text>
+          <View style={{ ...styles.section, marginTop: 40, marginBottom: 40, alignItems: 'center' }}>
+            <Text style={{ fontSize: 13, fontFamily: TITLE_FONT, color: PRIMARY, letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>
+              Mergulho Profundo
+            </Text>
+            <Text style={{ fontSize: 32, fontFamily: TITLE_FONT, color: PRIMARY, textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.2 }}>
+              Sua{'\n'}Análise
+            </Text>
+            <View style={{ width: 40, height: 2, backgroundColor: PRIMARY, marginTop: 16 }} />
+          </View>
             <RenderMarkdownChunks
               text={analiseCorpo}
               styles={styles}
@@ -471,18 +515,25 @@ export function NomeBebePDF({ analysis, magneticNames }: ProductPDFProps) {
               triCellSize={triCellSize}
               letrasNome={letrasNome}
             />
-          </View>
+
           <PDFFooter />
         </Page>
       )}
 
       {/* ── CONCLUSÃO ─────────────────────────────────────────────────────── */}
       {conclusaoTexto && conclusaoTexto.length > 100 && (
-        <Page size="A4" style={styles.page}>
+        <Page size="A4" style={{ ...styles.page, backgroundColor: theme.coverBgColor }}>
           <PDFPageHeader subtitle={`${nomeParaExibir} — Bênção Numerológica`} />
-          <View style={styles.conclusaoCard}>
-            <RenderMarkdownChunks text={conclusaoTexto} styles={styles} GOLD={PRIMARY} />
+          <View style={{ ...styles.section, marginTop: 40, alignItems: 'center' }}>
+            <Text style={{ fontSize: 13, fontFamily: TITLE_FONT, color: PRIMARY, letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>
+              Finalização
+            </Text>
+            <Text style={{ fontSize: 32, fontFamily: TITLE_FONT, color: PRIMARY, textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.2 }}>
+              A Bênção
+            </Text>
+            <View style={{ width: 40, height: 2, backgroundColor: PRIMARY, marginTop: 16, marginBottom: 24 }} />
           </View>
+          <RenderMarkdownChunks text={conclusaoTexto} styles={styles} GOLD={PRIMARY} />
           <PDFFooter />
         </Page>
       )}
