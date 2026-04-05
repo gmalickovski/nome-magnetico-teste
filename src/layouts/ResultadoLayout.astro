@@ -55,21 +55,30 @@ try {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
               Análises
             </a>
+            {showActions && (
+              <a
+                href={pdfHref}
+                class="inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_2px_16px_rgba(212,175,55,0.35)] hover:bg-[#f2ca50] hover:shadow-[0_4px_24px_rgba(212,175,55,0.5)] active:scale-95 transition-all duration-300"
+              >
+                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Baixar Análise
+              </a>
+            )}
             <AvatarMenu client:load nome={userNome} />
           </div>
 
       </div>
     </header>
 
-    <!-- Floating PDF Button — visible on all screens, centered on mobile, bottom-right on desktop -->
+    <!-- Floating PDF Button — mobile only, centered above bottom nav -->
     {showActions && (
       <a
         id="pdf-download-btn"
         href={pdfHref}
-        class="fixed bottom-[88px] md:bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-6 z-50 inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(212,175,55,0.4)] hover:bg-[#f2ca50] hover:shadow-[0_4px_32px_rgba(212,175,55,0.55)] active:scale-95 transition-all duration-300"
+        class="md:hidden fixed bottom-[88px] left-1/2 -translate-x-1/2 z-50 inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(212,175,55,0.4)] hover:bg-[#f2ca50] hover:shadow-[0_4px_32px_rgba(212,175,55,0.55)] active:scale-95 transition-all duration-300"
       >
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-        Baixar Análise Completa
+        Baixar Análise
       </a>
     )}
 
@@ -107,45 +116,45 @@ try {
     }
   </script>
 
-  <!-- Floating PDF button opacity behavior -->
+  <!-- Mobile FAB opacity: opaque at rest, semi-transparent while scrolling/interacting -->
   <script is:inline>
     (function () {
       var btn = document.getElementById('pdf-download-btn');
       if (!btn) return;
 
-      var IDLE_DELAY = 3000;   // ms before fading
-      var FADE_OPACITY = '0.35';
-      var FULL_OPACITY = '1';
-      var idleTimer = null;
+      var FADE_DELAY  = 150;    // ms after interaction stops before going opaque again
+      var FADE_OPACITY = '0.3'; // opacity while user is actively scrolling/interacting
+      var FULL_OPACITY = '1';   // opacity when idle (resting)
+      var restoreTimer = null;
+      var isHovered = false;
 
-      btn.style.transition = 'opacity 0.5s ease, background-color 0.3s, box-shadow 0.3s, transform 0.1s';
+      btn.style.transition = 'opacity 0.4s ease, background-color 0.3s, box-shadow 0.3s, transform 0.1s';
+      // Start fully visible
       btn.style.opacity = FULL_OPACITY;
 
-      function goIdle() {
+      function onInteractionStart() {
+        if (isHovered) return;
+        clearTimeout(restoreTimer);
         btn.style.opacity = FADE_OPACITY;
+        // After brief pause in interaction, restore
+        restoreTimer = setTimeout(function () {
+          if (!isHovered) btn.style.opacity = FULL_OPACITY;
+        }, FADE_DELAY);
       }
 
-      function wakeUp() {
-        btn.style.opacity = FULL_OPACITY;
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(goIdle, IDLE_DELAY);
-      }
-
-      // Start idle timer after initial render
-      idleTimer = setTimeout(goIdle, IDLE_DELAY);
-
-      // Wake up on any interaction
-      ['scroll', 'mousemove', 'mouseenter', 'touchstart', 'pointerdown', 'keydown'].forEach(function (ev) {
-        window.addEventListener(ev, wakeUp, { passive: true });
+      // Fade while actively interacting (scroll / touch)
+      ['scroll', 'touchstart', 'touchmove'].forEach(function (ev) {
+        window.addEventListener(ev, onInteractionStart, { passive: true });
       });
 
-      // Clicking the button itself always shows it fully
+      // Hover always shows full opacity (desktop safety, irrelevant on mobile)
       btn.addEventListener('mouseenter', function () {
+        isHovered = true;
+        clearTimeout(restoreTimer);
         btn.style.opacity = FULL_OPACITY;
-        clearTimeout(idleTimer);
       });
       btn.addEventListener('mouseleave', function () {
-        idleTimer = setTimeout(goIdle, IDLE_DELAY);
+        isHovered = false;
       });
     })();
   </script>
