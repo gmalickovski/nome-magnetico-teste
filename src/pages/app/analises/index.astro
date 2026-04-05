@@ -140,22 +140,20 @@ const hasMultipleProducts = uniqueProducts.length > 1;
                   {analysis.icon}
                 </span>
 
-                {/* Bloco central: nome + tags (ocupa espaço livre) */}
+                {/* Bloco central: nome+score em linha, depois tags */}
                 <div class="flex-1 min-w-0">
 
-                  {/* Nome */}
-                  <p class="text-gray-200 font-semibold break-words text-base sm:text-lg group-hover/link:text-[#D4AF37] transition-colors leading-snug mb-1">
-                    {analysis.nomeExibido}
-                  </p>
-
-                  {/* Tag de Score (se houver) */}
-                  {analysis.score !== null && (
-                    <div class="mb-1.5">
-                      <span class={`inline-flex items-center text-xs px-2.5 py-1 font-bold rounded border bg-black/20 ${analysis.score >= 80 ? 'text-emerald-400 border-emerald-500/20' : analysis.score >= 60 ? 'text-yellow-400 border-yellow-500/20' : 'text-red-400 border-red-500/20'}`}>
+                  {/* Nome + score na mesma linha, quebra se não couber */}
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1.5">
+                    <p class="text-gray-200 font-semibold break-words text-base sm:text-lg group-hover/link:text-[#D4AF37] transition-colors leading-snug">
+                      {analysis.nomeExibido}
+                    </p>
+                    {analysis.score !== null && (
+                      <span class={`inline-flex items-center text-xs px-2.5 py-1 font-bold rounded border bg-black/20 whitespace-nowrap flex-shrink-0 ${analysis.score >= 80 ? 'text-emerald-400 border-emerald-500/20' : analysis.score >= 60 ? 'text-yellow-400 border-yellow-500/20' : 'text-red-400 border-red-500/20'}`}>
                         {analysis.score}% Compatível
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   {/* Tags de produto + status */}
                   <div class="flex flex-wrap items-center gap-2">
