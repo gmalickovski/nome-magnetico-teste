@@ -20,6 +20,8 @@ import KarmicDebts from '../KarmicDebts';
 import KarmicLessons from '../KarmicLessons';
 import CompatibilityBadge from '../CompatibilityBadge';
 import ScoreDisplay from '../ScoreDisplay';
+import BrandingIdentidade from '../BrandingIdentidade';
+import { getIdentidadeVisual } from '../../../../backend/numerology/branding';
 
 interface Props {
   analysis: any;
@@ -52,6 +54,7 @@ const melhorNome = rankingEmpresa?.melhorNome;
 const expressaoEmpresa = melhorNome?.expressao ?? analysis.numero_expressao;
 const outrosNumerosEmpresa = cincoNumerosEmpresa.filter(n => n.label !== 'Expressão');
 const nomesCandidatos: any[] = rankingEmpresa?.nomesCandidatos ?? [];
+const identidadeVisual = expressaoEmpresa ? getIdentidadeVisual(expressaoEmpresa) : null;
 ---
 
 {/* ── SEÇÃO 1: A ESTRELA DE 5 PONTAS — EXPRESSÃO EM DESTAQUE ───────────── */}
@@ -203,7 +206,7 @@ const nomesCandidatos: any[] = rankingEmpresa?.nomesCandidatos ?? [];
             <span>Missão: <span class="text-gray-300">{c.missao}</span></span>
             <span>Impressão: <span class="text-gray-300">{c.impressao}</span></span>
           </div>
-          <div class="flex flex-wrap gap-3 text-xs">
+          <div class="flex flex-wrap gap-3 text-xs mb-2">
             {c.temBloqueio
               ? <span class="text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>
               : <span class="text-emerald-400">✓ Sem bloqueios</span>
@@ -213,6 +216,16 @@ const nomesCandidatos: any[] = rankingEmpresa?.nomesCandidatos ?? [];
               : <span class="text-emerald-400">✓ Sem Débitos Kármicos</span>
             }
           </div>
+          {c.disponibilidade && (
+            <div class="flex flex-wrap gap-2 text-[10px]">
+              {c.disponibilidade.dominioCom === true && <span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full">✓ .com livre</span>}
+              {c.disponibilidade.dominioCom === false && <span class="bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full">✗ .com ocupado</span>}
+              {c.disponibilidade.dominioBr === true && <span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full">✓ .com.br livre</span>}
+              {c.disponibilidade.dominioBr === false && <span class="bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full">✗ .com.br ocupado</span>}
+              {c.disponibilidade.instagram === true && <span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full">✓ @Instagram livre</span>}
+              {c.disponibilidade.instagram === false && <span class="bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full">✗ @Instagram ocupado</span>}
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -290,6 +303,23 @@ const nomesCandidatos: any[] = rankingEmpresa?.nomesCandidatos ?? [];
       <h2 class="font-cinzel text-2xl font-bold text-white">Arquétipo da Empresa</h2>
     </div>
     <ArquetipoCard client:visible arquetipo={arquetipoData} mode="empresa" />
+  </section>
+)}
+
+{/* ── SEÇÃO 7b: IDENTIDADE VISUAL MAGNÉTICA ──────────────────────────── */}
+{identidadeVisual && melhorNome && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Design & Branding Numerológico</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Identidade Visual Magnética</h2>
+      <p class="text-gray-500 text-sm mt-1">Cores, tipografia e símbolo derivados da vibração numerológica da empresa</p>
+    </div>
+    <BrandingIdentidade
+      client:visible
+      identidade={identidadeVisual}
+      nomeEmpresa={melhorNome.nomeEmpresa}
+      expressao={expressaoEmpresa ?? 1}
+    />
   </section>
 )}
 

@@ -4,6 +4,7 @@ import { COLORS, pdfStyles } from './styles';
 import type { Analysis, MagneticName } from '../db/analyses';
 import { formatAnalysisText } from '../../utils/textFormatter';
 import { getArquetipo } from '../numerology/archetypes';
+import { getIdentidadeVisual } from '../numerology/branding';
 
 interface PDFTemplateProps {
   analysis: Analysis;
@@ -151,6 +152,9 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
   // Arquétipo derivado do número de Expressão já calculado
   const expressaoNum = analysis.numero_expressao;
   const arquetipo = expressaoNum ? getArquetipo(expressaoNum) : null;
+  const identidadeVisual = (analysis.product_type === 'nome_empresa' && expressaoNum)
+    ? getIdentidadeVisual(expressaoNum)
+    : null;
 
   return (
     <Document>
@@ -274,7 +278,134 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
         </Page>
       )}
 
-      {/* Página 4 — Fatores Kármicos e Ocultos */}
+      {/* Página 4 — Identidade Visual Magnética (exclusivo Nome Empresa) */}
+      {identidadeVisual && (
+        <Page size="A4" style={styles.page}>
+          <Text style={{ ...styles.sectionTitle, color: COLORS.gold, marginBottom: 4 }}>
+            Identidade Visual Magnética
+          </Text>
+          <Text style={{ ...styles.body, fontSize: 9, marginBottom: 16 }}>
+            {identidadeVisual.titulo} · Expressão {expressaoNum}
+          </Text>
+          <Text style={{ ...styles.body, fontSize: 10, marginBottom: 16, lineHeight: 1.5 }}>
+            {identidadeVisual.descricaoGeral}
+          </Text>
+
+          <View style={pdfStyles.goldDivider} />
+
+          {/* Paleta de cores */}
+          <Text style={{ ...styles.sectionTitle, color: COLORS.gold, fontSize: 12, marginTop: 14, marginBottom: 8 }}>
+            Paleta de Cores Numerológica
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+            {[
+              { label: 'Primária', cor: identidadeVisual.cores.primaria },
+              { label: 'Secundária', cor: identidadeVisual.cores.secundaria },
+              { label: 'Acento', cor: identidadeVisual.cores.acento },
+            ].map(({ label, cor }) => (
+              <View key={label} style={{ flex: 1, borderRadius: 6, overflow: 'hidden' }}>
+                <View style={{ height: 36, backgroundColor: cor.hex }} />
+                <View style={{
+                  padding: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9',
+                  borderRadius: 0,
+                }}>
+                  <Text style={{ fontSize: 8, color: textSecondary, marginBottom: 2 }}>{label}</Text>
+                  <Text style={{ fontSize: 9, color: isDark ? '#ffffff' : '#1a1a1a', fontFamily: 'Helvetica-Bold', marginBottom: 2 }}>
+                    {cor.nome}
+                  </Text>
+                  <Text style={{ fontSize: 8, color: COLORS.gold }}>{cor.hex}</Text>
+                  <Text style={{ fontSize: 8, color: textSecondary, marginTop: 2, lineHeight: 1.4 }}>
+                    {cor.significado}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={pdfStyles.goldDivider} />
+
+          {/* Tipografia */}
+          <Text style={{ ...styles.sectionTitle, color: COLORS.gold, fontSize: 12, marginTop: 14, marginBottom: 8 }}>
+            Tipografia Recomendada
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+            <View style={{
+              flex: 1, padding: 10,
+              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9',
+              borderRadius: 6,
+            }}>
+              <Text style={{ fontSize: 8, color: textSecondary, marginBottom: 4 }}>Para Títulos & Logotipo</Text>
+              <Text style={{ fontSize: 9, color: isDark ? '#ffffff' : '#1a1a1a', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                {identidadeVisual.tipografia.titulos.sugestao}
+              </Text>
+              <Text style={{ fontSize: 8, color: textSecondary, lineHeight: 1.4 }}>
+                {identidadeVisual.tipografia.titulos.estilo}
+              </Text>
+            </View>
+            <View style={{
+              flex: 1, padding: 10,
+              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9',
+              borderRadius: 6,
+            }}>
+              <Text style={{ fontSize: 8, color: textSecondary, marginBottom: 4 }}>Para Corpo de Texto</Text>
+              <Text style={{ fontSize: 9, color: isDark ? '#ffffff' : '#1a1a1a', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                {identidadeVisual.tipografia.corpo.sugestao}
+              </Text>
+              <Text style={{ fontSize: 8, color: textSecondary, lineHeight: 1.4 }}>
+                {identidadeVisual.tipografia.corpo.estilo}
+              </Text>
+            </View>
+          </View>
+
+          <View style={pdfStyles.goldDivider} />
+
+          {/* Logo */}
+          <Text style={{ ...styles.sectionTitle, color: COLORS.gold, fontSize: 12, marginTop: 14, marginBottom: 8 }}>
+            Diretrizes de Logotipo & Símbolo
+          </Text>
+          <View style={{
+            padding: 12, borderRadius: 6, marginBottom: 10,
+            backgroundColor: isDark ? 'rgba(212,175,55,0.07)' : '#fffdf0',
+            borderWidth: 1, borderColor: COLORS.border,
+          }}>
+            <Text style={{ fontSize: 9, color: COLORS.gold, fontFamily: 'Helvetica-Bold', marginBottom: 6 }}>
+              {identidadeVisual.logo.estilo}
+            </Text>
+            <Text style={{ fontSize: 9, color: textSecondary, lineHeight: 1.5, marginBottom: 8 }}>
+              {identidadeVisual.logo.descricao}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 8, color: '#10b981', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                  Formas Recomendadas
+                </Text>
+                {identidadeVisual.logo.formas.map((f, i) => (
+                  <Text key={i} style={{ fontSize: 8, color: textSecondary, marginBottom: 2 }}>◆ {f}</Text>
+                ))}
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 8, color: COLORS.error, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                  Elementos a Evitar
+                </Text>
+                {identidadeVisual.logo.evitar.map((e, i) => (
+                  <Text key={i} style={{ fontSize: 8, color: textSecondary, marginBottom: 2 }}>✗ {e}</Text>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          <Text style={{ fontSize: 8, color: textSecondary, textAlign: 'center', marginTop: 8 }}>
+            Diretrizes derivadas da vibração numerológica da Expressão {expressaoNum} da empresa.
+          </Text>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Nome Magnético — {analysis.nome_completo}</Text>
+            <Text style={styles.footerText}>Página 4</Text>
+          </View>
+        </Page>
+      )}
+
+      {/* Página 5 — Fatores Kármicos e Ocultos */}
       {(hasLicoes || hasTendencias || hasDebitos) && (
         <Page size="A4" style={styles.page}>
           
@@ -322,7 +453,7 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>Nome Magnético — {analysis.nome_completo}</Text>
-            <Text style={styles.footerText}>Página 4</Text>
+            <Text style={styles.footerText}>Página 5</Text>
           </View>
         </Page>
       )}

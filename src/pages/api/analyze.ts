@@ -12,6 +12,7 @@ import { calcularScore, calcularScoreTeto } from '../../backend/numerology/score
 import { avaliarCompatibilidade } from '../../backend/numerology/harmonization';
 import { analisarNomesBebe } from '../../backend/numerology/products/nome-bebe';
 import { analisarNomesEmpresa } from '../../backend/numerology/products/nome-empresa';
+import { verificarDisponibilidadeNomes } from '../../backend/utils/availability';
 import { analisarNomesSocial } from '../../backend/numerology/products/nome-social';
 import type { ProductType } from '../../backend/payments/stripe';
 
@@ -129,6 +130,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
           ramo_atividade,
           descricao_negocio
         );
+
+        // Enriquecer com disponibilidade digital (.com, .com.br, Instagram)
+        try {
+          const nomesParaVerificar = resultado.nomesCandidatos.map(a => a.nomeEmpresa);
+          const disponibilidades = await verificarDisponibilidadeNomes(nomesParaVerificar);
+          resultado.nomesCandidatos = resultado.nomesCandidatos.map(a => ({
+            ...a,
+            disponibilidade: disponibilidades.get(a.nomeEmpresa.toLowerCase()) ?? null,
+          }));
+          if (resultado.melhorNome) {
+            resultado.melhorNome = {
+              ...resultado.melhorNome,
+              disponibilidade: disponibilidades.get(resultado.melhorNome.nomeEmpresa.toLowerCase()) ?? null,
+            };
+          }
+        } catch {
+          // Falha na verificação não deve bloquear a análise
+        }
 
         // Calcular triângulos do melhor nome (mesmo padrão do nome_bebe)
         const melhorNomeEmpresaStr = resultado.melhorNome?.nomeEmpresa ?? null;

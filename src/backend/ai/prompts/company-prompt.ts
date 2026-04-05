@@ -41,8 +41,16 @@ export function buildCompanyAnalysisPrompt(params: CompanyPromptParams): string 
       const debitoInfo = a.debitosCarmicos.length === 0
         ? '✓ Sem Débitos Kármicos'
         : `⚠ Débitos Kármicos: ${a.debitosCarmicos.map(d => d.numero).join(', ')}`;
+      const disp = (a as any).disponibilidade;
+      const dispTexto = disp
+        ? [
+            disp.dominioCom === true ? '✓ .com livre' : disp.dominioCom === false ? '✗ .com ocupado' : '',
+            disp.dominioBr === true ? '✓ .com.br livre' : disp.dominioBr === false ? '✗ .com.br ocupado' : '',
+            disp.instagram === true ? '✓ @Instagram livre' : disp.instagram === false ? '✗ @Instagram ocupado' : '',
+          ].filter(Boolean).join(' | ')
+        : '';
       return `${rank} **${a.nomeEmpresa}**${origem} | Expressão: ${a.expressao} | Motivação: ${a.motivacao} | Missão: ${a.missao} | Impressão: ${a.impressao} | Compat. sócio: ${a.compatibilidadeSocio}${compatEmpresaInfo} | Score: ${a.score}/100
-   ${bloqueioInfo} | ${debitoInfo}
+   ${bloqueioInfo} | ${debitoInfo}${dispTexto ? `\n   Digital: ${dispTexto}` : ''}
    ${a.justificativa.slice(0, 2).join(' | ')}`;
     })
     .join('\n\n');
@@ -76,9 +84,11 @@ ${candidatosTexto}
 
 ## Sua Tarefa
 
-Você é um numerólogo cabalístico especializado em nomes empresariais e branding energético. Com base nos dados acima, elabore um relatório estratégico, profundo e acionável para o empreendedor. Este relatório vale R$150+ e deve ser uma consultoria de alto valor — cada seção deve trazer revelações e orientações que um consultor de branding comum não poderia oferecer.
+Você é um numerólogo cabalístico especializado em nomes empresariais, branding energético e identidade visual. Com base nos dados acima, elabore um relatório estratégico, profundo e acionável para o empreendedor. Este relatório vale R$150+ e deve ser uma consultoria de alto valor — cada seção deve trazer revelações e orientações que um consultor de branding comum não poderia oferecer.
 
 Escreva pelo menos 2–3 parágrafos por seção. Evite generalidades — cada insight deve estar ancorado nos números específicos deste negócio e deste empreendedor.
+
+**Disponibilidade Digital:** Quando dois nomes tiverem scores numerológicos próximos (diferença ≤ 10 pontos), priorize o que tiver domínio .com e/ou .com.br livre. Mencione explicitamente no relatório quais nomes possuem domínio e perfil no Instagram disponíveis — isso é um diferencial estratégico concreto para o empreendedor agir imediatamente.
 
 Siga EXATAMENTE esta estrutura:
 
