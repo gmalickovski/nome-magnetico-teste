@@ -9,37 +9,32 @@
 
 ---
 
-## Design System
+## Design System ("The Celestial Alchemist")
 
-### Cores (NUNCA alterar sem aprovação)
-- Background principal: `#1a1a1a` e `#111111`
-- Accent/destaque: `#D4AF37` (gold)
-- Texto primário: `#e5e7eb` (gray-200)
-- Texto secundário: `#a0a0a0` (gray-400)
-- Erro: `#FF6B6B`
-- Espiritual/mistico: `#c084fc` (purple)
-- Sucesso: `#10b981` (emerald)
-- Borders: `rgba(212, 175, 55, 0.2)` (gold com opacidade)
+### Cores & Estilo Visual (Rooted in DESIGN.md)
+- **Base Layer (Void):** `#131313`. NUNCA usar pure whites para texto, use `#e5e2e1`.
+- **Primary (Godly Gold):** `#f2ca50` e `#d4af37`.
+- **Secondary (Earth):** `#76746a` (ações/dados secundários).
+- **Tertiary (Mystical Purple):** `#d7c6ff` e `#bea5ff` (focus, espiritual).
+- **"NO-LINE" Rule:** É ESTRITAMENTE PROIBIDO o uso de `border: 1px solid` para sectioning. Tudo é feito via stacking de fundo ou whitespace. O fallback acessibilidade é uma outline com 15% opacity.
+- **Glassmorphism:** Apenas flutuantes. Opacity 60% e blur 20-40px deixando vazar cor de fundo.
+- **Sombras:** Ambientais, estilo glow de escuridão: `0 20px 50px rgba(0,0,0,0.6)`. Nunca drop-shadows padrão.
+- **Animações (Micro-animations):** Lentas (800ms) para emular um ritmo meditativo.
+- **Radius:** `rounded-2xl` (cards) e `rounded-full` (botões/chips). NUNCA sharp corners.
 
 ### Fontes (Google Fonts)
-- Headings/branding: **Cinzel** (serif), weights 400 e 700
-- Body/UI: **Inter** (sans-serif), weights 300, 400, 500
-
-### Estilo visual
-- Dark theme em TODAS as páginas (produto e landing)
-- Glassmorphism em cards: `background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(212,175,55,0.2)`
-- Hover states: `scale(1.02)` + gold glow `shadow-yellow-500/10`
-- Border radius: `rounded-2xl` (16px) para containers principais
-- Transitions: `duration-300`
+- Headings/branding: **Cinzel** (serif), weights 400 e 700. Wide tracking.
+- Body/UI: **Inter** (sans-serif), weights 300, 400, 500.
+- Sub-headers: Inter `headline-sm` em ALL CAPS com `0.1em` tracking.
 
 ### Componentes base (src/frontend/components/ui/)
 Sempre preferir estes antes de criar novos:
-- `GlassCard` — card glassmorphism gold
-- `Button` — variants: primary (gold), secondary (outline), ghost
-- `Input` — estilo dark com label flutuante
-- `Modal` — overlay dark com card glass
-- `Badge` — pills coloridas
-- `Toast` — notificações temporárias
+- `Card` — stacked deep sheets, sem dividers (usar whitespace 2rem vertical).
+- `Button` — variants: primary (gold inner glow, container `primary-container`), secondary (ghost border, text primary).
+- `Input` — lowest surface. Hover/Focus dispara ghost border `tertiary`.
+- `Badge/Chip` — rounded-full. Seleção é sinalizada com gradient do roxo místico.
+- `Modal` — floating sheet com glassmorphism (opacidade base) e deep shadow.
+- `Toast` — notificações temporárias.
 
 ---
 

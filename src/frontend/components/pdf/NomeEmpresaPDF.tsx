@@ -15,11 +15,12 @@
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
 import { THEMES } from './shared/PDFTheme';
 import { PDFCover } from './shared/PDFCover';
+import { PDFStandardIntro } from './shared/PDFStandardIntro';
 import { PDFPageHeader } from './shared/PDFPageHeader';
 import { PDFFooter } from './shared/PDFFooter';
-import { PDFNumbersGrid } from './shared/PDFNumbersGrid';
+import { PDFNumbersCorporate } from './shared/PDFNumbersCorporate';
 import { RenderMarkdownChunks, TrianguloPiramideInline } from './shared/PDFMarkdownRenderer';
-import { DebitosBlock, LicoesBlock } from './shared/PDFKarmicBlock';
+import { DebitosBlock, LicoesBlock, TendenciasBlock } from './shared/PDFKarmicBlock';
 import { LOGO_FONT, TITLE_FONT, loadLogoSrc, formatDate } from './shared/PDFFonts';
 import { formatAnalysisText } from '../../../utils/textFormatter';
 import { ARCANOS } from '../../../backend/numerology/arcanos';
@@ -42,7 +43,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     color: DARK,
   },
-  section: { marginBottom: 24 },
+  hugeTitle: {
+    fontSize: 18,
+    fontFamily: TITLE_FONT,
+    color: theme.coverBgColor,
+    textAlign: 'center',
+    marginBottom: 16,
+    letterSpacing: 0.5,
+  },
+  section: { marginBottom: 16 },
   sectionTitle: {
     fontSize: 13,
     fontFamily: 'Helvetica-Bold',
@@ -141,11 +150,11 @@ const styles = StyleSheet.create({
     borderColor: PRIMARY,
     borderRadius: 6,
   },
-  candidatoBar: { height: 4, backgroundColor: LIGHT_GRAY, borderRadius: 2, marginBottom: 5 },
+  candidatoBar: { height: 4, backgroundColor: LIGHT_GRAY, borderRadius: 2, marginBottom: 6 },
   candidatoBarFill: { height: 4, borderRadius: 2 },
-  candidatoMeta: { flexDirection: 'row', gap: 10, marginBottom: 4, flexWrap: 'wrap' },
-  candidatoMetaText: { fontSize: 8, color: GRAY },
-  candidatoCompat: { flexDirection: 'row', gap: 10 },
+  candidatoMeta: { flexDirection: 'row', gap: 14, marginBottom: 5, flexWrap: 'wrap' },
+  candidatoMetaText: { fontSize: 9, color: GRAY },
+  candidatoCompat: { flexDirection: 'row', gap: 14 },
 });
 
 function scoreColor(score: number): string {
@@ -191,6 +200,9 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
 
   const debitos = Array.isArray(analysis.debitos_carmicos) ? analysis.debitos_carmicos : [];
   const licoes = Array.isArray(analysis.licoes_carmicas) ? analysis.licoes_carmicas : [];
+  const tendencias = Array.isArray(analysis.tendencias_ocultas) ? analysis.tendencias_ocultas : [];
+  const frequencias: Record<string, number> | null =
+    (freqData?.frequencias ?? null);
 
   const tVida = analysis.triangulo_vida ?? null;
   const tPessoal = analysis.triangulo_pessoal ?? null;
@@ -223,7 +235,8 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
     (freqData?.melhorNome?.debitosCarmicos?.length > 0) ||
     (freqData?.melhorNome?.licoesCarmicas?.length > 0) ||
     debitos.length > 0 ||
-    licoes.length > 0;
+    licoes.length > 0 ||
+    tendencias.length > 0;
 
   return (
     <Document title={`Nome Magnetico — ${nomeParaExibir}`} author="Nome Magnetico">
@@ -239,13 +252,28 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
         titleFont={TITLE_FONT}
       />
 
+      {/* ── PÁGINA INTRODUTÓRIA: GUIA DE LEITURA ────────────────────────── */}
+      <PDFStandardIntro theme={theme} productType="nome_empresa" entityName={analysis.nome_completo} />
+
       {/* ── PÁGINA 2: SINERGIA + MELHOR NOME + 5 NÚMEROS ─────────────────── */}
       <Page size="A4" style={styles.page}>
         <PDFPageHeader subtitle={`${analysis.nome_completo} — Análise de Nome Empresarial`} />
 
+        <Text style={styles.hugeTitle}>A Alquimia do Negócio</Text>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>O Nome como Ativo Estratégico</Text>
+          <Text style={styles.bodyText}>
+            No mundo dos negócios, um nome é muito mais do que uma marca: é um organismo vibratório que dita o ritmo do crescimento, a facilidade de vendas e a resiliência da operação. Desde as grandes corporações até os novos empreendimentos, a frequência sonora e numérica de uma marca atua como um campo de atração para clientes, parceiros e talentos. A Numerologia Cabalística Aplicada ao Business revela se o nome escolhido está "trabalhando" a favor do lucro ou se carrega bloqueios que geram estagnação. Este relatório é o seu mapa tático para alinhar a alma do negócio com o destino de sucesso dos sócios, criando uma marca magnética que não apenas ocupa espaço no mercado, mas domina a sua categoria.
+          </Text>
+        </View>
+
         {/* Sinergia Sócio-Empresa */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sinergia Sócio-Empresa</Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
+            Uma empresa nasce da intenção de seus fundadores. O sucesso sustentável ocorre quando o Destino da Empresa está em harmonia com o Destino dos Sócios. Quando essas frequências divergem, o empreendedor sente que "carrega o piano nas costas". Quando convergem, o negócio ganha tração natural.
+          </Text>
           <View style={styles.sinergiaRow}>
             <View style={[styles.sinergiaCard, { borderColor: PRIMARY }]}>
               <Text style={styles.sinergiaLabel}>DESTINO DO SÓCIO PRINCIPAL</Text>
@@ -267,28 +295,36 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
               <View style={[styles.sinergiaCard, { borderColor: ACCENT }]}>
                 <Text style={styles.sinergiaLabel}>DESTINO DA EMPRESA</Text>
                 <Text style={[styles.sinergiaNumber, { color: ACCENT }]}>{freqData.destinoEmpresa}</Text>
-                <Text style={styles.sinergiaMeta}>Data de fundação</Text>
+                <Text style={styles.sinergiaMeta}>Fundação</Text>
               </View>
             )}
           </View>
         </View>
 
-        {/* Estrela dos 5 números — Expressão destacada */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>A Estrela das 5 Pontas</Text>
-          <PDFNumbersGrid
-            nums={nums}
-            featuredLabel="Expressão"
-            primaryColor={PRIMARY}
-            accentColor={ACCENT}
-          />
+        {/* Estrela dos 5 números (engenharia da escala) */}
+        <View style={styles.section} minPresenceAhead={300} wrap={false}>
+          <Text style={styles.sectionTitle}>A Engenharia da Escala</Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
+            Para que uma empresa escale, ela precisa de engrenagens perfeitamente ajustadas. Na metodologia Nome Magnético, traduzimos os 5 números fundamentais em Eixos de Tração. Cada número atua como um motor: um atrai o cliente, outro sustenta a cultura, e um terceiro define o valor no mercado. Quando alinhados, o crescimento deixa de ser esforço e se torna consequência matemática da frequência.
+          </Text>
+          
+          <PDFNumbersCorporate nums={{
+            expressao: melhorNome?.expressao ?? analysis.numero_expressao,
+            destino: freqData?.destinoSocio ?? analysis.numero_destino,
+            motivacao: melhorNome?.motivacao ?? analysis.numero_motivacao,
+            missao: melhorNome?.missao ?? analysis.numero_missao,
+            impressao: melhorNome?.impressao ?? analysis.numero_impressao
+          }} />
         </View>
 
         {/* Melhor nome */}
         {melhorNome && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Nome Mais Indicado</Text>
-            <View style={[styles.melhorNomeBox, { borderColor: PRIMARY }]}>
+            <Text style={{ ...styles.bodyText, marginBottom: 14 }}>
+              O nome em destaque obteve o maior Score Numerológico geral, combinando uma vibração isenta de bloqueios limitantes com a melhor sinergia direcional entre a energia do empreendedor e o chamado corporativo. Esta é a assinatura comercial estrategicamente recomendada para estruturar vendas, atrair boas parcerias e posicionar a marca com autoridade.
+            </Text>
+            <View style={[styles.melhorNomeBox, { borderColor: PRIMARY }]} wrap={false}>
               <Text style={styles.melhorNomeTitle}>{melhorNome.nomeEmpresa}</Text>
 
               <View style={styles.scoreRow}>
@@ -338,11 +374,12 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
       {nomesCandidatos.length > 0 && (
         <Page size="A4" style={styles.page}>
           <PDFPageHeader subtitle={`${analysis.nome_completo} — Estudo dos Nomes Candidatos`} />
+          <Text style={styles.hugeTitle}>O Ranking de Ouro</Text>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Estudo Completo dos Nomes Candidatos</Text>
+            <Text style={styles.sectionTitle}>O Ranking da Escolha de Ouro</Text>
             <Text style={{ ...styles.bodyText, marginBottom: 12, lineHeight: 1.5 }}>
-              Todos os nomes foram analisados numerologicamente. O marcado com estrela é o mais indicado. (*) foram gerados automaticamente por terem score superior a 80.
+              Analisamos cada variação de nome enviada para filtrar aquela que possui a menor carga de bloqueios e a maior ressonância com o mercado. O nome marcado como RECOMENDADO é aquele que matematicamente oferece a menor resistência ao crescimento e a maior facilidade de fluxo financeiro.
             </Text>
 
             {nomesCandidatos.slice(0, 10).map((c: any, i: number) => {
@@ -372,15 +409,15 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
                   </View>
 
                   <View style={styles.candidatoCompat}>
-                    <Text style={{ fontSize: 7, color: compatColor(c.compatibilidadeSocio) }}>
+                    <Text style={{ fontSize: 9, color: compatColor(c.compatibilidadeSocio) }}>
                       Sócio: {compatLabel(c.compatibilidadeSocio)}
                     </Text>
                     {c.compatibilidadeEmpresa != null && (
-                      <Text style={{ fontSize: 7, color: compatColor(c.compatibilidadeEmpresa) }}>
+                      <Text style={{ fontSize: 9, color: compatColor(c.compatibilidadeEmpresa) }}>
                         Empresa: {compatLabel(c.compatibilidadeEmpresa)}
                       </Text>
                     )}
-                    <Text style={{ fontSize: 7, color: c.temBloqueio ? '#DC2626' : '#059669' }}>
+                    <Text style={{ fontSize: 9, color: c.temBloqueio ? '#DC2626' : '#059669' }}>
                       {c.temBloqueio ? `${c.bloqueios?.length ?? 1} bloqueio(s)` : 'Sem bloqueios'}
                     </Text>
                   </View>
@@ -398,33 +435,41 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
         <Page size="A4" style={styles.page}>
           <PDFPageHeader subtitle={`${nomeParaExibir} — Os 4 Triângulos Numerológicos`} />
 
+          <Text style={styles.hugeTitle}>Geometria do Crescimento</Text>
+
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Estudo dos 4 Triângulos</Text>
+            <Text style={styles.sectionTitle}>A Geometria Sagrada no Business</Text>
             <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
-              Os Quatro Triângulos Numerológicos revelam a estrutura energética profunda do nome escolhido. Cada triângulo rege uma dimensão específica do negócio.
+              A geometria sagrada aplicada ao business revela as pirâmides de fluxo. Cada triângulo rege um setor crítico do negócio. Bloqueios nessas pirâmides agem como "vazamentos" de energia e dinheiro. Eis o estudo minucioso dos Quatro Triângulos Numerológicos para a sua marca.
             </Text>
 
             {([
-              { data: tVida, key: 'Triângulo da Vida', desc: 'Vibração base — aspectos gerais de energia que o negócio projeta ao mercado e como é percebido por clientes e parceiros.' },
-              { data: tPessoal, key: 'Triângulo Pessoal', desc: 'Dimensão íntima — cultura interna, valores e a forma como a equipe e sócios vivenciam a empresa.' },
-              { data: tSocial, key: 'Triângulo Social', desc: 'Posicionamento de mercado — como clientes, concorrentes e o mercado percebem esta empresa.' },
-              { data: tDestino, key: 'Triângulo do Destino', desc: 'Missão e legado — propósito de longo prazo e o impacto que este nome carrega para o futuro.' },
+              {
+                data: tVida,
+                key: 'Triângulo da Vida',
+                desc: 'O Triângulo da Vida revela a vibração primária que o nome empresarial projeta ao mundo. Ele dita a primeira impressão que clientes, parceiros e o mercado formam sobre a marca no momento do contato — é a energia de fachada que abre ou fecha portas antes mesmo de qualquer apresentação. Bloqueios aqui agem como ruídos visuais que repelem oportunidades e comprometem a credibilidade orgânica do negócio.',
+              },
+              {
+                data: tPessoal,
+                key: 'Triângulo Pessoal',
+                desc: 'O Triângulo Pessoal mapeia a dimensão íntima do negócio: a cultura interna, os valores não declarados e a forma como os sócios, colaboradores e o time fundador vivenciam a empresa no dia a dia. Ele revela se o ambiente interno tem coesão vibracional para sustentar crescimento a longo prazo ou se carrega tensões que fragmentam a equipe. Harmonia neste triângulo é o alicerce invisível da consistência operacional.',
+              },
+              {
+                data: tSocial,
+                key: 'Triângulo Social',
+                desc: 'O Triângulo Social governa o posicionamento de mercado e o magnetismo relacional do nome. Ele determina como clientes, concorrentes, fornecedores e a mídia percebem e descrevem espontaneamente esta marca — sem que a empresa precise explicar. Um triângulo social limpo gera autoridade percebida, facilita parcerias estratégicas e reduz o esforço necessário para conquistar confiança no mercado.',
+              },
+              {
+                data: tDestino,
+                key: 'Triângulo do Destino',
+                desc: 'O Triângulo do Destino aponta para o propósito máximo e o legado que este nome empresarial foi criado para construir. Ele traça a trajetória de longo prazo do negócio, revelando em quais ciclos a empresa encontrará seus maiores alavancamentos e onde as forças do mercado conspirarão naturalmente a seu favor. É a bússola numerológica que confirma — ou questiona — se o nome está alinhado com a missão maior dos seus fundadores.',
+              },
             ] as const).filter(t => t.data != null).map(({ data, key, desc }) => {
-              const arcanoNum = data!.arcanoRegente;
-              const arcanoInfo = arcanoNum != null ? (ARCANOS as any)[arcanoNum] ?? null : null;
               return (
-                <View key={key} style={{ marginBottom: 16 }}>
-                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 8 }}>{key}</Text>
-                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 6, lineHeight: 1.4 }}>{desc}</Text>
+                <View key={key} style={{ marginBottom: 12 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 6 }}>{key}</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 8, lineHeight: 1.6 }}>{desc}</Text>
                   <TrianguloPiramideInline data={data!} label={key} cellSize={triCellSize} letras={letrasNome} />
-                  {arcanoInfo && (
-                    <View style={{ backgroundColor: '#F9FAFB', borderLeftWidth: 3, borderLeftColor: '#a78bfa', borderRadius: 4, padding: 8, marginTop: 6 }}>
-                      <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6d28d9', marginBottom: 3 }}>
-                        Arcano {arcanoNum} — {arcanoInfo.nome}: {arcanoInfo.palavraChave.toLowerCase()}
-                      </Text>
-                      <Text style={{ fontSize: 8, color: GRAY, lineHeight: 1.4 }}>{arcanoInfo.descricao.split('.')[0]}.</Text>
-                    </View>
-                  )}
                 </View>
               );
             })}
@@ -437,36 +482,46 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
       {/* ── PÁGINA 5: KARMA EMPRESARIAL ───────────────────────────────────── */}
       {hasKarma && (
         <Page size="A4" style={styles.page}>
-          <PDFPageHeader subtitle={`${analysis.nome_completo} — Karma Empresarial`} />
+          <PDFPageHeader subtitle={`${analysis.nome_completo} — O Peso do Passado`} />
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Karma Empresarial — Perfil do Sócio</Text>
-            <Text style={{ ...styles.bodyText, marginBottom: 14, lineHeight: 1.5 }}>
-              Os padrões kármicos do empreendedor influenciam diretamente a energia e os resultados do negócio. Compreender e trabalhar esses padrões é fundamental para o sucesso sustentável da empresa.
-            </Text>
+          <View>
+            <Text style={styles.hugeTitle}>O Peso do Passado (Karma e Tendências)</Text>
+
+            {(freqData?.melhorNome?.debitosCarmicos?.length > 0 || debitos.length > 0) && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706' }]}>
+                  Débitos Kármicos
+                </Text>
+                <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
+                  Os Débitos Kármicos de uma empresa espelham os padrões não resolvidos do empreendedor fundador. Na numerologia cabalística, nenhum empreendimento nasce sem herdar parte da bagagem vibracional de quem o criou. Esses padrões — que podem se manifestar como ciclos repetitivos de inadimplência, conflitos societários, dificuldades de expansão ou rotatividade de talentos — só se dissolvem quando reconhecidos e trabalhados com ação consciente. Identificá-los aqui é o primeiro passo para transformar a empresa num veículo de cura e prosperidade genuína.
+                </Text>
+                <DebitosBlock debitos={freqData?.melhorNome?.debitosCarmicos ?? debitos} />
+              </View>
+            )}
+
+            {(freqData?.melhorNome?.licoesCarmicas?.length > 0 || licoes.length > 0) && (
+              <View style={{ ...styles.section, marginTop: 0 }}>
+                <Text style={[styles.sectionTitle, { color: '#7c3aed', borderBottomColor: '#7c3aed' }]}>
+                  Lições Kármicas — Competências a Desenvolver
+                </Text>
+                <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
+                  As Lições Kármicas apontam para as frequências numéricas ausentes na composição do nome escolhido. No contexto empresarial, elas revelam exatamente quais competências estratégicas, perfis de liderança ou áreas de gestão a empresa precisará desenvolver conscientemente para superar seus pontos de vulnerabilidade. São os "quartos vazios" do edifício corporativo — não para paralisar, mas para que o empreendedor saiba onde investir em mentorias, parceiros e capacitação com urgência calculada.
+                </Text>
+                <LicoesBlock licoes={freqData?.melhorNome?.licoesCarmicas ?? licoes} />
+              </View>
+            )}
+
+            {/* Tendências Ocultas — sempre renderiza (mostra gráfico + estado vazio se não houver tendências) */}
+            <View style={{ ...styles.section, marginTop: 0 }}>
+              <Text style={[styles.sectionTitle, { color: '#6d28d9', borderBottomColor: '#6d28d9' }]}>
+                Tendências Ocultas — Forças em Excesso
+              </Text>
+              <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
+                As Tendências Ocultas revelam as forças numéricas que se repetem em grande intensidade nas letras do nome empresarial. No negócio, essas forças amplificadas constroem vantagens competitivas extraordinárias — mas quando não gerenciadas, podem se tornar pontos cegos que distorcem decisões, criam dependência excessiva de uma única estratégia ou afastam parceiros pela intensidade da vibração dominante. Conhecê-las permite ao empreendedor canalizar esse excesso de forma estratégica e sustentável.
+              </Text>
+              <TendenciasBlock tendencias={tendencias} frequencias={frequencias} />
+            </View>
           </View>
-
-          {/* Débitos do melhor nome (vindos do ranking) ou da análise */}
-          {(freqData?.melhorNome?.debitosCarmicos?.length > 0 || debitos.length > 0) && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706' }]}>
-                Débitos Kármicos Identificados
-              </Text>
-              <DebitosBlock
-                debitos={freqData?.melhorNome?.debitosCarmicos ?? debitos}
-              />
-            </View>
-          )}
-
-          {/* Lições */}
-          {(freqData?.melhorNome?.licoesCarmicas?.length > 0 || licoes.length > 0) && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: '#7c3aed', borderBottomColor: '#7c3aed' }]}>
-                Lições Kármicas — Qualidades a Desenvolver
-              </Text>
-              <LicoesBlock licoes={freqData?.melhorNome?.licoesCarmicas ?? licoes} />
-            </View>
-          )}
 
           <PDFFooter />
         </Page>
@@ -475,9 +530,9 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
       {/* ── PÁGINA(S) 6+: ANÁLISE IA COMPLETA ───────────────────────────── */}
       {analiseCorpo && (
         <Page size="A4" style={styles.page}>
-          <PDFPageHeader subtitle={`${nomeParaExibir} — Análise Completa`} />
+          <PDFPageHeader subtitle={`${nomeParaExibir} — Análise da Empresa`} />
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Análise Completa</Text>
+            <Text style={styles.hugeTitle}>O Diagnóstico da Marca</Text>
             <RenderMarkdownChunks
               text={analiseCorpo}
               styles={styles}

@@ -19,6 +19,7 @@ import {
   type TendenciaData,
 } from './PDFKarmicBlock';
 import { TITLE_FONT } from './PDFFonts';
+import { ARCANOS } from '../../../../../src/backend/numerology/arcanos';
 
 // ── Helpers de texto ──────────────────────────────────────────────────────────
 
@@ -279,9 +280,29 @@ export function TrianguloPiramideInline({
         </View>
       ))}
 
-      {data.arcanoRegente !== null ? (
-        <Text style={triStyles.arcano}>Arcano Regente: {data.arcanoRegente}</Text>
-      ) : null}
+      {(() => {
+        const arcanoInfo = data.arcanoRegente !== null ? (ARCANOS as any)[data.arcanoRegente] ?? null : null;
+        return arcanoInfo ? (
+          <View style={{ borderWidth: 1, borderColor: '#f3f4f6', backgroundColor: '#F9FAFB', borderRadius: 8, marginTop: 16 }}>
+            <Text style={{ fontSize: 9, textAlign: 'center', color: '#6b7280', padding: 8, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
+              Arcano Regente: {data.arcanoRegente}
+            </Text>
+            <View style={{ borderLeftWidth: 4, borderLeftColor: '#8b5cf6', padding: 12, backgroundColor: '#faf5ff', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
+              <View style={{ paddingBottom: 6 }}>
+                <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#6d28d9' }}>
+                  Arcano {data.arcanoRegente} — {arcanoInfo.nome}: {arcanoInfo.palavraChave.toLowerCase()}
+                </Text>
+              </View>
+              <Text style={{ fontFamily: 'Helvetica', fontSize: 10, lineHeight: 1.5, marginBottom: 0, color: '#4b5563' }}>
+                {arcanoInfo.descricao.split('.')[0]}.
+              </Text>
+            </View>
+          </View>
+        ) : data.arcanoRegente !== null ? (
+          <Text style={triStyles.arcano}>Arcano Regente: {data.arcanoRegente}</Text>
+        ) : null;
+      })()}
+      
       {data.sequenciasNegativas.length > 0 ? (
         <Text style={triStyles.bloqueioAlert}>
           Bloqueio: {data.sequenciasNegativas.join(', ')}
@@ -437,16 +458,16 @@ export function RenderMarkdownChunks({
       if (level === 2) {
         fontSize = 13;
         fontFam = TITLE_FONT;
-        fontColor = '#8A661C'; // Dourado mais escuro e castanho
+        fontColor = GOLD; // usa a cor primária do produto passada via prop
         textTransform = 'uppercase';
         letterSpacing = 0.5;
         borderBottomWidth = 1;
-        borderBottomColor = '#8A661C';
+        borderBottomColor = GOLD;
         paddingBottom = 4;
       }
 
-      const marginTop = level === 1 ? 20 : level === 2 ? 14 : level === 3 ? 10 : 6;
-      const marginBottom = level === 1 ? 10 : level === 2 ? 12 : level === 3 ? 8 : 3;
+      const marginTop = level === 1 ? 14 : level === 2 ? 10 : level === 3 ? 8 : 4;
+      const marginBottom = level === 1 ? 8 : level === 2 ? 6 : level === 3 ? 4 : 2;
 
       const shouldBreak = pageBreaks?.some(b => normalizeStr(content).includes(normalizeStr(b)));
       const injectionKey = injections ? Object.keys(injections).find(k => normalizeStr(content).includes(normalizeStr(k))) : undefined;
@@ -565,7 +586,7 @@ export function RenderMarkdownChunks({
     result.push(
       <Text
         key={idx}
-        style={{ ...styles.bodyText, lineHeight: 1.5, textAlign: 'justify', marginBottom: 8 }}
+        style={{ ...styles.bodyText, lineHeight: 1.5, textAlign: 'justify', marginBottom: 6 }}
       >
         {renderMarkdownPiece(trimmed, styles.bodyText, { fontFamily: 'Helvetica-Bold' })}
       </Text>

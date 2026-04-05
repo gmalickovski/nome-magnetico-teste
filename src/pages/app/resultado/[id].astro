@@ -67,8 +67,9 @@ const freqData = (analysis as any).frequencias_numeros as any;
 const frequenciasRaw: Record<number, number> | null =
   freqData?.frequencias
     ?? (freqData && !freqData?.ranking && !freqData?.nomesCandidatos ? freqData as Record<number, number> : null);
-const rankingBebe    = freqData?.ranking ?? null;
+const rankingBebe    = (analysis.product_type === 'nome_bebe' ? freqData?.ranking : null) ?? null;
 const rankingEmpresa = (analysis.product_type === 'nome_empresa' ? freqData : null) as any;
+const rankingSocial  = (analysis.product_type === 'nome_social' && freqData?.ranking) ? freqData.ranking : null;
 
 // ── Helpers de produto (declarados cedo pois são usados abaixo) ──────
 const isNomeSocial  = analysis.product_type === 'nome_social';
@@ -81,11 +82,10 @@ const arcanoData = arcanoRawNum ? getArcano(arcanoRawNum) : null;
 
 // ── Arquétipo (derivado do número de Expressão já calculado) ─────────
 const expressaoParaArquetipo =
-  isNomeBebe && freqData?.melhorNome?.expressao
-    ? freqData.melhorNome.expressao
-    : isNomeEmpresa && freqData?.melhorNome?.expressao
-      ? freqData.melhorNome.expressao
-      : analysis.numero_expressao;
+  isNomeBebe    && rankingBebe?.melhorNome?.expressao    ? rankingBebe.melhorNome.expressao
+  : isNomeSocial  && rankingSocial?.melhorNome?.expressao ? rankingSocial.melhorNome.expressao
+  : isNomeEmpresa && freqData?.melhorNome?.expressao      ? freqData.melhorNome.expressao
+  : analysis.numero_expressao;
 const arquetipoData = expressaoParaArquetipo ? getArquetipo(expressaoParaArquetipo) : null;
 
 // ── Texto da IA ──────────────────────────────────────────────────────
@@ -98,10 +98,9 @@ const scoreGeral = (analysis as any).score as number | null;
 
 // ── Nome exibido ─────────────────────────────────────────────────────
 const nomeExibido: string =
-  (analysis.product_type === 'nome_bebe' && rankingBebe?.melhorNome?.nomeCompleto)
-    ? rankingBebe.melhorNome.nomeCompleto
-  : (analysis.product_type === 'nome_empresa' && rankingEmpresa?.melhorNome?.nomeEmpresa)
-    ? rankingEmpresa.melhorNome.nomeEmpresa
+  (isNomeBebe    && rankingBebe?.melhorNome?.nomeCompleto)    ? rankingBebe.melhorNome.nomeCompleto
+  : (isNomeSocial  && rankingSocial?.melhorNome?.nomeCompleto) ? rankingSocial.melhorNome.nomeCompleto
+  : (isNomeEmpresa && rankingEmpresa?.melhorNome?.nomeEmpresa) ? rankingEmpresa.melhorNome.nomeEmpresa
   : analysis.nome_completo;
 
 const primeiroNome = nomeExibido.split(' ')[0];
@@ -277,6 +276,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
             frequenciasRaw={frequenciasRaw}
             analiseHtml={analiseHtml}
             topNames={topNames}
+            rankingSocial={rankingSocial}
           />
         )}
 

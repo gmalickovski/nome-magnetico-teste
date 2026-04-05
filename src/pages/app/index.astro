@@ -2,8 +2,6 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 import { hasActiveSubscription, hasAnySubscription } from '../../backend/db/subscriptions';
 import { createUserClient } from '../../backend/db/supabase';
-import { OnboardingNomeSocialModal } from '../../frontend/components/app/OnboardingNomeSocialModal';
-
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
 
@@ -116,14 +114,10 @@ const products = [
       <h2 class="font-cinzel text-xl font-bold text-gray-100 mb-4">Seus Produtos</h2>
       <div class="grid md:grid-cols-3 gap-6">
         {products.map(product => {
-          const isNomeSocial = product.id === 'nome_social';
-          const needsOnboarding = !profileData?.birth_name || !profileData?.birth_date;
-          
           return product.hasAccess ? (
             <a
               data-product-id={product.id}
-              href={isNomeSocial ? (needsOnboarding ? '#' : product.href) : product.href}
-              onclick={isNomeSocial && needsOnboarding ? "event.preventDefault(); document.dispatchEvent(new CustomEvent('openNomeSocialModal'));" : undefined}
+              href={product.href}
               class="product-card block group bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 hover:border-[#D4AF37]/40 hover:bg-white/8 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
             >
               <div class="text-4xl mb-4">{product.icon}</div>
@@ -170,11 +164,5 @@ const products = [
 
   </div>
   
-  <OnboardingNomeSocialModal 
-    client:load 
-    nomeSalvo={profileData?.birth_name || ''} 
-    dataSalva={profileData?.birth_date || ''} 
-  />
-
 
 </AppLayout>

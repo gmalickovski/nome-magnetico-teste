@@ -7,11 +7,12 @@ import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } 
 import { calcularCincoNumeros } from '../../backend/numerology/numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, mapearFrequencias, calcularDebitosCarmicos } from '../../backend/numerology/karmic';
 import { gerarNomesMagneticos } from '../../backend/numerology/suggestions';
-import { generateAnalysis, generateSuggestions, generateBabyAnalysis, generateCompanyAnalysis } from '../../backend/ai/brain';
+import { generateAnalysis, generateSuggestions, generateBabyAnalysis, generateCompanyAnalysis, generateSocialAnalysis } from '../../backend/ai/brain';
 import { calcularScore, calcularScoreTeto } from '../../backend/numerology/score';
 import { avaliarCompatibilidade } from '../../backend/numerology/harmonization';
 import { analisarNomesBebe } from '../../backend/numerology/products/nome-bebe';
 import { analisarNomesEmpresa } from '../../backend/numerology/products/nome-empresa';
+import { analisarNomesSocial } from '../../backend/numerology/products/nome-social';
 import type { ProductType } from '../../backend/payments/stripe';
 
 const schema = z.object({
@@ -20,7 +21,7 @@ const schema = z.object({
   product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']).default('nome_social'),
   // campos específicos nome_bebe
   sobrenome_familia: z.string().min(1).max(100).optional(),
-  nomes_candidatos: z.array(z.string().min(2)).min(1).optional(),
+  nomes_candidatos: z.array(z.string().min(2)).optional(),
   nome_pai: z.string().optional(),
   sobrenome_pai: z.string().optional(),
   ignorar_pai: z.boolean().optional(),
@@ -37,6 +38,10 @@ const schema = z.object({
   descricao_negocio: z.string().optional(),
   nome_socio2: z.string().min(2).max(150).optional(),
   data_nascimento_socio2: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/).optional(),
+  // campos específicos nome_social (novo fluxo)
+  objetivo_apresentacao: z.string().max(500).optional(),
+  vibracoes_desejadas: z.string().max(300).optional(),
+  contexto_uso: z.string().optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -74,6 +79,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     genero_preferido, estilo_preferido, caracteristicas_desejadas,
     data_fundacao, ramo_atividade, descricao_negocio,
     nome_socio2, data_nascimento_socio2,
+    objetivo_apresentacao, vibracoes_desejadas, contexto_uso,
   } = parsed.data;
 
   const { data: profile } = await supabase
@@ -216,8 +222,72 @@ export const POST: APIRoute = async ({ request, locals }) => {
           user.id,
           analysis.id
         );
+      } else if (product_type === 'nome_social') {
+        // ── Produto: Nome Social (novo fluxo) ──
+        const candidatos = nomes_candidatos ?? [];
+
+        const resultado = analisarNomesSocial(
+          candidatos,
+          nome_completo,
+          data_nascimento,
+          genero_preferido
+        );
+
+        const melhor = resultado.melhorNome;
+        const todosTriangulosSocial = melhor
+          ? calcularTodosTriangulos(melhor.nomeCompleto, data_nascimento)
+          : null;
+        const freqMapSocial = melhor ? mapearFrequencias(melhor.nomeCompleto) : {};
+
+        await updateAnalysis(analysis.id, {
+          frequencias_numeros: { ranking: resultado, frequencias: freqMapSocial } as unknown,
+          numero_expressao:    melhor?.expressao    ?? null,
+          numero_destino:      resultado.destino,
+          numero_motivacao:    melhor?.motivacao    ?? null,
+          numero_missao:       melhor?.missao       ?? null,
+          numero_impressao:    melhor?.impressao    ?? null,
+          bloqueios:           (melhor?.bloqueios   ?? []) as unknown[],
+          triangulo_vida:      todosTriangulosSocial?.vida    as unknown ?? null,
+          triangulo_pessoal:   todosTriangulosSocial?.pessoal as unknown ?? null,
+          triangulo_social:    todosTriangulosSocial?.social  as unknown ?? null,
+          triangulo_destino:   todosTriangulosSocial?.destino as unknown ?? null,
+          licoes_carmicas:     (melhor?.licoesCarmicas    ?? []) as unknown[],
+          tendencias_ocultas:  (melhor?.tendenciasOcultas ?? []) as unknown[],
+          debitos_carmicos:    (melhor?.debitosCarmicos   ?? []) as unknown[],
+          score: melhor?.score ?? null,
+        });
+
+        // Salvar inputs do formulário para histórico
+        const parts = data_nascimento.split('/');
+        const dataNascIso = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : data_nascimento;
+        await supabase.from('social_name_inputs').insert({
+          analysis_id: analysis.id,
+          user_id: user.id,
+          nome_nascimento: nome_completo,
+          data_nascimento: dataNascIso,
+          objetivo_apresentacao: objetivo_apresentacao ?? null,
+          vibracoes_desejadas: vibracoes_desejadas ?? null,
+          contexto_uso: contexto_uso ?? null,
+          estilo_preferido: estilo_preferido ?? null,
+          genero: genero_preferido ?? null,
+          nomes_candidatos: candidatos,
+        });
+
+        analiseTexto = await generateSocialAnalysis(
+          {
+            resultado,
+            nomeNascimento: nome_completo,
+            objetivoApresentacao: objetivo_apresentacao,
+            vibracoesDesejadas: vibracoes_desejadas,
+            contextoUso: contexto_uso,
+            estiloPreferido: estilo_preferido,
+            genero: genero_preferido,
+          },
+          user.id,
+          analysis.id
+        );
       } else {
-        // ── Produto: Nome Magnético (e fallback para outros) ──
+        // ── Produto: fallback genérico (não deve ocorrer com os 3 produtos definidos) ──
         const todosTriangulos = calcularTodosTriangulos(nome_completo, data_nascimento);
         const bloqueios = detectarBloqueios(todosTriangulos);
         const sequenciasNegativas = todasSequenciasNegativas(todosTriangulos);
@@ -280,40 +350,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           user.id,
           analysis.id
         );
-
-        if (product_type === 'nome_social') {
-          // Score teto: melhor score que qualquer nome pode atingir para esta pessoa.
-          // Sugestões devem estar acima de 80% (ou do teto se teto < 80).
-          const debitosFixosCount = debitosCarmicos.filter(d => d.fixo).length;
-          const scoreTeto = calcularScoreTeto(debitosFixosCount);
-          const minScoreSugestoes = Math.min(80, Math.max(70, scoreTeto));
-
-          const variacoes = gerarNomesMagneticos(
-            nome_completo,
-            cincoNumeros.expressao,
-            cincoNumeros.destino,
-            gender,
-            data_nascimento,
-            3,                  // apenas 3 sugestões finais
-            minScoreSugestoes   // mínimo 80% (ou teto se menor)
-          );
-
-          await generateSuggestions(
-            { nomeCompleto: nome_completo, cincoNumeros, variacoesCandidatas: variacoes, gender },
-            user.id,
-            analysis.id
-          );
-
-          await saveMagneticNames(analysis.id, user.id, variacoes.map(v => ({
-            nomeSugerido: v.nome,
-            numeroExpressao: v.numerosExpressao,
-            motivacao: v.motivacao,
-            impressao: v.impressao,
-            temBloqueio: v.temBloqueio,
-            score: v.score,
-            justificativa: v.justificativa,
-          })));
-        }
+        void sequenciasNegativas;
       }
 
       await updateAnalysis(analysis.id, {

@@ -122,101 +122,112 @@ ${debitosTexto}
 Elabore um relatório numerológico cabalístico completo e profundamente personalizado para **${primeiroNome}**.
 O sistema indicou que a pessoa se identifica com o gênero: **${gender}**. Adapte pronomes, adjetivos e tom para refletir esse gênero ao longo de todo o texto.
 
+Escreva cada seção com pelo menos 3 parágrafos densos e específicos. Evite generalidades — cada afirmação deve estar ancorada nos números concretos desta pessoa. Este relatório vale R$150+ e deve justificar esse valor com revelações que a pessoa nunca ouviu sobre si mesma.
+
 Siga EXATAMENTE esta estrutura de seções, nesta ordem:
 
 ---
 
-## ✨ 1. Perfil Energético Geral
+## ✨ 1. Perfil Energético — Quem Você É em Essência
 
-Visão panorâmica da energia do nome completo e como ela se manifesta na vida de ${primeiroNome}. Conecte **Expressão**, **Destino** e **Motivação** em uma narrativa coesa. Escreva 3 parágrafos reveladores e específicos — não genéricos.
-
----
-
-## 🔢 2. A Estrela de 5 Pontas — Identidade Numerológica
-
-Para cada um dos 5 números, escreva uma análise específica para ${primeiroNome}:
-
-### 2.1 Expressão — O Dom que Você Veio Manifestar
-O que o número **${cincoNumeros.expressao}** revela sobre os talentos e forma de agir de ${primeiroNome} no mundo. Como esse número se manifesta na carreira, relacionamentos e comunicação.
-
-### 2.2 Destino — O Chamado da Alma
-O que o número **${cincoNumeros.destino}** representa como missão de vida. Quais desafios e conquistas este caminho naturalmente oferece.
-
-### 2.3 Motivação — O Desejo Mais Profundo
-O número **${cincoNumeros.motivacao}** revela o que move ${primeiroNome} por dentro — o desejo da alma que nem sempre é dito. Como isso influencia as escolhas.
-
-### 2.4 Impressão — A Energia das Consoantes
-O número **${cincoNumeros.impressao}** revela como ${primeiroNome} é percebido pelas outras pessoas — a impressão que deixa, a "máscara social" e a força estrutural do nome.
-
-### 2.5 Missão — A Vocação de Vida
-O número **${cincoNumeros.missao}** (soma de Destino + Expressão) representa a grande missão e vocação que ${primeiroNome} veio cumprir — a síntese entre quem é e para onde está indo.
+Escreva uma visão panorâmica e reveladora da energia do nome completo de ${primeiroNome}. Conecte **Expressão ${cincoNumeros.expressao}**, **Destino ${cincoNumeros.destino}** e **Motivação ${cincoNumeros.motivacao}** em uma narrativa coesa de identidade:
+- O que a combinação única desses três números revela sobre a trajetória desta alma
+- Como esses números criam uma tensão criativa ou harmonia natural entre o que ${primeiroNome} é, o que deseja e para onde vai
+- Qual o "tema central" desta encarnação — a grande lição-dom que este conjunto numerológico carrega
+- Como esse perfil se manifesta em escolhas de carreira, relacionamentos e modo de estar no mundo
 
 ---
 
-## 🔺 3. Os 4 Triângulos — Mapeamento Completo
+## 🔢 2. A Estrela de 5 Pontas — Anatomia do Nome
 
-Cada triângulo revela uma dimensão distinta da energia de ${primeiroNome}:
+Para cada um dos 5 números, escreva uma análise aprofundada e específica para ${primeiroNome}. Use pelo menos 2 parágrafos por número:
+
+### 2.1 Expressão ${cincoNumeros.expressao} — O Dom que Veio Manifestar
+Talentos naturais, forma de agir e comunicar, o que este número revela sobre como ${primeiroNome} cria impacto no mundo. Explore tanto a polaridade positiva (o dom em pleno florescimento) quanto o padrão de sombra (como esse dom pode virar excesso ou se bloquear). Como este número se manifesta especificamente na carreira e criatividade.
+
+### 2.2 Destino ${cincoNumeros.destino} — O Chamado da Alma
+O que este número representa como missão de vida. Quais desafios e conquistas este caminho naturalmente oferece. Explique como o Destino funciona como uma "bússola interna" — as situações de vida que esta pessoa inevitavelmente atrairá para crescer. Exemplos de como esse Destino se ativa em crises e grandes decisões.
+
+### 2.3 Motivação ${cincoNumeros.motivacao} — O Desejo Mais Profundo
+O que move ${primeiroNome} por dentro — o desejo da alma que nem sempre é consciente. Como essa motivação secreta influencia escolhas de parceiros, projetos e estilo de vida. O que acontece quando esse desejo é reprimido vs quando é honrado plenamente.
+
+### 2.4 Impressão ${cincoNumeros.impressao} — Como o Mundo Lhe Vê
+Como ${primeiroNome} é percebido pelas outras pessoas antes mesmo de abrir a boca. A "máscara social" que este número cria — sua utilidade e seus limites. A diferença entre quem ${primeiroNome} é por dentro (Motivação) e como aparece por fora (Impressão) — e o que essa diferença gera na vida.
+
+### 2.5 Missão ${cincoNumeros.missao} — A Síntese da Jornada
+O que a soma de Destino + Expressão revela como vocação máxima. Este número representa onde ${primeiroNome} deixará seu legado maior. Como se manifesta quando esta pessoa está vivendo sua missão plena vs quando está desviada dela.
+
+---
+
+## 🔺 3. Os 4 Triângulos — Geometria da Alma
+
+Cada triângulo revela uma dimensão distinta da energia de ${primeiroNome}. Para cada um, escreva 2 parágrafos reveladores:
 
 ### Triângulo da Vida (Arcano **${todosTriangulos.vida.arcanoRegente ?? '—'}**)
-Padrões gerais de vida, trajetória e aspectos que permeiam toda a existência.
+A vibração base que permeia toda a trajetória de vida. Padrões que se repetem em diferentes fases e contextos. O que o Arcano **${todosTriangulos.vida.arcanoRegente ?? '—'}** revela como tema arquetípico dominante desta encarnação.
 
 ### Triângulo Pessoal (Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}**)
-Vida íntima, reações internas e como ${primeiroNome} se sente por dentro — o mundo emocional e psicológico.
+Como ${primeiroNome} se sente por dentro — o mundo emocional, as reações íntimas, o que nunca mostra. Como o Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}** molda a vida afetiva, o autocuidado e a relação com a vulnerabilidade.
 
 ### Triângulo Social (Arcano **${todosTriangulos.social.arcanoRegente ?? '—'}**)
-Influências externas, como o mundo percebe ${primeiroNome} e como as relações sociais se desenvolvem.
+Como o mundo percebe e responde a ${primeiroNome}. Que tipo de relações, oportunidades e desafios este triângulo atrai. O que o Arcano **${todosTriangulos.social.arcanoRegente ?? '—'}** diz sobre o papel social que esta pessoa tende a ocupar.
 
 ### Triângulo do Destino (Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}**)
-Resultados que ${primeiroNome} tende a colher na vida, missão e previsões energéticas.
+Os resultados que ${primeiroNome} tende a colher — o que a energia deste triângulo produz como frutos ao longo da vida. O Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}** como revelador da missão e dos ciclos de amadurecimento.
 
 ${bloqueios.length > 0
-  ? `**Para cada bloqueio detectado, analise profundamente:**
-- O impacto específico deste bloqueio na vida de ${primeiroNome}
-- Em quais áreas da vida (carreira, saúde, relacionamentos) ele se manifesta com mais força
-- O aspecto de saúde associado (com sensibilidade e sem alarmismo)
+  ? `**Para cada bloqueio detectado, escreva uma análise aprofundada de 2-3 parágrafos:**
+- O impacto específico e concreto deste bloqueio na vida de ${primeiroNome} (em que situações ele aparece, como sabota)
+- Em quais áreas da vida (carreira, saúde, relacionamentos, finanças) ele se manifesta com mais força
+- O aspecto de saúde associado: a tensão emocional-somática que este padrão pode gerar no corpo (com sensibilidade)
 
 #### ⚡ Antídoto Prático para cada bloqueio:
-Para CADA bloqueio listado, escreva um subitem "**Antídoto Prático:**" com 2–3 ações concretas e práticas que ${primeiroNome} pode adotar AGORA para transformar essa energia. Seja específico e acionável — não apenas filosófico.`
-  : `**Celebre a ausência de bloqueios:** Explique o que significa ter os 4 triângulos limpos e como isso facilita a realização dos sonhos de ${primeiroNome}.`
+Para CADA bloqueio, escreva um subitem "**Antídoto Prático:**" com 3 ações concretas e específicas que ${primeiroNome} pode adotar nos próximos 30 dias. Seja cirúrgico e acionável.`
+  : `**Celebre a ausência de bloqueios:** Escreva 2 parágrafos sobre o que significa ter os 4 triângulos limpos. Que tipo de fluidez, resiliência e facilidade isso cria na vida de ${primeiroNome}.`
 }
 
 ---
 
-## ⚖️ 4. O Peso do Passado — Karma e Lições
+## ⚖️ 4. O Peso do Passado — Karma, Lições e Tendências
+
+${debitosCarmicos.length > 0
+  ? `${primeiroNome} carrega ${debitosCarmicos.length} débito(s) kármico(s) nesta encarnação. Para cada débito, escreva uma análise profunda e compassiva:
+- O contexto espiritual-histórico deste débito: que padrão de encarnações passadas ele representa
+- Como ele se manifesta especificamente em relacionamentos, finanças, carreira ou saúde nesta vida
+- A "lei de compensação" que este número exige: o que precisa ser reintegrado conscientemente
+- 2–3 práticas concretas e transformadoras para quitar este débito nesta encarnação`
+  : `${primeiroNome} não possui débitos kármicos — escreva 1 parágrafo celebrando essa raridade e o que ela revela sobre a maturidade desta alma.`
+}
 
 ${licoesCarmicas.length > 0
-  ? `${primeiroNome} traz ${licoesCarmicas.length} lição(ões) kármica(s) nesta encarnação. Para cada lição, explique:
-- O que essa ausência numérica revela sobre a alma
-- Como essa qualidade se manifesta (ou não se manifesta) na vida cotidiana
-- 2 práticas específicas para desenvolver essa qualidade`
-  : `${primeiroNome} não possui lições kármicas — celebre essa inteireza energética e o que ela revela.`
+  ? `${primeiroNome} traz ${licoesCarmicas.length} lição(ões) kármica(s). Para cada lição, escreva com profundidade:
+- O "talento escondido" por trás desta ausência numérica — o que esta alma ainda não dominou, mas veio aprender
+- Como esta lacuna se manifesta concretamente no dia a dia (situações em que ${primeiroNome} se sente inapto ou evita)
+- O "caminho de ativação": 2–3 práticas específicas (atividades, hábitos, comportamentos) para desenvolver esta qualidade`
+  : `Ausência de lições kármicas — ${primeiroNome} traz todos os números de 1 a 8 representados. Escreva 1 parágrafo sobre o que essa completude vibracional proporciona.`
 }
 
 ${tendenciasOcultas.length > 0
-  ? `Há tendências ocultas que pedem equilíbrio consciente. Para cada tendência, explique como ${primeiroNome} pode canalizar esse excesso positivamente.`
+  ? `Tendências ocultas presentes — números com repetição excessiva que criam intensidade vibracional. Para cada tendência, explique:
+- O "superpoder mal direcionado": que dom extraordinário essa repetição confere, e como ele pode se tornar excesso
+- Situações concretas em que esse excesso se manifesta como armadilha, obsessão ou ponto cego
+- A "arte do equilíbrio": como ${primeiroNome} pode usar essa força de forma estratégica e sustentável`
   : ''
 }
 
-${debitosCarmicos.length > 0
-  ? `${primeiroNome} carrega ${debitosCarmicos.length} débito(s) kármico(s). Para cada débito, explique com profundidade o que ele representa e como quitá-lo nesta encarnação através de ações práticas.`
-  : `${primeiroNome} não possui débitos kármicos — um sinal de alma que já trabalhou suas pendências.`
-}
+---
+
+## 🌙 5. O Arcano Regente — O Mestre Deste Ciclo
+
+O **Arcano ${arcanoRegente ?? '—'}** governa o triângulo central de ${primeiroNome}. Escreva 3 parágrafos reveladores:
+- O arquétipo profundo que este arcano representa: sua mitologia, sua lição universal e como ela ecoa nesta vida específica
+- Qual energia este arcano traz como presente e qual desafio ele convida a superar
+- Como a presença deste arcano regente se manifestou como padrão nas principais fases da vida de ${primeiroNome}
+- O convite concreto deste arcano: o que precisa ser honrado, desenvolvido ou liberado neste ciclo atual
 
 ---
 
-## 🌙 5. Ciclo Atual e Arcano Regente
-
-O **Arcano ${arcanoRegente ?? '—'}** governa o triângulo principal de ${primeiroNome}. Explique:
-- O arquétipo profundo que este arcano representa na jornada desta pessoa
-- Qual energia domina o ciclo atual de vida de ${primeiroNome}
-- Como aproveitar ao máximo essa energia regente nos próximos meses
-- O principal desafio que este arcano convida a superar
-
----
-
-${arquetipo ? `---
-
-## 🎭 6. Seu Arquétipo — A Identidade Mítica
+${arquetipo ? `## 🎭 6. O Arquétipo — A Identidade Mítica
 
 O número de **Expressão ${cincoNumeros.expressao}** revela que ${primeiroNome} carrega o arquétipo do(a) **${arquetipo.nome}**.
 
@@ -225,45 +236,52 @@ Manifestações positivas: ${arquetipo.expressaoPositiva.join(' | ')}
 Sombra a integrar: ${arquetipo.expressaoSombra.join(' | ')}
 Figuras míticas de referência: ${arquetipo.figurasMiticas.join(', ')}
 
-Escreva a seção "🎭 6. Seu Arquétipo — A Identidade Mítica" que:
-- Apresente o arquétipo do(a) **${arquetipo.nome}** como a identidade narrativa profunda de ${primeiroNome}
-- Conecte a essência do arquétipo à jornada numerológica já analisada nas seções anteriores
-- Explique como a **sombra do arquétipo** (${arquetipo.sombra}) se manifesta nos bloqueios ou padrões identificados
-- Mostre como o nome magnético sugerido ativa a expressão positiva do arquétipo — o que muda na vibração quando ${primeiroNome} adota o novo nome
-- Use linguagem mítica e psicológica, mas acessível — conecte o simbólico ao cotidiano concreto de ${primeiroNome}
-- Escreva 3–4 parágrafos reveladores que façam ${primeiroNome} se reconhecer nessa identidade arquetípica
-
-` : ''}---
-
-## ✍️ ${arquetipo ? '7' : '6'}. Manual da Nova Assinatura
-
-Com base nos números de ${primeiroNome}, escreva orientações práticas de grafoscopia para o nome magnetizado:
-
-- **Inclinação:** Qual a inclinação ideal da escrita (levemente ascendente, reta, etc.) e o que isso projeta energeticamente
-- **Traços e letras:** Quais letras devem ser escritas de forma aberta/fluida e quais traços devem ser evitados (especialmente traços que cruzam ou cortam)
-- **Ritmo e pressão:** Como a pressão da caneta e o ritmo da escrita influenciam a vibração do nome
-- **Iniciais e majúsculas:** Como trabalhar as letras iniciais para maximizar a projeção energética
-- **Prática recomendada:** Quantas vezes por dia praticar e em quais contextos começar a usar o nome
+Escreva 4 parágrafos que:
+- Apresentem o arquétipo do(a) **${arquetipo.nome}** como a identidade narrativa profunda de ${primeiroNome}
+- Conectem a essência do arquétipo à jornada numerológica analisada — como os bloqueios, lições e destino tecem a história deste arquétipo
+- Mostrem como a **sombra** (${arquetipo.sombra}) se manifesta nos padrões identificados e o que integrá-la muda
+- Usem linguagem mítica E cotidiana — o simbólico ancorado em situações concretas do dia a dia
 
 ---
 
-## 🌟 ${arquetipo ? '8' : '7'}. Síntese e Mensagem Final
+` : ''}## 🔮 ${arquetipo ? '7' : '6'}. O Nome como Ferramenta de Cura
 
-Escreva uma conclusão rica (3–4 parágrafos) que:
-- Conecte todos os elementos analisados em uma narrativa de propósito único para ${primeiroNome}
-- Fale em segunda pessoa: "você", "seu caminho", "sua missão"
-- Encerre com uma mensagem transformadora e encorajadora sobre a jornada desta alma
-- Tom esperançoso, profundo e poderoso
+A mudança vibracional que o nome magnetizado produz não é apenas simbólica — ela reorganiza padrões concretos de atração e resposta do ambiente. Escreva 3 parágrafos sobre:
+- O que muda na vibração-base quando ${primeiroNome} começa a usar o novo nome conscientemente
+- Quais padrões de relacionamento, oportunidade ou autossabotagem tendem a se reorganizar com a mudança de frequência
+- O período de adaptação vibracional: como funcionam os primeiros 90 dias de uso consciente do nome magnetizado, e o que observar como sinal de integração
+
+---
+
+## ✍️ ${arquetipo ? '8' : '7'}. Manual da Nova Assinatura
+
+Com base nos números de ${primeiroNome}, escreva orientações práticas de grafoscopia para o nome magnetizado:
+
+- **Inclinação:** A inclinação ideal da escrita e o que ela projeta energeticamente para este perfil
+- **Traços e Letras:** Quais letras devem ser escritas de forma aberta/fluida — e especificamente quais traços devem ser evitados (traços que cruzam, cortam ou fecham o movimento)
+- **Ritmo e Pressão:** Como a pressão da caneta e o ritmo da escrita influenciam a vibração — leve vs marcado para este número
+- **Iniciais e Maiúsculas:** Como trabalhar as letras iniciais para maximizar a projeção energética deste perfil
+- **Prática Recomendada:** Um protocolo de ativação — quantas vezes por dia, em quais contextos, e como criar o hábito de usar o nome
+
+---
+
+## 🌟 ${arquetipo ? '9' : '8'}. Síntese e Mensagem Final
+
+Escreva uma conclusão profunda e poderosa (4 parágrafos) que:
+- Conecte todos os elementos — números, bloqueios, karma, arcano e arquétipo — em uma narrativa de propósito único para ${primeiroNome}
+- Fale em segunda pessoa direta: "você", "sua jornada", "sua missão"
+- Nomeie o presente que este trabalho numerológico representa e o que se abre com a nova vibração
+- Encerre com uma mensagem transformadora, esperançosa e de alta frequência sobre o que está por vir
 
 ---
 
 REGRAS ESTRITAS DE FORMATAÇÃO:
 1. Use estruturação Markdown rigorosa com Hash Headers (##, ###, ####).
-2. NUNCA use títulos apenas com letras maiúsculas. SEMPRE use Hash Headers com emoticon (ex: "## ✨ 1. Perfil Energético Geral").
+2. NUNCA use títulos apenas com letras maiúsculas. SEMPRE use Hash Headers com emoticon.
 3. **Negrito:** Use EXCLUSIVAMENTE para termos numerológicos cabalísticos (Expressão, Destino, Motivação, Bloqueio, Arcano, etc.) e para os números. O restante do texto em formato normal.
 4. SEMPRE duplo espaçamento entre parágrafos — texto arejado e escaneável.
 5. Parágrafos com no máximo 4 linhas.
-6. Escreva em segunda pessoa de forma natural.
+6. Escreva em segunda pessoa de forma natural e direta.
 7. ${primeiroNome} pode aparecer no máximo 1 vez por seção ##.
-8. Seja profundo, específico e transformador — este relatório vale R$ 100+ e deve justificar esse valor.`;
+8. Escreva com profundidade real, especificidade e poder transformador — cada parágrafo deve revelar algo que esta pessoa nunca viu assim sobre si mesma.`;
 }

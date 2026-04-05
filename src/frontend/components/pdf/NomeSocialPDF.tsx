@@ -12,6 +12,7 @@
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
 import { THEMES } from './shared/PDFTheme';
 import { PDFCover } from './shared/PDFCover';
+import { PDFStandardIntro } from './shared/PDFStandardIntro';
 import { PDFPageHeader } from './shared/PDFPageHeader';
 import { PDFFooter } from './shared/PDFFooter';
 import { PDFNumbersGrid } from './shared/PDFNumbersGrid';
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     fontFamily: BODY_FONT,
     color: DARK,
   },
-  section: { marginBottom: 24 },
+  section: { marginBottom: 16 },
   sectionTitle: {
     fontSize: 13,
     fontFamily: TITLE_FONT,
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     fontFamily: TITLE_FONT,
     color: GOLD,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     letterSpacing: 0.5,
   },
   fixedText: {
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
 
 /** Extrai estritamente o bloco de Conclusão Final do texto */
 function extractConclusao(text: string): string | null {
-  const match = text.match(/##[^\n]*(?:8\.|conclus[aã]o)/i);
+  const match = text.match(/##[^\n]*(?:\d+\.\s*conclus|\d+\.\s*o nome como|conclus[aã]o)/i);
   if (!match || match.index === undefined) return null;
   return text.slice(match.index).trim();
 }
@@ -270,10 +271,23 @@ function scoreColor(score: number): string {
   return score >= 70 ? '#059669' : score >= 40 ? '#D97706' : '#DC2626';
 }
 
+function compatColor(c: string): string {
+  return c === 'total' ? '#059669' : c === 'complementar' ? '#7c3aed' : c === 'aceitavel' ? '#D97706' : '#DC2626';
+}
+
+function compatLabel(c: string): string {
+  return c === 'total' ? 'Total' : c === 'complementar' ? 'Complementar' : c === 'aceitavel' ? 'Aceitável' : 'Incompatível';
+}
+
 export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFProps) {
   const logoSrc = loadLogoSrc();
-  const nomeParaExibir = analysis.nome_completo;
-  const dataNascimento = formatDate(analysis.data_nascimento);
+  const freqData = analysis.frequencias_numeros as any;
+  // Para o novo fluxo, exibir o nome social escolhido (não o nome de nascimento)
+  const nomeParaExibir = freqData?.ranking?.melhorNome?.nomeCompleto ?? analysis.nome_completo;
+  const nomeNascimento = analysis.nome_completo;
+  const dataNascimento = formatDate(
+    freqData?.ranking?.dataNascimento ?? analysis.data_nascimento
+  );
   const dataGeracao = formatDate(analysis.completed_at ?? analysis.created_at);
 
   const letrasNome = nomeParaExibir
@@ -281,6 +295,9 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
     .replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ]/g, '')
     .toUpperCase()
     .split('');
+
+  const melhorNome = freqData?.ranking?.melhorNome;
+  const nomesCandidatos: any[] = freqData?.ranking?.nomesCandidatos ?? [];
 
   const nums = [
     { label: 'Expressão', sublabel: 'O Dom', value: analysis.numero_expressao, icon: '✦' },
@@ -294,7 +311,6 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
   const debitos = Array.isArray(analysis.debitos_carmicos) ? analysis.debitos_carmicos : [];
   const licoes = Array.isArray(analysis.licoes_carmicas) ? analysis.licoes_carmicas : [];
   const tendencias = Array.isArray(analysis.tendencias_ocultas) ? analysis.tendencias_ocultas : [];
-  const freqData = analysis.frequencias_numeros as any;
   const frequencias: Record<string, number> | null =
     freqData?.frequencias ?? (freqData && !freqData?.ranking ? freqData : null);
 
@@ -316,15 +332,12 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
     : undefined;
 
   const analiseFormatado = analysis.analise_texto
-  let analiseCorpo = analiseFormatado;
-  let conclusaoTexto: string | null = null;
-  
-  if (analiseFormatado) {
-    conclusaoTexto = extractConclusao(analiseFormatado);
-    if (conclusaoTexto) {
-      analiseCorpo = analiseFormatado.slice(0, analiseFormatado.indexOf(conclusaoTexto)).trim();
-    }
-  }
+    ? formatAnalysisText(analysis.analise_texto)
+    : null;
+  const conclusaoTexto = analiseFormatado ? extractConclusao(analiseFormatado) : null;
+  const analiseCorpo = analiseFormatado && conclusaoTexto
+    ? analiseFormatado.slice(0, analiseFormatado.indexOf(conclusaoTexto)).trim()
+    : analiseFormatado;
 
   return (
     <Document title={`Nome Magnetico — ${nomeParaExibir}`} author="Nome Magnetico">
@@ -340,33 +353,74 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
         titleFont={TITLE_FONT}
       />
 
-      {/* ── PÁGINA 2: O PODER DO NOME SOCIAL E DA ASSINATURA ───────────────── */}
-      <Page size="A4" style={styles.darkPage}>
-        <PDFPageHeader subtitle="Introdução" />
-        <View style={styles.section}>
-          <Text style={styles.hugeTitle}>O Poder do Nome Social e da Assinatura</Text>
-          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#e5e2e1', marginBottom: 14, lineHeight: 1.6 }}>
-            Desde as antigas escolas de mistério do Oriente e as tradições secretas da Cabala, compreende-se que o universo não é feito apenas de matéria, mas de frequência, geometria e som. Os sábios já ensinavam que cada letra do alfabeto é um símbolo gráfico que oculta um código vibratório rigoroso. Quando essas letras formam o seu nome, criam um acorde invisível que ecoa repetidas vezes, magnetizando e moldando, silenciosamente, a realidade ao seu redor.
-          </Text>
-          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#e5e2e1', marginBottom: 14, lineHeight: 1.6 }}>
-            Na Numerologia Cabalística, o seu nome de batismo não é um acaso: ele define o seu Destino — a rota kármica da sua existência e ancestralidade. No entanto, o seu poder de cocriar a própria realidade (o sagrado livre-arbítrio) manifesta-se essencialmente através do seu Nome Social e da sua Assinatura. É através deles que você comunica ao mundo quem escolheu ser. A assinatura atua como o selo de poder da sua alma, ativando energeticamente todos os seus relacionamentos e negócios.
-          </Text>
-          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#e5e2e1', marginBottom: 14, lineHeight: 1.6 }}>
-            Mas atenção: uma assinatura repleta de sequências negativas ou arcanos conflitantes atua como um escudo opaco, travando a fluidez financeira e minando as suas interações. Ao harmonizar a geometria vibracional do seu nome de apresentação, desencadeia-se uma verdadeira alquimia interior: as resistências kármicas são quebradas e uma nova frequência de atração é intencionalmente ancorada no seu campo magnético.
-          </Text>
-          <Text style={{ ...styles.bodyText, fontSize: 10.5, color: '#e5e2e1', marginBottom: 14, lineHeight: 1.6 }}>
-            A partir desta página, mergulharemos no Raio-X definitivo da sua essência numérica. Desvendaremos seus triângulos cabalísticos, seus maiores dons e entregaremos o mapa tático de alinhamento da sua nova assinatura. Prepare-se para reescrever o seu código cósmico e inaugurar o capítulo mais próspero da sua jornada.
-          </Text>
-        </View>
-        <PDFFooter />
-      </Page>
+      {/* ── PÁGINA INTRODUTÓRIA: GUIA DE LEITURA ────────────────────────── */}
+      <PDFStandardIntro theme={theme} productType="nome_social" entityName={nomeParaExibir} />
+
+      {/* ── PÁGINA: RANKING DOS CANDIDATOS (novo fluxo) ─────────────────────── */}
+      {nomesCandidatos.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <PDFPageHeader subtitle={`${nomeParaExibir} — Ranking dos Candidatos`} />
+
+          <View style={styles.section}>
+            <Text style={styles.hugeTitle}>Ranking Numerológico dos Candidatos</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 12 }}>
+              Abaixo está a classificação vibratória de todos os nomes avaliados, ordenados do maior para o menor potencial de fluidez. A pontuação reflete a harmonia entre as frequências do nome social candidato e o seu Destino imutável. O nome no topo é a recomendação de ouro — o que entrega maior compatibilidade, clareza de fluxo e ausência de bloqueios.
+            </Text>
+
+            {nomesCandidatos.slice(0, 10).map((c: any, i: number) => {
+              const sc = scoreColor(c.score);
+              const isTop = i === 0;
+              const isIA = c.origemSugerida === 'ia';
+              return (
+                <View key={i} style={isTop ? {
+                  marginBottom: 8, padding: 10, backgroundColor: '#FFFDF0',
+                  borderWidth: 1.5, borderColor: GOLD, borderRadius: 6,
+                } : {
+                  marginBottom: 8, padding: 10, backgroundColor: '#F9FAFB',
+                  borderWidth: 1, borderColor: LIGHT_GRAY, borderRadius: 6,
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      {isTop && <Text style={{ fontSize: 8, color: GOLD, fontFamily: 'Helvetica-Bold' }}>★ RECOMENDADO{'  '}</Text>}
+                      {isIA && !isTop && <Text style={{ fontSize: 7, color: '#7c3aed', fontFamily: 'Helvetica-Bold' }}>(*) SUGESTÃO{'  '}</Text>}
+                      <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: isTop ? DARK : '#374151' }}>{c.nomeCompleto}</Text>
+                    </View>
+                    <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: sc }}>{c.score}/100</Text>
+                  </View>
+
+                  <View style={{ height: 4, backgroundColor: LIGHT_GRAY, borderRadius: 2, marginBottom: 6 }}>
+                    <View style={{ height: 4, borderRadius: 2, width: `${Math.min(100, c.score)}%`, backgroundColor: sc }} />
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 14, marginBottom: 5, flexWrap: 'wrap' }}>
+                    <Text style={{ fontSize: 9, color: GRAY }}>Expressão: <Text style={{ fontFamily: 'Helvetica-Bold', color: GOLD }}>{c.expressao}</Text></Text>
+                    <Text style={{ fontSize: 9, color: GRAY }}>Motivação: <Text style={{ fontFamily: 'Helvetica-Bold' }}>{c.motivacao}</Text></Text>
+                    <Text style={{ fontSize: 9, color: GRAY }}>Impressão: <Text style={{ fontFamily: 'Helvetica-Bold' }}>{c.impressao ?? '?'}</Text></Text>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 14 }}>
+                    <Text style={{ fontSize: 9, color: compatColor(c.compatibilidade) }}>
+                      Compatibilidade c/ Destino: {compatLabel(c.compatibilidade)}
+                    </Text>
+                    <Text style={{ fontSize: 9, color: c.temBloqueio ? '#DC2626' : '#059669' }}>
+                      {c.temBloqueio ? `${c.bloqueios?.length ?? 1} bloqueio(s)` : 'Sem bloqueios'}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+
+          <PDFFooter />
+        </Page>
+      )}
 
       {/* ── PÁGINA 3: A ESTRELA DE 5 PONTAS + BLOQUEIOS ───────────────────── */}
       <Page size="A4" style={styles.page}>
         <PDFPageHeader subtitle={`${nomeParaExibir} — O Pentagrama Pessoal`} />
 
         <View style={{ marginTop: 20, marginBottom: 8 }}>
-          <Text style={styles.hugeTitle}>A ESSÊNCIA E O PERSONAGEM</Text>
+          <Text style={styles.hugeTitle}>A Essência e o Personagem</Text>
         </View>
 
         <View style={styles.section}>
@@ -427,7 +481,7 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
         <PDFPageHeader subtitle={`${nomeParaExibir} — O Peso do Passado`} />
         
         <View style={{ marginTop: 20, marginBottom: 8 }}>
-          <Text style={styles.hugeTitle}>O PESO DO PASSADO (KARMA E TENDÊNCIAS)</Text>
+          <Text style={styles.hugeTitle}>O Peso do Passado (Karma e Tendências)</Text>
         </View>
 
         <View style={{ ...styles.section, marginTop: 12 }}>
@@ -466,9 +520,9 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
           <PDFPageHeader subtitle={`${nomeParaExibir} — Análise Profunda`} />
 
           <View style={{ marginTop: 20, marginBottom: 8 }}>
-            <Text style={styles.hugeTitle}>SUA ANÁLISE PROFUNDA</Text>
+            <Text style={styles.hugeTitle}>Sua Análise Profunda</Text>
             <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 24 }}>
-               ESTUDO NUMEROLÓGICO COMPLETO
+              Estudo Numerológico Completo
             </Text>
           </View>
 
@@ -500,16 +554,16 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
         <Page size="A4" style={styles.darkPage}>
           <PDFPageHeader subtitle={`${nomeParaExibir} — O Encerramento`} />
           <View style={{ marginTop: 24, marginBottom: 16 }}>
-             <Text style={styles.hugeTitle}>CONCLUSÃO FINAL</Text>
+             <Text style={styles.hugeTitle}>Conclusão Final</Text>
              <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 24 }}>
-               A SÍNTESE DO SEU MAPA
+               A Síntese do Seu Mapa
              </Text>
           </View>
           <View style={styles.section}>
-            <RenderMarkdownChunks 
-               text={conclusaoTexto.replace(/##[^\n]*(?:8\.|conclus[aã]o)/gi, '').trim()} // Retira o "## 8. Conclusão" para não duplicar com nosso Header
-               styles={{...styles, bodyText: { ...styles.bodyText, color: '#e5e2e1' }}} 
-               GOLD={GOLD} 
+            <RenderMarkdownChunks
+               text={conclusaoTexto}
+               styles={{...styles, bodyText: { ...styles.bodyText, color: '#e5e2e1' }}}
+               GOLD={GOLD}
             />
           </View>
           <PDFFooter />

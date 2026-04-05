@@ -13,8 +13,8 @@ const LIGHT_GRAY = PDF_COLORS.lightGray;
 
 const styles = StyleSheet.create({
   sectionBlock: {
-    marginTop: 16,
-    marginBottom: 16,
+    marginTop: 6,
+    marginBottom: 8,
   },
   sectionLabel: {
     fontSize: 8,
@@ -26,17 +26,17 @@ const styles = StyleSheet.create({
   // Bloqueios
   bloqueioRow: {
     backgroundColor: '#FEF2F2',
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#EF4444',
-    padding: 8,
-    marginBottom: 6,
-    borderRadius: 4,
+    padding: 11,
+    marginBottom: 8,
+    borderRadius: 6,
   },
   bloqueioTitle: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#DC2626',
-    marginBottom: 2,
+    marginBottom: 6,
   },
   bloqueioDesc: {
     fontSize: 10,
@@ -46,42 +46,42 @@ const styles = StyleSheet.create({
   bloqueioSaude: {
     fontSize: 9,
     color: '#7f1d1d',
-    marginTop: 3,
+    marginTop: 4,
     fontStyle: 'italic',
   },
   bloqueioTriangulos: {
     fontSize: 9,
     color: '#991b1b',
-    marginTop: 2,
+    marginTop: 4,
   },
   // Débitos
   debitoRow: {
     backgroundColor: '#FFFBEB',
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#F59E0B',
-    padding: 8,
-    marginBottom: 6,
-    borderRadius: 4,
+    padding: 11,
+    marginBottom: 8,
+    borderRadius: 6,
   },
   debitoRowVariable: {
     backgroundColor: '#F5F3FF',
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#7C3AED',
-    padding: 8,
-    marginBottom: 6,
-    borderRadius: 4,
+    padding: 11,
+    marginBottom: 8,
+    borderRadius: 6,
   },
   debitoTitle: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#92400E',
-    marginBottom: 2,
+    marginBottom: 6,
   },
   debitoTitleVariable: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#5B21B6',
-    marginBottom: 2,
+    marginBottom: 6,
   },
   debitoDesc: {
     fontSize: 10,
@@ -90,30 +90,30 @@ const styles = StyleSheet.create({
   },
   debitoNoneBox: {
     backgroundColor: '#ECFDF5',
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#10B981',
-    padding: 8,
-    borderRadius: 4,
-    marginBottom: 6,
+    padding: 11,
+    borderRadius: 6,
+    marginBottom: 8,
   },
   debitoNoneText: {
-    fontSize: 8,
+    fontSize: 10,
     color: '#065F46',
   },
   // Lições
   licaoRow: {
     backgroundColor: 'rgba(56,189,248,0.06)',
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#38bdf8',
-    padding: 8,
-    marginBottom: 6,
-    borderRadius: 4,
+    padding: 11,
+    marginBottom: 8,
+    borderRadius: 6,
   },
   licaoTitle: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#0369a1',
-    marginBottom: 2,
+    marginBottom: 6,
   },
   licaoDesc: {
     fontSize: 10,
@@ -122,30 +122,30 @@ const styles = StyleSheet.create({
   },
   licaoNoneBox: {
     backgroundColor: 'rgba(56,189,248,0.06)',
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#38bdf8',
-    padding: 8,
-    borderRadius: 4,
-    marginBottom: 6,
+    padding: 11,
+    borderRadius: 6,
+    marginBottom: 8,
   },
   licaoNoneText: {
-    fontSize: 8,
+    fontSize: 10,
     color: '#0369a1',
   },
   // Tendências
   tendenciaRow: {
     backgroundColor: 'rgba(167,139,250,0.08)',
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#a78bfa',
-    padding: 8,
-    marginBottom: 6,
-    borderRadius: 4,
+    padding: 11,
+    marginBottom: 8,
+    borderRadius: 6,
   },
   tendenciaTitle: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#6d28d9',
-    marginBottom: 2,
+    marginBottom: 6,
   },
   tendenciaDesc: {
     fontSize: 10,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   tendenciaNoneText: {
-    fontSize: 8,
+    fontSize: 10,
     color: '#6d28d9',
   },
   // Frequency chart
@@ -259,7 +259,7 @@ export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
   return (
     <View style={styles.sectionBlock}>
       {bloqueios.map((b, i) => (
-        <View key={i} style={styles.bloqueioRow} wrap={false}>
+        <View key={i} style={styles.bloqueioRow}>
           <Text style={styles.bloqueioTitle}>{b.codigo} — {b.titulo}</Text>
           <Text style={styles.bloqueioDesc}>{b.descricao}</Text>
           {b.aspectoSaude ? (
@@ -292,7 +292,7 @@ export function DebitosBlock({ debitos }: { debitos: DebitoData[] }) {
       {debitos.map((d, i) => {
         const isFixed = d.fixo === true;
         return (
-          <View key={i} style={isFixed ? styles.debitoRow : styles.debitoRowVariable} wrap={false}>
+          <View key={i} style={isFixed ? styles.debitoRow : styles.debitoRowVariable}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 3 }}>
               <Text style={isFixed ? styles.debitoTitle : styles.debitoTitleVariable}>
                 {d.titulo}
@@ -330,7 +330,7 @@ export function LicoesBlock({ licoes }: { licoes: LicaoData[] }) {
   return (
     <View style={styles.sectionBlock}>
       {licoes.map((l, i) => (
-        <View key={i} style={styles.licaoRow} wrap={false}>
+        <View key={i} style={styles.licaoRow}>
           <Text style={styles.licaoTitle}>{l.titulo}</Text>
           <Text style={styles.licaoDesc}>{l.descricao}</Text>
         </View>
@@ -348,7 +348,7 @@ function FrequencyBar({ frequencias }: { frequencias: Record<string, number> }) 
   if (entries.length === 0) return null;
   const max = Math.max(...entries.map(e => e.count), 1);
   return (
-    <View style={{ marginBottom: 24 }}>
+    <View style={{ marginBottom: 20 }} wrap={false}>
       <Text style={[styles.sectionLabel, { color: '#6d28d9', fontSize: 11, marginBottom: 4, textTransform: 'none' }]}>
         Mapeamento de Repetição Energética
       </Text>
@@ -393,7 +393,7 @@ export function TendenciasBlock({
       ) : (
         <>
           {tendencias.map((t, i) => (
-            <View key={i} style={styles.tendenciaRow} wrap={false}>
+            <View key={i} style={styles.tendenciaRow}>
               <Text style={styles.tendenciaTitle}>
                 {t.titulo} — {t.frequencia}x no nome
               </Text>

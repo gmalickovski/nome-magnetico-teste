@@ -76,7 +76,9 @@ ${candidatosTexto}
 
 ## Sua Tarefa
 
-Você é um numerólogo cabalístico especializado em nomes empresariais e branding energético. Com base nos dados acima, elabore um relatório estratégico, profundo e acionável para o empreendedor. Este relatório vale R$ 100+ e deve justificar esse valor.
+Você é um numerólogo cabalístico especializado em nomes empresariais e branding energético. Com base nos dados acima, elabore um relatório estratégico, profundo e acionável para o empreendedor. Este relatório vale R$150+ e deve ser uma consultoria de alto valor — cada seção deve trazer revelações e orientações que um consultor de branding comum não poderia oferecer.
+
+Escreva pelo menos 2–3 parágrafos por seção. Evite generalidades — cada insight deve estar ancorado nos números específicos deste negócio e deste empreendedor.
 
 Siga EXATAMENTE esta estrutura:
 
@@ -84,11 +86,10 @@ Siga EXATAMENTE esta estrutura:
 
 ## 🧲 1. O Magnetismo do Negócio
 
-Explique como nomes de empresas atraem (ou repelem) clientes através da vibração sonora e escrita.
-- Como a Expressão **${melhorNome?.expressao ?? '—'}** do nome escolhido ressoa no mercado${ramoAtividade ? ` de ${ramoAtividade}` : ''}
-- Que tipo de cliente, parceiro e oportunidade este nome naturalmente magnetiza
-- O "campo energético" que este nome cria ao ser pronunciado e escrito
-- Por que este nome tem poder de atração além do branding convencional
+Escreva 3 parágrafos reveladores sobre a força magnética que este nome empresarial projeta:
+- Como a **Expressão ${melhorNome?.expressao ?? '—'}** ressoa no mercado${ramoAtividade ? ` de ${ramoAtividade}` : ''} — que tipo de energia este número emite quando pronunciado e escrito, e como isso afeta a percepção inconsciente de clientes e parceiros
+- Que tipo de cliente, oportunidade, parceria e mídia espontânea este nome naturalmente magnetiza — baseado na vibração do número de Expressão e Motivação
+- O "campo energético" que este nome cria ao ser dito repetidamente — como a vibração sonora e escrita de **${melhorNome?.nomeEmpresa ?? 'o nome'}** funciona além do branding convencional, agindo no nível subconsciente do mercado
 
 ---
 
@@ -102,133 +103,118 @@ Risco de sombra: ${arquetipo.expressaoSombra.join(' | ')}
 Marcas de referência com esse arquétipo: ${arquetipo.marcasReferencia.join(', ')}
 Posicionamento natural: ${arquetipo.posicionamento}
 
-Escreva a seção "🎭 1b. Arquétipo da Marca — A Personalidade Profunda do Negócio" que:
-- Apresente o(a) **${arquetipo.nome}** como a persona da marca — a identidade que o mercado vai perceber e sentir
-- Compare com as marcas de referência (${arquetipo.marcasReferencia.join(', ')}) — o que essas marcas têm em comum e como **${melhorNome?.nomeEmpresa ?? 'a empresa'}** pode se posicionar no mesmo território
-- Oriente sobre TOM DE VOZ: como a empresa deve se comunicar (formal/informal, autoritária/acessível, técnica/emocional)
-- Oriente sobre VALORES DA MARCA: o que comunicar consistentemente para ser autêntico ao arquétipo
-- Aponte os RISCOS de desvio: o que acontece quando a comunicação ou as decisões saem do arquétipo (a sombra — ${arquetipo.sombra})
-- Escreva 3–4 parágrafos estratégicos, como se fosse uma consultoria de branding premium
+Escreva 4 parágrafos estratégicos que:
+- Apresentem o(a) **${arquetipo.nome}** como a persona profunda da marca — a identidade que o mercado vai sentir antes de entender racionalmente
+- Comparem com as marcas de referência (${arquetipo.marcasReferencia.join(', ')}) — o que essas marcas têm em comum e como **${melhorNome?.nomeEmpresa ?? 'esta empresa'}** pode se posicionar no mesmo território de forma autêntica
+- Orientem sobre TOM DE VOZ: como a empresa deve se comunicar em anúncios, redes sociais, propostas e atendimento para ser autêntica ao arquétipo
+- Apontem os RISCOS de desvio: o que acontece quando as decisões ou comunicações saem do arquétipo (a sombra — ${arquetipo.sombra}) e como corrigir o curso
 
-` : ''}---
+---
 
-## 🔗 2. Sinergia Sócio-Empresa
+` : ''}## 🔗 2. Sinergia Sócio-Empresa
 
-Analise profundamente a relação entre o(s) empreendedor(es) e o nome do negócio:
+Escreva 3-4 parágrafos analisando a relação poderosa entre o empreendedor e o nome escolhido:
 
 ### O Perfil Empreendedor de ${primeirNomeSocio}
-O Número de **Destino ${destinoSocio}** revela o perfil empresarial de ${primeirNomeSocio} — seus pontos fortes naturais, áreas de atenção nos negócios e o tipo de empresa que esta alma veio construir.
+O **Destino ${destinoSocio}** revela os pontos fortes naturais de ${primeirNomeSocio} nos negócios, as áreas onde ele/ela é naturalmente excepcional, e os pontos de atenção — onde tende a cometer erros sistemáticos sem perceber. Explique com profundidade como esse Destino molda o estilo de liderança, tomada de decisão e gestão de equipes.
 
-${temSocio2 ? `### O Perfil do 2º Sócio
-O **Destino ${destinoSocio2}** do 2º sócio (${nomeSocio2}) traz uma vibração complementar (ou desafiante) ao primeiro. Analise como essa combinação de destinos afeta a liderança, as decisões e a cultura interna da empresa.` : ''}
+${temSocio2 ? `### O Perfil do 2º Sócio e a Dinâmica Societária
+O **Destino ${destinoSocio2}** do 2º sócio (${nomeSocio2}) traz uma vibração que ou amplifica ou tensiona a do sócio principal. Analise: eles são sócios naturalmente complementares ou precisarão trabalhar conscientemente as diferenças? Que decisões societárias a numerologia indica que podem gerar conflito e como preveni-los.` : ''}
 
-${temDataFundacao ? `### Harmonia Sócio-Empresa
-Como o **Destino da Empresa (${destinoEmpresa})** se relaciona com o Destino do sócio (${destinoSocio})${temSocio2 ? ` e do 2º sócio (${destinoSocio2})` : ''}? Essa combinação cria harmonia ou tensão? Quais são as implicações práticas para o cotidiano do negócio?` : ''}
+${temDataFundacao ? `### A Harmonia Sócio-Empresa
+Como o **Destino da Empresa (${destinoEmpresa})** dialoga com o Destino do sócio (${destinoSocio})${temSocio2 ? ` e do 2º sócio (${destinoSocio2})` : ''}? Essa é uma combinação de potencialização ou de tensão criativa? Explique as implicações práticas para o cotidiano da gestão, relacionamento entre sócios e cultura organizacional.` : ''}
 
 ### Por que **${melhorNome?.nomeEmpresa ?? 'o nome recomendado'}** é o Nome Ideal
-- Relação entre a Expressão do nome e o Destino de ${primeirNomeSocio}
-- Como essa compatibilidade (${melhorNome?.compatibilidadeSocio ?? '—'}) se traduz em resultados práticos
-- Os Débitos Kármicos presentes (ou ausentes) e o que isso implica para o negócio
-- Como a energia deste nome potencializa${ramoAtividade ? ` o ramo de ${ramoAtividade}` : ' o negócio'}
+Conecte de forma técnica e inspiradora: como a **Expressão ${melhorNome?.expressao ?? '—'}** do nome e o **Destino ${destinoSocio}** de ${primeirNomeSocio} criam sinergia ou tensão produtiva. Como a compatibilidade (${melhorNome?.compatibilidadeSocio ?? '—'}) se traduz em resultados concretos de mercado, facilidade de comunicação e reconhecimento de marca.
 
 ---
 
-${(temDebitos || temLicoes) ? `## 🔮 2b. Karma Empresarial — O Sócio e a Empresa
+${(temDebitos || temLicoes) ? `## 🔮 2b. Karma Empresarial — Padrões que o Empreendedor Precisa Ver
 
-Os padrões kármicos do empreendedor influenciam diretamente a energia do negócio. Com base no perfil kármico de ${primeirNomeSocio}:
+Os padrões kármicos do fundador se instalam inevitavelmente na cultura e nos ciclos financeiros do negócio. Para ${primeirNomeSocio}, escreva 3 parágrafos sobre:
 
-${temDebitos ? `**Débitos Kármicos identificados (números ${melhorNome!.debitosCarmicos.map(d => d.numero).join(', ')}):**
-- Como esses padrões podem se manifestar como desafios operacionais, financeiros ou relacionais na empresa
-- Que comportamentos e decisões o empreendedor deve monitorar para não bloquear o crescimento do negócio
-- Como o nome escolhido ativa, neutraliza ou amplifica esses Débitos Kármicos` : ''}
+${temDebitos ? `**Débitos Kármicos (números ${melhorNome!.debitosCarmicos.map(d => d.numero).join(', ')}):**
+- Como esses padrões tendem a se manifestar como ciclos repetitivos no negócio: inadimplência, conflitos societários, dificuldade de delegação, ciclos de expansão e retração
+- O "antídoto empresarial": que práticas de gestão, mentorias ou mudanças de cultura podem neutralizar esses débitos no contexto do negócio
+- Como o nome escolhido ativa, desafia ou neutraliza esses padrões kármicos do fundador` : ''}
 
-${temLicoes ? `**Lições Kármicas (qualidades a desenvolver — números ${melhorNome!.licoesCarmicas.map(l => l.numero).join(', ')}):**
-- Que habilidades empresariais esses números indicam precisar de desenvolvimento consciente
-- Como o nome da empresa pode ajudar a ativar essas qualidades no dia a dia do negócio` : ''}
-
----
-
-` : ''}## 💎 3. Impressão da Marca
-
-Como o mercado percebe esta empresa através dos números:
-- **Impressão (${melhorNome?.impressao ?? '—'} — primeira palavra do nome):** O número que define a primeira impressão que clientes e parceiros têm desta empresa
-- É percebida como: confiável, inovadora, premium, acessível, técnica? O que os números dizem?
-- Qual posicionamento de mercado este nome naturalmente sugere
-- Que valores a empresa precisa comunicar para alinhar identidade com vibração
+${temLicoes ? `**Lições Kármicas (competências a desenvolver — números ${melhorNome!.licoesCarmicas.map(l => l.numero).join(', ')}):**
+- Que habilidades de gestão, liderança ou visão estratégica esses números indicam como lacunas a desenvolver conscientemente
+- Como o nome da empresa ativa essas qualidades ausentes — tornando o próprio negócio um veículo de desenvolvimento do empreendedor` : ''}
 
 ---
 
-## 💰 4. Análise de Fluxo de Caixa
+` : ''}## 💎 3. A Impressão da Marca no Mercado
 
-Foco nas tendências financeiras reveladas pelos números:
+Como o mercado percebe esta empresa antes mesmo de conhecer seus produtos. Escreva 3 parágrafos sobre:
+- **Impressão ${melhorNome?.impressao ?? '—'}** (primeira palavra/consoantes do nome): que julgamento instantâneo este número projeta — confiável, inovadora, premium, acessível, técnica, calorosa? Seja específico sobre o que acontece no cérebro de um cliente ou parceiro nos primeiros 7 segundos de contato com este nome
+- Que posicionamento de mercado este número naturalmente ocupa e por que tentar ir contra essa vibração gera ruído e alto custo de marketing
+- Que valores a empresa precisa comunicar consistentemente para que a identidade percebida se alinhe com a vibração numérica — e o que acontece quando há dissonância
+
+---
+
+## 💰 4. Análise de Fluxo Financeiro
+
+Foco nas tendências financeiras reveladas pelos números desta empresa. Escreva 3 parágrafos sobre:
 ${melhorNome?.expressao === 8 || melhorNome?.motivacao === 8
-  ? `- **Atenção:** Este nome carrega forte vibração do 8, o número do poder e do dinheiro — isso é um sinal de potencial financeiro elevado, MAS exige consciência para não cair no excesso materialista`
-  : `- Como a Expressão **${melhorNome?.expressao ?? '—'}** influencia o fluxo financeiro do negócio`
+  ? `- **Atenção ao 8:** Este nome carrega intensa vibração do 8 — o número do poder e do dinheiro. Isso é sinal de potencial financeiro elevado, MAS o 8 não perdoa desvios de integridade. Explique o risco e o protocolo de governança que esse número exige`
+  : `- Como a **Expressão ${melhorNome?.expressao ?? '—'}** influencia o fluxo e a relação emocional com o dinheiro dentro deste negócio`
 }
-- Padrões financeiros que este nome tende a atrair (abundância, crescimento constante, ciclos, etc.)
-- Riscos financeiros específicos que os números indicam e como mitigá-los
-- A relação do número de **Motivação (${melhorNome?.motivacao ?? '—'})** com a cultura financeira da empresa
+- Padrões financeiros que este nome tende a atrair: fluxo constante vs. grandes ciclos, clientes que pagam bem vs. os que atrasam — e como a vibração molda isso
+- Os riscos financeiros específicos que os números indicam, com protocolos preventivos concretos para cada um — não apenas como evitar, mas como construir processos que respeitem essa vibração
 
 ---
 
-## ⚠️ 5. Mapeamento de Riscos
+## ⚠️ 5. Mapeamento de Riscos Energéticos
 
 ${melhorNome && melhorNome.temBloqueio
-  ? `Este nome apresenta bloqueios que merecem atenção. Para cada bloqueio detectado, explique:
-- Como ele pode se manifestar no cotidiano do negócio (operacional, jurídico, relacional)
-- Ações preventivas concretas para neutralizar este risco energeticamente
-- O "Antídoto Prático" — o que o empreendedor pode fazer nos próximos 90 dias`
-  : `O nome escolhido não apresenta bloqueios energéticos críticos. Explique o que isso significa para a resiliência do negócio.`
+  ? `Este nome apresenta bloqueios que merecem gestão consciente. Para cada bloqueio detectado, escreva 2 parágrafos:
+- Como ele pode se manifestar no cotidiano do negócio (operacional, jurídico, relacional, financeiro) com exemplos concretos
+- O "Antídoto Empresarial": 3 ações de gestão práticas que o empreendedor pode implementar nos próximos 60 dias para neutralizar o risco`
+  : `O nome escolhido não apresenta bloqueios energéticos críticos. Escreva 2 parágrafos sobre o que isso significa para a resiliência e continuidade do negócio — que obstáculos comuns em outros nomes esta empresa naturalmente não enfrentará.`
 }
 
-Analise especificamente os bloqueios de maior risco empresarial:
-- **Bloqueio 444 (Estruturação):** Impacto em processos, burocracia e reconhecimento profissional
-- **Bloqueio 777 (Espiritual):** Impacto em isolamento de mercado e falta de praticidade
-- **Bloqueio 999 (Compaixão):** Impacto em ciclos que não fecham, dificuldade de cobrança
+Analise especificamente os bloqueios de maior risco empresarial quando presentes:
+- **Bloqueio 444 (Estruturação):** Impacto em processos, contratos, burocracia e reconhecimento profissional
+- **Bloqueio 777 (Espiritual):** Impacto em isolamento de mercado, dificuldade de comunicação e falta de praticidade
+- **Bloqueio 999 (Compaixão):** Impacto em ciclos que não fecham, dificuldade de cobrança e encerramento de projetos
 
 ---
 
 ## 🎨 6. Identidade Visual Magnética
 
-Com base na Expressão **${melhorNome?.expressao ?? '—'}** da empresa, sugira uma identidade visual alinhada numerologicamente:
-
-- **Paleta de Cores Principal:** As 2–3 cores que vibram com o número de Expressão e o que cada uma projeta
-- **Formas e Geometrias:** Quais formas geométricas ressoam com a energia deste número (círculos, triângulos, retas, etc.)
-- **Tipografia e Estilo Visual:** Que estilo de fonte e design comunica autenticamente esta vibração
-- **Elementos a Evitar:** O que visualmente conflita com a energia numérica desta empresa
+Com base na **Expressão ${melhorNome?.expressao ?? '—'}**, escreva 3 parágrafos de consultoria de branding premium:
+- **Paleta de Cores Numerológica:** As 2–3 cores primárias que vibram com a **Expressão ${melhorNome?.expressao ?? '—'}**, o que cada cor projeta psicologicamente e como construir uma paleta harmônica — com referências de tons específicos (ex: azul-marinho, dourado fosco, verde-esmeralda)
+- **Geometrias e Formas:** Que formas geométricas ressoam com a energia deste número (círculos = 2, 6; triângulos = 3, 9; hexágonos = 6, 8; etc.) e como aplicar isso no logotipo, ícones e linguagem visual
+- **Tipografia e Elementos a Evitar:** Que estilo de fonte comunica autenticamente esta vibração — e o que visualmente cria dissonância com a energia numérica desta empresa
 
 ---
 
-## 📅 7. Calendário de Ativação
+## 📅 7. Calendário de Ativação e Ciclos de Oportunidade
 
-Com base no **Destino de ${primeirNomeSocio} (${destinoSocio})**${temDataFundacao ? ` e no Destino da empresa (${destinoEmpresa})` : ''}, defina:
-
-- **Meses de Força:** Os 3 meses do ano com maior sinergia energética para lançamentos e decisões importantes
-- **Meses de Cautela:** Os meses em que o empreendedor deve evitar grandes movimentos
-- **Data Ideal de Abertura/Lançamento:** Se ainda não definida, qual o número de dia/mês mais harmonioso
-- **Ritual de Ativação:** Uma prática simbólica para "ligar" a energia do nome no primeiro dia de operação
+Com base no **Destino de ${primeirNomeSocio} (${destinoSocio})**${temDataFundacao ? ` e no Destino da empresa (${destinoEmpresa})` : ''}, escreva 3 parágrafos estratégicos:
+- **Os Meses de Força:** Os 3–4 meses do ano com maior sinergia energética para lançamentos, negociações importantes e decisões estratégicas — com justificativa numerológica de cada um
+- **Os Meses de Revisão:** Os meses em que o empreendedor deve evitar grandes movimentos externos e focar em consolidação interna, planejamento e operações
+- **Data de Lançamento/Abertura:** Se ainda não definida, qual o número de dia mais harmonioso para a abertura formal — e o ritual de ativação simbólico para "ligar" a energia do nome no primeiro dia de operação
 
 ---
 
-## 🎯 8. Direcionamento Estratégico
+## 🎯 8. Estratégia e Direcionamento de Mercado
 
-Com base na numerologia, qual o posicionamento e estratégia que este nome naturalmente potencializa:
-
-- O tipo de produto/serviço que este nome atrai com mais facilidade
-- O perfil ideal de cliente para esta empresa (pela vibração, não apenas demografia)
-- Os diferenciais competitivos que este número sugere explorar
-- Como escalar o negócio respeitando a vibração numérica
-- A "missão oculta" que este nome empresarial carrega no mercado
+Com base na numerologia, qual posicionamento esta empresa deve adotar para maximizar seu campo magnético. Escreva 3-4 parágrafos estratégicos:
+- O tipo de produto ou serviço que este nome atrai com mais facilidade e menor custo de aquisição — e por quê numerologicamente isso faz sentido
+- O perfil ideal de cliente para esta empresa (pela vibração da alma, não apenas por demografia) e como comunicar para atrair exatamente esse perfil
+- Os diferenciais competitivos que o número de **Expressão ${melhorNome?.expressao ?? '—'}** naturalmente projeta — o que torna esta empresa única pelo prisma vibracional
+- Como escalar o negócio respeitando os ciclos de força e revisão — a diferença entre "forçar" e "fluir" no crescimento alinhado à vibração
 
 ---
 
-## 🏁 9. Próximos Passos
+## 🏁 9. Os Próximos 90 Dias — Plano de Ativação
 
-Orientações práticas e acionáveis para os primeiros 90 dias:
-1. O que fazer ANTES do lançamento para ativar a energia do nome
-2. Como comunicar o nome para maximizar impacto (oral e escrito)
-3. Registro e proteção legal no momento certo
-4. Como a equipe deve apresentar e usar o nome
+Orientações práticas e acionáveis para ativar a energia deste nome. Escreva 3 parágrafos de consultoria direta:
+- O que fazer ANTES do lançamento oficial para preparar o campo energético (prática simbólica de ativação, primeiras comunicações estratégicas, configuração visual mínima)
+- Como comunicar o nome nos primeiros 30 dias — oralmente em reuniões, por escrito em propostas, nas redes sociais — para maximizar o impacto do lançamento da vibração
+- Registro legal e proteção de marca no momento certo, e como a equipe deve ser treinada para apresentar e usar o nome com consistência e intenção
 
 ---
 
@@ -238,5 +224,7 @@ REGRAS ESTRITAS DE FORMATAÇÃO:
 3. **Negrito:** Use EXCLUSIVAMENTE para termos numerológicos e os números em si.
 4. SEMPRE duplo espaçamento entre parágrafos — texto arejado e escaneável.
 5. Parágrafos com no máximo 4 linhas.
-6. Escreva com autoridade, clareza e entusiasmo empreendedor — este é um momento decisivo para o negócio!`;
+6. Escreva com autoridade, clareza e entusiasmo empreendedor — este é um momento decisivo para o negócio.
+7. Seja específico e acionável — evite conselhos genéricos que qualquer empresa poderia seguir.`;
+
 }

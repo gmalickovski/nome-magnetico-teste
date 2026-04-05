@@ -4,42 +4,37 @@
 
 **Produto:** Nome Magnético
 **O que é:** SaaS de numerologia cabalística que analisa o nome de nascimento, detecta bloqueios energéticos e sugere variações do nome sem bloqueios, compatíveis com os números de Expressão e Destino do usuário.
-**Stack:** Astro 5 SSR + React islands + Tailwind CSS + Supabase + Stripe
+**Stack:** Astro 5 SSR + React islands + Tailwind CSS + Supabase Cloud + Stripe
 **Nota:** "Astro" é APENAS o framework técnico. Nunca aparece na interface, copy ou branding do produto.
 
 ---
 
-## Design System
+## Design System ("The Celestial Alchemist")
 
-### Cores (NUNCA alterar sem aprovação)
-- Background principal: `#1a1a1a` e `#111111`
-- Accent/destaque: `#D4AF37` (gold)
-- Texto primário: `#e5e7eb` (gray-200)
-- Texto secundário: `#a0a0a0` (gray-400)
-- Erro: `#FF6B6B`
-- Espiritual/mistico: `#c084fc` (purple)
-- Sucesso: `#10b981` (emerald)
-- Borders: `rgba(212, 175, 55, 0.2)` (gold com opacidade)
+### Cores & Estilo Visual (Rooted in DESIGN.md)
+- **Base Layer (Void):** `#131313`. NUNCA usar pure whites para texto, use `#e5e2e1`.
+- **Primary (Godly Gold):** `#f2ca50` e `#d4af37`.
+- **Secondary (Earth):** `#76746a` (ações/dados secundários).
+- **Tertiary (Mystical Purple):** `#d7c6ff` e `#bea5ff` (focus, espiritual).
+- **"NO-LINE" Rule:** É ESTRITAMENTE PROIBIDO o uso de `border: 1px solid` para sectioning. Tudo é feito via stacking de fundo ou whitespace. O fallback acessibilidade é uma outline com 15% opacity.
+- **Glassmorphism:** Apenas flutuantes. Opacity 60% e blur 20-40px deixando vazar cor de fundo.
+- **Sombras:** Ambientais, estilo glow de escuridão: `0 20px 50px rgba(0,0,0,0.6)`. Nunca drop-shadows padrão.
+- **Animações (Micro-animations):** Lentas (800ms) para emular um ritmo meditativo.
+- **Radius:** `rounded-2xl` (cards) e `rounded-full` (botões/chips). NUNCA sharp corners.
 
 ### Fontes (Google Fonts)
-- Headings/branding: **Cinzel** (serif), weights 400 e 700
-- Body/UI: **Inter** (sans-serif), weights 300, 400, 500
-
-### Estilo visual
-- Dark theme em TODAS as páginas (produto e landing)
-- Glassmorphism em cards: `background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(212,175,55,0.2)`
-- Hover states: `scale(1.02)` + gold glow `shadow-yellow-500/10`
-- Border radius: `rounded-2xl` (16px) para containers principais
-- Transitions: `duration-300`
+- Headings/branding: **Cinzel** (serif), weights 400 e 700. Wide tracking.
+- Body/UI: **Inter** (sans-serif), weights 300, 400, 500.
+- Sub-headers: Inter `headline-sm` em ALL CAPS com `0.1em` tracking.
 
 ### Componentes base (src/frontend/components/ui/)
 Sempre preferir estes antes de criar novos:
-- `GlassCard` — card glassmorphism gold
-- `Button` — variants: primary (gold), secondary (outline), ghost
-- `Input` — estilo dark com label flutuante
-- `Modal` — overlay dark com card glass
-- `Badge` — pills coloridas
-- `Toast` — notificações temporárias
+- `Card` — stacked deep sheets, sem dividers (usar whitespace 2rem vertical).
+- `Button` — variants: primary (gold inner glow, container `primary-container`), secondary (ghost border, text primary).
+- `Input` — lowest surface. Hover/Focus dispara ghost border `tertiary`.
+- `Badge/Chip` — rounded-full. Seleção é sinalizada com gradient do roxo místico.
+- `Modal` — floating sheet com glassmorphism (opacidade base) e deep shadow.
+- `Toast` — notificações temporárias.
 
 ---
 
@@ -161,10 +156,10 @@ Compatibilidade Expressão × Destino:
 ## Produtos
 
 ```typescript
-type ProductType = 'nome_magnetico' | 'nome_bebe' | 'nome_empresa'
+type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa'
 ```
 
-### `nome_magnetico` — Análise Pessoal (produto principal)
+### `nome_social` — Nome Social (produto principal)
 - Analisa nome de nascimento + data de nascimento
 - Calcula 5 números + 4 triângulos + bloqueios + lições kármics + tendências ocultas
 - Sugere variações do nome sem bloqueios e compatíveis com Expressão × Destino
@@ -194,10 +189,11 @@ Pagamento único por ciclo de 30 dias (não recorrente)
 
 ## Banco de Dados
 
-- Schema dedicado: `nome_magnetico`
+- **Supabase Cloud:** projeto `nome_magnetico` (`bhxneaeuhybtucmbmpvg.supabase.co`)
+- Schema: **`public`** (todas as tabelas estão no schema public)
 - Auth: `auth.users` do Supabase (nativo)
 - RLS ativo em todas as tabelas
-- Admin: `nome_magnetico.profiles.role = 'admin'`
+- Admin: `profiles.role = 'admin'`
 
 ### Tabelas principais
 - `profiles` — perfis (role, nome, email)
@@ -212,41 +208,41 @@ Pagamento único por ciclo de 30 dias (não recorrente)
 - `faq_categories` + `faq_items` — FAQ editável
 
 ### Migrations aplicadas
-- `001_nome_magnetico.sql` — schema base completo
+- `001_nome_magnetico.sql` — schema base completo (schema public no Supabase Cloud)
 - `002_expand_analyses.sql` — expansão para 4 triângulos, lições kármics, tendências ocultas, produtos nome_bebe e nome_empresa
-- `003_add_birth_data_to_profiles.sql` — dados de nascimento no perfil
-- `004_create_magnetic_names.sql` — estrutura para sugestões
-- `005_add_gender_to_profiles_fix.sql` - Correção do campo gender
-- `006_add_gender_to_profiles.sql` — campo gender no perfil
-- `007_create_settings_table.sql` - Tabela de configurações
-- `008_add_score_to_analyses.sql` - Adiciona campo score
 
 ---
 
-## Emails (n8n + Resend)
+## Emails
 
-NUNCA enviar email diretamente do código. Sempre usar:
+### Auth (Supabase + Amazon SES) — NÃO usar código para isso
+- **Confirmação de cadastro** e **recuperação de senha** são gerenciadas 100% pelo Supabase Auth nativo
+- Supabase está configurado com Amazon SES como provedor SMTP (sem Resend, sem n8n para auth)
+- Templates HTML de confirmação e recuperação estão configurados diretamente no Supabase Dashboard
+- `auth.signUp()` → dispara email de confirmação via SES automaticamente
+- `auth.resetPasswordForEmail()` → dispara email de recuperação via SES automaticamente
+
+### Emails transacionais (n8n) — pagamentos e suporte
+NUNCA enviar emails de pagamento/suporte diretamente do código. Sempre usar:
 ```typescript
 import { notify } from '@/backend/notifications/notify'
-await notify('user.welcome', { email, firstName, accessUrl })
+await notify('payment.confirmed', { email, firstName, accessUrl })
 ```
 
-O n8n recebe o evento e o Resend envia o email. Templates ficam no n8n.
+O n8n recebe o evento via webhook e processa o envio. Webhooks configurados:
+- `N8N_WEBHOOK_TRANSACIONAL` — eventos de pagamento
+- `N8N_WEBHOOK_SUPORTE` — tickets de suporte
 
 ---
 
-## Workflows Disponíveis (Antigravity Skills)
+## Comandos Disponíveis / Workflows
 
-Estes workflows estão armazenados em `.agents/workflows/` e podem ser usados como referência guiada:
-
-- `criar-projeto` — ordem de criação dos arquivos do zero
-- `criar-pagina` — criar nova página seguindo design system
-- `criar-componente` — criar novo componente React seguindo padrões
-- `criar-api` — criar novo endpoint Astro API
-- `configurar-stripe` — passos para configuração do Stripe
-- `revisar-plano` — workflow para verificar progresso do `PLANO-REVISAO.md`
-- `formatar-texto` — documentação dos padrões de formatação
-- `salvar-doc` — documenta feature ou correção no Changelog Técnico do Notion
+- `/criar-projeto` — ordem de criação dos arquivos do zero
+- `/criar-pagina` — criar nova página seguindo design system
+- `/criar-componente` — criar novo componente React seguindo padrões
+- `/criar-api` — criar novo endpoint Astro API
+- `/revisar-plano` — workflow para verificar progresso do PLANO-REVISAO
+- `/salvar-doc` — documenta feature ou correção no Changelog do Notion
 
 ---
 
@@ -261,7 +257,17 @@ Estes workflows estão armazenados em `.agents/workflows/` e podem ser usados co
 
 ---
 
-## Regras Gerais para Agentes (Claude e Gemini)
+## MCP Stripe — Configuração / Testes Locais
+
+- O MCP Stripe atua diretamente conectando-se ao seu ambiente local
+- **SEMPRE** usar a chave da conta **Nome Magnético** (não Sincro): `STRIPE_SECRET_KEY` do arquivo `.env` do projeto
+- Chave test: `sk_test_51TDUrBL...` (conta `TDUrBL66SzSlet1`)
+- Chave live: `sk_live_51TDUrBL...` (mesma conta, modo produção)
+- Se visualizar integrações de produtos como "Sincro Sinergia" ou "Sincro Desperta", a chave está errada — trocar pela do `.env`
+
+---
+
+## Regras Gerais para Agentes
 
 1. **NUNCA** nomear arquivos ou variáveis com "astro" (é o framework, não o produto)
 2. **SEMPRE** usar Tailwind CSS — sem CSS custom a não ser para glassmorphism

@@ -8,7 +8,7 @@ export interface TaskConfig {
 export const TASK_CONFIG: Record<AITask, TaskConfig> = {
   analysis: {
     temperature: 0.7,
-    maxTokens: 4096,
+    maxTokens: 6000,
   },
   suggestions: {
     temperature: 0.8,

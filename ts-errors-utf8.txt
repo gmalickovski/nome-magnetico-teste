@@ -1,0 +1,12 @@
+﻿src/backend/numerology/karmic.ts(242,3): error TS2739: Type '{ titulo: string; descricao: string; }' is missing the following properties from type 'Omit<DebitoCarmicoInfo, "numero">': fontes, fixo
+src/backend/numerology/karmic.ts(247,3): error TS2739: Type '{ titulo: string; descricao: string; }' is missing the following properties from type 'Omit<DebitoCarmicoInfo, "numero">': fontes, fixo
+src/backend/numerology/karmic.ts(252,3): error TS2739: Type '{ titulo: string; descricao: string; }' is missing the following properties from type 'Omit<DebitoCarmicoInfo, "numero">': fontes, fixo
+src/backend/numerology/karmic.ts(257,3): error TS2739: Type '{ titulo: string; descricao: string; }' is missing the following properties from type 'Omit<DebitoCarmicoInfo, "numero">': fontes, fixo
+src/pages/api/auth/register.ts(108,7): error TS18047: 'data' is possibly 'null'.
+src/pages/api/auth/register.ts(108,21): error TS18047: 'data' is possibly 'null'.
+src/pages/api/auth/register.ts(109,71): error TS18047: 'data' is possibly 'null'.
+src/pages/api/auth/register.ts(118,9): error TS18047: 'data' is possibly 'null'.
+src/pages/api/auth/register.ts(119,12): error TS18047: 'data' is possibly 'null'.
+src/pages/api/auth/register.ts(120,16): error TS18047: 'data' is possibly 'null'.
+src/pages/api/auth/register.ts(124,7): error TS18047: 'data' is possibly 'null'.
+src/pages/api/auth/register.ts(126,7): error TS18047: 'data' is possibly 'null'.

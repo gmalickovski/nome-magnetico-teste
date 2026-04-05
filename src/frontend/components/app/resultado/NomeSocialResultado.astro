@@ -44,6 +44,8 @@ interface Props {
   frequenciasRaw: Record<number, number> | null;
   analiseHtml: string | null;
   topNames: any[];
+  /** Ranking do novo fluxo de Nome Social (null em análises antigas). */
+  rankingSocial?: any;
 }
 
 const {
@@ -62,6 +64,7 @@ const {
   frequenciasRaw,
   analiseHtml,
   topNames,
+  rankingSocial,
 } = Astro.props;
 
 const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
@@ -96,6 +99,158 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
     ))}
   </div>
 </section>
+
+{/* ── SEÇÃO 1b: NOME DE OURO (novo fluxo) ──────────────────────────────── */}
+{rankingSocial?.melhorNome && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Nome de Ouro</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Nome Social Mais Indicado</h2>
+    </div>
+    <div class="rounded-2xl bg-[#D4AF37]/5 border border-[#D4AF37]/30 p-6 md:p-8">
+      <div class="text-center mb-6">
+        <span class="text-[10px] text-[#D4AF37] font-bold uppercase tracking-wider block mb-2">⭐ Melhor Compatibilidade</span>
+        <div class="font-cinzel text-3xl md:text-4xl font-bold text-white">{rankingSocial.melhorNome.nomeCompleto}</div>
+      </div>
+      <div class="max-w-xs mx-auto mb-5">
+        <ScoreDisplay client:load score={rankingSocial.melhorNome.score} size="lg" />
+      </div>
+      <div class="flex flex-wrap justify-center gap-4 mb-4 text-sm text-gray-500">
+        <span>Expressão: <span class="text-gray-300 font-medium">{rankingSocial.melhorNome.expressao}</span></span>
+        <span>Destino: <span class="text-[#D4AF37] font-bold">{rankingSocial.destino}</span></span>
+        <span>Motivação: <span class="text-gray-300 font-medium">{rankingSocial.melhorNome.motivacao}</span></span>
+        <span>Impressão: <span class="text-gray-300 font-medium">{rankingSocial.melhorNome.impressao}</span></span>
+      </div>
+      <div class="flex flex-col items-center gap-2">
+        <span class={`px-3 py-1 rounded-full text-xs font-semibold ${
+          rankingSocial.melhorNome.compatibilidade === 'total'       ? 'bg-emerald-500/20 text-emerald-400' :
+          rankingSocial.melhorNome.compatibilidade === 'complementar' ? 'bg-blue-500/20 text-blue-400'    :
+          rankingSocial.melhorNome.compatibilidade === 'aceitavel'    ? 'bg-amber-500/20 text-amber-400'  :
+                                                                        'bg-red-500/20 text-red-400'
+        }`}>
+          {rankingSocial.melhorNome.compatibilidade === 'total'        ? '✦ Total'        :
+           rankingSocial.melhorNome.compatibilidade === 'complementar' ? '◈ Complementar' :
+           rankingSocial.melhorNome.compatibilidade === 'aceitavel'    ? '◎ Aceitável'   :
+                                                                         '⚠ Incompatível'}
+        </span>
+        {rankingSocial.melhorNome.temBloqueio ? (
+          <span class="text-xs text-red-400">⚠ {rankingSocial.melhorNome.bloqueios?.length} bloqueio(s) detectado(s)</span>
+        ) : (
+          <span class="text-xs text-emerald-400">✓ Sem bloqueios energéticos</span>
+        )}
+      </div>
+      {rankingSocial.melhorNome.justificativa?.length > 0 && (
+        <p class="text-center text-xs text-gray-500 mt-4">{rankingSocial.melhorNome.justificativa.slice(0, 2).join(' · ')}</p>
+      )}
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 1c: TOP 3 ALTERNATIVAS CLICÁVEIS (novo fluxo) ──────────────── */}
+{rankingSocial?.top3?.length > 0 && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Alternativas de Alta Vibração</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">3 Outras Excelentes Opções</h2>
+      <p class="text-sm text-gray-400 mt-1">Clique em qualquer opção para gerar o relatório completo daquele nome.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+      {(rankingSocial.top3 as any[]).map((c: any) => (
+        <button
+          type="button"
+          class="analisar-nome-card w-full text-left rounded-2xl bg-white/5 p-5 flex flex-col gap-3 hover:bg-white/10 hover:scale-[1.02] transition-all duration-200 cursor-pointer relative group focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+          data-nome={c.nomeCompleto}
+          data-nome-nasc={rankingSocial.nomeNascimento}
+          data-data-nasc={rankingSocial.dataNascimento}
+        >
+          {c.origemSugerida === 'ia' && (
+            <span class="text-[10px] text-[#c084fc] font-bold uppercase tracking-wider">Sugestão Numerológica</span>
+          )}
+          <div class="font-cinzel text-xl font-bold text-white group-hover:text-[#D4AF37] transition-colors">{c.nomeCompleto}</div>
+          <ScoreDisplay client:load score={c.score} size="sm" />
+          <span class={`px-3 py-1 rounded-full text-xs font-semibold w-fit ${
+            c.compatibilidade === 'total'        ? 'bg-emerald-500/20 text-emerald-400' :
+            c.compatibilidade === 'complementar' ? 'bg-blue-500/20 text-blue-400'      :
+            c.compatibilidade === 'aceitavel'    ? 'bg-amber-500/20 text-amber-400'    :
+                                                   'bg-red-500/20 text-red-400'
+          }`}>
+            {c.compatibilidade === 'total'        ? '✦ Total'        :
+             c.compatibilidade === 'complementar' ? '◈ Complementar' :
+             c.compatibilidade === 'aceitavel'    ? '◎ Aceitável'    :
+                                                    '⚠ Incompatível'}
+          </span>
+          <div class="flex flex-wrap gap-3 text-xs text-gray-500">
+            <span>Expr: <span class="text-gray-300">{c.expressao}</span></span>
+            <span>Mot: <span class="text-gray-300">{c.motivacao}</span></span>
+            <span>Imp: <span class="text-gray-300">{c.impressao}</span></span>
+          </div>
+          {c.temBloqueio ? (
+            <span class="text-xs text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>
+          ) : (
+            <span class="text-xs text-emerald-400">✓ Sem bloqueios</span>
+          )}
+          <span class="text-xs text-[#D4AF37]/60 group-hover:text-[#D4AF37] transition-colors mt-1">
+            Gerar relatório completo →
+          </span>
+          <div class="card-loading hidden absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center">
+            <span class="w-6 h-6 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin"></span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 1d: RANKING COMPLETO CLICÁVEL (novo fluxo) ─────────────────── */}
+{rankingSocial?.nomesCandidatos?.length > 4 && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Tabela Comparativa</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Ranking Completo dos Candidatos</h2>
+      <p class="text-sm text-gray-400 mt-1">Clique em qualquer nome para gerar o relatório completo.</p>
+    </div>
+    <div class="space-y-3">
+      {(rankingSocial.nomesCandidatos as any[]).map((c: any, idx: number) => (
+        <button
+          type="button"
+          class={`analisar-nome-card w-full text-left rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:opacity-80 transition-all cursor-pointer relative ${idx === 0 ? 'bg-[#D4AF37]/5 border border-[#D4AF37]/20' : 'bg-white/5'}`}
+          data-nome={c.nomeCompleto}
+          data-nome-nasc={rankingSocial.nomeNascimento}
+          data-data-nasc={rankingSocial.dataNascimento}
+        >
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-cinzel font-bold text-white text-sm">{c.nomeCompleto}</span>
+              {c.origemSugerida === 'ia' && (
+                <span class="text-[9px] text-[#c084fc] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-[#c084fc]/10 rounded">IA</span>
+              )}
+            </div>
+            {Array.isArray(c.justificativa) && (
+              <p class="text-xs text-gray-600">{(c.justificativa as string[])[0]}</p>
+            )}
+          </div>
+          <div class="shrink-0 w-36">
+            <ScoreDisplay client:load score={c.score} size="sm" />
+          </div>
+          <span class={`shrink-0 px-2 py-1 rounded-full text-xs font-semibold ${
+            c.compatibilidade === 'total'        ? 'bg-emerald-500/20 text-emerald-400' :
+            c.compatibilidade === 'complementar' ? 'bg-blue-500/20 text-blue-400'      :
+            c.compatibilidade === 'aceitavel'    ? 'bg-amber-500/20 text-amber-400'    :
+                                                   'bg-red-500/20 text-red-400'
+          }`}>
+            {c.compatibilidade === 'total'        ? '✦ Total'        :
+             c.compatibilidade === 'complementar' ? '◈ Complementar' :
+             c.compatibilidade === 'aceitavel'    ? '◎ Aceitável'    :
+                                                    '⚠ Incomp.'}
+          </span>
+          <div class="card-loading hidden absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center">
+            <span class="w-6 h-6 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin"></span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </section>
+)}
 
 {/* ── SEÇÃO 2: ARQUÉTIPO ───────────────────────────────────────────────── */}
 {arquetipoData && (
@@ -235,7 +390,45 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
   </section>
 )}
 
-{/* ── SEÇÃO 9: VARIAÇÕES DE NOME SOCIAL ───────────────────────────────── */}
+{/* ── SCRIPT: handler dos cards clicáveis de nome social ──────────────── */}
+{rankingSocial && (
+  <script>
+    document.querySelectorAll('.analisar-nome-card').forEach(function(card) {
+      card.addEventListener('click', async function() {
+        const nome = card.getAttribute('data-nome');
+        const nomeNasc = card.getAttribute('data-nome-nasc');
+        const dataNasc = card.getAttribute('data-data-nasc');
+        if (!nome || !nomeNasc || !dataNasc) return;
+
+        const loadingEl = card.querySelector('.card-loading');
+        if (loadingEl) loadingEl.classList.remove('hidden');
+        card.style.pointerEvents = 'none';
+
+        try {
+          const res = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product_type: 'nome_social',
+              nome_completo: nomeNasc,
+              data_nascimento: dataNasc,
+              nomes_candidatos: [nome],
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error ?? 'Erro ao iniciar análise');
+          window.location.href = '/app/resultado/' + data.analysisId;
+        } catch (err) {
+          if (loadingEl) loadingEl.classList.add('hidden');
+          card.style.pointerEvents = '';
+          alert('Erro ao gerar análise: ' + (err instanceof Error ? err.message : String(err)));
+        }
+      });
+    });
+  </script>
+)}
+
+{/* ── SEÇÃO 9: VARIAÇÕES DE NOME SOCIAL (legado) ───────────────────────── */}
 {topNames.length > 0 && (
   <section class="mb-12">
     <div class="mb-3 px-1">

@@ -11,6 +11,7 @@ import { buildSuggestionsPrompt, type SuggestionsPromptParams } from './prompts/
 import { buildGuidePrompt, type GuidePromptParams } from './prompts/guide-prompt';
 import { buildBabyAnalysisPrompt, type BabyPromptParams } from './prompts/baby-prompt';
 import { buildCompanyAnalysisPrompt, type CompanyPromptParams } from './prompts/company-prompt';
+import { buildSocialAnalysisPrompt, type SocialPromptParams } from './prompts/social-prompt';
 import { getModel, type AITask } from './config/models';
 import { getArquetipo } from '../numerology/archetypes';
 
@@ -208,6 +209,26 @@ export async function generateCompanyAnalysis(
     ? { ...params, arquetipo: getArquetipo(expressaoEmpresa) }
     : params;
   return runWithGuard(() => buildCompanyAnalysisPrompt(paramsWithArquetipo), 'analysis', userId, analysisId);
+}
+
+// ================================================================
+// NOME SOCIAL (novo fluxo)
+// ================================================================
+
+/**
+ * Gera análise IA para seleção de nome social.
+ */
+export async function generateSocialAnalysis(
+  params: SocialPromptParams,
+  userId: string | null,
+  analysisId: string | null
+): Promise<string> {
+  const expressaoMelhorNome = params.resultado.melhorNome?.expressao ?? params.resultado.destino;
+  const paramsWithArquetipo = {
+    ...params,
+    arquetipo: getArquetipo(expressaoMelhorNome),
+  };
+  return runWithGuard(() => buildSocialAnalysisPrompt(paramsWithArquetipo), 'analysis', userId, analysisId);
 }
 
 // ================================================================

@@ -2,12 +2,11 @@
 import AppLayout from '../../../layouts/AppLayout.astro';
 import { hasActiveSubscription } from '../../../backend/db/subscriptions';
 import { createUserClient } from '../../../backend/db/supabase';
-import { LiveNameTester } from '../../../frontend/components/app/LiveNameTester';
+import SocialNameForm from '../../../frontend/components/app/SocialNameForm';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
 
-// Pegar dados base de nascimento no perfil
 const client = createUserClient(Astro.locals.accessToken ?? '');
 const { data: profile } = await client
   .from('profiles')
@@ -19,31 +18,40 @@ const isAdmin = profile?.role === 'admin';
 const hasAccess = isAdmin || await hasActiveSubscription(user.id, 'nome_social');
 if (!hasAccess) return Astro.redirect('/comprar?produto=nome_social');
 
-// Proteção caso o usuário tenha burlado o modal no Dashboard
-if (!profile?.birth_name || !profile?.birth_date) {
-  return Astro.redirect('/app');
+// Converter data do banco (YYYY-MM-DD) para o formato do formulário (DD/MM/YYYY)
+function dbDateToInput(dbDate: string | null): string {
+  if (!dbDate) return '';
+  const parts = dbDate.split('-');
+  if (parts.length !== 3) return '';
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
+
+const nomeInicial = profile?.birth_name ?? '';
+const dataInicial = dbDateToInput(profile?.birth_date ?? '');
 ---
 
-<AppLayout title="Simulador — Nome Social">
+<AppLayout title="Análise — Nome Social">
   <div class="max-w-4xl mx-auto space-y-8 pb-16">
-    
+
     <div>
       <a href="/app" class="text-sm text-[#D4AF37]/80 hover:text-[#D4AF37] mb-4 inline-block transition-colors">
         &larr; Voltar ao Painel
       </a>
       <h1 class="font-cinzel justify-between flex flex-col md:flex-row md:items-center text-3xl font-bold text-white mb-4 pb-2 border-b border-white/10">
-        <span>Simulador de Nome Social</span>
-        <span class="mt-2 md:mt-0 text-sm bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30 font-inter self-start md:self-auto">Live Tester</span>
+        <span>Análise de Nome Social</span>
+        <span class="mt-2 md:mt-0 text-sm bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30 font-inter self-start md:self-auto">Novo Fluxo</span>
       </h1>
-      <p class="text-gray-400 text-lg leading-relaxed mb-8">Utilize este ambiente para testar variações da sua assinatura ou Nome Social, avaliando em tempo real as influências, bloqueios e grau de compatibilidade com seu propósito original.</p>
+      <p class="text-gray-400 text-lg leading-relaxed mb-8">
+        Informe seus dados de nascimento, sua intenção e os nomes que você deseja considerar.
+        A numerologia cabalística analisará a compatibilidade com o seu Destino e entregará
+        a melhor opção com 3 alternativas de alta vibração.
+      </p>
     </div>
 
-    <!-- Interface interativa em React -->
-    <LiveNameTester 
-      client:load 
-      birthName={profile.birth_name} 
-      birthDate={profile.birth_date} 
+    <SocialNameForm
+      client:load
+      nomeInicial={nomeInicial}
+      dataInicial={dataInicial}
     />
 
   </div>
