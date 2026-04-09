@@ -57,8 +57,12 @@ React Component → fetch /api/endpoint → Astro API route → backend/service 
 ```
 
 ### Roteamento de Auth
-- `/app/*` → requer session + subscription ativa
-- `/admin/*` → requer session + `role='admin'` na tabela profiles
+- `/app/*` → requer session + subscription ativa (ou is_test válido, ou admin)
+- `/admin/*` → **REDIRECIONA para `https://hq.studiomlk.com.br`** (painel admin removido do SaaS)
+- `/api/admin/*` → ainda protegido por `role='admin'` (endpoints legados mantidos temporariamente)
+- `/acesso` → público — landing page para links trial gerados pelo HQ
+- `/acesso/resgatar` → requer session — efetiva o resgate do trial
+- `/api/redeem-trial` → requer session — endpoint para resgatar código trial via POST
 - `/api/teste-bloqueio` → público, rate limit por IP (3/hora)
 - Todo o resto → público
 
@@ -210,6 +214,53 @@ Pagamento único por ciclo de 30 dias (não recorrente)
 ### Migrations aplicadas
 - `001_nome_magnetico.sql` — schema base completo (schema public no Supabase Cloud)
 - `002_expand_analyses.sql` — expansão para 4 triângulos, lições kármics, tendências ocultas, produtos nome_bebe e nome_empresa
+- `020_test_users.sql` — campos `is_test` + `test_ends_at` na tabela `profiles`, tabela `trial_redemptions` para rastreabilidade do HQ
+
+---
+
+## Integração HQ StudioMLK
+
+O HQ (`hq.studiomlk.com.br`) gerencia centralmente usuários, trials e billing de todos os SaaS do estúdio.
+
+### Painel Admin
+- O painel `/admin/*` foi **removido** do Nome Magnético — tudo é gerenciado pelo HQ.
+- Rotas `/admin/*` redirecionam automaticamente para `https://hq.studiomlk.com.br`.
+
+### Usuários Teste (Trial)
+Dois campos foram adicionados à tabela `profiles`:
+- `is_test: boolean` — marcado como true quando o HQ cria um acesso trial
+- `test_ends_at: timestamptz | null` — data de expiração (`null` = sem expiração)
+
+Regra de acesso: se `is_test=true` E (`test_ends_at IS NULL` OU `test_ends_at > now()`), o usuário tem acesso completo sem subscription paga.
+
+### Fluxo 1 — Usuário existente (via HQ)
+HQ → Usuários → ícone Experimento → "Marcar como teste" → o HQ atualiza `is_test` diretamente no Supabase.
+
+### Fluxo 2 — Novo usuário via link
+Link gerado pelo HQ: `https://nomemagnetico.com.br/acesso?code=CODE&days=7&product=nome_social`
+1. Usuário acessa o link → `/acesso.astro`
+2. Se não logado: redireciona para cadastro/login com redirect para `/acesso/resgatar?code=...`
+3. Após auth: `/acesso/resgatar.astro` aplica o trial e redireciona para `/app?trial=ativado`
+
+### Checkout com cupom
+O `CheckoutFlow.tsx` possui campo de código promocional opcional.
+O endpoint `/api/create-checkout.ts` resolve o ID do promotion_code no Stripe antes de criar a sessão.
+Admins e usuários teste recebem bypass total (assinatura criada diretamente no Supabase, sem Stripe).
+
+### Trial Redemptions
+Tabela `trial_redemptions` registra cada resgate com `user_id`, `trial_code`, `source` ('link' | 'manual').
+Garante que um mesmo código não seja resgatado duas vezes pelo mesmo usuário.
+
+### Plano de implementação do lado HQ
+As mudanças necessárias no projeto `C:\Dev\hq-studiomlk-refine` estão documentadas em:
+`C:\Dev\hq-studiomlk-refine\docs\agente-hq-test-users-sync.md`
+
+Resumo do que o HQ ainda precisa fazer:
+- `POST /access-codes/test-users` → também setar `profiles.is_test=true` no Supabase do SaaS
+- `DELETE /access-codes/test-users/:userId` → também setar `profiles.is_test=false` no SaaS
+- `POST /access-codes/:id/apply` → criar subscriptions com produtos válidos + setar `is_test`
+- `GET /users` select → incluir `is_test, test_ends_at` para mostrar tag "TESTE" na lista
+- `UserList.tsx` → toggle marcar/remover teste com feedback visual
 
 ---
 

@@ -4,28 +4,92 @@ import BaseLayout from './BaseLayout.astro';
 export interface Props {
   title?: string;
   description?: string;
+  keywords?: string;
+  ogImage?: string;
 }
 
 const {
   title = 'Descubra Seu Nome Magnético',
   description = 'Análise de numerologia cabalística do seu nome de nascimento. Detecte bloqueios energéticos e encontre variações do nome em harmonia com seus números de Expressão e Destino.',
+  keywords = 'numerologia cabalística, numerologia do nome, mapa numerológico, bloqueios energéticos nome, análise vibracional nome, nome magnético, significado do nome numerologia, nome para bebê numerologia, nome empresarial numerologia, cabala numerologia',
+  ogImage = '/og-image.jpg',
 } = Astro.props;
 
-const schema = {
+// Schema.org — WebSite principal
+const schemaWebSite = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'Nome Magnético',
-  url: 'https://www.nomemagnetico.com.br',
+  url: 'https://nomemagnetico.com.br',
   description,
+  inLanguage: 'pt-BR',
   potentialAction: {
     '@type': 'SearchAction',
-    target: 'https://www.nomemagnetico.com.br/?q={search_term_string}',
+    target: 'https://nomemagnetico.com.br/?q={search_term_string}',
     'query-input': 'required name=search_term_string',
   },
 };
+
+// Schema.org — SoftwareApplication / Service
+const schemaService = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Nome Magnético',
+  url: 'https://nomemagnetico.com.br',
+  applicationCategory: 'LifestyleApplication',
+  operatingSystem: 'Web',
+  description: 'SaaS de numerologia cabalística que analisa o nome de nascimento, detecta bloqueios energéticos e sugere variações do nome compatíveis com os números de Expressão e Destino.',
+  inLanguage: 'pt-BR',
+  offers: {
+    '@type': 'Offer',
+    priceCurrency: 'BRL',
+    availability: 'https://schema.org/InStock',
+    seller: {
+      '@type': 'Organization',
+      name: 'Studio MLK',
+      url: 'https://nomemagnetico.com.br',
+    },
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Studio MLK',
+    url: 'https://nomemagnetico.com.br',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: 'contato@nomemagnetico.com.br',
+      contactType: 'customer service',
+      availableLanguage: 'Portuguese',
+    },
+  },
+};
+
+// Schema.org — LocalBusiness / Organization
+const schemaOrg = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Nome Magnético',
+  url: 'https://nomemagnetico.com.br',
+  logo: 'https://nomemagnetico.com.br/logo-nome-magnetico.png',
+  description: 'Numerologia cabalística personalizada com IA. Análise de bloqueios energéticos no nome, mapa numerológico completo e sugestões de nomes harmoniosos.',
+  email: 'contato@nomemagnetico.com.br',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Viamão',
+    addressRegion: 'RS',
+    addressCountry: 'BR',
+  },
+  sameAs: [],
+};
 ---
 
-<BaseLayout title={title} description={description}>
-  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+<BaseLayout
+  title={title}
+  description={description}
+  keywords={keywords}
+  ogImage={ogImage}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaWebSite)} />
+  <script type="application/ld+json" set:html={JSON.stringify(schemaService)} />
+  <script type="application/ld+json" set:html={JSON.stringify(schemaOrg)} />
   <slot />
 </BaseLayout>

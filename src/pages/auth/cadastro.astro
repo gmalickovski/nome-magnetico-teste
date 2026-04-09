@@ -4,13 +4,15 @@ import { SignupForm } from '../../frontend/components/auth/SignupForm';
 
 const user = Astro.locals.user;
 const produto = Astro.url.searchParams.get('produto') ?? '';
+const redirect = Astro.url.searchParams.get('redirect') ?? '';
 
-// Usuário já logado → vai direto para o checkout ou para o app
+// Usuário já logado → vai direto para o checkout, redirect ou app
 if (user) {
+  if (redirect) return Astro.redirect(redirect);
   return Astro.redirect(produto ? `/comprar?produto=${produto}` : '/app');
 }
 ---
 
 <AuthLayout title="Criar Conta">
-  <SignupForm client:load produto={produto} />
+  <SignupForm client:load produto={produto} redirect={redirect} />
 </AuthLayout>

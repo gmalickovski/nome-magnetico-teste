@@ -24,8 +24,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.cookies.get('nome-magnetico-auth-refresh-token')?.value ??
     context.cookies.get('sb-refresh-token')?.value;
 
+  // Rotas /admin/* redirecionam para o HQ StudioMLK
+  if (pathname.startsWith('/admin')) {
+    return Response.redirect('https://hq.studiomlk.com.br', 302);
+  }
+
   if (!accessToken) {
-    if (pathname.startsWith('/app') || pathname.startsWith('/admin')) {
+    if (pathname.startsWith('/app')) {
       return context.redirect('/auth/login?redirect=' + encodeURIComponent(pathname));
     }
     return next();
@@ -41,7 +46,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       context.cookies.delete('sb-access-token', { path: '/' });
       context.cookies.delete('sb-refresh-token', { path: '/' });
 
-      if (pathname.startsWith('/app') || pathname.startsWith('/admin')) {
+      if (pathname.startsWith('/app')) {
         return context.redirect('/auth/login');
       }
       return next();
@@ -56,7 +61,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       context.cookies.delete('nome-magnetico-auth-refresh-token', { path: '/' });
       context.cookies.delete('sb-access-token', { path: '/' });
       context.cookies.delete('sb-refresh-token', { path: '/' });
-      if (pathname.startsWith('/app') || pathname.startsWith('/admin')) {
+      if (pathname.startsWith('/app')) {
         return context.redirect('/auth/login?msg=sem-acesso');
       }
       return next();
@@ -65,27 +70,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Injetar usuário no contexto
     context.locals.user = user;
     context.locals.accessToken = accessToken;
-
-    // Verificar acesso admin
-    if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (profile?.role !== 'admin') {
-        if (pathname.startsWith('/api/')) {
-          return new Response(JSON.stringify({ error: 'Acesso negado' }), {
-            status: 403,
-            headers: { 'Content-Type': 'application/json' },
-          });
-        }
-        return context.redirect('/app');
-      }
-    }
   } catch {
-    if (pathname.startsWith('/app') || pathname.startsWith('/admin')) {
+    if (pathname.startsWith('/app')) {
       return context.redirect('/auth/login');
     }
   }

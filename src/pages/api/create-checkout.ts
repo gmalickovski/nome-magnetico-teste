@@ -1,13 +1,15 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { createCheckoutSession, type ProductType } from '../../backend/payments/stripe';
+import { createCheckoutSession, stripe, type ProductType } from '../../backend/payments/stripe';
+import { supabase } from '../../backend/db/supabase';
+import { getHqPricesAndPromo } from '../../backend/payments/prices';
 
 const schema = z.object({
   product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']),
+  couponCode: z.string().optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals, url }) => {
-  // Verificar autenticação
   const user = locals.user;
   const accessToken = locals.accessToken;
 
@@ -18,7 +20,6 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     );
   }
 
-  // Validar body
   let body: unknown;
   try {
     body = await request.json();
@@ -37,19 +38,74 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     );
   }
 
-  const { product_type } = parsed.data;
-  // O Node SSR atrás de um proxy reverso as vezes recebe a origin como localhost ou IP
-  // se o X-Forwarded-Host não estiver configurado perfeitamente no NGINX/Caddy.
-  // APP_URL no .env é a fonte absoluta de verdade, logo, usamos ela como primeira opção.
+  const { product_type, couponCode } = parsed.data;
   const baseUrl = process.env.APP_URL || url.origin;
 
+  // Verificar se é admin ou usuário teste → bypass do Stripe
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, is_test, test_ends_at')
+    .eq('id', user.id)
+    .single();
+
+  const isAdmin = profile?.role === 'admin';
+  const isTest =
+    profile?.is_test === true &&
+    (profile.test_ends_at === null ||
+      new Date(profile.test_ends_at) > new Date());
+
+  if (isAdmin || isTest) {
+    const endsAt = new Date(Date.now() + 30 * 86400000).toISOString();
+    await supabase.from('subscriptions').insert({
+      user_id: user.id,
+      product_type,
+      starts_at: new Date().toISOString(),
+      ends_at: endsAt,
+      stripe_session_id: `bypass_${isAdmin ? 'admin' : 'test'}_${Date.now()}`,
+      amount_paid: 0,
+    });
+
+    return new Response(
+      JSON.stringify({ bypass: true, redirectUrl: '/app?acesso=liberado' }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
+    // Determinar código de cupom: manual (do usuário) ou automático (promoção ativa no HQ)
+    let effectiveCouponCode = couponCode;
+    if (!effectiveCouponCode) {
+      try {
+        const { promotion } = await getHqPricesAndPromo();
+        if (promotion?.stripePromoCode) {
+          const appliesToThis = !promotion.productType || promotion.productType === product_type;
+          if (appliesToThis) effectiveCouponCode = promotion.stripePromoCode;
+        }
+      } catch {
+        // HQ indisponível — prosseguir sem desconto automático
+      }
+    }
+
+    // Resolver o promotion_code ID do Stripe
+    let discounts: { promotion_code: string }[] | undefined;
+    if (effectiveCouponCode) {
+      const promos = await stripe.promotionCodes.list({
+        code: effectiveCouponCode,
+        active: true,
+        limit: 1,
+      });
+      if (promos.data.length > 0) {
+        discounts = [{ promotion_code: promos.data[0].id }];
+      }
+    }
+
     const session = await createCheckoutSession({
       userId: user.id,
       userEmail: user.email ?? '',
       productType: product_type as ProductType,
       successUrl: `${baseUrl}/app?checkout=success`,
       cancelUrl: `${baseUrl}/comprar?checkout=cancel`,
+      discounts,
     });
 
     return new Response(

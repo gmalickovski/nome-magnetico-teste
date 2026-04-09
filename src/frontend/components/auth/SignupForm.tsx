@@ -4,9 +4,10 @@ import { Input } from '../ui/Input';
 
 interface Props {
   produto?: string;
+  redirect?: string;
 }
 
-export function SignupForm({ produto = '' }: Props) {
+export function SignupForm({ produto = '', redirect = '' }: Props) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,7 +67,11 @@ export function SignupForm({ produto = '' }: Props) {
   }
 
   if (success) {
-    const loginUrl = produto ? `/auth/login?produto=${produto}` : '/auth/login';
+    const loginUrl = redirect
+      ? `/auth/login?redirect=${encodeURIComponent(redirect)}`
+      : produto
+      ? `/auth/login?produto=${produto}`
+      : '/auth/login';
     return (
       <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 text-center shadow-2xl shadow-black/50">
         <div className="text-5xl mb-4">✉️</div>
@@ -133,7 +138,13 @@ export function SignupForm({ produto = '' }: Props) {
       <p className="text-center text-gray-500 text-sm mt-6">
         Já tem conta?{' '}
         <a
-          href={produto ? `/auth/login?produto=${produto}` : '/auth/login'}
+          href={
+            redirect
+              ? `/auth/login?redirect=${encodeURIComponent(redirect)}`
+              : produto
+              ? `/auth/login?produto=${produto}`
+              : '/auth/login'
+          }
           className="text-[#D4AF37] hover:underline"
         >
           Entrar

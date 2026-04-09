@@ -6,12 +6,13 @@ import { HowItWorksSection } from '../frontend/components/landing/HowItWorksSect
 import { ProductsSection } from '../frontend/components/landing/ProductsSection';
 import { TesteBloqueio } from '../frontend/components/landing/TesteBloqueio';
 import { PricingSection } from '../frontend/components/landing/PricingSection';
-import type { StripePrices } from '../frontend/components/landing/PricingSection';
+import { PromoBanner } from '../frontend/components/landing/PromoBanner';
 import { FAQSection } from '../frontend/components/landing/FAQSection';
 import type { FaqItemProps } from '../frontend/components/landing/FAQSection';
 import { LandingFooter } from '../frontend/components/landing/LandingFooter';
 import { getSupabaseFaqs } from '../backend/faqs/getSupabaseFaqs';
-import { getStripePrices } from '../backend/payments/prices';
+import { getHqPricesAndPromo } from '../backend/payments/prices';
+import type { PriceInfo, ActivePromotion } from '../backend/payments/prices';
 
 let faqItems: FaqItemProps[] = [];
 try {
@@ -20,21 +21,25 @@ try {
   console.warn('[index] Falha ao carregar FAQs do Supabase — usando fallback:', err);
 }
 
-let stripePrices: StripePrices | undefined;
+let hqPrices: Record<string, PriceInfo> | undefined;
+let promotion: ActivePromotion | null = null;
 try {
-  stripePrices = await getStripePrices();
+  const result = await getHqPricesAndPromo();
+  hqPrices = result.prices;
+  promotion = result.promotion;
 } catch (err) {
-  console.warn('[index] Falha ao carregar preços do Stripe — usando fallback da landing:', err);
+  console.warn('[index] Falha ao carregar preços/promoção do HQ — usando fallback:', err);
 }
 ---
 
 <LandingLayout>
+  {promotion && <PromoBanner promotion={promotion} client:load />}
   <LandingHeader client:load />
   <HeroSection client:load />
   <HowItWorksSection client:visible />
   <ProductsSection client:visible />
   <TesteBloqueio client:visible />
-  <PricingSection stripePrices={stripePrices} client:visible />
+  <PricingSection hqPrices={hqPrices} promotion={promotion} client:visible />
   <FAQSection items={faqItems} client:visible />
   <LandingFooter client:visible />
 </LandingLayout>

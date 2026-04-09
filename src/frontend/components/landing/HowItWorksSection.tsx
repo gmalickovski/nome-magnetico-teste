@@ -3,73 +3,101 @@ import React from 'react';
 const steps = [
   {
     number: '01',
-    title: 'Os 5 Números Fundamentais',
+    title: 'Sua Frequência Vibracional',
     description:
-      'Calculamos sua Expressão, Destino, Motivação, Missão e Impressão para formar o seu mapa base a partir de seu nome.',
-    icon: '📝',
+      'Nossa Inteligência Analítica mapeia seus 5 Números Fundamentais — Expressão, Destino, Motivação, Missão e Personalidade — revelando a "assinatura matemática" única do seu nome de nascimento.',
+    icon: '🔢',
+    keyword: 'Mapa Numerológico',
   },
   {
     number: '02',
-    title: 'Os 4 Triângulos',
+    title: 'Os Bloqueios Invisíveis',
     description:
-      'Desenhamos os Triângulos da Vida, Pessoal, Social e Destino para encontrar travamentos invisíveis em diversas áreas.',
-    icon: '📐',
+      'Analisamos os 4 Triângulos Cabalísticos (Vida, Pessoal, Social e Destino) para identificar as sequências que criam atrito energético — os bloqueios que sabotam carreira, relacionamentos e prosperidade.',
+    icon: '🔍',
+    keyword: 'Bloqueios Energéticos',
   },
   {
     number: '03',
-    title: 'Arquétipos Junguianos',
+    title: 'Seu Arquétipo de Marca',
     description:
-      'Nossa IA especializada traduz os seus resultados numéricos para narrativas psicológicas reais para o seu perfil.',
+      'A mesma inteligência que determina o posicionamento de marcas como Apple e Nike é aplicada ao seu nome. Revelamos seu Arquétipo Junguiano — o perfil magnético que define como o mundo percebe você.',
     icon: '🎭',
+    keyword: 'Arquétipo Pessoal',
   },
   {
     number: '04',
-    title: 'A Nova Assinatura',
+    title: 'O Nome Ideal Para Você',
     description:
-      'Identificamos e sugerimos variações luxuosas do seu nome sem bloqueios, com um score perfeito de harmonia vibracional.',
+      'Com base em toda a análise, geramos variações do seu nome que eliminam os bloqueios, preservam sua identidade e alcançam harmonia perfeita entre Expressão e Destino. Você recebe um guia prático de implementação.',
     icon: '✨',
+    keyword: 'Nome Harmonizado',
   },
 ];
 
 export function HowItWorksSection() {
   return (
-    <section id="como-funciona" className="py-20 md:py-32 bg-[#1a1a1a]">
+    <section
+      id="como-funciona"
+      className="py-20 md:py-32 bg-[#1a1a1a]"
+      aria-label="Como funciona o Método Nome Magnético"
+    >
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
           <p className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase mb-3">
-            O Processo
+            O Método
           </p>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
-            Como Funciona
+            Como Funciona a Análise
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Diferente da astrologia genérica, o Nome Magnético une milênios de tradição matemática
-            da Cabala com tecnologia de Inteligência Artificial para destravar o seu verdadeiro potencial.
+          <p className="text-gray-400 max-w-2xl mx-auto leading-relaxed">
+            Durante séculos, a sabedoria da Cabala ficou restrita a poucos iniciados. Hoje, o{' '}
+            <strong className="text-gray-300">Método Nome Magnético</strong> torna esse conhecimento
+            acessível com a precisão de uma análise que processa{' '}
+            <strong className="text-[#D4AF37]">milhares de combinações vibracionais</strong> para
+            encontrar exatamente onde estão seus bloqueios — e como superá-los.
           </p>
         </div>
 
         {/* Steps */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6" role="list">
           {steps.map((step, idx) => (
-            <div key={step.number} className="relative">
+            <div key={step.number} className="relative" role="listitem">
               {/* Connector line */}
               {idx < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-10 left-full w-full h-px bg-gradient-to-r from-[#D4AF37]/30 to-transparent z-0 -translate-y-1/2" />
+                <div
+                  className="hidden lg:block absolute top-10 left-full w-full h-px bg-gradient-to-r from-[#D4AF37]/30 to-transparent z-0 -translate-y-1/2"
+                  aria-hidden="true"
+                />
               )}
 
-              <div className="relative z-10 bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 hover:border-[#D4AF37]/40 hover:bg-white/8 transition-all duration-300">
-                <div className="font-cinzel text-4xl font-bold text-[#D4AF37]/20 mb-3">
+              <div className="relative z-10 bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 hover:border-[#D4AF37]/40 hover:bg-white/[0.08] transition-all duration-500 h-full flex flex-col">
+                <div className="font-cinzel text-4xl font-bold text-[#D4AF37]/20 mb-3" aria-hidden="true">
                   {step.number}
                 </div>
-                <div className="text-3xl mb-4">{step.icon}</div>
+                <div className="text-3xl mb-4" aria-hidden="true">{step.icon}</div>
                 <h3 className="font-cinzel text-lg font-bold text-white mb-2">
                   {step.title}
                 </h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
+                <p className="text-gray-400 text-sm leading-relaxed flex-1">{step.description}</p>
+                <div className="mt-4">
+                  <span className="inline-block text-xs text-[#D4AF37]/60 border border-[#D4AF37]/20 rounded-full px-2 py-0.5">
+                    {step.keyword}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Nota de posicionamento da IA */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 text-xs max-w-xl mx-auto leading-relaxed">
+            A precisão da análise é garantida por um sistema de Inteligência Analítica proprietário
+            que cruza os cálculos da numerologia cabalística com padrões de mais de cem combinações
+            vibracionais por nome — algo impossível de fazer manualmente sem meses de estudo.
+          </p>
         </div>
       </div>
     </section>

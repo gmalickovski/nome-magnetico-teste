@@ -3,6 +3,8 @@ import LandingLayout from '../layouts/LandingLayout.astro';
 import { CheckoutFlow } from '../frontend/components/purchase/CheckoutFlow';
 import { hasActiveSubscription } from '../backend/db/subscriptions';
 import { createUserClient } from '../backend/db/supabase';
+import { getHqPricesAndPromo } from '../backend/payments/prices';
+import type { PriceInfo, ActivePromotion } from '../backend/payments/prices';
 
 const user = Astro.locals.user;
 
@@ -29,6 +31,17 @@ if (user && productType) {
   isOwned = await hasActiveSubscription(user.id, productType);
 }
 
+// Preços e promoção via HQ
+let hqPrices: Record<string, PriceInfo> | undefined;
+let promotion: ActivePromotion | null = null;
+try {
+  const result = await getHqPricesAndPromo();
+  hqPrices = result.prices;
+  promotion = result.promotion;
+} catch (err) {
+  console.warn('[comprar] Falha ao carregar preços/promoção do HQ — usando fallback:', err);
+}
+
 const paymentLinks = {
   nome_social: '/auth/login?redirect=/comprar?produto=nome_social',
   nome_bebe:      '/auth/login?redirect=/comprar?produto=nome_bebe',
@@ -36,12 +49,18 @@ const paymentLinks = {
 };
 ---
 
-<LandingLayout title="Planos">
+<LandingLayout
+  title="Planos e Preços — Mapa Numerológico Cabalístico"
+  description="Escolha seu plano e obtenha sua análise completa de numerologia cabalística. Nome Social, Nome para Bebê ou Nome Empresarial. Acesso imediato ao relatório em PDF."
+  keywords="comprar numerologia cabalística, planos numerologia, preço mapa numerológico, análise nome cabalística preço, numerologia nome completo comprar"
+>
   <CheckoutFlow
     client:load
     productType={productType}
-    isLoggedIn={true}
+    isLoggedIn={!!user}
     isOwned={isOwned}
     paymentLinks={paymentLinks}
+    hqPrices={hqPrices}
+    promotion={promotion}
   />
 </LandingLayout>

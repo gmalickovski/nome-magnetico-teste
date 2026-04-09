@@ -16,13 +16,32 @@ export interface Subscription {
 
 /**
  * Verifica se o usuário tem subscription ativa para um produto.
+ * Retorna true para admins e usuários teste com período válido.
  */
 export async function hasActiveSubscription(
   userId: string,
   productType: ProductType = 'nome_social'
 ): Promise<boolean> {
+  // 1. Verificar role, is_test e test_ends_at
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, is_test, test_ends_at')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.role === 'admin') return true;
+
+  if (
+    profile?.is_test === true &&
+    (profile.test_ends_at === null ||
+      new Date(profile.test_ends_at) > new Date())
+  ) {
+    return true;
+  }
+
+  // 2. Verificar assinatura normal
   const { data, error } = await supabase
-    
+
     .from('subscriptions')
     .select('id, ends_at')
     .eq('user_id', userId)

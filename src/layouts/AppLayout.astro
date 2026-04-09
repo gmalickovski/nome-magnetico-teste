@@ -19,25 +19,30 @@ if (!user) {
 let isAdmin = false;
 let hasAnyActive = false;
 let userNome = user.email?.split('@')[0] ?? '';
+let isTest = false;
+let testEndsAt: Date | null = null;
 try {
   const client = createUserClient(Astro.locals.accessToken ?? '');
   const [profileRes, subsRes] = await Promise.all([
     client
-
       .from('profiles')
-      .select('role, nome')
+      .select('role, nome, is_test, test_ends_at')
       .eq('id', user.id)
       .single(),
     client
-
       .from('subscriptions')
       .select('product_type')
       .eq('user_id', user.id)
       .gt('ends_at', new Date().toISOString()),
   ]);
   isAdmin = profileRes.data?.role === 'admin';
-  hasAnyActive = (subsRes.data?.length ?? 0) > 0;
   if (profileRes.data?.nome) userNome = profileRes.data.nome;
+  if (profileRes.data?.is_test) {
+    const exp = profileRes.data.test_ends_at;
+    isTest = exp === null || new Date(exp) > new Date();
+    if (exp) testEndsAt = new Date(exp);
+  }
+  hasAnyActive = isAdmin || isTest || (subsRes.data?.length ?? 0) > 0;
 } catch { /* silencioso */ }
 
 const pathname = Astro.url.pathname;
@@ -47,6 +52,19 @@ const isActive = (path: string) =>
 
 <BaseLayout title={title} description={description} noIndex={true} hasBottomNav={true}>
   <div class="min-h-screen bg-[#1a1a1a]">
+    <!-- Banner usuário teste -->
+    {isTest && (
+      <div class="bg-[#D4AF37]/10 border-b border-[#D4AF37]/20 px-4 py-2 text-center text-sm text-[#D4AF37]">
+        Você está usando um acesso de teste.
+        {testEndsAt
+          ? ` Válido até ${testEndsAt.toLocaleDateString('pt-BR')}.`
+          : ' Sem data de expiração.'}
+        <a href="/comprar" class="underline font-medium ml-1 hover:text-[#f2ca50] transition-colors">
+          Assinar agora
+        </a>
+      </div>
+    )}
+
     <!-- Header do app -->
     <header class="border-b border-[#D4AF37]/20 bg-[#111111]/80 backdrop-blur-md sticky top-0 z-40">
       <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between relative">
@@ -106,14 +124,12 @@ const isActive = (path: string) =>
           </a>
           {isAdmin && (
             <a
-              href="/admin"
-              class={`relative text-sm transition-colors pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-purple-400 after:transition-all after:duration-300 ${
-                isActive('/admin')
-                  ? 'text-purple-400 after:w-full'
-                  : 'text-purple-500 hover:text-purple-400 after:w-0 hover:after:w-full'
-              }`}
+              href="https://hq.studiomlk.com.br"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="relative text-sm transition-colors pb-0.5 text-purple-500 hover:text-purple-400 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-purple-400 after:transition-all after:duration-300 after:w-0 hover:after:w-full"
             >
-              Admin
+              HQ Admin
             </a>
           )}
           <AvatarMenu client:load nome={userNome} />
@@ -138,9 +154,9 @@ const isActive = (path: string) =>
         <span class="text-[10px] font-medium tracking-wide">Suporte</span>
       </a>
       {isAdmin && (
-        <a href="/admin" class={`flex flex-col items-center p-2 transition-colors ${isActive('/admin') ? 'text-purple-400' : 'text-gray-500 hover:text-purple-400'}`}>
+        <a href="https://hq.studiomlk.com.br" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center p-2 transition-colors text-gray-500 hover:text-purple-400">
           <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          <span class="text-[10px] font-medium tracking-wide">Admin</span>
+          <span class="text-[10px] font-medium tracking-wide">HQ Admin</span>
         </a>
       )}
     </nav>

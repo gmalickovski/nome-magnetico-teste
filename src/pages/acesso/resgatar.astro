@@ -1,0 +1,69 @@
+---
+import { supabase } from '../../backend/db/supabase';
+
+const code = Astro.url.searchParams.get('code');
+const days = parseInt(Astro.url.searchParams.get('days') ?? '7', 10);
+const product = Astro.url.searchParams.get('product') ?? 'all';
+
+const user = Astro.locals.user;
+
+if (!user) {
+  const resgatarUrl = `/acesso/resgatar?code=${encodeURIComponent(code ?? '')}&days=${days}&product=${encodeURIComponent(product)}`;
+  return Astro.redirect(`/auth/login?redirect=${encodeURIComponent(resgatarUrl)}`);
+}
+
+if (!code) {
+  return Astro.redirect('/app');
+}
+
+// Verificar se já foi resgatado
+const { data: existing } = await supabase
+  .from('trial_redemptions')
+  .select('id')
+  .eq('user_id', user.id)
+  .eq('trial_code', code)
+  .single();
+
+if (!existing) {
+  // trialDays === 0 → sem expiração (1 ano como proxy)
+  const endsAt =
+    days === 0
+      ? null
+      : new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+  const subscriptionEndsAt =
+    endsAt ?? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+
+  // 1. Marcar como usuário teste
+  await supabase
+    .from('profiles')
+    .update({ is_test: true, test_ends_at: endsAt })
+    .eq('id', user.id);
+
+  // 2. Criar subscriptions
+  const products =
+    product !== 'all' ? [product] : ['nome_social', 'nome_bebe', 'nome_empresa'];
+
+  for (const pt of products) {
+    await supabase.from('subscriptions').insert({
+      user_id: user.id,
+      product_type: pt,
+      starts_at: new Date().toISOString(),
+      ends_at: subscriptionEndsAt,
+      stripe_session_id: `trial_${code}`,
+      amount_paid: 0,
+    });
+  }
+
+  // 3. Registrar resgate
+  await supabase.from('trial_redemptions').insert({
+    user_id: user.id,
+    trial_code: code,
+    trial_days: days,
+    product_type: product,
+    source: 'link',
+  });
+}
+
+return Astro.redirect('/app?trial=ativado');
+---

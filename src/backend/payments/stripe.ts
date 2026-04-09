@@ -36,6 +36,7 @@ export interface CreateCheckoutParams {
   productType: ProductType;
   successUrl: string;
   cancelUrl: string;
+  discounts?: { promotion_code: string }[];
 }
 
 /**
@@ -69,6 +70,7 @@ export async function createCheckoutSession(
     success_url: params.successUrl,
     cancel_url: params.cancelUrl,
     locale: 'pt-BR',
+    ...(params.discounts ? { discounts: params.discounts } : {}),
     payment_intent_data: {
       metadata: {
         user_id: params.userId,

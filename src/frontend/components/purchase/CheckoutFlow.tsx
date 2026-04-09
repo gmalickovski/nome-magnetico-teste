@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
@@ -7,14 +8,15 @@ interface Props {
   isLoggedIn: boolean;
   isOwned: boolean;
   paymentLinks: Record<ProductType, string>;
+  hqPrices?: Record<string, PriceInfo>;
+  promotion?: ActivePromotion | null;
 }
 
 const ALL_PRODUCTS: ProductType[] = ['nome_social', 'nome_bebe', 'nome_empresa'];
 
-const PRODUCT_DATA: Record<ProductType, {
+const PRODUCT_STATIC: Record<ProductType, {
   name: string;
   subtitle: string;
-  price: string;
   period: string;
   description: string;
   features: string[];
@@ -24,7 +26,6 @@ const PRODUCT_DATA: Record<ProductType, {
   nome_social: {
     name: 'Nome Social',
     subtitle: 'A Jornada de Transformação Pessoal',
-    price: 'R$ 97',
     period: 'acesso por 30 dias',
     description: 'Análise cabalística profunda com IA especializada para descobrir a sua frequência correta e remover seus bloqueios energéticos.',
     features: [
@@ -42,7 +43,6 @@ const PRODUCT_DATA: Record<ProductType, {
   nome_bebe: {
     name: 'Nome de Bebê',
     subtitle: 'A Decisão Mais Importante do Seu Filho',
-    price: 'R$ 127',
     period: 'acesso por 30 dias',
     description: 'Tenha a certeza matemática de dar o melhor começo vibracional e livre de bloqueios ao destino do seu filho.',
     features: [
@@ -59,7 +59,6 @@ const PRODUCT_DATA: Record<ProductType, {
   nome_empresa: {
     name: 'Nome Empresarial',
     subtitle: 'Branding com Fundamento Vibracional',
-    price: 'R$ 147',
     period: 'acesso por 30 dias',
     description: 'Um nome magnético atrai fluxo de negócios. Um nome qualquer afasta prosperidade. Obtenha um posicionamento certeiro.',
     features: [
@@ -74,30 +73,84 @@ const PRODUCT_DATA: Record<ProductType, {
   },
 };
 
-export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }: Props) {
+const FALLBACK_PRICES: Record<string, PriceInfo> = {
+  nome_social:  { cents: 9700,  formatted: 'R$ 97',  hasDiscount: false },
+  nome_bebe:    { cents: 14700, formatted: 'R$ 147', hasDiscount: false },
+  nome_empresa: { cents: 19700, formatted: 'R$ 197', hasDiscount: false },
+};
+
+function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInfo; promotion?: ActivePromotion | null; productId: string }) {
+  const appliesToThis = !promotion?.productType || promotion.productType === productId;
+  const showDiscount = promotion && appliesToThis && priceInfo.hasDiscount && priceInfo.discountedFormatted;
+
+  if (showDiscount) {
+    return (
+      <div>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <span className="font-cinzel text-2xl font-bold text-gray-500 line-through opacity-60">
+            {priceInfo.formatted}
+          </span>
+          <span className="font-cinzel text-4xl font-bold text-[#D4AF37]">
+            {priceInfo.discountedFormatted}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="bg-[#D4AF37] text-black text-xs font-bold px-2 py-0.5 rounded-full">
+            {promotion!.discountType === 'percent'
+              ? `−${promotion!.discountValue}%`
+              : `−R$ ${promotion!.discountValue}`}
+          </span>
+          <span className="text-[#D4AF37] text-xs font-medium">{promotion!.name}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-baseline gap-2">
+      <span className="font-cinzel text-4xl font-bold text-[#D4AF37]">{priceInfo.formatted}</span>
+    </div>
+  );
+}
+
+export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, hqPrices, promotion }: Props) {
   const [showAll, setShowAll] = useState(productType === null);
   const [loading, setLoading] = useState<ProductType | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+
+  const prices = hqPrices ?? FALLBACK_PRICES;
 
   async function triggerCheckout(type: ProductType) {
     setLoading(type);
     setErrorMsg('');
     try {
+      // Auto-aplica cupom da promoção se o usuário não digitou um código manual
+      const appliesToThis = !promotion?.productType || promotion.productType === type;
+      const effectiveCoupon = couponCode.trim() || (promotion && appliesToThis ? promotion.stripePromoCode : null) || undefined;
+
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_type: type }),
+        body: JSON.stringify({
+          product_type: type,
+          couponCode: effectiveCoupon ?? undefined,
+        }),
       });
       const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error ?? 'Erro ao criar sessão');
-      window.location.href = data.url;
+      if (!res.ok) throw new Error(data.error ?? 'Erro ao criar sessão');
+      if (data.bypass) {
+        window.location.href = data.redirectUrl;
+      } else {
+        if (!data.url) throw new Error('URL de pagamento não retornada');
+        window.location.href = data.url;
+      }
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Erro ao criar sessão de pagamento');
       setLoading(null);
     }
   }
 
-  // Header sticky — adapta navegação ao estado atual
   function StickyHeader() {
     return (
       <header className="sticky top-0 z-50 border-b border-[#D4AF37]/20 bg-[#111111]/95 backdrop-blur-sm py-4 px-4">
@@ -107,8 +160,8 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
           </a>
           {isLoggedIn ? (
             <div className="flex items-center gap-2 sm:gap-4">
-              <a 
-                href="/app" 
+              <a
+                href="/app"
                 className="group flex items-center gap-2 text-sm transition-colors text-gray-400 hover:text-[#D4AF37] relative pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300 after:w-0 hover:after:w-full"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -157,12 +210,18 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
         <p className="text-gray-400">
           Pagamento único. Sem assinatura. Acesso completo por 30 dias.
         </p>
+        {promotion && (
+          <div className="inline-flex items-center gap-2 mt-3 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5">
+            <span className="text-[#D4AF37] text-sm font-semibold">🎉 {promotion.name} — desconto ativo!</span>
+          </div>
+        )}
       </div>
     );
   }
 
   function ProductCard({ type, showPayButton, forceHighlight = false }: { type: ProductType; showPayButton: boolean; forceHighlight?: boolean }) {
-    const p = PRODUCT_DATA[type];
+    const p = PRODUCT_STATIC[type];
+    const priceInfo = prices[type] ?? FALLBACK_PRICES[type];
     const isLoadingThis = loading === type;
     const isHighlighted = forceHighlight || p.popular;
 
@@ -184,9 +243,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
         </div>
 
         <div className="mb-6">
-          <div className="flex items-baseline gap-2">
-            <span className="font-cinzel text-4xl font-bold text-[#D4AF37]">{p.price}</span>
-          </div>
+          <PriceDisplay priceInfo={priceInfo} promotion={promotion} productId={type} />
           <p className="text-gray-500 text-sm mt-1">{p.period}</p>
         </div>
 
@@ -204,17 +261,31 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
         </ul>
 
         {showPayButton ? (
-          <button
-            onClick={() => triggerCheckout(type)}
-            disabled={!!loading}
-            className={`w-full font-bold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
-              isHighlighted
-                ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
-                : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
-            }`}
-          >
-            {isLoadingThis ? 'Aguarde...' : 'Comprar'}
-          </button>
+          <>
+            <div className="mb-4">
+              <label className="block text-xs text-[#76746a] font-medium uppercase tracking-widest mb-1.5">
+                Código promocional <span className="normal-case">(opcional)</span>
+              </label>
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                placeholder={promotion?.stripePromoCode ? `Auto: ${promotion.stripePromoCode}` : 'Ex: VERAO20'}
+                className="w-full bg-[#111111] border border-white/10 rounded-xl px-3 py-2 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/40 transition-colors"
+              />
+            </div>
+            <button
+              onClick={() => triggerCheckout(type)}
+              disabled={!!loading}
+              className={`w-full font-bold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
+                isHighlighted
+                  ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
+                  : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
+              }`}
+            >
+              {isLoadingThis ? 'Aguarde...' : 'Comprar'}
+            </button>
+          </>
         ) : (
           <a
             href={paymentLinks[type]}
@@ -233,9 +304,8 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
     );
   }
 
-  // Produto já adquirido
   if (isOwned && productType) {
-    const p = PRODUCT_DATA[productType];
+    const p = PRODUCT_STATIC[productType];
     return (
       <div className="min-h-screen bg-[#111111]">
         <StickyHeader />
@@ -262,7 +332,6 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
     );
   }
 
-  // Não logado — card único com link para entrar
   if (!isLoggedIn) {
     const type = productType ?? 'nome_social';
     return (
@@ -278,7 +347,6 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
     );
   }
 
-  // Logado — visão de todos os produtos
   if (showAll) {
     return (
       <div className="min-h-screen bg-[#111111]">
@@ -302,7 +370,6 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks }:
     );
   }
 
-  // Logado — visão de produto único
   const type = productType!;
   return (
     <div className="min-h-screen bg-[#111111]">

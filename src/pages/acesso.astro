@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const code = Astro.url.searchParams.get('code');
+const days = Astro.url.searchParams.get('days') ?? '7';
+const product = Astro.url.searchParams.get('product') ?? 'all';
+
+if (!code) {
+  return Astro.redirect('/');
+}
+
+// Usuário já logado → resgatar direto
+const user = Astro.locals.user;
+if (user) {
+  const resgatarUrl = `/acesso/resgatar?code=${encodeURIComponent(code)}&days=${days}&product=${encodeURIComponent(product)}`;
+  return Astro.redirect(resgatarUrl);
+}
+
+const PRODUCT_NAMES: Record<string, string> = {
+  nome_social: 'Nome Social',
+  nome_bebe: 'Nome de Bebê',
+  nome_empresa: 'Nome Empresarial',
+  all: 'Todos os Produtos',
+};
+
+const productLabel = PRODUCT_NAMES[product] ?? product;
+const daysLabel = days === '0' ? 'Sem data de expiração' : `${days} dias de acesso`;
+
+// Redirect para cadastro passando o resgate como destino pós-auth
+const resgatarUrl = `/acesso/resgatar?code=${encodeURIComponent(code)}&days=${days}&product=${encodeURIComponent(product)}`;
+const cadastroUrl = `/auth/cadastro?redirect=${encodeURIComponent(resgatarUrl)}`;
+const loginUrl = `/auth/login?redirect=${encodeURIComponent(resgatarUrl)}`;
+---
+
+<BaseLayout title="Acesso Especial — Nome Magnético">
+  <div class="min-h-screen bg-[#131313] flex items-center justify-center px-4 py-16">
+    <div class="max-w-md w-full">
+
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <a href="/" class="font-cinzel text-2xl font-bold text-[#D4AF37] tracking-wider">
+          NOME MAGNÉTICO
+        </a>
+      </div>
+
+      <!-- Card principal -->
+      <div class="bg-[#1a1a1a] rounded-2xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+
+        <!-- Ícone + título -->
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-[#D4AF37]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h1 class="font-cinzel text-2xl font-bold text-white mb-2">
+            Você recebeu um acesso especial
+          </h1>
+          <p class="text-gray-400 text-sm">
+            {daysLabel} ao <strong class="text-[#e5e2e1]">{productLabel}</strong>
+          </p>
+        </div>
+
+        <!-- Código -->
+        <div class="bg-[#D4AF37]/5 rounded-xl px-4 py-3 mb-6 text-center">
+          <p class="text-xs text-[#76746a] font-medium uppercase tracking-widest mb-1">Código de acesso</p>
+          <p class="font-mono text-xl font-bold text-[#D4AF37] tracking-wider">{code}</p>
+        </div>
+
+        <!-- CTAs -->
+        <div class="space-y-3">
+          <a
+            href={cadastroUrl}
+            class="block w-full text-center bg-[#D4AF37] text-black font-bold py-3.5 rounded-full hover:bg-[#f2ca50] transition-all duration-300 shadow-lg shadow-yellow-500/20"
+          >
+            Criar conta e ativar acesso
+          </a>
+          <a
+            href={loginUrl}
+            class="block w-full text-center border border-[#D4AF37]/30 text-[#D4AF37] font-medium py-3.5 rounded-full hover:bg-[#D4AF37]/10 transition-all duration-300 text-sm"
+          >
+            Já tenho conta — Entrar
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Rodapé -->
+      <p class="text-center text-[#76746a] text-xs mt-6">
+        O código será ativado automaticamente após o login.
+      </p>
+
+    </div>
+  </div>
+</BaseLayout>
