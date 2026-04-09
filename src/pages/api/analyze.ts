@@ -43,6 +43,8 @@ const schema = z.object({
   objetivo_apresentacao: z.string().max(500).optional(),
   vibracoes_desejadas: z.string().max(300).optional(),
   contexto_uso: z.string().optional(),
+  // flag de modo nome_bebe: indica que o nome já foi registrado em cartório
+  nome_ja_escolhido: z.boolean().optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -81,6 +83,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     data_fundacao, ramo_atividade, descricao_negocio,
     nome_socio2, data_nascimento_socio2,
     objetivo_apresentacao, vibracoes_desejadas, contexto_uso,
+    nome_ja_escolhido,
   } = parsed.data;
 
   const { data: profile } = await supabase
@@ -196,11 +199,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
         if (sobrenomesValidos.length === 0 && sobrenome_familia) {
           sobrenomesValidos.push(sobrenome_familia);
         }
-        if (sobrenomesValidos.length === 0) {
+        if (sobrenomesValidos.length === 0 && !nome_ja_escolhido) {
           sobrenomesValidos.push(nome_completo.replace('(bebê) ', ''));
         }
 
-        const resultado = analisarNomesBebe(candidatos, sobrenomesValidos, data_nascimento, genero_preferido);
+        const resultado = analisarNomesBebe(candidatos, sobrenomesValidos, data_nascimento, genero_preferido, nome_ja_escolhido);
 
         const melhorNome = resultado.melhorNome;
         const cincoNums = melhorNome
@@ -237,6 +240,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
             generoPreferido: genero_preferido,
             estiloPreferido: estilo_preferido,
             caracteristicasDesejadas: caracteristicas_desejadas,
+            nomeJaEscolhido: nome_ja_escolhido ?? false,
           },
           user.id,
           analysis.id

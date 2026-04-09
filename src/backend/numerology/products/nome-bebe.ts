@@ -265,13 +265,18 @@ export function analisarNomesBebe(
   nomesCandidatos: string[],
   sobrenomesDisponiveis: string[],
   dataNascimento: string,
-  generoPreferido?: string
+  generoPreferido?: string,
+  nomeJaEscolhido?: boolean
 ): ResultadoNomeBebe {
   const destino = calcularDestino(dataNascimento);
 
-  const sobrenomesValidos = sobrenomesDisponiveis
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
+  // Se o nome já foi escolhido (registrado), descartamos os sobrenomes para não haver duplicação,
+  // pois nomesCandidatos[0] já é o nome completo registrado.
+  const sobrenomesValidos = nomeJaEscolhido 
+    ? [] 
+    : sobrenomesDisponiveis
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
 
   // Combinações a testar (inclui subsets com apenas 1 sobrenome)
   const combinacoes = sobrenomesValidos.length > 0
@@ -289,8 +294,8 @@ export function analisarNomesBebe(
 
   const melhorScoreUsuario = analises[0]?.score ?? 0;
 
-  // Se todos os candidatos do usuário têm score baixo, gerar sugestões automáticas
-  if (melhorScoreUsuario < 70) {
+  // Se todos os candidatos do usuário têm score baixo E o nome não foi previamente definido, gerar sugestões automáticas
+  if (!nomeJaEscolhido && melhorScoreUsuario < 70) {
     const nomesCandidatosSet = new Set(
       analises.map(a => a.primeiroNome.toLowerCase())
     );
