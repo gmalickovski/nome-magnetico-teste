@@ -32,7 +32,11 @@ const cadastroUrl = `/auth/cadastro?redirect=${encodeURIComponent(resgatarUrl)}`
 const loginUrl = `/auth/login?redirect=${encodeURIComponent(resgatarUrl)}`;
 ---
 
-<BaseLayout title="Acesso Especial — Nome Magnético">
+<BaseLayout
+  title="Acesso Especial — Nome Magnético"
+  description={`Você recebeu ${daysLabel} gratuito ao Nome Magnético — Análise Cabalística de ${productLabel}. Crie sua conta ou faça login para resgatar.`}
+  noIndex={true}
+>
   <div class="min-h-screen bg-[#131313] flex items-center justify-center px-4 py-16">
     <div class="max-w-md w-full">
 
