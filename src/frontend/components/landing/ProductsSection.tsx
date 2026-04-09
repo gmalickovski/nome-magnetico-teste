@@ -6,7 +6,7 @@ const products = [
     icon: '✨',
     name: 'Nome Social',
     tagline: 'A Jornada de Transformação Pessoal',
-    description: 'Para adultos em busca de autoconhecimento aplicado e vida destravada.',
+    description: 'Para adultos que sentem que algo no nome não ressoa com quem realmente são — ou com o que querem atrair na vida e na carreira.',
     benefits: [
       'Identificação de Bloqueios Energéticos e Tendências Ocultas.',
       'Revelação do seu Arquétipo Junguiano.',
@@ -20,7 +20,7 @@ const products = [
     icon: '👶',
     name: 'Nome de Bebê',
     tagline: 'A Decisão Mais Importante do Seu Filho',
-    description: 'A certeza de dar o melhor começo vibracional de todos para quem você mais ama.',
+    description: 'A certeza de dar ao seu filho o melhor começo vibracional possível. Sem bloqueios. Com um nome que ressoará com o destino dele para sempre.',
     benefits: [
       'Análise cruzada dos nomes candidatos com o Destino da criança.',
       'Ranking objetivo do pior ao "Nome de Ouro".',
@@ -34,7 +34,7 @@ const products = [
     icon: '🏢',
     name: 'Nome Empresarial',
     tagline: 'Branding com Fundamento Vibracional',
-    description: 'A diferença entre uma marca que as pessoas esquecem e uma marca magnética.',
+    description: 'A diferença entre uma marca que as pessoas esquecem e uma que atrai clientes, sócios e oportunidades com magnetismo natural.',
     benefits: [
       'Avaliação da sinergia entre o Destino dos sócios e o nome da marca.',
       'Verificação rigorosa de riscos ocultos operacionais e financeiros.',
@@ -55,11 +55,11 @@ export function ProductsSection() {
             Produtos
           </p>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
-            Três Análises, Uma Missão
+            Três Produtos, Uma Missão: Remover o que Bloqueia Seu Potencial
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Seja para você, para o seu filho ou para sua empresa — cada nome carrega uma vibração única
-            que pode abrir ou fechar caminhos.
+            que pode abrir ou fechar caminhos. A análise revela qual é o seu caso.
           </p>
         </div>
 

@@ -154,10 +154,10 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
             Investimento
           </p>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
-            Planos
+            Seu Investimento em Clareza e Magnetismo
           </h2>
           <p className="text-gray-400 max-w-xl mx-auto">
-            Pagamento único. Sem assinatura. Acesso completo por 30 dias.
+            Pagamento único. Sem assinatura. Acesso completo por 30 dias à análise mais profunda que você já fez sobre o seu nome.
           </p>
           {promotion && (
             <div className="inline-flex items-center gap-2 mt-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5">
@@ -232,7 +232,7 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
 
         {/* Garantia */}
         <div className="text-center mt-12 text-gray-500 text-sm">
-          <p>🔒 Pagamento seguro via Stripe · 7 dias de garantia</p>
+          <p>🔒 Pagamento seguro via Stripe · Garantia de 7 dias · Suporte incluso</p>
         </div>
       </div>
     </section>

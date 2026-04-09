@@ -13,8 +13,8 @@ export interface Props {
 
 const {
   title,
-  description = 'Descubra os segredos do seu nome com numerologia cabalística. Detecte bloqueios energéticos e encontre seu Nome Magnético.',
-  keywords = 'numerologia cabalística, numerologia do nome, mapa numerológico, bloqueios energéticos nome, análise vibracional nome, nome magnético, significado do nome numerologia',
+  description = 'Análise de numerologia cabalística: detecte bloqueios no seu nome de nascimento e descubra a variação que alinha Expressão ao Destino. Mapa numerológico completo em PDF.',
+  keywords = 'numerologia cabalística, numerologia do nome, mapa numerológico, bloqueios energéticos nome, análise vibracional nome, nome magnético, significado do nome numerologia, nome sem bloqueios energéticos, como meu nome afeta minha vida, mudar nome numerologia',
   ogImage = '/og-image.jpg',
   ogType = 'website',
   noIndex = false,
@@ -82,15 +82,25 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
     <meta name="theme-color" content="#D4AF37" />
     <meta name="msapplication-TileColor" content="#1A1A1A" />
 
-    <!-- Autor e Propriedade -->
+    <!-- Autor, Propriedade e E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) -->
     <meta name="author" content="Nome Magnético - Studio MLK" />
     <meta name="copyright" content="Nome Magnético" />
+    <meta name="publisher" content="Studio MLK" />
+    <!-- Sinais de conteúdo especializado para AI Overviews (Google SGE 2026) -->
+    <meta name="subject" content="Numerologia Cabalística, Desenvolvimento Pessoal, Branding Pessoal" />
+    <meta name="category" content="Ferramentas de Autoconhecimento" />
+    <meta name="coverage" content="Brasil" />
+    <meta name="rating" content="general" />
 
-    <!-- Performance: Preconnect + Preload fontes críticas -->
+    <!-- Performance: Preconnect + DNS prefetch (Core Web Vitals 2026) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://analytics.studiomlk.com.br" />
-    <!-- Preload Cinzel (usado no acima da dobra) antes para eliminar render-blocking -->
+    <!-- DNS prefetch para serviços externos — reduz latência de lookup -->
+    <link rel="dns-prefetch" href="https://js.stripe.com" />
+    <link rel="dns-prefetch" href="https://bhxneaeuhybtucmbmpvg.supabase.co" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <!-- Preload Cinzel (LCP candidate — acima da dobra) — elimina render-blocking -->
     <link
       rel="preload"
       href="https://fonts.gstatic.com/s/cinzel/v23/8vIJ7ww63mVu7gt79mT7fg.woff2"
@@ -111,7 +121,7 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
         rel="stylesheet"
       />
     </noscript>
-    <!-- Analytics (Umami) -->
+    <!-- Analytics (Umami) — defer para não bloquear INP -->
     <script defer src="https://analytics.studiomlk.com.br/script.js" data-website-id="15b0df31-1cc8-4464-a3f7-89fd82c25bcf"></script>
   </head>
   <body class:list={['bg-[#1a1a1a] text-gray-200 min-h-screen font-inter antialiased', { 'has-bottom-nav': hasBottomNav }]}>

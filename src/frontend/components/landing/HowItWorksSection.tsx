@@ -13,7 +13,7 @@ const steps = [
     number: '02',
     title: 'Os Bloqueios Invisíveis',
     description:
-      'Analisamos os 4 Triângulos Cabalísticos (Vida, Pessoal, Social e Destino) para identificar as sequências que criam atrito energético — os bloqueios que sabotam carreira, relacionamentos e prosperidade.',
+      'Analisamos os 4 Triângulos Cabalísticos (Vida, Pessoal, Social e Destino) para identificar as sequências que criam atrito energético — os bloqueios que, sem você saber, sabotam carreira, relacionamentos e prosperidade há anos.',
     icon: '🔍',
     keyword: 'Bloqueios Energéticos',
   },
@@ -29,7 +29,7 @@ const steps = [
     number: '04',
     title: 'O Nome Ideal Para Você',
     description:
-      'Com base em toda a análise, geramos variações do seu nome que eliminam os bloqueios, preservam sua identidade e alcançam harmonia perfeita entre Expressão e Destino. Você recebe um guia prático de implementação.',
+      'Com base em toda a análise, geramos variações do seu nome que eliminam os bloqueios, preservam sua identidade e alcançam harmonia perfeita entre Expressão e Destino. Você recebe um guia prático de implementação para os próximos 30 dias.',
     icon: '✨',
     keyword: 'Nome Harmonizado',
   },
@@ -49,14 +49,14 @@ export function HowItWorksSection() {
             O Método
           </p>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
-            Como Funciona a Análise
+            Da Teoria à Transformação: Como o Método Funciona
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            Durante séculos, a sabedoria da Cabala ficou restrita a poucos iniciados. Hoje, o{' '}
-            <strong className="text-gray-300">Método Nome Magnético</strong> torna esse conhecimento
-            acessível com a precisão de uma análise que processa{' '}
-            <strong className="text-[#D4AF37]">milhares de combinações vibracionais</strong> para
-            encontrar exatamente onde estão seus bloqueios — e como superá-los.
+            Durante séculos, a sabedoria da Cabala ficou restrita a poucos iniciados. O{' '}
+            <strong className="text-gray-300">Método Nome Magnético</strong> combina essa tradição com
+            análise vibracional avançada — processando{' '}
+            <strong className="text-[#D4AF37]">milhares de combinações numéricas</strong> para
+            encontrar exatamente onde estão seus bloqueios e como superá-los.
           </p>
         </div>
 
@@ -94,9 +94,9 @@ export function HowItWorksSection() {
         {/* Nota de posicionamento da IA */}
         <div className="mt-12 text-center">
           <p className="text-gray-600 text-xs max-w-xl mx-auto leading-relaxed">
-            A precisão da análise é garantida por um sistema de Inteligência Analítica proprietário
-            que cruza os cálculos da numerologia cabalística com padrões de mais de cem combinações
-            vibracionais por nome — algo impossível de fazer manualmente sem meses de estudo.
+            A precisão da análise vem do cruzamento dos cálculos da numerologia cabalística com
+            padrões de mais de cem combinações vibracionais por nome — algo impossível de fazer
+            manualmente sem meses de estudo especializado.
           </p>
         </div>
       </div>

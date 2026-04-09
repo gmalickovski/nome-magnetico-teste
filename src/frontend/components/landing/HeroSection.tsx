@@ -49,10 +49,10 @@ export function HeroSection() {
 
         {/* Subheadline — foco no resultado, não no processo */}
         <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-4 leading-relaxed font-light">
-          Cada letra do seu nome de nascimento carrega uma frequência matemática. Quando essas frequências colidem, surgem os bloqueios invisíveis que sabotam sua carreira, seus relacionamentos e sua prosperidade.
+          Cada letra do seu nome de nascimento carrega uma frequência matemática. Na numerologia cabalística, quando essas frequências colidem, surgem bloqueios invisíveis que sabotam sua carreira, seus relacionamentos e sua prosperidade.
         </p>
         <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-          O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> revela esses bloqueios e encontra a variação do seu nome que <em>alinha sua Expressão ao seu Destino</em>.
+          O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> usa análise vibracional avançada para revelar esses bloqueios e encontrar a variação do seu nome que <em>alinha sua Expressão ao seu Destino</em> — com precisão matemática impossível de fazer manualmente.
         </p>
 
         {/* CTA Principal */}
@@ -81,14 +81,16 @@ export function HeroSection() {
           <span className="hidden sm:inline" aria-hidden="true">•</span>
           <span>✓ 4 Triângulos Cabalísticos</span>
           <span className="hidden sm:inline" aria-hidden="true">•</span>
+          <span>✓ Método Cabalístico com Precisão Analítica</span>
+          <span className="hidden sm:inline" aria-hidden="true">•</span>
           <span>✓ Relatório em PDF para Download</span>
         </div>
 
         {/* Social proof com números reais */}
         <div className="flex items-center justify-center gap-8 text-sm text-gray-500" role="list" aria-label="Indicadores de qualidade">
           <div className="text-center" role="listitem">
-            <div className="font-cinzel text-2xl font-bold text-[#D4AF37]" aria-label="3 produtos disponíveis">3</div>
-            <div>análises disponíveis</div>
+            <div className="font-cinzel text-2xl font-bold text-[#D4AF37]" aria-label="3 produtos de análise">3</div>
+            <div>produtos de análise</div>
           </div>
           <div className="h-8 w-px bg-white/10" aria-hidden="true" />
           <div className="text-center" role="listitem">
@@ -97,8 +99,8 @@ export function HeroSection() {
           </div>
           <div className="h-8 w-px bg-white/10" aria-hidden="true" />
           <div className="text-center" role="listitem">
-            <div className="font-cinzel text-2xl font-bold text-[#D4AF37]" aria-label="30 dias de acesso">30</div>
-            <div>dias de acesso</div>
+            <div className="font-cinzel text-2xl font-bold text-[#D4AF37]" aria-label="30 dias de acesso completo">30</div>
+            <div>dias de acesso completo</div>
           </div>
         </div>
       </div>

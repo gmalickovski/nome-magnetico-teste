@@ -4,9 +4,10 @@ export const GET: APIRoute = async () => {
   const baseUrl = 'https://nomemagnetico.com.br';
 
   const pages = [
-    { url: '/', changefreq: 'weekly', priority: '1.0', lastmod: '2026-04-01' },
-    { url: '/comprar', changefreq: 'weekly', priority: '0.9', lastmod: '2026-04-01' },
-    { url: '/suporte', changefreq: 'monthly', priority: '0.6', lastmod: '2026-03-18' },
+    { url: '/', changefreq: 'weekly', priority: '1.0', lastmod: '2026-04-09' },
+    { url: '/comprar', changefreq: 'weekly', priority: '0.9', lastmod: '2026-04-09' },
+    { url: '/auth/cadastro', changefreq: 'monthly', priority: '0.7', lastmod: '2026-04-09' },
+    { url: '/suporte', changefreq: 'monthly', priority: '0.6', lastmod: '2026-04-09' },
     { url: '/privacidade', changefreq: 'yearly', priority: '0.3', lastmod: '2026-03-18' },
     { url: '/termos', changefreq: 'yearly', priority: '0.3', lastmod: '2026-03-18' },
     { url: '/reembolso', changefreq: 'yearly', priority: '0.3', lastmod: '2026-03-18' },
