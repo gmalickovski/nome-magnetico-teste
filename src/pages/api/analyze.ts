@@ -245,7 +245,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           user.id,
           analysis.id
         );
-      } else if (product_type === 'nome_social') {
+      } else if (product_type === 'nome_social' && !nome_ja_escolhido) {
         // ── Produto: Nome Social (novo fluxo) ──
         const candidatos = nomes_candidatos ?? [];
 
@@ -369,6 +369,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
             tendenciasOcultas,
             debitosCarmicos,
             gender,
+            isCurrentNameAnalysis: !!nome_ja_escolhido,
           },
           user.id,
           analysis.id

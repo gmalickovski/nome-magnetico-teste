@@ -15,6 +15,7 @@ export interface AnalysisPromptParams {
   debitosCarmicos: DebitoCarmicoInfo[];
   gender: string;
   arquetipo?: Arquetipo;
+  isCurrentNameAnalysis?: boolean;
 }
 
 export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
@@ -27,9 +28,11 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
     bloqueios,
     licoesCarmicas,
     tendenciasOcultas,
+    tendenciasOcultas,
     debitosCarmicos,
     gender,
     arquetipo,
+    isCurrentNameAnalysis,
   } = params;
 
   const primeiroNome = nomeCompleto.split(' ')[0] ?? nomeCompleto;
@@ -244,24 +247,30 @@ Escreva 4 parágrafos que:
 
 ---
 
-` : ''}## 🔮 ${arquetipo ? '7' : '6'}. O Nome como Ferramenta de Cura
+` : ''}## 🔮 ${arquetipo ? '7' : '6'}. O Nome como Ferramenta de Poder Energético
 
-A mudança vibracional que o nome magnetizado produz não é apenas simbólica — ela reorganiza padrões concretos de atração e resposta do ambiente. Escreva 3 parágrafos sobre:
+${isCurrentNameAnalysis 
+  ? `A vibração que o seu nome de batismo produz não é apenas simbólica — ela organiza padrões concretos de atração e resposta do ambiente. Escreva 3 parágrafos sobre:
+- O que essa vibração-base cria naturalmente quando ${primeiroNome} passa a usá-la com intenção consciente
+- Quais padrões de relacionamento, oportunidade ou autossabotagem tendem a ressoar com essa frequência de nascença
+- Como assumir plenamente o próprio nome atual pode transmutar as dificuldades reveladas e iniciar um novo ciclo de magnetismo pessoal`
+  : `A mudança vibracional que o nome magnetizado produz não é apenas simbólica — ela reorganiza padrões concretos de atração e resposta do ambiente. Escreva 3 parágrafos sobre:
 - O que muda na vibração-base quando ${primeiroNome} começa a usar o novo nome conscientemente
 - Quais padrões de relacionamento, oportunidade ou autossabotagem tendem a se reorganizar com a mudança de frequência
-- O período de adaptação vibracional: como funcionam os primeiros 90 dias de uso consciente do nome magnetizado, e o que observar como sinal de integração
+- O período de adaptação vibracional: como funcionam os primeiros 90 dias de uso consciente do nome magnetizado, e o que observar como sinal de integração`
+}
 
 ---
 
-## ✍️ ${arquetipo ? '8' : '7'}. Manual da Nova Assinatura
+## ✍️ ${arquetipo ? '8' : '7'}. Manual de Assinatura Fluída
 
-Com base nos números de ${primeiroNome}, escreva orientações práticas de grafoscopia para o nome magnetizado:
+Com base nos números de ${primeiroNome}, escreva orientações práticas de grafoscopia para a assinatura de seu nome:
 
 - **Inclinação:** A inclinação ideal da escrita e o que ela projeta energeticamente para este perfil
 - **Traços e Letras:** Quais letras devem ser escritas de forma aberta/fluida — e especificamente quais traços devem ser evitados (traços que cruzam, cortam ou fecham o movimento)
 - **Ritmo e Pressão:** Como a pressão da caneta e o ritmo da escrita influenciam a vibração — leve vs marcado para este número
 - **Iniciais e Maiúsculas:** Como trabalhar as letras iniciais para maximizar a projeção energética deste perfil
-- **Prática Recomendada:** Um protocolo de ativação — quantas vezes por dia, em quais contextos, e como criar o hábito de usar o nome
+${isCurrentNameAnalysis ? '- **Prática Diária:** Como escrever o próprio nome pode se tornar um ritual de presença e ancoramento' : '- **Prática Recomendada:** Um protocolo de ativação — quantas vezes por dia, em quais contextos, e como criar o hábito de usar o nome'}
 
 ---
 

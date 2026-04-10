@@ -33,7 +33,7 @@ export function HeroSection() {
 
         {/* H1 Headline principal */}
         <h1 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-          O Seu Nome Vibra.{' '}
+          O Seu Nome É Um Ímã.{' '}
           <br />
           <span
             style={{
@@ -43,7 +43,7 @@ export function HeroSection() {
               backgroundClip: 'text',
             }}
           >
-            A Questão É: Para Quê?
+            O Que Ele Tem Atraído?
           </span>
         </h1>
 
