@@ -72,30 +72,35 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
   }
 
   try {
-    // Determinar código de cupom: manual (do usuário) ou automático (promoção ativa no HQ)
-    let effectiveCouponCode = couponCode;
-    if (!effectiveCouponCode) {
-      try {
-        const { promotion } = await getHqPricesAndPromo();
-        if (promotion?.stripePromoCode) {
-          const appliesToThis = !promotion.productType || promotion.productType === product_type;
-          if (appliesToThis) effectiveCouponCode = promotion.stripePromoCode;
+    // ── Desconto sazonal automático: consulta o HQ (stripeCouponId direto)
+    let couponId: string | undefined;
+    let promotionCodeId: string | undefined;
+
+    try {
+      const { promotion } = await getHqPricesAndPromo();
+      if (promotion?.stripeCouponId) {
+        const appliesToThis = !promotion.productType || promotion.productType === product_type;
+        if (appliesToThis) {
+          couponId = promotion.stripeCouponId;
         }
-      } catch {
-        // HQ indisponível — prosseguir sem desconto automático
       }
+    } catch {
+      // HQ indisponível — prosseguir sem desconto sazonal automático
     }
 
-    // Resolver o promotion_code ID do Stripe
-    let discounts: { promotion_code: string }[] | undefined;
-    if (effectiveCouponCode) {
-      const promos = await stripe.promotionCodes.list({
-        code: effectiveCouponCode,
-        active: true,
-        limit: 1,
-      });
-      if (promos.data.length > 0) {
-        discounts = [{ promotion_code: promos.data[0].id }];
+    // ── Código de promoção manual (só usado se não há cupom sazonal ativo)
+    if (!couponId && couponCode) {
+      try {
+        const promos = await stripe.promotionCodes.list({
+          code: couponCode,
+          active: true,
+          limit: 1,
+        });
+        if (promos.data.length > 0) {
+          promotionCodeId = promos.data[0].id;
+        }
+      } catch {
+        // Falha silenciosa ao resolver código manual
       }
     }
 
@@ -105,7 +110,8 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
       productType: product_type as ProductType,
       successUrl: `${baseUrl}/app?checkout=success`,
       cancelUrl: `${baseUrl}/comprar?checkout=cancel`,
-      discounts,
+      couponId,
+      promotionCodeId,
     });
 
     return new Response(

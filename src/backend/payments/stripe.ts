@@ -36,7 +36,10 @@ export interface CreateCheckoutParams {
   productType: ProductType;
   successUrl: string;
   cancelUrl: string;
-  discounts?: { promotion_code: string }[];
+  /** Cupom sazonal automático (ID do coupon Stripe, vindo do HQ) */
+  couponId?: string;
+  /** Código de promoção manual do usuário (promotion_code ID do Stripe) */
+  promotionCodeId?: string;
 }
 
 /**
@@ -49,6 +52,18 @@ export async function createCheckoutSession(
 
   if (!priceId) {
     throw new Error(`Price ID não configurado para o produto: ${params.productType}`);
+  }
+
+  // ── Desconto: coupon sazonal (HQ) > código manual > allow_promotion_codes
+  // Stripe proíbe usar discounts[] e allow_promotion_codes simultaneamente.
+  let discountOptions: Record<string, unknown> = { allow_promotion_codes: true };
+
+  if (params.couponId) {
+    // Desconto sazonal automático: passa coupon diretamente (sem buscar promotion_code)
+    discountOptions = { discounts: [{ coupon: params.couponId }] };
+  } else if (params.promotionCodeId) {
+    // Código manual aplicado pelo usuário (já resolvido para promotion_code ID)
+    discountOptions = { discounts: [{ promotion_code: params.promotionCodeId }] };
   }
 
   return stripe.checkout.sessions.create({
@@ -70,7 +85,7 @@ export async function createCheckoutSession(
     success_url: params.successUrl,
     cancel_url: params.cancelUrl,
     locale: 'pt-BR',
-    ...(params.discounts ? { discounts: params.discounts } : {}),
+    ...discountOptions,
     payment_intent_data: {
       metadata: {
         user_id: params.userId,
