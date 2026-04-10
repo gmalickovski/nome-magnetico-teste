@@ -28,7 +28,6 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
     bloqueios,
     licoesCarmicas,
     tendenciasOcultas,
-    tendenciasOcultas,
     debitosCarmicos,
     gender,
     arquetipo,
