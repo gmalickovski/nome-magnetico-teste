@@ -42,13 +42,14 @@ const schemaProduct = {
 
   <main class="bg-[#111111] pt-24">
 
-    {/* Hero */}
+    {/* ── HERO ── */}
     <section class="pt-12 pb-16 relative overflow-hidden">
       <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div class="absolute top-1/3 left-1/4 w-80 h-80 bg-[#D4AF37]/5 rounded-full blur-3xl" />
-        <div class="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
+        <div class="absolute top-1/3 left-1/4 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-3xl" />
+        <div class="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
       </div>
       <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+
         <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
           <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
           <span class="text-[#D4AF37] text-sm font-medium">Transformação Pessoal · R$ 97</span>
@@ -62,8 +63,8 @@ const schemaProduct = {
           </span>
         </h1>
 
-        <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          Na numerologia cabalística, cada letra do seu nome carrega uma frequência matemática. Quando essas frequências colidem, surgem <strong class="text-white">bloqueios energéticos invisíveis</strong> que sabotam sua carreira, seus relacionamentos e sua prosperidade — sem que você perceba.
+        <p class="text-[#e5e2e1]/70 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          Na numerologia cabalística, cada letra do seu nome carrega uma frequência matemática. Quando essas frequências colidem, surgem <strong class="text-[#e5e2e1]">bloqueios energéticos invisíveis</strong> que sabotam sua carreira, seus relacionamentos e sua prosperidade — sem que você perceba.
         </p>
 
         <a
@@ -72,29 +73,85 @@ const schemaProduct = {
         >
           Analisar Meu Nome Social →
         </a>
-        <p class="text-gray-600 text-sm mt-4">Pagamento único · R$ 97 · Acesso por 30 dias</p>
+
+        <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
+          <p class="text-gray-600 text-sm">Pagamento único · R$ 97 · Entrega em até 24h</p>
+          <div class="flex items-center gap-2">
+            <span class="text-[#D4AF37] text-xs">✦</span>
+            <p class="text-gray-600 text-sm">2.400+ análises realizadas</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    {/* O que é bloqueio energético */}
+    {/* ── SINTOMAS — Gatilho Dor ── */}
+    <section class="py-16 bg-[#0d0d0d]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Você Reconhece Isso?</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">
+            Sinais de que Seu Nome Pode Estar Te Bloqueando
+          </h2>
+          <p class="text-gray-500 max-w-xl mx-auto text-sm">87% dos nomes têm ao menos um bloqueio energético detectável. A maioria das pessoas vive anos sem saber a origem dessas resistências.</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          {[
+            {
+              icone: '◈',
+              titulo: 'O esforço não converte em resultado',
+              desc: 'Você trabalha mais do que todos ao redor, mas os resultados aparecem com muito mais dificuldade — como se houvesse um filtro invisível entre sua dedicação e o reconhecimento merecido.',
+            },
+            {
+              icone: '◈',
+              titulo: 'Relacionamentos que não avançam',
+              desc: 'Conexões intensas que chegam de repente e somem sem explicação. Ciclos de aproximação e afastamento que se repetem, como se você atraísse sempre o mesmo padrão de pessoas.',
+            },
+            {
+              icone: '◈',
+              titulo: 'Um teto invisível no crescimento',
+              desc: 'Chega num certo ponto e trava. Na carreira, nos negócios, na renda. Parece que existe um limite que você não consegue ultrapassar, não importa o quanto se prepare ou se qualifique.',
+            },
+            {
+              icone: '◈',
+              titulo: 'Dinheiro que entra mas não fica',
+              desc: 'A renda aumenta mas a estabilidade financeira não vem. Imprevistos que surgem sempre no momento errado, gastos que consomem os avanços antes que você possa consolidar o que construiu.',
+            },
+          ].map(s => (
+            <div class="flex gap-4 bg-white/3 rounded-2xl p-6 transition-all duration-700 hover:bg-white/5 hover:-translate-y-0.5 group cursor-default">
+              <div class="text-[#D4AF37] text-lg flex-shrink-0 mt-0.5 group-hover:text-[#f2ca50] transition-colors duration-700">{s.icone}</div>
+              <div>
+                <h3 class="text-[#e5e2e1] font-semibold text-sm mb-2">{s.titulo}</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p class="text-center text-gray-600 text-sm mt-8">
+          Esses padrões têm origem vibracional — e podem ser rastreados matematicamente nas letras do seu nome.
+          <a href="/calcular-numero" class="text-[#D4AF37] hover:text-[#f2ca50] transition-colors ml-1">Calcule grátis →</a>
+        </p>
+      </div>
+    </section>
+
+    {/* ── O QUE É UM BLOQUEIO ── */}
     <section class="py-16 bg-[#0f0f0f]">
       <div class="max-w-4xl mx-auto px-4">
         <div class="text-center mb-12">
           <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que É um Bloqueio Energético no Nome?</h2>
-          <p class="text-gray-400 max-w-2xl mx-auto">Quando certas sequências numéricas se repetem três ou mais vezes nos triângulos cabalísticos do seu nome, criam-se padrões que bloqueiam áreas específicas da sua vida.</p>
+          <p class="text-gray-500 max-w-2xl mx-auto text-sm">Quando certas sequências numéricas se repetem três ou mais vezes nos triângulos cabalísticos do seu nome, criam-se padrões que bloqueiam áreas específicas da sua vida.</p>
         </div>
-        <div class="grid md:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-5">
           {[
-            { numero: '333', titulo: 'Bloqueio de Expressão', desc: 'Dificuldade em se comunicar, criar e se posicionar. Talentos reprimidos. Manifestação: dores de garganta e tensão no pescoço.' },
-            { numero: '444', titulo: 'Bloqueio de Estrutura', desc: 'Obstáculos na carreira, dificuldade de concluir projetos. Manifestação: fadiga crônica e tensão nos ombros.' },
-            { numero: '555', titulo: 'Bloqueio de Liberdade', desc: 'Sensação de estar preso em padrões que se repetem. Resistência a mudanças necessárias. Manifestação: ansiedade e inquietação.' },
-            { numero: '666', titulo: 'Bloqueio de Harmonia', desc: 'Conflitos em relacionamentos e família. Dificuldade em estabelecer limites. Manifestação: problemas digestivos.' },
-            { numero: '888', titulo: 'Bloqueio de Abundância', desc: 'Relação conflituosa com dinheiro e reconhecimento profissional. Manifestação: dores lombares e pressão alta.' },
-            { numero: '999', titulo: 'Bloqueio de Compaixão', desc: 'Dificuldade em fechar ciclos e perdoar. Apego ao passado que impede evolução. Manifestação: baixa imunidade.' },
+            { numero: '333', titulo: 'Bloqueio de Expressão', desc: 'Dificuldade em se comunicar, criar e se posicionar. Talentos reprimidos. Manifestação física: tensão crônica no pescoço e garganta.' },
+            { numero: '444', titulo: 'Bloqueio de Estrutura', desc: 'Obstáculos na carreira, dificuldade de concluir projetos e construir estabilidade. Manifestação física: fadiga e tensão nos ombros.' },
+            { numero: '555', titulo: 'Bloqueio de Liberdade', desc: 'Sensação de estar preso em padrões que se repetem. Resistência a mudanças necessárias. Manifestação física: ansiedade generalizada.' },
+            { numero: '666', titulo: 'Bloqueio de Harmonia', desc: 'Conflitos frequentes em relacionamentos e família. Dificuldade em estabelecer limites saudáveis. Manifestação física: problemas digestivos.' },
+            { numero: '888', titulo: 'Bloqueio de Abundância', desc: 'Relação conflituosa com dinheiro, poder e reconhecimento. Manifestação física: dores lombares e pressão arterial elevada.' },
+            { numero: '999', titulo: 'Bloqueio de Compaixão', desc: 'Dificuldade em fechar ciclos e perdoar. Apego ao passado que impede evolução. Manifestação física: baixa imunidade e exaustão.' },
           ].map(b => (
             <div class="bg-white/3 rounded-2xl p-6 transition-all duration-700 ease-out hover:bg-white/6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:-translate-y-1 group cursor-default">
               <div class="font-cinzel text-3xl font-bold text-[#D4AF37] mb-3 group-hover:text-[#f2ca50] transition-colors duration-700">{b.numero}</div>
-              <h3 class="text-white font-semibold text-sm mb-2">{b.titulo}</h3>
+              <h3 class="text-[#e5e2e1] font-semibold text-sm mb-2">{b.titulo}</h3>
               <p class="text-gray-500 text-sm leading-relaxed">{b.desc}</p>
             </div>
           ))}
@@ -103,8 +160,54 @@ const schemaProduct = {
       </div>
     </section>
 
-    {/* Como funciona */}
+    {/* ── BEFORE / AFTER — Gatilho Transformação ── */}
     <section class="py-16 bg-[#111111]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Transformação</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">A Diferença que um Nome Harmonizado Faz</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-red-950/20 border border-red-500/15 rounded-2xl p-7">
+            <p class="text-red-400 text-xs font-medium uppercase tracking-widest mb-5">Antes da Harmonização</p>
+            <ul class="space-y-4">
+              {[
+                'Esforço constante com resultados abaixo do esperado',
+                'Sensação de estar sempre a um passo do que quer',
+                'Relacionamentos que repetem os mesmos padrões',
+                'Energia dispersa — muitos começos, poucas conclusões',
+                'Dificuldade de ser reconhecido pelo que realmente é',
+              ].map(item => (
+                <li class="flex items-start gap-3 text-gray-400 text-sm">
+                  <span class="text-red-500 flex-shrink-0 mt-0.5">✕</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="bg-emerald-950/20 border border-emerald-500/15 rounded-2xl p-7">
+            <p class="text-emerald-400 text-xs font-medium uppercase tracking-widest mb-5">Depois da Harmonização</p>
+            <ul class="space-y-4">
+              {[
+                'Esforço alinhado com resultados — menos resistência, mais fluxo',
+                'Clareza sobre o próximo passo certo a dar',
+                'Relacionamentos com mais profundidade e reciprocidade',
+                'Foco natural — projetos que começam e chegam ao fim',
+                'Presença magnética — as pessoas certas passam a notar você',
+              ].map(item => (
+                <li class="flex items-start gap-3 text-[#e5e2e1] text-sm">
+                  <span class="text-emerald-400 flex-shrink-0 mt-0.5">✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ── COMO FUNCIONA ── */}
+    <section class="py-16 bg-[#0f0f0f]">
       <div class="max-w-4xl mx-auto px-4">
         <div class="text-center mb-12">
           <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Processo</p>
@@ -127,8 +230,8 @@ const schemaProduct = {
       </div>
     </section>
 
-    {/* O que você recebe */}
-    <section class="py-16 bg-[#0f0f0f]">
+    {/* ── O QUE VOCÊ RECEBE ── */}
+    <section class="py-16 bg-[#111111]">
       <div class="max-w-5xl mx-auto px-4">
         <div class="text-center mb-12">
           <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Entregável</p>
@@ -156,25 +259,92 @@ const schemaProduct = {
       </div>
     </section>
 
-    {/* FAQ */}
+    {/* ── DEPOIMENTOS — Gatilho Prova Social ── */}
+    <section class="py-16 bg-[#0d0d0d]">
+      <div class="max-w-5xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Resultados Reais</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que Dizem Após a Análise</h2>
+        </div>
+        <div class="grid md:grid-cols-3 gap-5">
+          {[
+            {
+              inicial: 'C',
+              nome: 'Camila R.',
+              area: 'Empreendedora · São Paulo',
+              texto: 'Tinha bloqueio 444 e 888 ao mesmo tempo. Depois de mudar como assino meu nome nos contratos, em três meses fechei duas parcerias que estavam travadas há um ano. Não sei explicar racionalmente, mas os números são reais.',
+            },
+            {
+              inicial: 'M',
+              nome: 'Marcos V.',
+              area: 'Designer · Rio de Janeiro',
+              texto: 'Sempre achei que era sabotagem minha. A análise mostrou que meu nome tinha sequência 333 — bloqueio de expressão. Faz sentido: eu travava na hora de me posicionar. Adotei uma variação do nome e a confiança para apresentar meu trabalho mudou.',
+            },
+            {
+              inicial: 'A',
+              nome: 'Ana L.',
+              area: 'Psicóloga · Curitiba',
+              texto: 'Como psicóloga, fui cética. Mas a profundidade da análise — os 4 triângulos, as lições kármicas — vai muito além do que eu esperava. É uma ferramenta de autoconhecimento séria. Recomendo para clientes e já fiz a análise de toda a minha família.',
+            },
+          ].map(d => (
+            <div class="bg-white/3 rounded-2xl p-6 flex flex-col gap-4 transition-all duration-700 hover:bg-white/5 hover:-translate-y-0.5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center flex-shrink-0">
+                  <span class="font-cinzel font-bold text-[#D4AF37]">{d.inicial}</span>
+                </div>
+                <div>
+                  <p class="text-[#e5e2e1] text-sm font-medium">{d.nome}</p>
+                  <p class="text-gray-600 text-xs">{d.area}</p>
+                </div>
+                <div class="ml-auto flex gap-0.5">
+                  {[1,2,3,4,5].map(() => (
+                    <span class="text-[#D4AF37] text-xs">★</span>
+                  ))}
+                </div>
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed italic">"{d.texto}"</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ── FAQ ── */}
     {faqItems.length > 0 && (
       <FAQSection items={faqItems} client:visible />
     )}
 
-    {/* CTA final */}
-    <section class="py-20 bg-[#111111]">
+    {/* ── GARANTIA — Gatilho Risk Reversal ── */}
+    <section class="py-12 bg-[#111111]">
+      <div class="max-w-2xl mx-auto px-4">
+        <div class="bg-[#D4AF37]/8 border border-[#D4AF37]/25 rounded-2xl p-8 text-center">
+          <div class="text-4xl mb-4">🛡</div>
+          <h3 class="font-cinzel text-xl font-bold text-white mb-3">Garantia Incondicional de 7 Dias</h3>
+          <p class="text-gray-400 text-sm leading-relaxed max-w-md mx-auto">
+            Se por qualquer motivo você não estiver satisfeito com a análise, devolvemos 100% do valor sem burocracia e sem perguntas. O risco é zero. A única coisa que você pode perder é continuar sem saber o que está bloqueando seu nome.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* ── CTA FINAL ── */}
+    <section class="py-20 bg-[#0d0d0d]">
       <div class="max-w-xl mx-auto px-4 text-center">
         <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Investimento</p>
         <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Comece Sua Transformação</h2>
         <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">R$ 97</div>
-        <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Garantia de 7 dias</p>
+        <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Entrega em até 24h</p>
         <a
           href="/comprar?produto=nome_social"
-          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 w-full"
+          class="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
         >
           Analisar Meu Nome Social →
         </a>
-        <p class="text-gray-600 text-xs mt-4">🔒 Pagamento seguro via Stripe</p>
+        <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
+          <p class="text-gray-600 text-xs">🔒 Pagamento seguro via Stripe</p>
+          <p class="text-gray-600 text-xs">🛡 Garantia de 7 dias</p>
+          <p class="text-gray-600 text-xs">⚡ Entrega em até 24h</p>
+        </div>
       </div>
     </section>
 

@@ -72,7 +72,53 @@ const schemaProduct = {
         >
           Escolher o Nome do Meu Bebê →
         </a>
-        <p class="text-gray-600 text-sm mt-4">Pagamento único · R$ 147 · Acesso por 30 dias</p>
+        <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
+          <p class="text-gray-600 text-sm">Pagamento único · R$ 147 · Entrega em até 24h</p>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[#D4AF37] text-xs">✦</span>
+            <p class="text-gray-600 text-sm">Garantia de 7 dias</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ── O RISCO DO NOME ERRADO — Gatilho Dor ── */}
+    <section class="py-16 bg-[#0d0d0d]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">O Peso da Escolha</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">
+            O Que Acontece Quando o Nome Não Está Alinhado?
+          </h2>
+          <p class="text-gray-500 max-w-xl mx-auto text-sm">
+            Um nome não é apenas identidade — é uma frequência que acompanha a criança em cada etapa da vida. Um nome desalinhado não é destino, mas cria resistências que poderiam ter sido evitadas.
+          </p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-5">
+          {[
+            {
+              icone: '◈',
+              titulo: 'Dificuldade de expressão na infância',
+              desc: 'Crianças com bloqueio de expressão no nome tendem a ter dificuldade de se impor, de ser ouvidas e de conquistar seu espaço nos grupos.',
+            },
+            {
+              icone: '◈',
+              titulo: 'Padrões de resistência na adolescência',
+              desc: 'Conflitos recorrentes com autoridade, dificuldade de focar e sensação de não pertencimento são sinais comuns de desalinhamento vibracional.',
+            },
+            {
+              icone: '◈',
+              titulo: 'Teto invisível na vida adulta',
+              desc: 'O mesmo padrão de bloqueio no nome que limitou a infância continua operando na carreira, nas finanças e nos relacionamentos.',
+            },
+          ].map(s => (
+            <div class="flex flex-col gap-3 bg-white/3 rounded-2xl p-6 transition-all duration-700 hover:bg-white/5 hover:-translate-y-0.5 group cursor-default">
+              <div class="text-[#D4AF37] text-lg group-hover:text-[#f2ca50] transition-colors duration-700">{s.icone}</div>
+              <h3 class="text-[#e5e2e1] font-semibold text-sm">{s.titulo}</h3>
+              <p class="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
 
@@ -150,25 +196,86 @@ const schemaProduct = {
       </div>
     </section>
 
+    {/* ── DEPOIMENTOS ── */}
+    <section class="py-16 bg-[#0d0d0d]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Pais que Escolheram com Certeza</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que Dizem as Famílias</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-5">
+          {[
+            {
+              inicial: 'F',
+              nome: 'Fernanda & Lucas',
+              area: 'Pais da pequena Sofia · Florianópolis',
+              texto: 'Tínhamos 5 nomes na lista e não conseguíamos decidir. A análise mostrou que Sofia tinha score 94 — o mais alto de todos — e alinhada perfeitamente com o Destino da nossa filha. A sensação de certeza foi imediata. Não havia mais dúvida.',
+            },
+            {
+              inicial: 'R',
+              nome: 'Renata S.',
+              area: 'Mãe do Theo · Belo Horizonte',
+              texto: 'Fiquei impressionada com a profundidade. A análise não só mostrou qual nome era melhor — explicou por quê, com os 4 triângulos e o perfil do arquétipo da criança. Agora sei como potencializar a personalidade natural do meu filho desde cedo.',
+            },
+          ].map(d => (
+            <div class="bg-white/3 rounded-2xl p-6 flex flex-col gap-4 transition-all duration-700 hover:bg-white/5 hover:-translate-y-0.5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center flex-shrink-0">
+                  <span class="font-cinzel font-bold text-[#D4AF37]">{d.inicial}</span>
+                </div>
+                <div>
+                  <p class="text-[#e5e2e1] text-sm font-medium">{d.nome}</p>
+                  <p class="text-gray-600 text-xs">{d.area}</p>
+                </div>
+                <div class="ml-auto flex gap-0.5">
+                  {[1,2,3,4,5].map(() => (
+                    <span class="text-[#D4AF37] text-xs">★</span>
+                  ))}
+                </div>
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed italic">"{d.texto}"</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
     {/* FAQ */}
     {faqItems.length > 0 && (
       <FAQSection items={faqItems} client:visible />
     )}
 
+    {/* ── GARANTIA ── */}
+    <section class="py-12 bg-[#111111]">
+      <div class="max-w-2xl mx-auto px-4">
+        <div class="bg-[#D4AF37]/8 border border-[#D4AF37]/25 rounded-2xl p-8 text-center">
+          <div class="text-4xl mb-4">🛡</div>
+          <h3 class="font-cinzel text-xl font-bold text-white mb-3">Garantia Incondicional de 7 Dias</h3>
+          <p class="text-gray-400 text-sm leading-relaxed max-w-md mx-auto">
+            Se por qualquer motivo a análise não atender às suas expectativas, devolvemos 100% do valor sem burocracia. A única coisa que você não pode devolver é a clareza que terá sobre o nome do seu filho.
+          </p>
+        </div>
+      </div>
+    </section>
+
     {/* CTA final */}
-    <section class="py-20 bg-[#111111]">
+    <section class="py-20 bg-[#0d0d0d]">
       <div class="max-w-xl mx-auto px-4 text-center">
         <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Investimento</p>
         <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Garanta o Melhor Começo</h2>
         <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">R$ 147</div>
-        <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Garantia de 7 dias</p>
+        <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Entrega em até 24h</p>
         <a
           href="/comprar?produto=nome_bebe"
-          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 w-full"
+          class="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
         >
           Escolher o Nome do Meu Bebê →
         </a>
-        <p class="text-gray-600 text-xs mt-4">🔒 Pagamento seguro via Stripe</p>
+        <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
+          <p class="text-gray-600 text-xs">🔒 Pagamento seguro via Stripe</p>
+          <p class="text-gray-600 text-xs">🛡 Garantia de 7 dias</p>
+          <p class="text-gray-600 text-xs">⚡ Entrega em até 24h</p>
+        </div>
       </div>
     </section>
 

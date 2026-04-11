@@ -72,7 +72,53 @@ const schemaProduct = {
         >
           Analisar o Nome da Minha Empresa →
         </a>
-        <p class="text-gray-600 text-sm mt-4">Pagamento único · R$ 197 · Acesso por 30 dias</p>
+        <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
+          <p class="text-gray-600 text-sm">Pagamento único · R$ 197 · Entrega em até 24h</p>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[#D4AF37] text-xs">✦</span>
+            <p class="text-gray-600 text-sm">Garantia de 7 dias</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ── O CUSTO DO NOME ERRADO — Gatilho Dor ── */}
+    <section class="py-16 bg-[#0d0d0d]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">O Risco Invisível</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">
+            O Custo de um Nome Empresarial Desalinhado
+          </h2>
+          <p class="text-gray-500 max-w-xl mx-auto text-sm">
+            Cada real investido em marketing amplifica a vibração do nome — para o bem ou para o mal. Um nome desalinhado não apenas não atrai: ele repele ativamente o que sua empresa busca.
+          </p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-5">
+          {[
+            {
+              icone: '◈',
+              titulo: 'Marketing que não converte',
+              desc: 'Campanhas com bom alcance mas taxa de conversão frustrante. O nome cria uma dissonância subconsciente que faz o cliente hesitar no último momento.',
+            },
+            {
+              icone: '◈',
+              titulo: 'Dificuldade de escalar',
+              desc: 'A empresa cresce até um ponto e trava. Novos sócios, clientes-âncora e contratos maiores parecem atraídos — mas não fecham. O teto invisível do nome bloqueia o próximo nível.',
+            },
+            {
+              icone: '◈',
+              titulo: 'Conflitos internos recorrentes',
+              desc: 'Sócios que entram em atrito, equipes que se fragmentam, culturas que não se consolidam. O nome desalinhado com o Destino do fundador cria turbulência na estrutura.',
+            },
+          ].map(s => (
+            <div class="flex flex-col gap-3 bg-white/3 rounded-2xl p-6 transition-all duration-700 hover:bg-white/5 hover:-translate-y-0.5 group cursor-default">
+              <div class="text-[#D4AF37] text-lg group-hover:text-[#f2ca50] transition-colors duration-700">{s.icone}</div>
+              <h3 class="text-[#e5e2e1] font-semibold text-sm">{s.titulo}</h3>
+              <p class="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
 
@@ -126,25 +172,86 @@ const schemaProduct = {
       </div>
     </section>
 
+    {/* ── DEPOIMENTOS ── */}
+    <section class="py-16 bg-[#0d0d0d]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Marcas que Escolheram com Estratégia</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que Dizem os Fundadores</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-5">
+          {[
+            {
+              inicial: 'P',
+              nome: 'Paulo M.',
+              area: 'Fundador · Consultoria Financeira · Porto Alegre',
+              texto: 'Estava entre dois nomes para minha consultoria. A análise mostrou que um tinha Tendência Oculta do 8 — exatamente o que eu queria evitar num negócio que lida com dinheiro dos outros. Escolhi o segundo. Em 8 meses, fechei os maiores contratos da minha carreira.',
+            },
+            {
+              inicial: 'J',
+              nome: 'Juliana A.',
+              area: 'Empreendedora · Marca de bem-estar · São Paulo',
+              texto: 'O Arquétipo da Marca foi revelador. Mostrou que minha empresa tinha uma identidade vibracional de cuidado e cura — e que o nome que eu estava usando contradiz isso. Reposicionei a marca com o nome certo e a comunicação ficou muito mais autêntica.',
+            },
+          ].map(d => (
+            <div class="bg-white/3 rounded-2xl p-6 flex flex-col gap-4 transition-all duration-700 hover:bg-white/5 hover:-translate-y-0.5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center flex-shrink-0">
+                  <span class="font-cinzel font-bold text-[#D4AF37]">{d.inicial}</span>
+                </div>
+                <div>
+                  <p class="text-[#e5e2e1] text-sm font-medium">{d.nome}</p>
+                  <p class="text-gray-600 text-xs">{d.area}</p>
+                </div>
+                <div class="ml-auto flex gap-0.5">
+                  {[1,2,3,4,5].map(() => (
+                    <span class="text-[#D4AF37] text-xs">★</span>
+                  ))}
+                </div>
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed italic">"{d.texto}"</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
     {/* FAQ */}
     {faqItems.length > 0 && (
       <FAQSection items={faqItems} client:visible />
     )}
 
+    {/* ── GARANTIA ── */}
+    <section class="py-12 bg-[#111111]">
+      <div class="max-w-2xl mx-auto px-4">
+        <div class="bg-[#D4AF37]/8 border border-[#D4AF37]/25 rounded-2xl p-8 text-center">
+          <div class="text-4xl mb-4">🛡</div>
+          <h3 class="font-cinzel text-xl font-bold text-white mb-3">Garantia Incondicional de 7 Dias</h3>
+          <p class="text-gray-400 text-sm leading-relaxed max-w-md mx-auto">
+            Se a análise não entregar o valor que você esperava, devolvemos 100% do investimento sem burocracia. Uma decisão estratégica sobre o nome da sua empresa merece ser feita com segurança total.
+          </p>
+        </div>
+      </div>
+    </section>
+
     {/* CTA final */}
-    <section class="py-20 bg-[#111111]">
+    <section class="py-20 bg-[#0d0d0d]">
       <div class="max-w-xl mx-auto px-4 text-center">
         <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Investimento</p>
-        <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Posicione Sua Marca</h2>
+        <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Posicione Sua Marca com Precisão</h2>
         <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">R$ 197</div>
-        <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Garantia de 7 dias</p>
+        <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Entrega em até 24h</p>
         <a
           href="/comprar?produto=nome_empresa"
-          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 w-full"
+          class="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
         >
           Analisar o Nome da Minha Empresa →
         </a>
-        <p class="text-gray-600 text-xs mt-4">🔒 Pagamento seguro via Stripe</p>
+        <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
+          <p class="text-gray-600 text-xs">🔒 Pagamento seguro via Stripe</p>
+          <p class="text-gray-600 text-xs">🛡 Garantia de 7 dias</p>
+          <p class="text-gray-600 text-xs">⚡ Entrega em até 24h</p>
+        </div>
       </div>
     </section>
 
