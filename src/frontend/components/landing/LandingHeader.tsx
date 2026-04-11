@@ -40,7 +40,7 @@ export function LandingHeader() {
         </a>
 
         {/* Nav desktop */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
           <a href="/#como-funciona" className={navLinkClass}>
             Como Funciona
           </a>
@@ -132,7 +132,7 @@ export function LandingHeader() {
         {/* Menu mobile toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-[#D4AF37] hover:text-[#f2ca50] transition-colors"
+          className="lg:hidden text-[#D4AF37] hover:text-[#f2ca50] transition-colors"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {menuOpen ? (
@@ -146,7 +146,7 @@ export function LandingHeader() {
 
       {/* Menu mobile aberto */}
       {menuOpen && (
-        <div className="md:hidden bg-[#111111]/95 backdrop-blur-md border-t border-[#D4AF37]/20 px-4 py-6 space-y-1">
+        <div className="lg:hidden bg-[#111111]/95 backdrop-blur-md border-t border-[#D4AF37]/20 px-4 py-6 space-y-1">
           <a href="/#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Como Funciona</a>
           <a href="/calcular-numero" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Teste de Bloqueios</a>
           <a href="/#precos" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Preços</a>
