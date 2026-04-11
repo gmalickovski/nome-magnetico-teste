@@ -43,6 +43,12 @@ CREATE TABLE IF NOT EXISTS public.glossary_terms (
 ALTER TABLE public.blog_posts    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.glossary_terms ENABLE ROW LEVEL SECURITY;
 
+-- Recriar policies idempotente
+DROP POLICY IF EXISTS "blog_public_read"     ON public.blog_posts;
+DROP POLICY IF EXISTS "blog_service_all"     ON public.blog_posts;
+DROP POLICY IF EXISTS "glossary_public_read" ON public.glossary_terms;
+DROP POLICY IF EXISTS "glossary_service_all" ON public.glossary_terms;
+
 -- Leitura pública: apenas conteúdo publicado (site serve isso)
 CREATE POLICY "blog_public_read"
   ON public.blog_posts FOR SELECT
