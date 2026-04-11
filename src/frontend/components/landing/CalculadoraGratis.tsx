@@ -19,6 +19,15 @@ function formatDate(raw: string): string {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
 }
 
+const HIDDEN_ITEMS = [
+  'Triângulo Pessoal — vida íntima e reações internas',
+  'Triângulo Social — percepção do mundo e influências externas',
+  'Triângulo de Destino — resultados, missão e previsões',
+  'Lições Kármicas — o que você veio desenvolver nesta encarnação',
+  'Número de Motivação da Alma — o desejo oculto que guia suas escolhas',
+  '3 variações do seu nome já harmonizadas e prontas para assinar',
+];
+
 export function CalculadoraGratis() {
   const [nome, setNome] = useState('');
   const [data, setData] = useState('');
@@ -55,20 +64,21 @@ export function CalculadoraGratis() {
   }
 
   if (result) {
+    const temBloqueios = result.quantidade_bloqueios > 0;
+
     return (
-      <div className="animate-fade-in">
-        {/* Resultado */}
-        <div className="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-8 mb-6 shadow-xl shadow-black/40">
-          <div className="text-center mb-8">
-            <p className="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-2">Resultado</p>
-            <h3 className="font-cinzel text-2xl font-bold text-white mb-1">
-              {result.nome_primeiro}
-            </h3>
-            <p className="text-gray-500 text-sm">Análise parcial do nome</p>
+      <div className="animate-fade-in space-y-5">
+
+        {/* Cabeçalho do resultado */}
+        <div className="bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 shadow-xl shadow-black/40">
+          <div className="text-center mb-6">
+            <p className="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-2">Diagnóstico Concluído</p>
+            <h3 className="font-cinzel text-2xl font-bold text-white mb-1">{result.nome_primeiro}</h3>
+            <p className="text-gray-500 text-sm">Análise parcial do nome de nascimento</p>
           </div>
 
           {/* Números */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-black/30 rounded-xl p-5 text-center">
               <p className="text-gray-500 text-xs uppercase tracking-widest mb-1">Número de Expressão</p>
               <p className="font-cinzel text-4xl font-bold text-[#D4AF37]">{result.numero_expressao}</p>
@@ -83,59 +93,88 @@ export function CalculadoraGratis() {
             </div>
           </div>
 
-          {/* Bloqueios detectados */}
-          {result.quantidade_bloqueios > 0 ? (
-            <div className="bg-amber-950/40 border border-amber-500/30 rounded-xl p-5 mb-6">
-              <div className="flex items-start gap-3">
-                <span className="text-amber-400 text-xl flex-shrink-0 leading-none mt-0.5">⚠</span>
-                <div>
-                  <p className="text-amber-300 font-semibold text-sm mb-1">
-                    {result.quantidade_bloqueios} bloqueio{result.quantidade_bloqueios > 1 ? 's' : ''} energético{result.quantidade_bloqueios > 1 ? 's' : ''} detectado{result.quantidade_bloqueios > 1 ? 's' : ''}
-                  </p>
-                  {result.primeiro_bloqueio_titulo && (
-                    <p className="text-amber-500/80 text-xs leading-relaxed">
-                      Padrão identificado: <strong className="text-amber-400">{result.primeiro_bloqueio_titulo}</strong>
-                      {result.quantidade_bloqueios > 1 && ` + ${result.quantidade_bloqueios - 1} outro${result.quantidade_bloqueios > 2 ? 's' : ''}`}
-                    </p>
-                  )}
-                  <p className="text-gray-500 text-xs mt-2 leading-relaxed">
-                    A análise completa revela quais áreas da vida estão sendo afetadas e como remover esses padrões.
-                  </p>
-                </div>
+          {/* Interpretação básica */}
+          <p className="text-gray-300 text-sm leading-relaxed">{result.interpretacao_basica}</p>
+        </div>
+
+        {/* Card de bloqueios — dramático se tiver */}
+        {temBloqueios ? (
+          <div className="bg-amber-950/50 border border-amber-500/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <span className="text-amber-400 text-lg">⚠</span>
+              </div>
+              <div>
+                <p className="text-amber-300 font-bold text-base mb-1">
+                  {result.quantidade_bloqueios} bloqueio{result.quantidade_bloqueios > 1 ? 's' : ''} energético{result.quantidade_bloqueios > 1 ? 's' : ''} detectado{result.quantidade_bloqueios > 1 ? 's' : ''} no seu nome
+                </p>
+                <p className="text-amber-500/80 text-sm leading-relaxed">
+                  {result.primeiro_bloqueio_titulo
+                    ? `Padrão ativo: "${result.primeiro_bloqueio_titulo}"${result.quantidade_bloqueios > 1 ? ` e mais ${result.quantidade_bloqueios - 1} outro${result.quantidade_bloqueios > 2 ? 's' : ''}` : ''}.`
+                    : `Seu nome carrega padrões de repetição que criam resistência em áreas específicas da vida.`
+                  }
+                </p>
               </div>
             </div>
-          ) : (
-            <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-4 mb-6">
-              <div className="flex items-center gap-2">
-                <span className="text-emerald-400 text-base">✦</span>
-                <p className="text-emerald-400/80 text-sm">Nenhum bloqueio detectado neste nome</p>
+            <div className="bg-amber-900/30 rounded-xl p-4 border border-amber-500/20">
+              <p className="text-amber-400/90 text-xs leading-relaxed">
+                <strong className="text-amber-300">O que isso significa:</strong> Bloqueios energéticos no nome criam padrões de repetição que resistem a todo esforço consciente — você pode trabalhar, se esforçar e fazer tudo certo, mas o resultado trava sempre no mesmo ponto. A análise completa revela exatamente quais áreas estão sendo afetadas e sugere variações do seu nome que eliminam esses padrões.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-5">
+            <div className="flex items-start gap-3">
+              <span className="text-emerald-400 text-xl flex-shrink-0 leading-none mt-0.5">✦</span>
+              <div>
+                <p className="text-emerald-400 font-semibold text-sm mb-1">Nenhum bloqueio detectado no Triângulo da Vida</p>
+                <p className="text-emerald-600/80 text-xs leading-relaxed">
+                  Ótimo sinal. Mas os outros 3 triângulos (Pessoal, Social e Destino) ainda não foram analisados — bloqueios podem estar presentes nessas dimensões. A análise completa verifica todos os 4 triângulos.
+                </p>
               </div>
             </div>
-          )}
-
-          {/* Interpretação */}
-          <div className="mb-8">
-            <p className="text-gray-300 text-sm leading-relaxed">{result.interpretacao_basica}</p>
           </div>
+        )}
 
-          {/* Teaser */}
-          <div className="bg-[#D4AF37]/8 border border-[#D4AF37]/20 rounded-xl p-5 mb-6">
-            <p className="text-[#D4AF37] text-xs font-medium uppercase tracking-widest mb-2">Análise incompleta</p>
-            <p className="text-gray-300 text-sm leading-relaxed">
-              Seu nome carrega padrões mais profundos que esses dois números. A análise completa revela os{' '}
-              <strong className="text-white">4 Triângulos Cabalísticos</strong>, os{' '}
-              <strong className="text-white">bloqueios energéticos</strong> presentes em cada dimensão do seu nome, suas{' '}
-              <strong className="text-white">Lições Kármicas</strong> e as{' '}
-              <strong className="text-white">3 variações do seu nome</strong> já harmonizadas — impossível de calcular manualmente.
-            </p>
+        {/* Seção "O que você ainda não sabe" — teaser */}
+        <div className="bg-[#0d0d0d] border border-[#D4AF37]/25 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-full bg-[#D4AF37]/15 flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-[#D4AF37]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1C8.676 1 6 3.676 6 7v1H4v15h16V8h-2V7c0-3.324-2.676-6-6-6zm0 2c2.276 0 4 1.724 4 4v1H8V7c0-2.276 1.724-4 4-4zm0 9a2 2 0 110 4 2 2 0 010-4z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-[#D4AF37] font-semibold text-sm">Análise parcial — há muito mais sobre seu nome</p>
+              <p className="text-gray-600 text-xs">Não revelado neste diagnóstico gratuito</p>
+            </div>
           </div>
+          <ul className="space-y-2.5">
+            {HIDDEN_ITEMS.map((item, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm">
+                <span className="text-[#D4AF37]/40 mt-0.5 flex-shrink-0">—</span>
+                <span className="text-gray-500 italic">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
+        {/* CTA forte */}
+        <div className="rounded-2xl overflow-hidden">
           <a
             href={result.cta_url}
-            className="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20 text-base"
+            className="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold py-4 hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-[#D4AF37]/25 text-base"
           >
-            Ver Minha Análise Completa →
+            {temBloqueios
+              ? 'Desbloquear Minha Análise Completa →'
+              : 'Ver Minha Análise Numerológica Completa →'
+            }
           </a>
+          <div className="bg-[#D4AF37]/8 text-center py-3 px-4">
+            <p className="text-gray-500 text-xs">
+              Entrega em até 24h · Garantia de 7 dias · Análise personalizada e manual
+            </p>
+          </div>
         </div>
 
         {/* Recalcular */}
@@ -143,7 +182,7 @@ export function CalculadoraGratis() {
           onClick={() => { setResult(null); setNome(''); setData(''); }}
           className="w-full text-center text-gray-600 hover:text-gray-400 text-sm transition-colors py-2"
         >
-          Calcular outro nome
+          Testar outro nome
         </button>
       </div>
     );
@@ -200,10 +239,10 @@ export function CalculadoraGratis() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            Calculando...
+            Analisando...
           </span>
         ) : (
-          'Calcular Meu Número de Expressão'
+          'Detectar Bloqueios do Meu Nome'
         )}
       </button>
 

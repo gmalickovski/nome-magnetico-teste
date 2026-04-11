@@ -1,14 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export function LandingHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+  const productsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (productsRef.current && !productsRef.current.contains(e.target as Node)) {
+        setProductsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const navLinkClass =
+    'relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300';
 
   return (
     <header
@@ -26,16 +41,73 @@ export function LandingHeader() {
 
         {/* Nav desktop */}
         <nav className="hidden md:flex items-center gap-6">
-          <a href="/#como-funciona" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
+          <a href="/#como-funciona" className={navLinkClass}>
             Como Funciona
           </a>
-          <a href="/calcular-numero" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
-            Calculadora Grátis
+          <a href="/calcular-numero" className={navLinkClass}>
+            Teste de Bloqueios
           </a>
-          <a href="/perguntas-frequentes" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
+
+          {/* Dropdown Produtos */}
+          <div
+            ref={productsRef}
+            className="relative"
+            onMouseEnter={() => setProductsOpen(true)}
+            onMouseLeave={() => setProductsOpen(false)}
+          >
+            <button
+              className="flex items-center gap-1 text-gray-400 hover:text-[#D4AF37] transition-colors text-sm"
+              onClick={() => setProductsOpen(v => !v)}
+              aria-expanded={productsOpen}
+            >
+              Produtos
+              <svg
+                className={`w-3 h-3 transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {productsOpen && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-56 bg-[#1a1a1a] border border-[#D4AF37]/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden py-2 z-50">
+                <a
+                  href="/nome-social"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
+                  onClick={() => setProductsOpen(false)}
+                >
+                  <span className="text-[#D4AF37] text-base leading-none">✦</span>
+                  <span>Nome Social</span>
+                </a>
+                <a
+                  href="/nome-bebe"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
+                  onClick={() => setProductsOpen(false)}
+                >
+                  <span className="text-base leading-none">👶</span>
+                  <span>Nome para Bebê</span>
+                </a>
+                <a
+                  href="/nome-empresarial"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
+                  onClick={() => setProductsOpen(false)}
+                >
+                  <span className="text-base leading-none">🏢</span>
+                  <span>Nome Empresarial</span>
+                </a>
+              </div>
+            )}
+          </div>
+
+          <a href="/blog" className={navLinkClass}>
+            Blog
+          </a>
+          <a href="/perguntas-frequentes" className={navLinkClass}>
             FAQ
           </a>
-          <a href="/#precos" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
+          <a href="/#precos" className={navLinkClass}>
             Preços
           </a>
           <a href="/auth/login" className="bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-sm px-5 py-2 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">
@@ -49,7 +121,7 @@ export function LandingHeader() {
           </a>
         </nav>
 
-        {/* Menu mobile */}
+        {/* Menu mobile toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden text-[#D4AF37] hover:text-[#f2ca50] transition-colors"
@@ -66,21 +138,32 @@ export function LandingHeader() {
 
       {/* Menu mobile aberto */}
       {menuOpen && (
-        <div className="md:hidden bg-[#111111]/95 backdrop-blur-md border-t border-[#D4AF37]/20 px-4 py-6 space-y-4">
-          <a href="/#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Como Funciona</a>
-          <a href="/calcular-numero" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Calculadora Grátis</a>
-          <a href="/perguntas-frequentes" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Perguntas Frequentes</a>
-          <a href="/#precos" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Preços</a>
-          <div class="border-t border-white/5 pt-2 space-y-2">
-            <p className="text-gray-600 text-xs uppercase tracking-widest px-1">Produtos</p>
-            <a href="/nome-social" className="block text-gray-400 hover:text-[#D4AF37] py-1.5 text-sm" onClick={() => setMenuOpen(false)}>Análise de Nome Social</a>
-            <a href="/nome-bebe" className="block text-gray-400 hover:text-[#D4AF37] py-1.5 text-sm" onClick={() => setMenuOpen(false)}>Nome para Bebê</a>
-            <a href="/nome-empresarial" className="block text-gray-400 hover:text-[#D4AF37] py-1.5 text-sm" onClick={() => setMenuOpen(false)}>Nome Empresarial</a>
+        <div className="md:hidden bg-[#111111]/95 backdrop-blur-md border-t border-[#D4AF37]/20 px-4 py-6 space-y-1">
+          <a href="/#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Como Funciona</a>
+          <a href="/calcular-numero" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Teste de Bloqueios</a>
+          <a href="/blog" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Blog</a>
+          <a href="/perguntas-frequentes" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Perguntas Frequentes</a>
+          <a href="/#precos" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Preços</a>
+
+          <div className="border-t border-white/8 pt-3 mt-3 space-y-1">
+            <p className="text-gray-600 text-xs uppercase tracking-widest px-1 pb-1">Produtos</p>
+            <a href="/nome-social" className="flex items-center gap-2 text-gray-400 hover:text-[#D4AF37] py-2 text-sm" onClick={() => setMenuOpen(false)}>
+              <span className="text-[#D4AF37] text-xs">✦</span> Nome Social
+            </a>
+            <a href="/nome-bebe" className="flex items-center gap-2 text-gray-400 hover:text-[#D4AF37] py-2 text-sm" onClick={() => setMenuOpen(false)}>
+              <span>👶</span> Nome para Bebê
+            </a>
+            <a href="/nome-empresarial" className="flex items-center gap-2 text-gray-400 hover:text-[#D4AF37] py-2 text-sm" onClick={() => setMenuOpen(false)}>
+              <span>🏢</span> Nome Empresarial
+            </a>
           </div>
-          <a href="/auth/login" className="block bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-center py-2.5 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">Entrar</a>
-          <a href="/#precos" className="block bg-[#D4AF37] text-[#1A1A1A] font-medium text-center py-3 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" onClick={() => setMenuOpen(false)}>
-            Começar Agora
-          </a>
+
+          <div className="pt-3 space-y-3">
+            <a href="/auth/login" className="block bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-center py-2.5 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300" onClick={() => setMenuOpen(false)}>Entrar</a>
+            <a href="/#precos" className="block bg-[#D4AF37] text-[#1A1A1A] font-medium text-center py-3 rounded-lg hover:bg-[#f2ca50] transition-all duration-300" onClick={() => setMenuOpen(false)}>
+              Começar Agora
+            </a>
+          </div>
         </div>
       )}
     </header>
