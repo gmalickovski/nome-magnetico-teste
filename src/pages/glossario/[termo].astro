@@ -1,0 +1,121 @@
+---
+import LandingLayout from '../../layouts/LandingLayout.astro';
+import { LandingHeader } from '../../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
+import { createClient } from '@supabase/supabase-js';
+import { marked } from 'marked';
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+const { termo } = Astro.params;
+
+const { data: termData } = await supabase
+  .from('glossary_terms')
+  .select('*')
+  .eq('slug', termo)
+  .eq('is_published', true)
+  .single();
+
+if (!termData) {
+  return Astro.redirect('/glossario', 302);
+}
+
+const definitionHtml = await marked.parse(termData.definition_markdown ?? '', { gfm: true });
+
+const schemaDefinedTerm = {
+  '@context': 'https://schema.org',
+  '@type': 'DefinedTerm',
+  name: termData.term,
+  description: termData.definition_markdown?.split('\n')[0] ?? termData.term,
+  url: `https://nomemagnetico.com.br/glossario/${termData.slug}`,
+  inDefinedTermSet: {
+    '@type': 'DefinedTermSet',
+    name: 'Glossário de Numerologia Cabalística — Nome Magnético',
+    url: 'https://nomemagnetico.com.br/glossario',
+  },
+};
+
+const schemaBreadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://nomemagnetico.com.br' },
+    { '@type': 'ListItem', position: 2, name: 'Glossário', item: 'https://nomemagnetico.com.br/glossario' },
+    { '@type': 'ListItem', position: 3, name: termData.term, item: `https://nomemagnetico.com.br/glossario/${termData.slug}` },
+  ],
+};
+---
+
+<LandingLayout
+  title={`${termData.term} — O Que É na Numerologia Cabalística | Nome Magnético`}
+  description={`Entenda o que é ${termData.term} na numerologia cabalística: definição completa, como calcular e como interpretar no seu mapa numerológico.`}
+  keywords={`o que é ${termData.term.toLowerCase()}, ${termData.term.toLowerCase()} numerologia, significado ${termData.term.toLowerCase()}, numerologia cabalística ${termData.term.toLowerCase()}`}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaDefinedTerm)} />
+  <script type="application/ld+json" set:html={JSON.stringify(schemaBreadcrumb)} />
+  <link rel="canonical" href={`https://nomemagnetico.com.br/glossario/${termData.slug}`} />
+
+  <LandingHeader client:load />
+
+  <main class="min-h-screen bg-[#111111] pt-24 pb-20">
+    <div class="max-w-3xl mx-auto px-4">
+
+      <nav class="flex items-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
+        <span aria-hidden="true">›</span>
+        <a href="/glossario" class="hover:text-gray-400 transition-colors">Glossário</a>
+        <span aria-hidden="true">›</span>
+        <span class="text-gray-500 truncate max-w-[200px]">{termData.term}</span>
+      </nav>
+
+      <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-3 py-1 mb-6">
+        <span class="text-[#D4AF37] text-xs font-medium">Glossário · Numerologia Cabalística</span>
+      </div>
+
+      <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-8 leading-tight">
+        O Que É {termData.term}?
+      </h1>
+
+      <div class="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:font-cinzel prose-a:text-[#D4AF37] prose-strong:text-white prose-p:text-gray-400 prose-p:leading-relaxed">
+        <Fragment set:html={definitionHtml} />
+      </div>
+
+      {/* CTA */}
+      <div class="mt-14 bg-white/4 border border-[#D4AF37]/20 rounded-2xl p-8 text-center">
+        <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Aprofunde o Conhecimento</p>
+        <h3 class="font-cinzel text-xl font-bold text-white mb-3">
+          Veja Isso no Seu Próprio Nome
+        </h3>
+        <p class="text-gray-400 text-sm mb-6 max-w-md mx-auto">
+          Entender o conceito é o primeiro passo. Descobrir como ele se manifesta no seu nome é a transformação.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href="/calcular-numero"
+            class="inline-block border border-[#D4AF37]/40 text-[#D4AF37] font-medium px-6 py-3 rounded-xl hover:bg-[#D4AF37]/10 transition-all duration-300 text-sm"
+          >
+            Calculadora Gratuita
+          </a>
+          <a
+            href="/comprar?produto=nome_social"
+            class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-6 py-3 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20 text-sm"
+          >
+            Análise Completa →
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <a href="/glossario" class="text-gray-600 hover:text-gray-400 text-sm transition-colors">
+          ← Voltar para o Glossário
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <LandingFooter client:visible />
+</LandingLayout>

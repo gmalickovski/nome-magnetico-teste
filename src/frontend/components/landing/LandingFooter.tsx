@@ -4,7 +4,7 @@ export function LandingFooter() {
   return (
     <footer className="bg-[#0a0a0a] border-t border-white/5 py-12">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-8 mb-10">
+        <div className="grid md:grid-cols-4 gap-8 mb-10">
           {/* Brand */}
           <div>
             <h3 className="font-cinzel text-xl font-bold text-[#D4AF37] mb-3">
@@ -16,13 +16,24 @@ export function LandingFooter() {
             </p>
           </div>
 
-          {/* Links */}
+          {/* Produtos */}
           <div>
-            <h4 className="text-gray-300 font-medium mb-4 text-sm">Links</h4>
+            <h4 className="text-gray-300 font-medium mb-4 text-sm">Produtos</h4>
             <ul className="space-y-2">
-              <li><a href="/" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Início</a></li>
-              <li><a href="#como-funciona" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Como Funciona</a></li>
-              <li><a href="#precos" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Preços</a></li>
+              <li><a href="/nome-social" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Análise de Nome Social</a></li>
+              <li><a href="/nome-bebe" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Nome para Bebê</a></li>
+              <li><a href="/nome-empresarial" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Nome Empresarial</a></li>
+            </ul>
+          </div>
+
+          {/* Ferramentas & Conteúdo */}
+          <div>
+            <h4 className="text-gray-300 font-medium mb-4 text-sm">Ferramentas</h4>
+            <ul className="space-y-2">
+              <li><a href="/calcular-numero" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Calculadora Gratuita</a></li>
+              <li><a href="/perguntas-frequentes" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Perguntas Frequentes</a></li>
+              <li><a href="/blog" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Blog</a></li>
+              <li><a href="/glossario" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Glossário</a></li>
               <li><a href="/suporte" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Suporte</a></li>
               <li><a href="/auth/login" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Entrar</a></li>
             </ul>

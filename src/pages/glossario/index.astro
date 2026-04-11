@@ -1,0 +1,70 @@
+---
+import LandingLayout from '../../layouts/LandingLayout.astro';
+import { LandingHeader } from '../../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+const { data: terms } = await supabase
+  .from('glossary_terms')
+  .select('id, slug, term')
+  .eq('is_published', true)
+  .order('term', { ascending: true });
+---
+
+<LandingLayout
+  title="Glossário de Numerologia Cabalística | Nome Magnético"
+  description="Dicionário completo de termos da numerologia cabalística: número de expressão, número de destino, triângulos cabalísticos, bloqueios energéticos e muito mais."
+  keywords="glossário numerologia cabalística, termos numerologia, o que é número de expressão, o que é número de destino, triângulo cabalístico, bloqueio energético nome, cabala numerologia termos"
+>
+  <link rel="canonical" href="https://nomemagnetico.com.br/glossario" />
+
+  <LandingHeader client:load />
+
+  <main class="min-h-screen bg-[#111111] pt-24 pb-20">
+    <div class="max-w-3xl mx-auto px-4">
+
+      <nav class="flex items-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
+        <span aria-hidden="true">›</span>
+        <span class="text-gray-500">Glossário</span>
+      </nav>
+
+      <div class="text-center mb-14">
+        <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Referência</p>
+        <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
+          Glossário de Numerologia Cabalística
+        </h1>
+        <p class="text-gray-400 max-w-xl mx-auto">
+          Definições claras dos principais conceitos da numerologia cabalística usados no Nome Magnético.
+        </p>
+      </div>
+
+      {terms && terms.length > 0 ? (
+        <div class="grid sm:grid-cols-2 gap-3">
+          {terms.map(term => (
+            <a
+              href={`/glossario/${term.slug}`}
+              class="group flex items-center justify-between bg-white/3 border border-white/8 rounded-xl px-5 py-4 hover:border-[#D4AF37]/30 hover:bg-white/5 transition-all duration-300"
+            >
+              <span class="text-white text-sm font-medium group-hover:text-[#D4AF37] transition-colors">{term.term}</span>
+              <span class="text-[#D4AF37]/50 group-hover:text-[#D4AF37] transition-colors text-lg" aria-hidden="true">→</span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-20 text-gray-600">
+          <p class="text-lg mb-2">Em breve</p>
+          <p class="text-sm">Termos em elaboração. <a href="/" class="text-[#D4AF37] hover:underline">Voltar para o início</a>.</p>
+        </div>
+      )}
+
+    </div>
+  </main>
+
+  <LandingFooter client:visible />
+</LandingLayout>

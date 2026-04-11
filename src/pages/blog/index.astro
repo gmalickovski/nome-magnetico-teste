@@ -1,0 +1,90 @@
+---
+import LandingLayout from '../../layouts/LandingLayout.astro';
+import { LandingHeader } from '../../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+const { data: posts } = await supabase
+  .from('blog_posts')
+  .select('id, slug, title, description, produto_relacionado, published_at')
+  .eq('is_published', true)
+  .order('published_at', { ascending: false });
+
+const PRODUTO_LABEL: Record<string, string> = {
+  nome_social: 'Nome Social',
+  nome_bebe: 'Nome Bebê',
+  nome_empresa: 'Nome Empresarial',
+};
+---
+
+<LandingLayout
+  title="Blog de Numerologia Cabalística | Nome Magnético"
+  description="Artigos sobre numerologia cabalística, bloqueios energéticos no nome, como calcular o número de expressão, nome para bebê e muito mais."
+  keywords="blog numerologia cabalística, artigos numerologia, numerologia do nome, bloqueio energético nome, calcular número expressão"
+>
+  <link rel="canonical" href="https://nomemagnetico.com.br/blog" />
+
+  <LandingHeader client:load />
+
+  <main class="min-h-screen bg-[#111111] pt-24 pb-20">
+    <div class="max-w-4xl mx-auto px-4">
+
+      <nav class="flex items-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
+        <span aria-hidden="true">›</span>
+        <span class="text-gray-500">Blog</span>
+      </nav>
+
+      <div class="text-center mb-14">
+        <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Conteúdo</p>
+        <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
+          Blog de Numerologia Cabalística
+        </h1>
+        <p class="text-gray-400 max-w-xl mx-auto">
+          Artigos educativos sobre como o nome influencia a vida, como calcular os números principais e como a numerologia cabalística funciona.
+        </p>
+      </div>
+
+      {posts && posts.length > 0 ? (
+        <div class="grid md:grid-cols-2 gap-6">
+          {posts.map(post => (
+            <a
+              href={`/blog/${post.slug}`}
+              class="group block bg-white/3 border border-white/8 rounded-2xl p-6 hover:border-[#D4AF37]/30 hover:bg-white/5 transition-all duration-300"
+            >
+              {post.produto_relacionado && (
+                <span class="inline-block bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-medium px-2.5 py-1 rounded-full mb-3">
+                  {PRODUTO_LABEL[post.produto_relacionado] ?? post.produto_relacionado}
+                </span>
+              )}
+              <h2 class="text-white font-semibold text-base mb-2 leading-snug group-hover:text-[#D4AF37] transition-colors">
+                {post.title}
+              </h2>
+              {post.description && (
+                <p class="text-gray-500 text-sm leading-relaxed line-clamp-2">{post.description}</p>
+              )}
+              {post.published_at && (
+                <p class="text-gray-700 text-xs mt-3">
+                  {new Date(post.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </p>
+              )}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-20 text-gray-600">
+          <p class="text-lg mb-2">Em breve</p>
+          <p class="text-sm">Novos artigos chegando em breve. <a href="/" class="text-[#D4AF37] hover:underline">Voltar para o início</a>.</p>
+        </div>
+      )}
+
+    </div>
+  </main>
+
+  <LandingFooter client:visible />
+</LandingLayout>

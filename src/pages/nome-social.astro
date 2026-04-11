@@ -1,0 +1,189 @@
+---
+import LandingLayout from '../layouts/LandingLayout.astro';
+import { LandingHeader } from '../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+import { getSupabaseFaqs } from '../backend/faqs/getSupabaseFaqs';
+import type { FaqItemProps } from '../frontend/components/landing/FAQSection';
+import { FAQSection } from '../frontend/components/landing/FAQSection';
+
+let faqItems: FaqItemProps[] = [];
+try {
+  faqItems = await getSupabaseFaqs({ featuredOnly: true });
+} catch {
+  // fallback silencioso
+}
+
+const schemaProduct = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: 'Nome Social — Análise Numerológica Cabalística',
+  description: 'Análise completa do seu nome de nascimento com mapa de 4 triângulos cabalísticos, 5 números fundamentais, detecção de bloqueios energéticos e sugestões de nome harmonizado.',
+  url: 'https://nomemagnetico.com.br/nome-social',
+  brand: { '@type': 'Brand', name: 'Nome Magnético' },
+  offers: {
+    '@type': 'Offer',
+    price: '97.00',
+    priceCurrency: 'BRL',
+    availability: 'https://schema.org/InStock',
+    url: 'https://nomemagnetico.com.br/comprar?produto=nome_social',
+  },
+};
+---
+
+<LandingLayout
+  title="Análise de Nome Social — Numerologia Cabalística | Nome Magnético"
+  description="Descubra se seu nome social tem bloqueios energéticos que sabotam carreira e relacionamentos. Mapa numerológico com 4 triângulos, 5 números e sugestões de nome harmonizado."
+  keywords="numerologia do nome social, bloqueio energético no nome, mudar nome numerologia, nome sem bloqueios energéticos, como meu nome afeta minha vida, análise vibracional nome, nome magnético numerologia, numerologia cabalística nome"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaProduct)} />
+  <link rel="canonical" href="https://nomemagnetico.com.br/nome-social" />
+
+  <LandingHeader client:load />
+
+  <main class="bg-[#111111] pt-24">
+
+    {/* Hero */}
+    <section class="py-20 md:py-32 relative overflow-hidden">
+      <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div class="absolute top-1/3 left-1/4 w-80 h-80 bg-[#D4AF37]/5 rounded-full blur-3xl" />
+        <div class="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
+      </div>
+      <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+        <nav class="flex items-center justify-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
+          <span aria-hidden="true">›</span>
+          <span class="text-gray-500">Nome Social</span>
+        </nav>
+
+        <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
+          <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
+          <span class="text-[#D4AF37] text-sm font-medium">Transformação Pessoal · R$ 97</span>
+          <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
+        </div>
+
+        <h1 class="font-cinzel text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+          Seu Nome Social Está<br/>
+          <span style="background: linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            Sabotando Sua Vida?
+          </span>
+        </h1>
+
+        <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          Na numerologia cabalística, cada letra do seu nome carrega uma frequência matemática. Quando essas frequências colidem, surgem <strong class="text-white">bloqueios energéticos invisíveis</strong> que sabotam sua carreira, seus relacionamentos e sua prosperidade — sem que você perceba.
+        </p>
+
+        <a
+          href="/comprar?produto=nome_social"
+          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
+        >
+          Analisar Meu Nome Social →
+        </a>
+        <p class="text-gray-600 text-sm mt-4">Pagamento único · R$ 97 · Acesso por 30 dias</p>
+      </div>
+    </section>
+
+    {/* O que é bloqueio energético */}
+    <section class="py-16 bg-[#0f0f0f]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que É um Bloqueio Energético no Nome?</h2>
+          <p class="text-gray-400 max-w-2xl mx-auto">Quando certas sequências numéricas se repetem três ou mais vezes nos triângulos cabalísticos do seu nome, criam-se padrões que bloqueiam áreas específicas da sua vida.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+          {[
+            { numero: '333', titulo: 'Bloqueio de Expressão', desc: 'Dificuldade em se comunicar, criar e se posicionar no mundo. Talentos reprimidos.' },
+            { numero: '444', titulo: 'Bloqueio de Estrutura', desc: 'Obstáculos na carreira, dificuldade de concluir projetos e construir estabilidade material.' },
+            { numero: '888', titulo: 'Bloqueio de Abundância', desc: 'Relação conflituosa com dinheiro, poder e reconhecimento profissional.' },
+          ].map(b => (
+            <div class="bg-white/3 rounded-2xl p-6">
+              <div class="font-cinzel text-3xl font-bold text-[#D4AF37] mb-3">{b.numero}</div>
+              <h3 class="text-white font-semibold text-sm mb-2">{b.titulo}</h3>
+              <p class="text-gray-500 text-sm leading-relaxed">{b.desc}</p>
+            </div>
+          ))}
+        </div>
+        <p class="text-center text-gray-600 text-sm mt-6">A análise completa verifica <strong class="text-gray-400">9 tipos de bloqueios</strong> em <strong class="text-gray-400">4 triângulos</strong> diferentes do seu nome.</p>
+      </div>
+    </section>
+
+    {/* Como funciona */}
+    <section class="py-16 bg-[#111111]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Processo</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">Como Funciona a Análise</h2>
+        </div>
+        <div class="grid md:grid-cols-4 gap-6">
+          {[
+            { n: '01', t: 'Mapeamento', d: 'Convertemos cada letra do seu nome em seu valor cabalístico usando a tabela hebraica.' },
+            { n: '02', t: 'Triângulos', d: 'Calculamos os 4 triângulos (Vida, Pessoal, Social e Destino) para revelar todas as dimensões do seu nome.' },
+            { n: '03', t: 'Bloqueios', d: 'Identificamos sequências repetidas que indicam bloqueios e lições kármicas não resolvidas.' },
+            { n: '04', t: 'Harmonização', d: 'A IA sugere 3 variações do seu nome que removem os bloqueios e alinham Expressão ao Destino.' },
+          ].map(s => (
+            <div class="text-center">
+              <div class="font-cinzel text-4xl font-bold text-[#D4AF37]/30 mb-3">{s.n}</div>
+              <h3 class="text-white font-medium text-sm mb-2">{s.t}</h3>
+              <p class="text-gray-500 text-xs leading-relaxed">{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* O que você recebe */}
+    <section class="py-16 bg-[#0f0f0f]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Entregável</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que Você Recebe</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          {[
+            '5 números principais com interpretação profunda',
+            '4 triângulos cabalísticos detalhados (Vida, Pessoal, Social e Destino)',
+            'Detecção de todos os bloqueios energéticos com aspectos de saúde',
+            'Lições Kármicas — qualidades a desenvolver nesta encarnação',
+            'Tendências Ocultas — excessos que sabotam sua expressão',
+            '3 variações do seu nome harmonizadas e rankeadas',
+            'Guia de implementação da nova assinatura magnética (30 dias)',
+            'Seu Arquétipo Junguiano revelado',
+            'Relatório PDF Premium para download',
+            'Suporte por 30 dias',
+          ].map(item => (
+            <div class="flex items-start gap-3">
+              <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="text-gray-300 text-sm">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* FAQ */}
+    {faqItems.length > 0 && (
+      <FAQSection items={faqItems} client:visible />
+    )}
+
+    {/* CTA final */}
+    <section class="py-20 bg-[#111111]">
+      <div class="max-w-xl mx-auto px-4 text-center">
+        <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Investimento</p>
+        <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Comece Sua Transformação</h2>
+        <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">R$ 97</div>
+        <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Garantia de 7 dias</p>
+        <a
+          href="/comprar?produto=nome_social"
+          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 w-full"
+        >
+          Analisar Meu Nome Social →
+        </a>
+        <p class="text-gray-600 text-xs mt-4">🔒 Pagamento seguro via Stripe</p>
+      </div>
+    </section>
+
+  </main>
+
+  <LandingFooter client:visible />
+</LandingLayout>

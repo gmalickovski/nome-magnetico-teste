@@ -25,21 +25,24 @@ export function LandingHeader() {
         </a>
 
         {/* Nav desktop */}
-        <nav className="hidden md:flex items-center gap-8">
-          <a href="#como-funciona" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
+        <nav className="hidden md:flex items-center gap-6">
+          <a href="/#como-funciona" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
             Como Funciona
           </a>
-          <a href="#teste" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
-            Teste Grátis
+          <a href="/calcular-numero" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
+            Calculadora Grátis
           </a>
-          <a href="#precos" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
+          <a href="/perguntas-frequentes" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
+            FAQ
+          </a>
+          <a href="/#precos" className="relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300">
             Preços
           </a>
           <a href="/auth/login" className="bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-sm px-5 py-2 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">
             Entrar
           </a>
           <a
-            href="#precos"
+            href="/#precos"
             className="bg-[#D4AF37] text-[#1A1A1A] font-medium text-sm px-5 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20"
           >
             Começar Agora
@@ -64,11 +67,18 @@ export function LandingHeader() {
       {/* Menu mobile aberto */}
       {menuOpen && (
         <div className="md:hidden bg-[#111111]/95 backdrop-blur-md border-t border-[#D4AF37]/20 px-4 py-6 space-y-4">
-          <a href="#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Como Funciona</a>
-          <a href="#teste" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Teste Grátis</a>
-          <a href="#precos" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Preços</a>
+          <a href="/#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Como Funciona</a>
+          <a href="/calcular-numero" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Calculadora Grátis</a>
+          <a href="/perguntas-frequentes" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Perguntas Frequentes</a>
+          <a href="/#precos" className="block text-gray-400 hover:text-[#D4AF37] py-2" onClick={() => setMenuOpen(false)}>Preços</a>
+          <div class="border-t border-white/5 pt-2 space-y-2">
+            <p className="text-gray-600 text-xs uppercase tracking-widest px-1">Produtos</p>
+            <a href="/nome-social" className="block text-gray-400 hover:text-[#D4AF37] py-1.5 text-sm" onClick={() => setMenuOpen(false)}>Análise de Nome Social</a>
+            <a href="/nome-bebe" className="block text-gray-400 hover:text-[#D4AF37] py-1.5 text-sm" onClick={() => setMenuOpen(false)}>Nome para Bebê</a>
+            <a href="/nome-empresarial" className="block text-gray-400 hover:text-[#D4AF37] py-1.5 text-sm" onClick={() => setMenuOpen(false)}>Nome Empresarial</a>
+          </div>
           <a href="/auth/login" className="block bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-center py-2.5 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">Entrar</a>
-          <a href="#precos" className="block bg-[#D4AF37] text-[#1A1A1A] font-medium text-center py-3 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" onClick={() => setMenuOpen(false)}>
+          <a href="/#precos" className="block bg-[#D4AF37] text-[#1A1A1A] font-medium text-center py-3 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" onClick={() => setMenuOpen(false)}>
             Começar Agora
           </a>
         </div>

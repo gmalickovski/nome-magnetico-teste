@@ -93,6 +93,27 @@ export const POST: APIRoute = async ({ request }) => {
           amount: session.amount_total ?? undefined,
         });
 
+        // Evento Umami server-side — purchase_complete
+        const umamiWebsiteId = process.env.UMAMI_WEBSITE_ID;
+        const umamiApiUrl = process.env.UMAMI_API_URL;
+        if (umamiWebsiteId && umamiApiUrl) {
+          fetch(`${umamiApiUrl}/api/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              payload: {
+                website: umamiWebsiteId,
+                name: 'purchase_complete',
+                data: {
+                  produto: productType,
+                  valor: (session.amount_total ?? 0) / 100,
+                },
+              },
+            }),
+          }).catch(() => {}); // analytics nunca quebra o webhook
+
+        }
+
         break;
       }
 

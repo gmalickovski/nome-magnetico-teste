@@ -1,0 +1,146 @@
+---
+import LandingLayout from '../../layouts/LandingLayout.astro';
+import { LandingHeader } from '../../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
+import { createClient } from '@supabase/supabase-js';
+import { marked } from 'marked';
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+const { slug } = Astro.params;
+
+const { data: post } = await supabase
+  .from('blog_posts')
+  .select('*')
+  .eq('slug', slug)
+  .eq('is_published', true)
+  .single();
+
+if (!post) {
+  return Astro.redirect('/blog', 302);
+}
+
+const contentHtml = await marked.parse(post.content_markdown ?? '', { gfm: true });
+
+const PRODUTO_HREF: Record<string, string> = {
+  nome_social: '/comprar?produto=nome_social',
+  nome_bebe: '/comprar?produto=nome_bebe',
+  nome_empresa: '/comprar?produto=nome_empresa',
+};
+
+const PRODUTO_LABEL: Record<string, string> = {
+  nome_social: 'Nome Social',
+  nome_bebe: 'Nome Bebê',
+  nome_empresa: 'Nome Empresarial',
+};
+
+const schemaArticle = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.title,
+  description: post.description ?? '',
+  url: `https://nomemagnetico.com.br/blog/${post.slug}`,
+  datePublished: post.published_at ?? post.created_at,
+  dateModified: post.updated_at ?? post.published_at ?? post.created_at,
+  author: { '@type': 'Organization', name: 'Nome Magnético' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Nome Magnético',
+    url: 'https://nomemagnetico.com.br',
+  },
+  inLanguage: 'pt-BR',
+};
+
+const schemaBreadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://nomemagnetico.com.br' },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://nomemagnetico.com.br/blog' },
+    { '@type': 'ListItem', position: 3, name: post.title, item: `https://nomemagnetico.com.br/blog/${post.slug}` },
+  ],
+};
+---
+
+<LandingLayout
+  title={`${post.title} | Nome Magnético`}
+  description={post.description ?? `Leia sobre ${post.title} no blog de numerologia cabalística do Nome Magnético.`}
+  keywords={post.keywords?.join(', ') ?? 'numerologia cabalística, nome magnético'}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaArticle)} />
+  <script type="application/ld+json" set:html={JSON.stringify(schemaBreadcrumb)} />
+  <link rel="canonical" href={`https://nomemagnetico.com.br/blog/${post.slug}`} />
+
+  <LandingHeader client:load />
+
+  <main class="min-h-screen bg-[#111111] pt-24 pb-20">
+    <div class="max-w-3xl mx-auto px-4">
+
+      <nav class="flex items-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
+        <span aria-hidden="true">›</span>
+        <a href="/blog" class="hover:text-gray-400 transition-colors">Blog</a>
+        <span aria-hidden="true">›</span>
+        <span class="text-gray-500 truncate max-w-[200px]">{post.title}</span>
+      </nav>
+
+      <article>
+        {post.produto_relacionado && (
+          <span class="inline-block bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-medium px-2.5 py-1 rounded-full mb-4">
+            {PRODUTO_LABEL[post.produto_relacionado] ?? post.produto_relacionado}
+          </span>
+        )}
+
+        <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+          {post.title}
+        </h1>
+
+        {post.description && (
+          <p class="text-gray-400 text-lg leading-relaxed mb-6">{post.description}</p>
+        )}
+
+        {post.published_at && (
+          <p class="text-gray-600 text-xs mb-10">
+            Publicado em {new Date(post.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+          </p>
+        )}
+
+        <div class="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:font-cinzel prose-a:text-[#D4AF37] prose-strong:text-white prose-p:text-gray-400 prose-p:leading-relaxed">
+          <Fragment set:html={contentHtml} />
+        </div>
+      </article>
+
+      {/* CTA ao final do artigo */}
+      {post.produto_relacionado && (
+        <div class="mt-14 bg-white/4 border border-[#D4AF37]/20 rounded-2xl p-8 text-center">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Próximo Passo</p>
+          <h3 class="font-cinzel text-xl font-bold text-white mb-3">
+            Descubra os Bloqueios do Seu Nome
+          </h3>
+          <p class="text-gray-400 text-sm mb-6 max-w-md mx-auto">
+            A análise completa vai além deste artigo — veja os 4 triângulos cabalísticos, bloqueios energéticos e sugestões de nome harmonizado.
+          </p>
+          <a
+            href={PRODUTO_HREF[post.produto_relacionado] ?? '/comprar'}
+            class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-8 py-3.5 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20 text-sm"
+          >
+            Ver Análise de {PRODUTO_LABEL[post.produto_relacionado] ?? 'Nome'} →
+          </a>
+        </div>
+      )}
+
+      {/* Voltar */}
+      <div class="mt-8 text-center">
+        <a href="/blog" class="text-gray-600 hover:text-gray-400 text-sm transition-colors">
+          ← Voltar para o Blog
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <LandingFooter client:visible />
+</LandingLayout>

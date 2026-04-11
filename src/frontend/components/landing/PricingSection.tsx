@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { track } from '../../lib/analytics';
 import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
 
 export interface StripePrices {
@@ -134,6 +135,22 @@ function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInf
 }
 
 export function PricingSection({ highlight, stripePrices, hqPrices, promotion }: PricingSectionProps) {
+  useEffect(() => {
+    const el = document.getElementById('precos');
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          track('pricing_view', { produto: (highlight as 'nome_social' | 'nome_bebe' | 'nome_empresa' | undefined) ?? undefined });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [highlight]);
+
   // Resolve prices: prefer hqPrices, then build from legacy stripePrices, then use fallback
   const resolvedPrices: Record<string, PriceInfo> = hqPrices ?? (
     stripePrices

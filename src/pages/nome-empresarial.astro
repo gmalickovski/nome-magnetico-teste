@@ -1,0 +1,164 @@
+---
+import LandingLayout from '../layouts/LandingLayout.astro';
+import { LandingHeader } from '../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+import { getSupabaseFaqs } from '../backend/faqs/getSupabaseFaqs';
+import type { FaqItemProps } from '../frontend/components/landing/FAQSection';
+import { FAQSection } from '../frontend/components/landing/FAQSection';
+
+let faqItems: FaqItemProps[] = [];
+try {
+  faqItems = await getSupabaseFaqs({ featuredOnly: true });
+} catch {
+  // fallback silencioso
+}
+
+const schemaProduct = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: 'Nome Empresarial — Análise Numerológica Cabalística',
+  description: 'Analise o nome da sua empresa com numerologia cabalística. Compatibilidade com o Destino do fundador, análise da data de fundação e ranking de nomes candidatos.',
+  url: 'https://nomemagnetico.com.br/nome-empresarial',
+  brand: { '@type': 'Brand', name: 'Nome Magnético' },
+  offers: {
+    '@type': 'Offer',
+    price: '197.00',
+    priceCurrency: 'BRL',
+    availability: 'https://schema.org/InStock',
+    url: 'https://nomemagnetico.com.br/comprar?produto=nome_empresa',
+  },
+};
+---
+
+<LandingLayout
+  title="Nome Empresarial com Numerologia — Branding Vibracional | Nome Magnético"
+  description="Analise o nome da sua empresa com numerologia cabalística. Compatibilidade com o Destino do fundador, posicionamento de marca e sugestões de nomes harmonizados."
+  keywords="nome empresa numerologia, branding vibracional, numerologia nome empresarial, nome empresa energia positiva, numerologia cabalística empresa, nome marca numerologia, nome empresarial sem bloqueios"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaProduct)} />
+  <link rel="canonical" href="https://nomemagnetico.com.br/nome-empresarial" />
+
+  <LandingHeader client:load />
+
+  <main class="bg-[#111111] pt-24">
+
+    {/* Hero */}
+    <section class="py-20 md:py-32 relative overflow-hidden">
+      <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div class="absolute top-1/3 left-1/3 w-80 h-80 bg-[#D4AF37]/5 rounded-full blur-3xl" />
+        <div class="absolute bottom-1/3 right-1/3 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
+      </div>
+      <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+        <nav class="flex items-center justify-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
+          <span aria-hidden="true">›</span>
+          <span class="text-gray-500">Nome Empresarial</span>
+        </nav>
+
+        <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
+          <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
+          <span class="text-[#D4AF37] text-sm font-medium">Branding Vibracional · R$ 197</span>
+          <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
+        </div>
+
+        <h1 class="font-cinzel text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+          O Nome da Sua Empresa Está<br/>
+          <span style="background: linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            Alinhado com o Seu Destino?
+          </span>
+        </h1>
+
+        <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+          Na numerologia cabalística, o nome da sua empresa precisa estar em harmonia com o Número de Destino do fundador. Um desalinhamento vibratório cria <strong class="text-white">resistências invisíveis</strong> que travam crescimento, vendas e posicionamento de marca.
+        </p>
+
+        <a
+          href="/comprar?produto=nome_empresa"
+          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
+        >
+          Analisar o Nome da Minha Empresa →
+        </a>
+        <p class="text-gray-600 text-sm mt-4">Pagamento único · R$ 197 · Acesso por 30 dias</p>
+      </div>
+    </section>
+
+    {/* Como o nome afeta o negócio */}
+    <section class="py-16 bg-[#0f0f0f]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">Como o Nome Empresarial Afeta o Negócio?</h2>
+          <p class="text-gray-400 max-w-2xl mx-auto">O nome da empresa não é apenas um rótulo — é a frequência vibracional que o mercado percebe, mesmo inconscientemente. Um nome magnético atrai fluxo. Um nome desalinhado afasta.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+          {[
+            { icon: '👤', t: 'Fundador × Empresa', d: 'A vibração do nome deve ser compatível ou complementar ao Número de Destino do fundador principal.' },
+            { icon: '📅', t: 'Data de Fundação', d: 'A data de fundação cria o "Destino da empresa". O nome ideal ressoa com essa energia específica.' },
+            { icon: '⚠️', t: 'Alerta do 8', d: 'Tendência Oculta do número 8 no nome indica excesso de materialismo — pode atrair conflitos por dinheiro e poder.' },
+          ].map(c => (
+            <div class="bg-white/3 rounded-2xl p-6 text-center">
+              <div class="text-3xl mb-3">{c.icon}</div>
+              <h3 class="text-white font-semibold text-sm mb-2">{c.t}</h3>
+              <p class="text-gray-500 text-sm leading-relaxed">{c.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* O que você recebe */}
+    <section class="py-16 bg-[#111111]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Entregável</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que Você Recebe</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          {[
+            'Análise de múltiplos nomes candidatos',
+            'Compatibilidade de cada nome com o Destino do fundador',
+            'Análise da data de fundação (Destino da empresa)',
+            'Alerta automático de Tendência Oculta do 8',
+            'Score 0–100 por harmonia vibracional',
+            'Arquétipo da Marca revelado para posicionamento',
+            'Riscos ocultos mapeados por nome candidato',
+            'Calendário ativo anual — melhores períodos para vendas',
+            'Relatório estratégico completo em PDF',
+            'Suporte por 30 dias',
+          ].map(item => (
+            <div class="flex items-start gap-3">
+              <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="text-gray-300 text-sm">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* FAQ */}
+    {faqItems.length > 0 && (
+      <FAQSection items={faqItems} client:visible />
+    )}
+
+    {/* CTA final */}
+    <section class="py-20 bg-[#111111]">
+      <div class="max-w-xl mx-auto px-4 text-center">
+        <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Investimento</p>
+        <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Posicione Sua Marca</h2>
+        <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">R$ 197</div>
+        <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Garantia de 7 dias</p>
+        <a
+          href="/comprar?produto=nome_empresa"
+          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 w-full"
+        >
+          Analisar o Nome da Minha Empresa →
+        </a>
+        <p class="text-gray-600 text-xs mt-4">🔒 Pagamento seguro via Stripe</p>
+      </div>
+    </section>
+
+  </main>
+
+  <LandingFooter client:visible />
+</LandingLayout>

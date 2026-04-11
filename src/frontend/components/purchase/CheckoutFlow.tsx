@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
+import { track } from '../../lib/analytics';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
@@ -128,6 +129,21 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
       // Auto-aplica cupom da promoção se o usuário não digitou um código manual
       const appliesToThis = !promotion?.productType || promotion.productType === type;
       const effectiveCoupon = couponCode.trim() || (promotion && appliesToThis ? promotion.stripePromoCode : null) || undefined;
+
+      const priceInfo = prices[type] ?? FALLBACK_PRICES[type];
+      track('checkout_start', {
+        produto: type,
+        preco: priceInfo.cents / 100,
+        promocao: promotion?.name ?? null,
+      });
+
+      // Se cupom foi digitado manualmente, registrar evento
+      if (couponCode.trim()) {
+        track('coupon_applied', {
+          codigo_cupom: couponCode.trim(),
+          produto: type,
+        });
+      }
 
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
