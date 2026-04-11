@@ -30,72 +30,133 @@ const schemaWebApp = {
 
   <LandingHeader client:load />
 
-  <main class="min-h-screen bg-[#111111] pt-20 pb-16">
-    <div class="max-w-2xl mx-auto px-4">
+  <main class="min-h-screen bg-[#111111] pt-20 pb-20">
 
-      {/* Header da página */}
-      <div class="text-center mb-12">
-        <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
-          <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
-          <span class="text-[#D4AF37] text-sm font-medium">Diagnóstico Gratuito</span>
-          <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
-        </div>
-
-        <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-[#e5e2e1] mb-4 leading-tight">
-          Teste de Bloqueios<br/>
-          <span style="background: linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            do Seu Nome
-          </span>
-        </h1>
-        <p class="text-gray-400 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-          Descubra se seu nome carrega bloqueios energéticos que criam padrões invisíveis de travamento — no sucesso, nos relacionamentos e na prosperidade.
-        </p>
-        <p class="text-gray-600 text-sm mt-3">87% dos nomes analisados têm ao menos 1 bloqueio ativo</p>
+    {/* ── HERO ── */}
+    <section class="max-w-6xl mx-auto px-4 pt-12 pb-16 text-center">
+      <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-5 py-2 mb-8">
+        <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
+        <span class="text-[#D4AF37] text-sm font-medium tracking-wide">Diagnóstico Gratuito</span>
+        <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
       </div>
 
-      {/* Bloco educativo — foco em bloqueios */}
-      <div class="grid md:grid-cols-3 gap-4 mb-12">
-        <div class="bg-white/3 rounded-2xl p-5">
-          <div class="text-amber-400 text-xl mb-3" aria-hidden="true">⚠</div>
-          <h3 class="text-white font-medium text-sm mb-2">O que são bloqueios</h3>
-          <p class="text-gray-500 text-xs leading-relaxed">
-            Sequências numéricas repetidas nos triângulos cabalísticos do nome que criam padrões de resistência e limitação em áreas específicas da vida.
+      <h1 class="font-cinzel text-4xl sm:text-5xl md:text-6xl font-bold text-[#e5e2e1] mb-6 leading-tight">
+        Teste de Bloqueios<br/>
+        <span style="background: linear-gradient(135deg, #f2ca50, #D4AF37, #B8960E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          do Seu Nome
+        </span>
+      </h1>
+
+      <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-4">
+        Descubra se seu nome carrega bloqueios energéticos que criam padrões invisíveis de
+        travamento — no sucesso, nos relacionamentos e na prosperidade.
+      </p>
+      <p class="text-[#76746a] text-sm">
+        87% dos nomes analisados têm ao menos 1 bloqueio ativo
+      </p>
+    </section>
+
+    {/* ── CARDS EDUCATIVOS ── */}
+    <section class="max-w-6xl mx-auto px-4 mb-16">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+        {/* Card 1 */}
+        <div class="group relative overflow-hidden rounded-3xl p-px cursor-default"
+          style="background: linear-gradient(135deg, rgba(212,175,55,0.4) 0%, rgba(212,175,55,0.05) 100%);">
+          <div class="relative rounded-3xl bg-[#171712] p-8 h-full transition-transform duration-500 group-hover:-translate-y-1"
+            style="background: radial-gradient(ellipse at top left, #1f1c0e 0%, #131313 70%);">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110"
+              style="background: rgba(251,191,36,0.12);">
+              <span class="text-3xl leading-none" aria-hidden="true">⚠</span>
+            </div>
+            <h3 class="font-cinzel text-lg font-bold text-[#e5e2e1] mb-3 tracking-wide">
+              O que são bloqueios
+            </h3>
+            <p class="text-[#76746a] text-sm leading-relaxed">
+              Sequências numéricas repetidas nos triângulos cabalísticos do nome que criam
+              padrões de resistência e limitação em áreas específicas da vida.
+            </p>
+            {/* glow decoration */}
+            <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-20 pointer-events-none"
+              style="background: radial-gradient(circle, #D4AF37 0%, transparent 70%); filter: blur(16px);"></div>
+          </div>
+        </div>
+
+        {/* Card 2 */}
+        <div class="group relative overflow-hidden rounded-3xl p-px cursor-default"
+          style="background: linear-gradient(135deg, rgba(212,175,55,0.4) 0%, rgba(212,175,55,0.05) 100%);">
+          <div class="relative rounded-3xl bg-[#171712] p-8 h-full transition-transform duration-500 group-hover:-translate-y-1"
+            style="background: radial-gradient(ellipse at top left, #1f1c0e 0%, #131313 70%);">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110"
+              style="background: rgba(212,175,55,0.12);">
+              <span class="text-[#D4AF37] text-3xl leading-none" aria-hidden="true">◈</span>
+            </div>
+            <h3 class="font-cinzel text-lg font-bold text-[#e5e2e1] mb-3 tracking-wide">
+              Como são detectados
+            </h3>
+            <p class="text-[#76746a] text-sm leading-relaxed">
+              Calculamos os 4 triângulos cabalísticos do seu nome — Vida, Pessoal, Social e
+              Destino — e identificamos repetições que formam bloqueios energéticos.
+            </p>
+            <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-20 pointer-events-none"
+              style="background: radial-gradient(circle, #D4AF37 0%, transparent 70%); filter: blur(16px);"></div>
+          </div>
+        </div>
+
+        {/* Card 3 */}
+        <div class="group relative overflow-hidden rounded-3xl p-px cursor-default"
+          style="background: linear-gradient(135deg, rgba(212,175,55,0.4) 0%, rgba(212,175,55,0.05) 100%);">
+          <div class="relative rounded-3xl bg-[#171712] p-8 h-full transition-transform duration-500 group-hover:-translate-y-1"
+            style="background: radial-gradient(ellipse at top left, #1f1c0e 0%, #131313 70%);">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110"
+              style="background: rgba(212,175,55,0.12);">
+              <span class="text-[#D4AF37] text-3xl leading-none" aria-hidden="true">✦</span>
+            </div>
+            <h3 class="font-cinzel text-lg font-bold text-[#e5e2e1] mb-3 tracking-wide">
+              O que fazer
+            </h3>
+            <p class="text-[#76746a] text-sm leading-relaxed">
+              Uma pequena variação do nome — mantendo identidade e pronúncia — pode eliminar
+              os bloqueios e criar harmonia com seus números de Expressão e Destino.
+            </p>
+            <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-20 pointer-events-none"
+              style="background: radial-gradient(circle, #D4AF37 0%, transparent 70%); filter: blur(16px);"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    {/* ── FORMULÁRIO ── */}
+    <section class="max-w-2xl mx-auto px-4">
+      <div class="relative overflow-hidden rounded-3xl p-px"
+        style="background: linear-gradient(135deg, rgba(212,175,55,0.5) 0%, rgba(212,175,55,0.08) 100%);">
+        <div class="relative rounded-3xl bg-[#171712] p-8 sm:p-10"
+          style="background: radial-gradient(ellipse at top, #1d1a0d 0%, #131313 65%); box-shadow: 0 30px 80px rgba(0,0,0,0.7);">
+
+          {/* decorative glow */}
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-12 rounded-full opacity-30 pointer-events-none"
+            style="background: radial-gradient(circle, #D4AF37 0%, transparent 70%); filter: blur(20px);"></div>
+
+          <h2 class="font-cinzel text-2xl sm:text-3xl font-bold text-[#e5e2e1] mb-2 text-center tracking-wide">
+            Detectar Bloqueios
+          </h2>
+          <p class="text-[#76746a] text-sm text-center mb-8">
+            Gratuito · Sem cadastro · Resultado imediato
           </p>
-        </div>
-        <div class="bg-white/3 rounded-2xl p-5">
-          <div class="text-[#D4AF37] text-xl mb-3" aria-hidden="true">◈</div>
-          <h3 class="text-white font-medium text-sm mb-2">Como são detectados</h3>
-          <p class="text-gray-500 text-xs leading-relaxed">
-            Calculamos os 4 triângulos cabalísticos do seu nome — Vida, Pessoal, Social e Destino — e identificamos repetições que formam bloqueios energéticos.
-          </p>
-        </div>
-        <div class="bg-white/3 rounded-2xl p-5">
-          <div class="text-[#D4AF37] text-xl mb-3" aria-hidden="true">✦</div>
-          <h3 class="text-white font-medium text-sm mb-2">O que fazer</h3>
-          <p class="text-gray-500 text-xs leading-relaxed">
-            Uma pequena variação do nome — mantendo identidade e pronúncia — pode eliminar os bloqueios e criar harmonia com seus números de Expressão e Destino.
-          </p>
+
+          <CalculadoraGratis client:load />
         </div>
       </div>
 
-      {/* Formulário */}
-      <div class="bg-white/4 border border-white/8 rounded-2xl p-8 shadow-2xl shadow-black/50">
-        <h2 class="font-cinzel text-xl font-bold text-white mb-2 text-center">Detectar Bloqueios — Gratuito</h2>
-        <p class="text-gray-500 text-sm text-center mb-8">Sem cadastro. Resultado em segundos.</p>
+      {/* Aviso disclosure */}
+      <p class="text-[#76746a] text-xs leading-relaxed max-w-md mx-auto text-center mt-6">
+        Este teste mostra os bloqueios do Triângulo da Vida e os números de Expressão e
+        Destino. A análise completa inclui os 4 Triângulos Cabalísticos, Lições Kármicas,
+        Tendências Ocultas e sugestões de nome harmonizadas.
+      </p>
+    </section>
 
-        <CalculadoraGratis client:load />
-      </div>
-
-      {/* Aviso sobre análise completa */}
-      <div class="mt-8 text-center">
-        <p class="text-gray-600 text-xs leading-relaxed max-w-md mx-auto">
-          Este teste mostra os bloqueios do Triângulo da Vida e os números de Expressão e Destino.
-          A análise completa inclui os 4 Triângulos Cabalísticos, Lições Kármicas, Tendências Ocultas
-          e 3 variações harmonizadas do seu nome.
-        </p>
-      </div>
-
-    </div>
   </main>
 
   <LandingFooter client:visible />

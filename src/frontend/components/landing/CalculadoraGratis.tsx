@@ -172,7 +172,7 @@ export function CalculadoraGratis() {
           </a>
           <div className="bg-[#D4AF37]/8 text-center py-3 px-4">
             <p className="text-gray-500 text-xs">
-              Entrega em até 24h · Garantia de 7 dias · Análise personalizada e manual
+              Acesso imediato · Gere quantas análises quiser · Resultados na hora
             </p>
           </div>
         </div>

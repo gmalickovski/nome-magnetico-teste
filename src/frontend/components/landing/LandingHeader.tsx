@@ -51,12 +51,16 @@ export function LandingHeader() {
           {/* Dropdown Produtos */}
           <div
             ref={productsRef}
-            className="relative"
+            className="relative py-2 -my-2"
             onMouseEnter={() => setProductsOpen(true)}
             onMouseLeave={() => setProductsOpen(false)}
           >
             <button
-              className="flex items-center gap-1 text-gray-400 hover:text-[#D4AF37] transition-colors text-sm"
+              className={`relative flex items-center gap-1 transition-colors text-sm ${
+                productsOpen ? 'text-[#D4AF37]' : 'text-gray-400 hover:text-[#D4AF37]'
+              } after:absolute after:bottom-0 after:left-0 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300 ${
+                productsOpen ? 'after:w-full' : 'after:w-0 hover:after:w-full'
+              }`}
               onClick={() => setProductsOpen(v => !v)}
               aria-expanded={productsOpen}
             >
@@ -72,43 +76,47 @@ export function LandingHeader() {
             </button>
 
             {productsOpen && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-56 bg-[#1a1a1a] border border-[#D4AF37]/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden py-2 z-50">
-                <a
-                  href="/nome-social"
-                  className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
-                  onClick={() => setProductsOpen(false)}
-                >
-                  <span className="text-[#D4AF37] text-base leading-none">✦</span>
-                  <span>Nome Social</span>
-                </a>
-                <a
-                  href="/nome-bebe"
-                  className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
-                  onClick={() => setProductsOpen(false)}
-                >
-                  <span className="text-base leading-none">👶</span>
-                  <span>Nome para Bebê</span>
-                </a>
-                <a
-                  href="/nome-empresarial"
-                  className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
-                  onClick={() => setProductsOpen(false)}
-                >
-                  <span className="text-base leading-none">🏢</span>
-                  <span>Nome Empresarial</span>
-                </a>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-56 z-50">
+                {/* bridge invisível para o mouse não sair da área hover */}
+                <div className="absolute -top-3 left-0 right-0 h-3" />
+                <div className="bg-[#1a1a1a] border border-[#D4AF37]/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden py-2">
+                  <a
+                    href="/nome-social"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
+                    onClick={() => setProductsOpen(false)}
+                  >
+                    <span className="text-[#D4AF37] text-base leading-none">✦</span>
+                    <span>Nome Social</span>
+                  </a>
+                  <a
+                    href="/nome-bebe"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
+                    onClick={() => setProductsOpen(false)}
+                  >
+                    <span className="text-base leading-none">👶</span>
+                    <span>Nome para Bebê</span>
+                  </a>
+                  <a
+                    href="/nome-empresarial"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-[#D4AF37] hover:bg-white/5 transition-all text-sm"
+                    onClick={() => setProductsOpen(false)}
+                  >
+                    <span className="text-base leading-none">🏢</span>
+                    <span>Nome Empresarial</span>
+                  </a>
+                </div>
               </div>
             )}
           </div>
 
+          <a href="/#precos" className={navLinkClass}>
+            Preços
+          </a>
           <a href="/blog" className={navLinkClass}>
             Blog
           </a>
           <a href="/perguntas-frequentes" className={navLinkClass}>
             FAQ
-          </a>
-          <a href="/#precos" className={navLinkClass}>
-            Preços
           </a>
           <a href="/auth/login" className="bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-sm px-5 py-2 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">
             Entrar
@@ -141,9 +149,9 @@ export function LandingHeader() {
         <div className="md:hidden bg-[#111111]/95 backdrop-blur-md border-t border-[#D4AF37]/20 px-4 py-6 space-y-1">
           <a href="/#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Como Funciona</a>
           <a href="/calcular-numero" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Teste de Bloqueios</a>
+          <a href="/#precos" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Preços</a>
           <a href="/blog" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Blog</a>
           <a href="/perguntas-frequentes" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Perguntas Frequentes</a>
-          <a href="/#precos" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Preços</a>
 
           <div className="border-t border-white/8 pt-3 mt-3 space-y-1">
             <p className="text-gray-600 text-xs uppercase tracking-widest px-1 pb-1">Produtos</p>
