@@ -225,5 +225,23 @@ const schemaFAQ = {
   <script type="application/ld+json" set:html={JSON.stringify(schemaOrg)} />
   <script type="application/ld+json" set:html={JSON.stringify(schemaHowTo)} />
   <script type="application/ld+json" set:html={JSON.stringify(schemaFAQ)} />
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('opacity-100', 'translate-y-0');
+            entry.target.classList.remove('opacity-0', 'translate-y-8');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.animate-on-scroll').forEach((el) => {
+        el.classList.add('opacity-0', 'translate-y-8', 'transition-all', 'duration-1000', 'ease-out');
+        observer.observe(el);
+      });
+    });
+  </script>
   <slot />
 </BaseLayout>
