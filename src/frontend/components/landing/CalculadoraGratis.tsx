@@ -7,6 +7,8 @@ interface CalcResult {
   numero_destino: number;
   arcano_nome: string | null;
   interpretacao_basica: string;
+  quantidade_bloqueios: number;
+  primeiro_bloqueio_titulo: string | null;
   cta_url: string;
 }
 
@@ -80,6 +82,36 @@ export function CalculadoraGratis() {
               <p className="text-gray-400 text-xs mt-1">Data de nascimento</p>
             </div>
           </div>
+
+          {/* Bloqueios detectados */}
+          {result.quantidade_bloqueios > 0 ? (
+            <div className="bg-amber-950/40 border border-amber-500/30 rounded-xl p-5 mb-6">
+              <div className="flex items-start gap-3">
+                <span className="text-amber-400 text-xl flex-shrink-0 leading-none mt-0.5">⚠</span>
+                <div>
+                  <p className="text-amber-300 font-semibold text-sm mb-1">
+                    {result.quantidade_bloqueios} bloqueio{result.quantidade_bloqueios > 1 ? 's' : ''} energético{result.quantidade_bloqueios > 1 ? 's' : ''} detectado{result.quantidade_bloqueios > 1 ? 's' : ''}
+                  </p>
+                  {result.primeiro_bloqueio_titulo && (
+                    <p className="text-amber-500/80 text-xs leading-relaxed">
+                      Padrão identificado: <strong className="text-amber-400">{result.primeiro_bloqueio_titulo}</strong>
+                      {result.quantidade_bloqueios > 1 && ` + ${result.quantidade_bloqueios - 1} outro${result.quantidade_bloqueios > 2 ? 's' : ''}`}
+                    </p>
+                  )}
+                  <p className="text-gray-500 text-xs mt-2 leading-relaxed">
+                    A análise completa revela quais áreas da vida estão sendo afetadas e como remover esses padrões.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400 text-base">✦</span>
+                <p className="text-emerald-400/80 text-sm">Nenhum bloqueio detectado neste nome</p>
+              </div>
+            </div>
+          )}
 
           {/* Interpretação */}
           <div className="mb-8">

@@ -43,18 +43,12 @@ const schemaProduct = {
   <main class="bg-[#111111] pt-24">
 
     {/* Hero */}
-    <section class="py-20 md:py-32 relative overflow-hidden">
+    <section class="pt-12 pb-16 relative overflow-hidden">
       <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div class="absolute top-1/3 left-1/3 w-80 h-80 bg-[#D4AF37]/5 rounded-full blur-3xl" />
         <div class="absolute bottom-1/3 right-1/3 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
       </div>
       <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
-        <nav class="flex items-center justify-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
-          <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
-          <span aria-hidden="true">›</span>
-          <span class="text-gray-500">Nome Empresarial</span>
-        </nav>
-
         <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
           <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
           <span class="text-[#D4AF37] text-sm font-medium">Branding Vibracional · R$ 197</span>
@@ -91,13 +85,13 @@ const schemaProduct = {
         </div>
         <div class="grid md:grid-cols-3 gap-6">
           {[
-            { icon: '👤', t: 'Fundador × Empresa', d: 'A vibração do nome deve ser compatível ou complementar ao Número de Destino do fundador principal.' },
-            { icon: '📅', t: 'Data de Fundação', d: 'A data de fundação cria o "Destino da empresa". O nome ideal ressoa com essa energia específica.' },
-            { icon: '⚠️', t: 'Alerta do 8', d: 'Tendência Oculta do número 8 no nome indica excesso de materialismo — pode atrair conflitos por dinheiro e poder.' },
+            { icon: '◈', t: 'Fundador × Empresa', d: 'A vibração do nome deve ser compatível ou complementar ao Número de Destino do fundador principal.' },
+            { icon: '⬡', t: 'Data de Fundação', d: 'A data de fundação cria o "Destino da empresa". O nome ideal ressoa com essa energia específica.' },
+            { icon: '⚠', t: 'Alerta do 8', d: 'Tendência Oculta do número 8 no nome indica excesso de materialismo — pode atrair conflitos por dinheiro e poder.' },
           ].map(c => (
-            <div class="bg-white/3 rounded-2xl p-6 text-center">
-              <div class="text-3xl mb-3">{c.icon}</div>
-              <h3 class="text-white font-semibold text-sm mb-2">{c.t}</h3>
+            <div class="bg-white/3 rounded-2xl p-6 text-center transition-all duration-700 ease-out hover:bg-white/6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:-translate-y-1 group cursor-default">
+              <div class="text-[#D4AF37] text-3xl mb-3 group-hover:text-[#f2ca50] transition-colors duration-700">{c.icon}</div>
+              <h3 class="text-[#e5e2e1] font-semibold text-sm mb-2">{c.t}</h3>
               <p class="text-gray-500 text-sm leading-relaxed">{c.d}</p>
             </div>
           ))}
@@ -107,29 +101,25 @@ const schemaProduct = {
 
     {/* O que você recebe */}
     <section class="py-16 bg-[#111111]">
-      <div class="max-w-4xl mx-auto px-4">
+      <div class="max-w-5xl mx-auto px-4">
         <div class="text-center mb-12">
           <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Entregável</p>
           <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que Você Recebe</h2>
+          <p class="text-gray-500 text-sm max-w-xl mx-auto">Análise estratégica completa com relatório PDF e plano de ação para posicionar sua marca.</p>
         </div>
-        <div class="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            'Análise de múltiplos nomes candidatos',
-            'Compatibilidade de cada nome com o Destino do fundador',
-            'Análise da data de fundação (Destino da empresa)',
-            'Alerta automático de Tendência Oculta do 8',
-            'Score 0–100 por harmonia vibracional',
-            'Arquétipo da Marca revelado para posicionamento',
-            'Riscos ocultos mapeados por nome candidato',
-            'Calendário ativo anual — melhores períodos para vendas',
-            'Relatório estratégico completo em PDF',
-            'Suporte por 30 dias',
-          ].map(item => (
-            <div class="flex items-start gap-3">
-              <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              <span class="text-gray-300 text-sm">{item}</span>
+            { icon: '◈', titulo: 'Arquétipo da Marca', desc: 'A identidade vibracional da empresa revelada — comunicação, posicionamento e atratividade de mercado.' },
+            { icon: '⬟', titulo: 'Score 0–100 por Candidato', desc: 'Ranking de todos os nomes que você enviar, com análise de compatibilidade com o Destino do fundador.' },
+            { icon: '△', titulo: '4 Triângulos por Nome', desc: 'Análise cabalística completa de cada candidato, incluindo a data de fundação da empresa.' },
+            { icon: '⚠', titulo: 'Alerta do 8 Automático', desc: 'Tendência Oculta do 8 detectada automaticamente — excesso de materialismo que atrai conflitos de poder.' },
+            { icon: '📆', titulo: 'Calendário Ativo Anual', desc: 'Os melhores períodos do ano para lançamentos, negociações, contratações e expansão do negócio.' },
+            { icon: '✦', titulo: 'Relatório Estratégico PDF', desc: 'Documento completo com análise de todos os candidatos, riscos ocultos e recomendação final.' },
+          ].map(c => (
+            <div class="bg-white/3 rounded-2xl p-5 transition-all duration-700 ease-out hover:bg-white/6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:-translate-y-1 group cursor-default">
+              <div class="text-[#D4AF37] text-2xl mb-3 group-hover:text-[#f2ca50] transition-colors duration-700">{c.icon}</div>
+              <h3 class="text-[#e5e2e1] font-semibold text-sm mb-2">{c.titulo}</h3>
+              <p class="text-gray-500 text-xs leading-relaxed">{c.desc}</p>
             </div>
           ))}
         </div>

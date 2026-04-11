@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { calcularExpressao, calcularDestino } from '../../backend/numerology/numbers';
+import { calcularTodosTriangulos, detectarBloqueios } from '../../backend/numerology/triangle';
 import { ARCANOS } from '../../backend/numerology/arcanos';
 
 const schema = z.object({
@@ -83,6 +84,9 @@ export const POST: APIRoute = async ({ request }) => {
     const arcano = ARCANOS[numeroExpressao];
     const interpretacao = INTERPRETACOES[numeroExpressao] ?? INTERPRETACOES[9];
 
+    const todosTriangulos = calcularTodosTriangulos(nome_completo, data_nascimento);
+    const bloqueios = detectarBloqueios(todosTriangulos);
+
     return new Response(
       JSON.stringify({
         nome_primeiro: nomePrimeiro,
@@ -90,6 +94,8 @@ export const POST: APIRoute = async ({ request }) => {
         numero_destino: numeroDestino,
         arcano_nome: arcano?.nome ?? null,
         interpretacao_basica: interpretacao,
+        quantidade_bloqueios: bloqueios.length,
+        primeiro_bloqueio_titulo: bloqueios[0]?.titulo ?? null,
         cta_url: `/comprar?produto=nome_social&utm_source=calculadora`,
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

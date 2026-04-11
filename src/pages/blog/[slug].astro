@@ -79,14 +79,6 @@ const schemaBreadcrumb = {
   <main class="min-h-screen bg-[#111111] pt-24 pb-20">
     <div class="max-w-3xl mx-auto px-4">
 
-      <nav class="flex items-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
-        <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
-        <span aria-hidden="true">›</span>
-        <a href="/blog" class="hover:text-gray-400 transition-colors">Blog</a>
-        <span aria-hidden="true">›</span>
-        <span class="text-gray-500 truncate max-w-[200px]">{post.title}</span>
-      </nav>
-
       <article>
         {post.produto_relacionado && (
           <span class="inline-block bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-medium px-2.5 py-1 rounded-full mb-4">

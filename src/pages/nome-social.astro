@@ -43,18 +43,12 @@ const schemaProduct = {
   <main class="bg-[#111111] pt-24">
 
     {/* Hero */}
-    <section class="py-20 md:py-32 relative overflow-hidden">
+    <section class="pt-12 pb-16 relative overflow-hidden">
       <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div class="absolute top-1/3 left-1/4 w-80 h-80 bg-[#D4AF37]/5 rounded-full blur-3xl" />
         <div class="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
       </div>
       <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
-        <nav class="flex items-center justify-center gap-2 text-xs text-gray-600 mb-10" aria-label="Breadcrumb">
-          <a href="/" class="hover:text-gray-400 transition-colors">Início</a>
-          <span aria-hidden="true">›</span>
-          <span class="text-gray-500">Nome Social</span>
-        </nav>
-
         <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
           <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
           <span class="text-[#D4AF37] text-sm font-medium">Transformação Pessoal · R$ 97</span>
@@ -91,12 +85,15 @@ const schemaProduct = {
         </div>
         <div class="grid md:grid-cols-3 gap-6">
           {[
-            { numero: '333', titulo: 'Bloqueio de Expressão', desc: 'Dificuldade em se comunicar, criar e se posicionar no mundo. Talentos reprimidos.' },
-            { numero: '444', titulo: 'Bloqueio de Estrutura', desc: 'Obstáculos na carreira, dificuldade de concluir projetos e construir estabilidade material.' },
-            { numero: '888', titulo: 'Bloqueio de Abundância', desc: 'Relação conflituosa com dinheiro, poder e reconhecimento profissional.' },
+            { numero: '333', titulo: 'Bloqueio de Expressão', desc: 'Dificuldade em se comunicar, criar e se posicionar. Talentos reprimidos. Manifestação: dores de garganta e tensão no pescoço.' },
+            { numero: '444', titulo: 'Bloqueio de Estrutura', desc: 'Obstáculos na carreira, dificuldade de concluir projetos. Manifestação: fadiga crônica e tensão nos ombros.' },
+            { numero: '555', titulo: 'Bloqueio de Liberdade', desc: 'Sensação de estar preso em padrões que se repetem. Resistência a mudanças necessárias. Manifestação: ansiedade e inquietação.' },
+            { numero: '666', titulo: 'Bloqueio de Harmonia', desc: 'Conflitos em relacionamentos e família. Dificuldade em estabelecer limites. Manifestação: problemas digestivos.' },
+            { numero: '888', titulo: 'Bloqueio de Abundância', desc: 'Relação conflituosa com dinheiro e reconhecimento profissional. Manifestação: dores lombares e pressão alta.' },
+            { numero: '999', titulo: 'Bloqueio de Compaixão', desc: 'Dificuldade em fechar ciclos e perdoar. Apego ao passado que impede evolução. Manifestação: baixa imunidade.' },
           ].map(b => (
-            <div class="bg-white/3 rounded-2xl p-6">
-              <div class="font-cinzel text-3xl font-bold text-[#D4AF37] mb-3">{b.numero}</div>
+            <div class="bg-white/3 rounded-2xl p-6 transition-all duration-700 ease-out hover:bg-white/6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:-translate-y-1 group cursor-default">
+              <div class="font-cinzel text-3xl font-bold text-[#D4AF37] mb-3 group-hover:text-[#f2ca50] transition-colors duration-700">{b.numero}</div>
               <h3 class="text-white font-semibold text-sm mb-2">{b.titulo}</h3>
               <p class="text-gray-500 text-sm leading-relaxed">{b.desc}</p>
             </div>
@@ -120,9 +117,9 @@ const schemaProduct = {
             { n: '03', t: 'Bloqueios', d: 'Identificamos sequências repetidas que indicam bloqueios e lições kármicas não resolvidas.' },
             { n: '04', t: 'Harmonização', d: 'A IA sugere 3 variações do seu nome que removem os bloqueios e alinham Expressão ao Destino.' },
           ].map(s => (
-            <div class="text-center">
-              <div class="font-cinzel text-4xl font-bold text-[#D4AF37]/30 mb-3">{s.n}</div>
-              <h3 class="text-white font-medium text-sm mb-2">{s.t}</h3>
+            <div class="text-center transition-all duration-700 ease-out hover:-translate-y-1 group cursor-default">
+              <div class="font-cinzel text-4xl font-bold text-[#D4AF37]/30 mb-3 group-hover:text-[#D4AF37]/60 transition-colors duration-700">{s.n}</div>
+              <h3 class="text-[#e5e2e1] font-medium text-sm mb-2">{s.t}</h3>
               <p class="text-gray-500 text-xs leading-relaxed">{s.d}</p>
             </div>
           ))}
@@ -132,29 +129,27 @@ const schemaProduct = {
 
     {/* O que você recebe */}
     <section class="py-16 bg-[#0f0f0f]">
-      <div class="max-w-4xl mx-auto px-4">
+      <div class="max-w-5xl mx-auto px-4">
         <div class="text-center mb-12">
           <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Entregável</p>
           <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que Você Recebe</h2>
+          <p class="text-gray-500 text-sm max-w-xl mx-auto">Tudo em um único relatório PDF premium, gerado por IA e personalizado para o seu nome.</p>
         </div>
-        <div class="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            '5 números principais com interpretação profunda',
-            '4 triângulos cabalísticos detalhados (Vida, Pessoal, Social e Destino)',
-            'Detecção de todos os bloqueios energéticos com aspectos de saúde',
-            'Lições Kármicas — qualidades a desenvolver nesta encarnação',
-            'Tendências Ocultas — excessos que sabotam sua expressão',
-            '3 variações do seu nome harmonizadas e rankeadas',
-            'Guia de implementação da nova assinatura magnética (30 dias)',
-            'Seu Arquétipo Junguiano revelado',
-            'Relatório PDF Premium para download',
-            'Suporte por 30 dias',
-          ].map(item => (
-            <div class="flex items-start gap-3">
-              <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              <span class="text-gray-300 text-sm">{item}</span>
+            { icon: '⬠', titulo: 'Pentágono dos 5 Números', desc: 'Expressão, Destino, Motivação, Missão e Personalidade com interpretação profunda.' },
+            { icon: '△', titulo: '4 Triângulos Cabalísticos', desc: 'Vida, Pessoal, Social e Destino — as 4 dimensões do seu nome analisadas.' },
+            { icon: '⚠', titulo: 'Raio-X de Bloqueios', desc: 'Todos os bloqueios detectados com aspecto de saúde relacionado a cada padrão.' },
+            { icon: '☯', titulo: 'Lições Kármicas', desc: 'Números ausentes revelam qualidades a desenvolver nesta encarnação.' },
+            { icon: '◈', titulo: 'Arquétipo Junguiano', desc: 'Seu perfil psíquico inato revelado pelo padrão numérico do seu nome.' },
+            { icon: '✦', titulo: '3 Variações Harmonizadas', desc: 'Cada opção com score 0–100 de compatibilidade entre Expressão e Destino.' },
+            { icon: '✍', titulo: 'Guia da Nova Assinatura', desc: 'Plano de 30 dias para implementar a nova assinatura magnética no dia a dia.' },
+            { icon: '⬇', titulo: 'PDF Premium + Suporte', desc: 'Relatório visual completo para download e suporte por 30 dias.' },
+          ].map(c => (
+            <div class="bg-white/3 rounded-2xl p-5 transition-all duration-700 ease-out hover:bg-white/6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:-translate-y-1 group cursor-default">
+              <div class="text-[#D4AF37] text-2xl mb-3 group-hover:text-[#f2ca50] transition-colors duration-700">{c.icon}</div>
+              <h3 class="text-[#e5e2e1] font-semibold text-sm mb-2">{c.titulo}</h3>
+              <p class="text-gray-500 text-xs leading-relaxed">{c.desc}</p>
             </div>
           ))}
         </div>
