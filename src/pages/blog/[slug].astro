@@ -144,17 +144,17 @@ const categorySlug = post.category ?? null;
 
   <BlogHeader client:load activeCategory={categorySlug ?? ''} />
 
-  <main class="min-h-screen bg-[#111111] pt-20 pb-20">
+  <main class="min-h-screen bg-[#111111] pt-[72px] pb-12 md:pb-20">
     <div class="max-w-6xl mx-auto px-4">
 
       {/* ── LAYOUT: conteúdo + sidebar (quando há TOC) ── */}
-      <div class={`${toc.length >= 3 ? 'lg:grid lg:grid-cols-[1fr_240px] lg:gap-12' : ''} mt-8`}>
+      <div class={`${toc.length >= 3 ? 'lg:grid lg:grid-cols-[1fr_240px] lg:gap-12' : ''} mt-6 sm:mt-8`}>
 
         {/* ── COLUNA PRINCIPAL ── */}
         <article class="min-w-0">
 
           {/* Breadcrumb */}
-          <nav class="flex items-center gap-2 text-xs text-gray-600 mb-6" aria-label="Navegação estrutural">
+          <nav class="flex flex-wrap items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-gray-600 mb-5 sm:mb-6" aria-label="Navegação estrutural">
             <a href="/" class="hover:text-[#D4AF37] transition-colors">Início</a>
             <span aria-hidden="true">›</span>
             <a href="/blog" class="hover:text-[#D4AF37] transition-colors">Blog</a>
@@ -169,7 +169,7 @@ const categorySlug = post.category ?? null;
           </nav>
 
           {/* ── CABEÇALHO DO ARTIGO ── */}
-          <header class="mb-8">
+          <header class="mb-6 sm:mb-8">
             {/* Categoria badge */}
             {catLabel(post) && (
               <span class={`inline-block text-xs font-medium px-3 py-1 rounded-full mb-4 ${catColor(post)}`}>
@@ -178,13 +178,13 @@ const categorySlug = post.category ?? null;
             )}
 
             {/* Título */}
-            <h1 class="font-cinzel text-3xl md:text-4xl lg:text-5xl font-bold text-[#e5e2e1] leading-tight mb-5">
+            <h1 class="font-cinzel text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#e5e2e1] leading-tight mb-4 sm:mb-5">
               {post.title}
             </h1>
 
             {/* Description / lead */}
             {post.description && (
-              <p class="text-gray-400 text-lg leading-relaxed mb-6 max-w-2xl">
+              <p class="text-gray-400 text-sm sm:text-base md:text-lg leading-relaxed mb-5 sm:mb-6 max-w-2xl">
                 {post.description}
               </p>
             )}
@@ -232,10 +232,10 @@ const categorySlug = post.category ?? null;
 
           {/* ── CONTEÚDO MARKDOWN ── */}
           <div
-            class="prose prose-invert prose-base max-w-none
+            class="prose prose-invert prose-sm sm:prose-base max-w-none
               prose-headings:font-cinzel prose-headings:text-[#e5e2e1] prose-headings:font-bold
-              prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+              prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:mt-8 sm:prose-h2:mt-10 prose-h2:mb-3 sm:prose-h2:mb-4
+              prose-h3:text-lg sm:prose-h3:text-xl prose-h3:mt-6 sm:prose-h3:mt-8 prose-h3:mb-2 sm:prose-h3:mb-3
               prose-p:text-gray-400 prose-p:leading-relaxed prose-p:mb-4
               prose-a:text-[#D4AF37] prose-a:no-underline hover:prose-a:underline
               prose-strong:text-[#e5e2e1] prose-strong:font-semibold
@@ -273,27 +273,27 @@ const categorySlug = post.category ?? null;
 
           {/* ── CTA PRODUTO RELACIONADO ── */}
           {post.produto_relacionado && (
-            <div class="mt-12 relative rounded-3xl overflow-hidden p-px"
+            <div class="mt-10 sm:mt-12 relative rounded-2xl sm:rounded-3xl overflow-hidden p-px"
               style="background: linear-gradient(135deg, rgba(212,175,55,0.5) 0%, rgba(212,175,55,0.08) 100%);">
-              <div class="rounded-3xl p-8 text-center"
+              <div class="rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center"
                 style="background: radial-gradient(ellipse at top, #1d1a0d 0%, #131313 65%);">
-                <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Próximo Passo</p>
-                <h3 class="font-cinzel text-xl font-bold text-white mb-3">
+                <p class="text-[#D4AF37] text-[10px] sm:text-xs font-medium tracking-widest uppercase mb-2 sm:mb-3">Próximo Passo</p>
+                <h3 class="font-cinzel text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">
                   Descubra os Bloqueios do Seu Nome
                 </h3>
-                <p class="text-gray-400 text-sm mb-6 max-w-md mx-auto leading-relaxed">
+                <p class="text-gray-400 text-xs sm:text-sm mb-5 sm:mb-6 max-w-md mx-auto leading-relaxed">
                   A análise completa vai além deste artigo — veja os 4 triângulos cabalísticos, bloqueios energéticos, lições kármicas e sugestões de nome harmonizado.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                   <a
                     href={PRODUTO_HREF[post.produto_relacionado] ?? '/precos'}
-                    class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-8 py-3.5 rounded-2xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.99] shadow-lg shadow-[#D4AF37]/20 text-sm"
+                    class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.99] shadow-lg shadow-[#D4AF37]/20 text-sm"
                   >
                     Ver Análise de {PRODUTO_LABEL[post.produto_relacionado] ?? 'Nome'} →
                   </a>
                   <a
                     href="/calcular-numero"
-                    class="inline-block border border-[#D4AF37]/40 text-[#D4AF37] font-medium px-8 py-3.5 rounded-2xl hover:bg-[#D4AF37]/10 transition-all duration-300 text-sm"
+                    class="inline-block border border-[#D4AF37]/40 text-[#D4AF37] font-medium px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl hover:bg-[#D4AF37]/10 transition-all duration-300 text-sm"
                   >
                     Teste Gratuito Primeiro
                   </a>
@@ -304,8 +304,8 @@ const categorySlug = post.category ?? null;
 
           {/* ── ARTIGOS RELACIONADOS ── */}
           {related && related.length > 0 && (
-            <div class="mt-14">
-              <p class="text-gray-600 text-xs font-medium uppercase tracking-widest mb-5">Continue lendo</p>
+            <div class="mt-10 sm:mt-14">
+              <p class="text-gray-600 text-[10px] sm:text-xs font-medium uppercase tracking-widest mb-4 sm:mb-5">Continue lendo</p>
               <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {related.map(rel => (
                   <a
@@ -331,11 +331,11 @@ const categorySlug = post.category ?? null;
           )}
 
           {/* Navegação final */}
-          <div class="mt-12 pt-6 border-t border-white/8 flex items-center justify-between">
-            <a href="/blog" class="text-gray-600 hover:text-[#D4AF37] text-sm transition-colors">
+          <div class="mt-10 sm:mt-12 pt-5 sm:pt-6 border-t border-white/8 flex items-center justify-between">
+            <a href="/blog" class="text-gray-600 hover:text-[#D4AF37] text-xs sm:text-sm transition-colors">
               ← Voltar para o Blog
             </a>
-            <a href="/calcular-numero" class="text-[#D4AF37]/70 hover:text-[#D4AF37] text-sm transition-colors">
+            <a href="/calcular-numero" class="text-[#D4AF37]/70 hover:text-[#D4AF37] text-xs sm:text-sm transition-colors">
               Fazer Teste Grátis →
             </a>
           </div>

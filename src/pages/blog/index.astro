@@ -9,7 +9,6 @@ const supabase = createClient(
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 );
 
-// Filtro por categoria via query string
 const activeCategory = Astro.url.searchParams.get('categoria') ?? '';
 
 let query = supabase
@@ -26,19 +25,19 @@ if (activeCategory) {
 const { data: posts } = await query;
 
 const CATEGORIA_LABEL: Record<string, string> = {
-  numerologia: 'Numerologia',
-  bloqueios: 'Bloqueios',
-  'nome-social': 'Nome Social',
-  'nome-bebe': 'Nome Bebê',
+  numerologia:    'Numerologia',
+  bloqueios:      'Bloqueios',
+  'nome-social':  'Nome Social',
+  'nome-bebe':    'Nome Bebê',
   'nome-empresa': 'Nome Empresarial',
-  desenvolvimento: 'Desenvolvimento',
-  espiritualidade: 'Espiritualidade',
+  desenvolvimento:'Desenvolvimento',
+  espiritualidade:'Espiritualidade',
 };
 
 const PRODUTO_LABEL: Record<string, string> = {
   nome_social: 'Nome Social',
-  nome_bebe: 'Nome Bebê',
-  nome_empresa: 'Nome Empresarial',
+  nome_bebe:   'Nome Bebê',
+  nome_empresa:'Nome Empresarial',
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
@@ -51,20 +50,21 @@ const CATEGORY_COLOR: Record<string, string> = {
   espiritualidade:'bg-violet-500/15 text-violet-300',
 };
 
-function categoryLabel(post: { category?: string | null; produto_relacionado?: string | null }): string | null {
-  if (post.category) return CATEGORIA_LABEL[post.category] ?? post.category;
-  if (post.produto_relacionado) return PRODUTO_LABEL[post.produto_relacionado] ?? null;
+type PostLike = { category?: string | null; produto_relacionado?: string | null };
+
+function categoryLabel(p: PostLike): string | null {
+  if (p.category) return CATEGORIA_LABEL[p.category] ?? p.category;
+  if (p.produto_relacionado) return PRODUTO_LABEL[p.produto_relacionado] ?? null;
   return null;
 }
 
-function categoryColor(post: { category?: string | null; produto_relacionado?: string | null }): string {
-  const key = post.category ?? post.produto_relacionado?.replace('_', '-') ?? '';
+function categoryColor(p: PostLike): string {
+  const key = p.category ?? (p.produto_relacionado?.replace('_', '-') ?? '');
   return CATEGORY_COLOR[key] ?? 'bg-white/10 text-gray-400';
 }
 
 function readingTime(md?: string | null): number {
-  const words = md?.trim().split(/\s+/).length ?? 0;
-  return Math.max(1, Math.ceil(words / 200));
+  return Math.max(1, Math.ceil((md?.trim().split(/\s+/).length ?? 0) / 200));
 }
 
 function formatDate(dateStr?: string | null): string {
@@ -76,15 +76,13 @@ const hasPosts = posts && posts.length > 0;
 const [featured, ...rest] = hasPosts ? posts : [];
 
 const pageTitle = activeCategory
-  ? `${CATEGORIA_LABEL[activeCategory] ?? activeCategory} — Blog | Nome Magnético`
+  ? `${CATEGORIA_LABEL[activeCategory] ?? activeCategory} — Blog`
   : 'Blog de Numerologia Cabalística';
-
-const pageDescription = 'Artigos sobre numerologia cabalística, bloqueios energéticos no nome, análise de nomes e desenvolvimento pessoal.';
 ---
 
 <BlogLayout
   title={pageTitle}
-  description={pageDescription}
+  description="Artigos sobre numerologia cabalística, bloqueios energéticos no nome, análise de nomes e desenvolvimento pessoal."
   keywords="blog numerologia cabalística, artigos numerologia, bloqueio energético nome, calcular número expressão, nome magnético"
   activeCategory={activeCategory}
 >
@@ -92,88 +90,86 @@ const pageDescription = 'Artigos sobre numerologia cabalística, bloqueios energ
 
   <BlogHeader client:load activeCategory={activeCategory} />
 
-  <main class="min-h-screen bg-[#111111] pt-20 pb-20">
+  <main class="min-h-screen bg-[#111111] pt-[72px] pb-16 md:pb-20">
 
     {/* ── HERO ── */}
-    <section class="max-w-6xl mx-auto px-4 pt-10 pb-10">
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <section class="max-w-5xl mx-auto px-4 pt-8 pb-8 md:pt-10 md:pb-10">
+      {activeCategory ? (
         <div>
-          {activeCategory ? (
-            <div>
-              <a href="/blog" class="text-gray-600 hover:text-[#D4AF37] text-xs transition-colors mb-2 inline-block">← Todos os artigos</a>
-              <h1 class="font-cinzel text-2xl md:text-3xl font-bold text-[#e5e2e1]">
-                {CATEGORIA_LABEL[activeCategory] ?? activeCategory}
-              </h1>
-            </div>
-          ) : (
-            <div>
-              <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-2">Numerologia Cabalística</p>
-              <h1 class="font-cinzel text-2xl md:text-3xl font-bold text-[#e5e2e1]">Blog</h1>
-              <p class="text-gray-500 text-sm mt-1 max-w-lg">
-                Artigos sobre como o nome influencia carreira, relacionamentos e prosperidade através da numerologia cabalística.
-              </p>
-            </div>
+          <a href="/blog" class="inline-flex items-center gap-1.5 text-gray-600 hover:text-[#D4AF37] text-xs transition-colors mb-3">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Todos os artigos
+          </a>
+          <h1 class="font-cinzel text-2xl sm:text-3xl font-bold text-[#e5e2e1]">
+            {CATEGORIA_LABEL[activeCategory] ?? activeCategory}
+          </h1>
+        </div>
+      ) : (
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+          <div>
+            <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-2">Numerologia Cabalística</p>
+            <h1 class="font-cinzel text-2xl sm:text-3xl font-bold text-[#e5e2e1]">Blog</h1>
+            <p class="text-gray-500 text-sm mt-1.5 max-w-lg leading-relaxed">
+              Artigos sobre como o nome influencia carreira, relacionamentos e prosperidade.
+            </p>
+          </div>
+          {posts && posts.length > 0 && (
+            <p class="text-gray-700 text-xs flex-shrink-0 self-end sm:self-auto">
+              {posts.length} artigo{posts.length !== 1 ? 's' : ''}
+            </p>
           )}
         </div>
-        {posts && posts.length > 0 && (
-          <p class="text-gray-700 text-xs flex-shrink-0">
-            {posts.length} artigo{posts.length !== 1 ? 's' : ''}
-          </p>
-        )}
-      </div>
+      )}
     </section>
 
-    {/* ── AD SLOT 1: Leaderboard topo ── */}
-    {/* Para ativar publicidade: substitua o conteúdo interno pelo código do Google AdSense */}
-    {/* Tamanho recomendado: 728×90 desktop / 320×50 mobile */}
-    {/*
-    <div class="max-w-6xl mx-auto px-4 mb-6">
-      <div class="ad-slot flex items-center justify-center rounded-xl border border-dashed border-white/8 h-16 md:h-24 text-gray-700 text-xs">
-        [ Publicidade ]
-      </div>
-    </div>
-    */}
-
-    <div class="max-w-6xl mx-auto px-4">
+    <div class="max-w-5xl mx-auto px-4">
 
       {hasPosts ? (
         <div>
-
-          {/* ── POST DESTAQUE ── */}
+          {/* ── CARD DESTAQUE ── */}
           {featured && (
             <a
               href={`/blog/${featured.slug}`}
-              class="group block mb-10 rounded-2xl bg-white/3 border border-white/8 hover:border-[#D4AF37]/30 hover:bg-white/4 transition-all duration-500 hover:shadow-[0_20px_60px_rgba(212,175,55,0.08)] p-7 md:p-9"
+              class="group block mb-8 md:mb-10 rounded-2xl bg-white/3 border border-white/8
+                     hover:border-[#D4AF37]/30 hover:bg-white/4
+                     transition-all duration-500 hover:shadow-[0_20px_60px_rgba(212,175,55,0.08)]
+                     p-5 sm:p-7 md:p-9"
             >
-              <div class="flex flex-wrap items-center gap-3 mb-4">
-                {(featured.is_featured || posts.length > 1) && (
-                  <span class="text-[#D4AF37] text-xs font-bold tracking-widest uppercase">Destaque</span>
-                )}
+              {/* Topo: badge + meta */}
+              <div class="flex flex-wrap items-center gap-2 mb-3 md:mb-4">
+                <span class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase">Destaque</span>
                 {categoryLabel(featured) && (
-                  <span class={`text-xs font-medium px-2.5 py-1 rounded-full ${categoryColor(featured)}`}>
+                  <span class={`text-[10px] font-medium px-2 py-0.5 rounded-full ${categoryColor(featured)}`}>
                     {categoryLabel(featured)}
                   </span>
                 )}
-                <span class="text-gray-700 text-xs ml-auto hidden sm:inline">
-                  {formatDate(featured.published_at)} · {readingTime(featured.content_markdown)} min de leitura
+                <span class="text-gray-700 text-[10px] ml-auto hidden sm:inline">
+                  {formatDate(featured.published_at)}{featured.content_markdown ? ` · ${readingTime(featured.content_markdown)} min` : ''}
                 </span>
               </div>
 
-              <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white leading-snug mb-4 group-hover:text-[#D4AF37] transition-colors duration-300">
+              {/* Título */}
+              <h2 class="font-cinzel text-xl sm:text-2xl md:text-3xl font-bold text-white
+                         leading-snug mb-3 md:mb-4
+                         group-hover:text-[#D4AF37] transition-colors duration-300">
                 {featured.title}
               </h2>
 
+              {/* Descrição */}
               {featured.description && (
-                <p class="text-gray-400 text-base leading-relaxed line-clamp-3 mb-5 max-w-3xl">
+                <p class="text-gray-400 text-sm sm:text-base leading-relaxed line-clamp-2 sm:line-clamp-3 mb-4 md:mb-5 max-w-3xl">
                   {featured.description}
                 </p>
               )}
 
+              {/* Rodapé do card */}
               <div class="flex items-center justify-between">
                 <span class="text-gray-700 text-xs sm:hidden">
-                  {formatDate(featured.published_at)} · {readingTime(featured.content_markdown)} min
+                  {formatDate(featured.published_at)}{featured.content_markdown ? ` · ${readingTime(featured.content_markdown)} min` : ''}
                 </span>
-                <span class="text-[#D4AF37]/60 group-hover:text-[#D4AF37] text-sm font-medium transition-colors ml-auto">
+                <span class="text-[#D4AF37]/60 group-hover:text-[#D4AF37] text-xs sm:text-sm font-medium transition-colors ml-auto">
                   Ler artigo completo →
                 </span>
               </div>
@@ -183,30 +179,38 @@ const pageDescription = 'Artigos sobre numerologia cabalística, bloqueios energ
           {/* ── GRID DOS DEMAIS POSTS ── */}
           {rest.length > 0 && (
             <div>
-              <div class="flex items-center justify-between mb-6">
-                <p class="text-gray-600 text-xs font-medium uppercase tracking-widest">
+              <div class="mb-5">
+                <p class="text-gray-600 text-[10px] font-medium uppercase tracking-widest">
                   {activeCategory ? 'Artigos' : 'Mais Recentes'}
                 </p>
               </div>
 
-              <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {rest.map((post, i) => (
+              {/* 1 col mobile → 2 col sm/tablet → 3 col lg/desktop */}
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                {rest.map(post => (
                   <a
                     href={`/blog/${post.slug}`}
-                    class="group flex flex-col bg-white/3 border border-white/8 rounded-2xl p-6 hover:border-[#D4AF37]/25 hover:bg-white/4 hover:shadow-[0_16px_40px_rgba(212,175,55,0.07)] transition-all duration-500"
+                    class="group flex flex-col bg-white/3 border border-white/8 rounded-2xl p-5
+                           hover:border-[#D4AF37]/25 hover:bg-white/4
+                           hover:shadow-[0_16px_40px_rgba(212,175,55,0.07)]
+                           transition-all duration-500"
                   >
-                    {/* Categoria + data */}
+                    {/* Categoria + tempo */}
                     <div class="flex items-center gap-2 mb-3">
                       {categoryLabel(post) && (
-                        <span class={`text-xs font-medium px-2 py-0.5 rounded-full ${categoryColor(post)}`}>
+                        <span class={`text-[10px] font-medium px-2 py-0.5 rounded-full ${categoryColor(post)}`}>
                           {categoryLabel(post)}
                         </span>
                       )}
-                      <span class="text-gray-700 text-xs ml-auto">{readingTime(post.content_markdown)} min</span>
+                      {post.content_markdown && (
+                        <span class="text-gray-700 text-[10px] ml-auto">{readingTime(post.content_markdown)} min</span>
+                      )}
                     </div>
 
                     {/* Título */}
-                    <h2 class="font-cinzel text-sm font-bold text-white leading-snug mb-3 line-clamp-3 group-hover:text-[#D4AF37] transition-colors duration-300 flex-1">
+                    <h2 class="font-cinzel text-sm font-bold text-white leading-snug
+                               mb-2.5 line-clamp-3
+                               group-hover:text-[#D4AF37] transition-colors duration-300 flex-1">
                       {post.title}
                     </h2>
 
@@ -219,49 +223,42 @@ const pageDescription = 'Artigos sobre numerologia cabalística, bloqueios energ
 
                     {/* Data + seta */}
                     <div class="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
-                      <span class="text-gray-700 text-xs">{formatDate(post.published_at)}</span>
-                      <span class="text-[#D4AF37]/40 group-hover:text-[#D4AF37] text-xs transition-colors">→</span>
+                      <span class="text-gray-700 text-[10px]">{formatDate(post.published_at)}</span>
+                      <span class="text-[#D4AF37]/40 group-hover:text-[#D4AF37] text-sm transition-colors">→</span>
                     </div>
                   </a>
                 ))}
-
-                {/* ── AD SLOT entre os cards (após 5º post) ── */}
-                {/* Descomente quando tiver código AdSense: */}
-                {/*
-                {rest.length >= 5 && (
-                  <div class="sm:col-span-2 lg:col-span-3 ad-slot flex items-center justify-center rounded-xl border border-dashed border-white/8 h-20 text-gray-700 text-xs">
-                    [ Publicidade ]
-                  </div>
-                )}
-                */}
               </div>
             </div>
           )}
-
         </div>
+
       ) : (
         /* ── EMPTY STATE ── */
-        <div class="text-center py-24 max-w-lg mx-auto">
-          <div class="relative inline-flex items-center justify-center w-20 h-20 mb-8">
+        <div class="text-center py-16 sm:py-24 max-w-sm sm:max-w-lg mx-auto">
+          <div class="relative inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 mb-6 sm:mb-8">
             <div class="absolute inset-0 rounded-full bg-[#D4AF37]/8 blur-xl"></div>
-            <span class="font-cinzel text-4xl text-[#D4AF37]/25 select-none relative">✦</span>
+            <span class="font-cinzel text-3xl sm:text-4xl text-[#D4AF37]/25 select-none relative">✦</span>
           </div>
-          <h2 class="font-cinzel text-2xl font-bold text-white mb-4">
-            {activeCategory ? `Nenhum artigo em "${CATEGORIA_LABEL[activeCategory] ?? activeCategory}"` : 'Artigos chegando em breve'}
+          <h2 class="font-cinzel text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">
+            {activeCategory
+              ? `Nenhum artigo em "${CATEGORIA_LABEL[activeCategory] ?? activeCategory}"`
+              : 'Artigos chegando em breve'}
           </h2>
           <p class="text-gray-500 text-sm leading-relaxed mb-8">
             {activeCategory
-              ? 'Ainda não há artigos publicados nesta categoria. Veja todos os artigos ou experimente o diagnóstico gratuito.'
-              : 'Estamos preparando conteúdo exclusivo sobre numerologia cabalística, bloqueios energéticos e como o nome influencia cada área da vida.'
-            }
+              ? 'Ainda não há artigos nesta categoria. Veja todos os artigos ou experimente o diagnóstico gratuito.'
+              : 'Estamos preparando conteúdo sobre numerologia cabalística, bloqueios energéticos e análise de nomes.'}
           </p>
-          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <div class="flex flex-col gap-3 items-center">
             {activeCategory && (
-              <a href="/blog" class="inline-flex items-center gap-2 border border-white/15 text-gray-400 font-medium px-6 py-3 rounded-full hover:border-[#D4AF37]/30 hover:text-[#D4AF37] transition-all duration-300 text-sm">
+              <a href="/blog"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-white/15 text-gray-400 font-medium px-6 py-3 rounded-full hover:border-[#D4AF37]/30 hover:text-[#D4AF37] transition-all duration-300 text-sm">
                 ← Ver todos os artigos
               </a>
             )}
-            <a href="/calcular-numero" class="inline-flex items-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-bold px-6 py-3 rounded-full hover:bg-[#f2ca50] transition-all duration-300 shadow-lg shadow-[#D4AF37]/20 text-sm">
+            <a href="/calcular-numero"
+              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-bold px-6 py-3 rounded-full hover:bg-[#f2ca50] transition-all duration-300 shadow-lg shadow-[#D4AF37]/20 text-sm">
               Fazer Teste de Bloqueios Grátis →
             </a>
           </div>
@@ -269,19 +266,6 @@ const pageDescription = 'Artigos sobre numerologia cabalística, bloqueios energ
       )}
 
     </div>
-
-    {/* ── AD SLOT RODAPÉ ── */}
-    {/* Descomente quando tiver código AdSense (300×250 ou responsivo): */}
-    {/*
-    {hasPosts && (
-      <div class="max-w-6xl mx-auto px-4 mt-16">
-        <div class="ad-slot flex items-center justify-center rounded-xl border border-dashed border-white/8 h-24 text-gray-700 text-xs">
-          [ Publicidade ]
-        </div>
-      </div>
-    )}
-    */}
-
   </main>
 
   <LandingFooter client:visible />
