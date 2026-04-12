@@ -1,26 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const CATEGORIES = [
-  { label: 'Todos os artigos', slug: '' },
-  { label: 'Numerologia', slug: 'numerologia' },
-  { label: 'Bloqueios Energéticos', slug: 'bloqueios' },
-  { label: 'Nome Social', slug: 'nome-social' },
-  { label: 'Nome para Bebê', slug: 'nome-bebe' },
-  { label: 'Nome Empresarial', slug: 'nome-empresa' },
-  { label: 'Espiritualidade', slug: 'espiritualidade' },
-];
-
-interface Props {
-  activeCategory?: string;
-}
-
-export function BlogHeader({ activeCategory = '' }: Props) {
+export function GlossaryHeader() {
   const [scrolled, setScrolled] = useState(false);
-  const [catOpen, setCatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const catRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,20 +13,9 @@ export function BlogHeader({ activeCategory = '' }: Props) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fecha dropdown ao clicar fora
-  useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (catRef.current && !catRef.current.contains(e.target as Node)) {
-        setCatOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, []);
-
   // Dispara evento de busca para o filtro client-side da página
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent('blog:search', { detail: searchQuery }));
+    window.dispatchEvent(new CustomEvent('glossary:search', { detail: searchQuery }));
   }, [searchQuery]);
 
   // Foca o input ao abrir busca mobile
@@ -51,8 +24,6 @@ export function BlogHeader({ activeCategory = '' }: Props) {
       setTimeout(() => mobileSearchRef.current?.focus(), 60);
     }
   }, [searchOpen]);
-
-  const activeCatLabel = CATEGORIES.find(c => c.slug === activeCategory)?.label;
 
   return (
     <header
@@ -65,18 +36,18 @@ export function BlogHeader({ activeCategory = '' }: Props) {
       <div className="max-w-6xl mx-auto px-4 flex items-center gap-3">
 
         {/* ── Logo ── */}
-        <a href="/blog" className="flex items-center gap-2 flex-shrink-0 group">
+        <a href="/glossario" className="flex items-center gap-2 flex-shrink-0 group">
           <span className="font-cinzel text-sm font-bold text-[#D4AF37] tracking-wider group-hover:opacity-80 transition-opacity">
             NOME MAGNÉTICO
           </span>
           <span className="text-[#D4AF37]/30 text-sm" aria-hidden="true">·</span>
           <span className="font-cinzel text-sm font-bold text-[#e5e2e1] group-hover:text-[#D4AF37] transition-colors tracking-wide">
-            Blog
+            Glossário
           </span>
         </a>
 
         {/* ── Search desktop (md+) ── */}
-        <div className="hidden md:flex flex-1 max-w-[200px] xl:max-w-xs mx-2">
+        <div className="hidden md:flex flex-1 max-w-[260px] xl:max-w-sm mx-2">
           <div className="relative w-full">
             <svg
               className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 pointer-events-none"
@@ -89,7 +60,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
               type="search"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Pesquisar artigos..."
+              placeholder="Pesquisar termos..."
               className="w-full bg-white/5 border border-white/8 rounded-xl pl-8 pr-7 py-2 text-xs text-[#e5e2e1] placeholder-gray-600
                          focus:outline-none focus:border-[#D4AF37]/40 focus:bg-white/8 transition-all duration-200"
             />
@@ -109,58 +80,6 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
         {/* ── Nav desktop ── */}
         <nav className="hidden md:flex items-center gap-2 ml-auto flex-shrink-0">
-
-          {/* Dropdown Categorias */}
-          <div ref={catRef} className="relative">
-            <button
-              onClick={() => setCatOpen(v => !v)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
-                catOpen || activeCategory
-                  ? 'bg-[#D4AF37]/12 text-[#D4AF37] border border-[#D4AF37]/25'
-                  : 'text-gray-400 hover:text-[#e5e2e1] hover:bg-white/6 border border-transparent'
-              }`}
-              aria-expanded={catOpen}
-            >
-              <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h10M4 18h7" />
-              </svg>
-              <span className="whitespace-nowrap">
-                {activeCategory && activeCatLabel ? activeCatLabel : 'Categorias'}
-              </span>
-              <svg
-                className={`w-3 h-3 opacity-50 flex-shrink-0 transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {catOpen && (
-              <div className="absolute top-full right-0 mt-2 w-56 bg-[#1a1a1a] border border-[#D4AF37]/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden py-1.5 z-50">
-                {CATEGORIES.map(cat => (
-                  <a
-                    key={cat.slug}
-                    href={cat.slug ? `/blog?categoria=${cat.slug}` : '/blog'}
-                    className={`flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
-                      activeCategory === cat.slug
-                        ? 'text-[#D4AF37] bg-[#D4AF37]/8'
-                        : 'text-gray-400 hover:text-[#e5e2e1] hover:bg-white/5'
-                    }`}
-                    onClick={() => setCatOpen(false)}
-                  >
-                    {cat.label}
-                    {activeCategory === cat.slug && (
-                      <svg className="w-3.5 h-3.5 text-[#D4AF37]" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Separador */}
           <span className="w-px h-4 bg-white/10 flex-shrink-0" aria-hidden="true" />
 
           {/* Análise Gratuita */}
@@ -171,6 +90,14 @@ export function BlogHeader({ activeCategory = '' }: Props) {
                        shadow-md shadow-[#D4AF37]/20 whitespace-nowrap"
           >
             Análise Gratuita
+          </a>
+
+          {/* Blog */}
+          <a
+            href="/blog"
+            className="text-gray-500 hover:text-[#e5e2e1] text-xs font-medium px-2 py-2 rounded-xl hover:bg-white/5 transition-all duration-200 whitespace-nowrap"
+          >
+            Blog
           </a>
 
           {/* Home */}
@@ -196,11 +123,11 @@ export function BlogHeader({ activeCategory = '' }: Props) {
             aria-label={searchOpen ? 'Fechar busca' : 'Buscar'}
           >
             {searchOpen ? (
-              <svg className="w-4.5 h-4.5" style={{ width: '18px', height: '18px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg style={{ width: '18px', height: '18px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             ) : (
-              <svg className="w-4.5 h-4.5" style={{ width: '18px', height: '18px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg style={{ width: '18px', height: '18px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             )}
@@ -225,7 +152,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
       {/* ── Painel de busca mobile ── */}
       {searchOpen && (
         <div className="md:hidden border-t border-white/8 bg-[#111111]/98 px-4 py-3">
-          {/* max-w-lg limita a largura em iPads (não ocupa tela inteira no tablet) */}
+          {/* max-w-lg garante que não ocupe tela inteira em iPads */}
           <div className="max-w-lg mx-auto relative">
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none"
@@ -239,7 +166,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
               type="search"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Pesquisar artigos..."
+              placeholder="Pesquisar termos..."
               className="w-full bg-white/6 border border-[#D4AF37]/20 rounded-xl pl-9 pr-9 py-2.5 text-sm text-[#e5e2e1]
                          placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50 transition-all"
             />
@@ -260,16 +187,21 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
       {/* ── Menu mobile ── */}
       {menuOpen && (
-        <div className="md:hidden bg-[#111111]/98 border-t border-[#D4AF37]/12 px-4 py-5 space-y-4">
-
-          {/* Botões principais */}
+        <div className="md:hidden bg-[#111111]/98 border-t border-[#D4AF37]/12 px-4 py-5 space-y-3">
+          <a
+            href="/calcular-numero"
+            className="flex items-center justify-center bg-[#D4AF37] text-[#1A1A1A] font-semibold text-sm py-3 rounded-xl hover:bg-[#f2ca50] transition-colors"
+            onClick={() => setMenuOpen(false)}
+          >
+            Análise Gratuita
+          </a>
           <div className="flex gap-3">
             <a
-              href="/calcular-numero"
-              className="flex-1 flex items-center justify-center bg-[#D4AF37] text-[#1A1A1A] font-semibold text-sm py-3 rounded-xl hover:bg-[#f2ca50] transition-colors"
+              href="/blog"
+              className="flex-1 flex items-center justify-center text-gray-400 text-sm py-3 rounded-xl border border-white/10 hover:border-[#D4AF37]/25 hover:text-[#D4AF37] transition-all"
               onClick={() => setMenuOpen(false)}
             >
-              Análise Gratuita
+              Blog
             </a>
             <a
               href="/"
@@ -282,27 +214,6 @@ export function BlogHeader({ activeCategory = '' }: Props) {
               </svg>
               Home
             </a>
-          </div>
-
-          {/* Categorias */}
-          <div>
-            <p className="text-gray-700 text-xs font-medium uppercase tracking-widest mb-2.5">Categorias</p>
-            <div className="grid grid-cols-2 gap-2">
-              {CATEGORIES.map(cat => (
-                <a
-                  key={cat.slug}
-                  href={cat.slug ? `/blog?categoria=${cat.slug}` : '/blog'}
-                  className={`text-xs font-medium px-3 py-2.5 rounded-xl text-center transition-all ${
-                    activeCategory === cat.slug
-                      ? 'bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/25'
-                      : 'bg-white/4 text-gray-400 hover:text-[#D4AF37] border border-white/5'
-                  }`}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {cat.label}
-                </a>
-              ))}
-            </div>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 ---
-import LandingLayout from '../../layouts/LandingLayout.astro';
-import { LandingHeader } from '../../frontend/components/landing/LandingHeader';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { GlossaryHeader } from '../../frontend/components/blog/GlossaryHeader';
 import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
 import { createClient } from '@supabase/supabase-js';
 import { marked } from 'marked';
@@ -49,7 +49,7 @@ const schemaBreadcrumb = {
 };
 ---
 
-<LandingLayout
+<BaseLayout
   title={`${termData.term} — O Que É na Numerologia Cabalística | Nome Magnético`}
   description={`Entenda o que é ${termData.term} na numerologia cabalística: definição completa, como calcular e como interpretar no seu mapa numerológico.`}
   keywords={`o que é ${termData.term.toLowerCase()}, ${termData.term.toLowerCase()} numerologia, significado ${termData.term.toLowerCase()}, numerologia cabalística ${termData.term.toLowerCase()}`}
@@ -58,56 +58,112 @@ const schemaBreadcrumb = {
   <script type="application/ld+json" set:html={JSON.stringify(schemaBreadcrumb)} />
   <link rel="canonical" href={`https://nomemagnetico.com.br/glossario/${termData.slug}`} />
 
-  <LandingHeader client:load />
+  <GlossaryHeader client:load />
 
-  <main class="min-h-screen bg-[#111111] pt-24 pb-20">
+  <main class="min-h-screen bg-[#111111] pt-[72px] pb-12 md:pb-20">
     <div class="max-w-3xl mx-auto px-4">
 
-      <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-3 py-1 mb-6">
-        <span class="text-[#D4AF37] text-xs font-medium">Glossário · Numerologia Cabalística</span>
-      </div>
+      {/* ── CONTEÚDO ── */}
+      <article class="mt-6 sm:mt-8">
 
-      <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-8 leading-tight">
-        O Que É {termData.term}?
-      </h1>
+        {/* Breadcrumb */}
+        <nav class="flex flex-wrap items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-gray-600 mb-5 sm:mb-6" aria-label="Navegação estrutural">
+          <a href="/" class="hover:text-[#D4AF37] transition-colors">Início</a>
+          <span aria-hidden="true">›</span>
+          <a href="/glossario" class="hover:text-[#D4AF37] transition-colors">Glossário</a>
+          <span aria-hidden="true">›</span>
+          <span class="text-gray-500 line-clamp-1">{termData.term}</span>
+        </nav>
 
-      <div class="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:font-cinzel prose-a:text-[#D4AF37] prose-strong:text-white prose-p:text-gray-400 prose-p:leading-relaxed">
-        <Fragment set:html={definitionHtml} />
-      </div>
+        {/* Badge */}
+        <div class="flex flex-wrap items-center gap-2 mb-4 sm:mb-5">
+          <span class="inline-flex items-center gap-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/25 rounded-full px-3 py-1">
+            <span class="text-[#D4AF37] text-[10px] sm:text-xs font-medium">Glossário · Numerologia Cabalística</span>
+          </span>
+          {termData.related_number && (
+            <span class="inline-flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1">
+              <span class="text-gray-400 text-[10px] sm:text-xs">Número {termData.related_number}</span>
+            </span>
+          )}
+        </div>
 
-      {/* CTA */}
-      <div class="mt-14 bg-white/4 border border-[#D4AF37]/20 rounded-2xl p-8 text-center">
-        <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Aprofunde o Conhecimento</p>
-        <h3 class="font-cinzel text-xl font-bold text-white mb-3">
-          Veja Isso no Seu Próprio Nome
-        </h3>
-        <p class="text-gray-400 text-sm mb-6 max-w-md mx-auto">
-          Entender o conceito é o primeiro passo. Descobrir como ele se manifesta no seu nome é a transformação.
-        </p>
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <a
-            href="/calcular-numero"
-            class="inline-block border border-[#D4AF37]/40 text-[#D4AF37] font-medium px-6 py-3 rounded-xl hover:bg-[#D4AF37]/10 transition-all duration-300 text-sm"
-          >
-            Calculadora Gratuita
+        {/* Título */}
+        <h1 class="font-cinzel text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-5 sm:mb-6 leading-tight">
+          O Que É {termData.term}?
+        </h1>
+
+        {/* Divisor */}
+        <div class="mb-6 h-px w-full opacity-20"
+          style="background: linear-gradient(90deg, transparent, #D4AF37 30%, #D4AF37 70%, transparent);">
+        </div>
+
+        {/* Conteúdo */}
+        <div class="prose prose-invert prose-sm sm:prose-base max-w-none
+          prose-headings:font-cinzel prose-headings:text-[#e5e2e1] prose-headings:font-bold
+          prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-3
+          prose-h3:text-lg sm:prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-2
+          prose-p:text-gray-400 prose-p:leading-relaxed prose-p:mb-4
+          prose-a:text-[#D4AF37] prose-a:no-underline hover:prose-a:underline
+          prose-strong:text-[#e5e2e1] prose-strong:font-semibold
+          prose-blockquote:border-l-[#D4AF37] prose-blockquote:border-l-4 prose-blockquote:bg-white/3 prose-blockquote:rounded-r-xl prose-blockquote:py-3 prose-blockquote:px-5 prose-blockquote:not-italic
+          prose-blockquote:text-gray-300
+          prose-ul:text-gray-400 prose-ol:text-gray-400
+          prose-li:mb-1
+          prose-hr:border-white/10">
+          <Fragment set:html={definitionHtml} />
+        </div>
+
+        {/* Tags */}
+        {termData.tags?.length > 0 && (
+          <div class="mt-8 pt-5 border-t border-white/8">
+            <div class="flex flex-wrap gap-2">
+              {termData.tags.map((tag: string) => (
+                <span class="text-xs text-gray-600 bg-white/3 border border-white/8 px-3 py-1 rounded-full">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── CTA ── */}
+        <div class="mt-10 sm:mt-12 bg-white/3 border border-[#D4AF37]/15 rounded-2xl p-6 sm:p-8 text-center">
+          <p class="text-[#D4AF37] text-[10px] sm:text-xs font-medium tracking-widest uppercase mb-2 sm:mb-3">Aprofunde o Conhecimento</p>
+          <h3 class="font-cinzel text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">
+            Veja Isso no Seu Próprio Nome
+          </h3>
+          <p class="text-gray-400 text-xs sm:text-sm mb-5 sm:mb-6 max-w-md mx-auto leading-relaxed">
+            Entender o conceito é o primeiro passo. Descobrir como ele se manifesta no seu nome é a transformação.
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href="/calcular-numero"
+              class="w-full sm:w-auto inline-block border border-[#D4AF37]/40 text-[#D4AF37] font-medium px-6 py-3 rounded-xl hover:bg-[#D4AF37]/10 transition-all duration-300 text-sm text-center"
+            >
+              Teste Gratuito
+            </a>
+            <a
+              href="/precos"
+              class="w-full sm:w-auto inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-6 py-3 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20 text-sm text-center"
+            >
+              Análise Completa →
+            </a>
+          </div>
+        </div>
+
+        {/* Navegação final */}
+        <div class="mt-8 sm:mt-10 pt-5 border-t border-white/8 flex items-center justify-between">
+          <a href="/glossario" class="text-gray-600 hover:text-[#D4AF37] text-xs sm:text-sm transition-colors">
+            ← Voltar ao Glossário
           </a>
-          <a
-            href="/comprar?produto=nome_social"
-            class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-6 py-3 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20 text-sm"
-          >
-            Análise Completa →
+          <a href="/blog" class="text-gray-600 hover:text-[#D4AF37] text-xs sm:text-sm transition-colors">
+            Ver Blog →
           </a>
         </div>
-      </div>
 
-      <div class="mt-8 text-center">
-        <a href="/glossario" class="text-gray-600 hover:text-gray-400 text-sm transition-colors">
-          ← Voltar para o Glossário
-        </a>
-      </div>
-
+      </article>
     </div>
   </main>
 
   <LandingFooter client:visible />
-</LandingLayout>
+</BaseLayout>

@@ -131,7 +131,9 @@ const pageTitle = activeCategory
           {/* ── CARD DESTAQUE ── */}
           {featured && (
             <a
+              id="section-featured"
               href={`/blog/${featured.slug}`}
+              data-searchable={`${featured.title ?? ''} ${featured.description ?? ''} ${categoryLabel(featured) ?? ''}`}
               class="group block mb-8 md:mb-10 rounded-2xl bg-white/3 border border-white/8
                      hover:border-[#D4AF37]/30 hover:bg-white/4
                      transition-all duration-500 hover:shadow-[0_20px_60px_rgba(212,175,55,0.08)]
@@ -178,8 +180,8 @@ const pageTitle = activeCategory
 
           {/* ── GRID DOS DEMAIS POSTS ── */}
           {rest.length > 0 && (
-            <div>
-              <div class="mb-5">
+            <div id="section-grid">
+              <div id="grid-header" class="mb-5">
                 <p class="text-gray-600 text-[10px] font-medium uppercase tracking-widest">
                   {activeCategory ? 'Artigos' : 'Mais Recentes'}
                 </p>
@@ -190,6 +192,7 @@ const pageTitle = activeCategory
                 {rest.map(post => (
                   <a
                     href={`/blog/${post.slug}`}
+                    data-searchable={`${post.title ?? ''} ${post.description ?? ''} ${categoryLabel(post) ?? ''}`}
                     class="group flex flex-col bg-white/3 border border-white/8 rounded-2xl p-5
                            hover:border-[#D4AF37]/25 hover:bg-white/4
                            hover:shadow-[0_16px_40px_rgba(212,175,55,0.07)]
@@ -231,6 +234,11 @@ const pageTitle = activeCategory
               </div>
             </div>
           )}
+          {/* ── Sem resultados na busca ── */}
+          <div id="no-results" class="hidden text-center py-12">
+            <p class="font-cinzel text-lg font-bold text-white mb-2">Nenhum artigo encontrado</p>
+            <p class="text-gray-500 text-sm">Tente outro termo ou <button onclick="window.dispatchEvent(new CustomEvent('blog:clear'))" class="text-[#D4AF37] hover:underline">limpe a busca</button>.</p>
+          </div>
         </div>
 
       ) : (
@@ -269,4 +277,35 @@ const pageTitle = activeCategory
   </main>
 
   <LandingFooter client:visible />
+
+  <script>
+    function filterBlog(query: string) {
+      const q = (query || '').toLowerCase().trim();
+      const cards = document.querySelectorAll<HTMLElement>('[data-searchable]');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const text = (card.getAttribute('data-searchable') || '').toLowerCase();
+        const matches = !q || text.includes(q);
+        card.style.display = matches ? '' : 'none';
+        if (matches) visible++;
+      });
+
+      // Cabeçalho da seção grid
+      const gridHeader = document.getElementById('grid-header');
+      if (gridHeader) {
+        const gridCards = document.querySelectorAll<HTMLElement>('#section-grid [data-searchable]');
+        const visibleGrid = Array.from(gridCards).filter(c => c.style.display !== 'none').length;
+        gridHeader.style.display = visibleGrid === 0 ? 'none' : '';
+      }
+
+      const noResults = document.getElementById('no-results');
+      if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    window.addEventListener('blog:search', (e: Event) => {
+      filterBlog((e as CustomEvent<string>).detail);
+    });
+    window.addEventListener('blog:clear', () => filterBlog(''));
+  </script>
 </BlogLayout>
