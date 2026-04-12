@@ -1,0 +1,397 @@
+---
+import LandingLayout from '../layouts/LandingLayout.astro';
+import { LandingHeader } from '../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+import { getHqPricesAndPromo } from '../backend/payments/prices';
+import type { PriceInfo, ActivePromotion } from '../backend/payments/prices';
+
+let hqPrices: Record<string, PriceInfo> | undefined;
+let promotion: ActivePromotion | null = null;
+try {
+  const result = await getHqPricesAndPromo();
+  hqPrices = result.prices;
+  promotion = result.promotion;
+} catch (err) {
+  console.warn('[precos] Falha ao carregar preços do HQ:', err);
+}
+
+const FALLBACK: Record<string, PriceInfo> = {
+  nome_social:  { cents: 9700,  formatted: 'R$ 97',  hasDiscount: false },
+  nome_bebe:    { cents: 14700, formatted: 'R$ 147', hasDiscount: false },
+  nome_empresa: { cents: 19700, formatted: 'R$ 197', hasDiscount: false },
+};
+
+const prices = hqPrices ?? FALLBACK;
+
+function getPrice(id: string) {
+  return prices[id] ?? FALLBACK[id];
+}
+
+function showDiscount(id: string): boolean {
+  const p = getPrice(id);
+  const applies = !promotion?.productType || promotion.productType === id;
+  return !!(promotion && applies && p.hasDiscount && p.discountedFormatted);
+}
+
+function displayPrice(id: string): string {
+  const p = getPrice(id);
+  if (showDiscount(id)) return p.discountedFormatted!;
+  return p.formatted;
+}
+
+function originalPrice(id: string): string {
+  return getPrice(id).formatted;
+}
+---
+
+<LandingLayout
+  title="Preços e Planos — Nome Magnético"
+  description="Escolha a análise certa para você: Nome Social, Nome de Bebê ou Nome Empresarial. Pagamento único, sem assinatura. Acesso por 30 dias."
+  keywords="preços numerologia cabalística, análise nome preço, nome social preço, nome bebê preço, nome empresarial preço, planos nome magnético"
+>
+  <link rel="canonical" href="https://nomemagnetico.com.br/precos" />
+
+  <LandingHeader client:load />
+
+  <main class="min-h-screen bg-[#111111] pt-24 pb-20">
+
+    {/* ── HERO ── */}
+    <section class="max-w-4xl mx-auto px-4 pt-8 pb-16 text-center">
+      {promotion && (
+        <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-5 py-2 mb-8">
+          <span class="text-[#D4AF37] text-sm font-semibold">🎉 {promotion.name} — desconto ativo!</span>
+        </div>
+      )}
+      <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-4">Planos e Preços</p>
+      <h1 class="font-cinzel text-4xl md:text-5xl font-bold text-[#e5e2e1] mb-5 leading-tight">
+        Investimento em<br/>
+        <span style="background: linear-gradient(135deg, #f2ca50, #D4AF37, #B8960E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          Clareza e Magnetismo
+        </span>
+      </h1>
+      <p class="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed mb-3">
+        Pagamento único. Sem assinatura. Acesso completo por 30 dias à análise numerológica mais profunda que você já fez sobre um nome.
+      </p>
+      <p class="text-gray-600 text-sm">Garantia de 7 dias · Entrega em até 24h · Suporte incluso</p>
+    </section>
+
+    {/* ── CARDS COMPLETOS ── */}
+    <section class="max-w-6xl mx-auto px-4 mb-24">
+      <div class="grid lg:grid-cols-3 gap-8 items-start">
+
+        {/* ─── NOME SOCIAL (Popular) ─── */}
+        <div class="relative order-first lg:order-none lg:-mt-4">
+          {/* Badge popular */}
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+            <span class="bg-[#D4AF37] text-[#1A1A1A] text-xs font-bold px-5 py-1.5 rounded-full tracking-wider shadow-lg shadow-[#D4AF37]/30">
+              MAIS POPULAR
+            </span>
+          </div>
+
+          <div class="relative rounded-3xl overflow-hidden border-2 border-[#D4AF37]/60 shadow-[0_30px_80px_rgba(212,175,55,0.15)]"
+            style="background: radial-gradient(ellipse at top, #1d1a0d 0%, #131313 65%);">
+
+            {/* Glow topo */}
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-1 rounded-full"
+              style="background: linear-gradient(90deg, transparent, #D4AF37, transparent);"></div>
+
+            <div class="p-8 pb-4">
+              <div class="flex items-center gap-3 mb-2">
+                <span class="text-2xl">✦</span>
+                <div>
+                  <h2 class="font-cinzel text-xl font-bold text-white">Nome Social</h2>
+                  <p class="text-gray-500 text-xs">Análise Pessoal</p>
+                </div>
+              </div>
+
+              <p class="text-gray-400 text-sm leading-relaxed mt-4 mb-6">
+                Análise completa do seu nome de nascimento com IA especializada em numerologia cabalística. Detecta bloqueios, revela padrões e entrega variações do nome já harmonizadas.
+              </p>
+
+              {/* Preço */}
+              <div class="mb-6">
+                {showDiscount('nome_social') ? (
+                  <div class="flex items-baseline gap-3">
+                    <span class="font-cinzel text-2xl font-bold text-gray-500 line-through opacity-60">{originalPrice('nome_social')}</span>
+                    <span class="font-cinzel text-5xl font-bold text-[#D4AF37]">{displayPrice('nome_social')}</span>
+                  </div>
+                ) : (
+                  <span class="font-cinzel text-5xl font-bold text-[#D4AF37]">{displayPrice('nome_social')}</span>
+                )}
+                <p class="text-gray-600 text-xs mt-1">pagamento único · acesso por 30 dias</p>
+              </div>
+
+              <a
+                href="/auth/cadastro?produto=nome_social"
+                class="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold py-4 rounded-2xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-[#D4AF37]/25 text-base mb-3"
+              >
+                Quero Meu Nome Social
+              </a>
+              <a href="/nome-social" class="block text-center text-gray-600 hover:text-[#D4AF37] text-xs transition-colors mb-6">
+                Ver página do produto →
+              </a>
+            </div>
+
+            {/* Divisor */}
+            <div class="mx-8 h-px opacity-15" style="background: linear-gradient(90deg, transparent, #D4AF37, transparent);"></div>
+
+            {/* Features */}
+            <div class="p-8 pt-6">
+              <p class="text-gray-500 text-xs font-medium uppercase tracking-widest mb-4">O que está incluído</p>
+              <ul class="space-y-3">
+                {[
+                  ['5 números principais com interpretação completa', true],
+                  ['4 triângulos cabalísticos: Vida, Pessoal, Social e Destino', true],
+                  ['Detecção de bloqueios energéticos em todos os triângulos', true],
+                  ['Lições kármicas — o que você veio desenvolver', true],
+                  ['Tendências ocultas e mapa de frequências 1–8', true],
+                  ['Arquétipo Junguiano revelado pelo nome', true],
+                  ['3 variações do nome harmonizadas e prontas para assinar', true],
+                  ['Guia de implementação para os 30 dias', true],
+                  ['PDF para download e impressão', true],
+                  ['Suporte por 30 dias', true],
+                ].map(([feature, included]) => (
+                  <li class="flex items-start gap-3 text-sm">
+                    <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-gray-300">{feature as string}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── NOME DE BEBÊ ─── */}
+        <div class="rounded-3xl border border-white/10 bg-white/3 hover:border-[#D4AF37]/25 transition-all duration-500 flex flex-col">
+          <div class="p-8 pb-4">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-2xl">👶</span>
+              <div>
+                <h2 class="font-cinzel text-xl font-bold text-white">Nome de Bebê</h2>
+                <p class="text-gray-500 text-xs">Para seu filho</p>
+              </div>
+            </div>
+
+            <p class="text-gray-400 text-sm leading-relaxed mt-4 mb-6">
+              Encontre o nome perfeito para o seu bebê: sem bloqueios, alinhado ao destino da família e com harmonia entre sobrenome e numerologia do nascimento.
+            </p>
+
+            <div class="mb-6">
+              {showDiscount('nome_bebe') ? (
+                <div class="flex items-baseline gap-3">
+                  <span class="font-cinzel text-2xl font-bold text-gray-500 line-through opacity-60">{originalPrice('nome_bebe')}</span>
+                  <span class="font-cinzel text-5xl font-bold text-[#D4AF37]">{displayPrice('nome_bebe')}</span>
+                </div>
+              ) : (
+                <span class="font-cinzel text-5xl font-bold text-[#D4AF37]">{displayPrice('nome_bebe')}</span>
+              )}
+              <p class="text-gray-600 text-xs mt-1">pagamento único · acesso por 30 dias</p>
+            </div>
+
+            <a
+              href="/auth/cadastro?produto=nome_bebe"
+              class="block w-full text-center border border-[#D4AF37]/50 text-[#D4AF37] font-bold py-4 rounded-2xl hover:bg-[#D4AF37]/10 hover:border-[#D4AF37] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] text-base mb-3"
+            >
+              Analisar Nome do Bebê
+            </a>
+            <a href="/nome-bebe" class="block text-center text-gray-600 hover:text-[#D4AF37] text-xs transition-colors mb-6">
+              Ver página do produto →
+            </a>
+          </div>
+
+          <div class="mx-8 h-px bg-white/5"></div>
+
+          <div class="p-8 pt-6 flex-1">
+            <p class="text-gray-500 text-xs font-medium uppercase tracking-widest mb-4">O que está incluído</p>
+            <ul class="space-y-3">
+              {[
+                'Análise de múltiplos nomes candidatos (lista livre)',
+                'Compatibilidade com sobrenome da família',
+                'Alinhamento com data de nascimento do bebê',
+                '4 triângulos cabalísticos por candidato',
+                'Detecção de bloqueios em todos os candidatos',
+                'Ranking com score 0–100 por harmonia numerológica',
+                'Identificação do Arquétipo da Criança',
+                'Relatório completo para os pais',
+                'PDF para download',
+                'Suporte por 30 dias',
+              ].map(feature => (
+                <li class="flex items-start gap-3 text-sm">
+                  <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-gray-300">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* ─── NOME EMPRESARIAL ─── */}
+        <div class="rounded-3xl border border-white/10 bg-white/3 hover:border-[#D4AF37]/25 transition-all duration-500 flex flex-col">
+          <div class="p-8 pb-4">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-2xl">🏢</span>
+              <div>
+                <h2 class="font-cinzel text-xl font-bold text-white">Nome Empresarial</h2>
+                <p class="text-gray-500 text-xs">Para sua empresa</p>
+              </div>
+            </div>
+
+            <p class="text-gray-400 text-sm leading-relaxed mt-4 mb-6">
+              Avalie nomes para sua empresa pela compatibilidade com o fundador e o destino do negócio. Cada real em marketing amplifica o nome — certo ou errado.
+            </p>
+
+            <div class="mb-6">
+              {showDiscount('nome_empresa') ? (
+                <div class="flex items-baseline gap-3">
+                  <span class="font-cinzel text-2xl font-bold text-gray-500 line-through opacity-60">{originalPrice('nome_empresa')}</span>
+                  <span class="font-cinzel text-5xl font-bold text-[#D4AF37]">{displayPrice('nome_empresa')}</span>
+                </div>
+              ) : (
+                <span class="font-cinzel text-5xl font-bold text-[#D4AF37]">{displayPrice('nome_empresa')}</span>
+              )}
+              <p class="text-gray-600 text-xs mt-1">pagamento único · acesso por 30 dias</p>
+            </div>
+
+            <a
+              href="/auth/cadastro?produto=nome_empresa"
+              class="block w-full text-center border border-[#D4AF37]/50 text-[#D4AF37] font-bold py-4 rounded-2xl hover:bg-[#D4AF37]/10 hover:border-[#D4AF37] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] text-base mb-3"
+            >
+              Analisar Minha Empresa
+            </a>
+            <a href="/nome-empresarial" class="block text-center text-gray-600 hover:text-[#D4AF37] text-xs transition-colors mb-6">
+              Ver página do produto →
+            </a>
+          </div>
+
+          <div class="mx-8 h-px bg-white/5"></div>
+
+          <div class="p-8 pt-6 flex-1">
+            <p class="text-gray-500 text-xs font-medium uppercase tracking-widest mb-4">O que está incluído</p>
+            <ul class="space-y-3">
+              {[
+                'Análise de múltiplos nomes candidatos',
+                'Compatibilidade com Número de Destino do fundador',
+                'Análise da data de fundação da empresa',
+                '4 triângulos cabalísticos por candidato',
+                'Alerta de Tendência Oculta do 8 (excesso de materialismo)',
+                'Ranking com score 0–100 por harmonia estratégica',
+                'Revelação do Arquétipo da Marca',
+                'Relatório estratégico completo',
+                'PDF para download',
+                'Suporte por 30 dias',
+              ].map(feature => (
+                <li class="flex items-start gap-3 text-sm">
+                  <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-gray-300">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    {/* ── TUDO INCLUÍDO ── */}
+    <section class="max-w-4xl mx-auto px-4 mb-24">
+      <div class="text-center mb-10">
+        <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Em todos os planos</p>
+        <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-[#e5e2e1]">Sempre incluído</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
+        {[
+          { icon: '⚡', title: 'Entrega em até 24h', desc: 'Análise processada e entregue em até 24 horas úteis' },
+          { icon: '🔒', title: 'Pagamento Seguro', desc: 'Via Stripe — sem armazenar dados do cartão' },
+          { icon: '🛡', title: 'Garantia de 7 Dias', desc: 'Reembolso total sem perguntas dentro de 7 dias' },
+          { icon: '💬', title: 'Suporte Incluso', desc: '30 dias de suporte para dúvidas sobre sua análise' },
+        ].map(item => (
+          <div class="bg-white/3 rounded-2xl p-6 text-center border border-white/5">
+            <div class="text-3xl mb-3">{item.icon}</div>
+            <h3 class="text-white font-semibold text-sm mb-1">{item.title}</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* ── GARANTIA ── */}
+    <section class="max-w-3xl mx-auto px-4 mb-24">
+      <div class="relative rounded-3xl overflow-hidden p-px"
+        style="background: linear-gradient(135deg, rgba(212,175,55,0.5) 0%, rgba(212,175,55,0.08) 100%);">
+        <div class="rounded-3xl p-10 text-center"
+          style="background: radial-gradient(ellipse at top, #1d1a0d 0%, #131313 60%);">
+          <div class="text-5xl mb-5">🛡</div>
+          <h2 class="font-cinzel text-2xl font-bold text-white mb-4">Garantia Incondicional de 7 Dias</h2>
+          <p class="text-gray-400 leading-relaxed max-w-xl mx-auto mb-2">
+            Se por qualquer motivo você não ficar satisfeito com sua análise, devolvemos 100% do valor pago — sem burocracia, sem perguntas, sem complicações. Basta enviar uma mensagem.
+          </p>
+          <p class="text-gray-600 text-sm">Porque confiamos na qualidade do que entregamos.</p>
+        </div>
+      </div>
+    </section>
+
+    {/* ── FAQ PREÇOS ── */}
+    <section class="max-w-3xl mx-auto px-4 mb-16">
+      <div class="text-center mb-10">
+        <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-[#e5e2e1]">Perguntas Frequentes</h2>
+      </div>
+      <div class="space-y-4">
+        {[
+          {
+            q: 'O pagamento é único ou mensal?',
+            a: 'Pagamento único. Você paga uma vez e tem acesso completo à análise por 30 dias. Não existe cobrança recorrente ou assinatura.',
+          },
+          {
+            q: 'Quanto tempo demora para receber a análise?',
+            a: 'A análise é processada automaticamente após a confirmação do pagamento e entregue em até 24 horas úteis. Na maioria dos casos, o acesso é imediato.',
+          },
+          {
+            q: 'Posso adquirir mais de um produto?',
+            a: 'Sim. Cada análise (Nome Social, Nome de Bebê, Nome Empresarial) é adquirida separadamente. Você pode ter os três ativos ao mesmo tempo.',
+          },
+          {
+            q: 'O que é o "acesso por 30 dias"?',
+            a: 'Após a compra, você tem 30 dias para acessar o painel com sua análise completa, fazer download do PDF e utilizar o suporte. A análise em si é vitalícia — o PDF fica com você para sempre.',
+          },
+          {
+            q: 'Como funciona a garantia?',
+            a: 'Se dentro de 7 dias após a compra você não estiver satisfeito, entre em contato pelo suporte e devolvemos 100% do valor, sem perguntas.',
+          },
+          {
+            q: 'Os dados informados ficam salvos?',
+            a: 'Sim, de forma segura. Seus dados de nome e nascimento ficam associados à sua conta para que você possa acessar a análise a qualquer momento durante os 30 dias.',
+          },
+        ].map(item => (
+          <details class="group bg-white/3 border border-white/8 rounded-2xl overflow-hidden">
+            <summary class="flex items-center justify-between p-6 cursor-pointer list-none hover:bg-white/3 transition-colors">
+              <span class="text-white font-medium text-sm pr-4">{item.q}</span>
+              <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+              {item.a}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    {/* ── CTA FINAL ── */}
+    <section class="max-w-2xl mx-auto px-4 text-center">
+      <p class="text-gray-500 text-sm mb-3">Ainda com dúvidas?</p>
+      <a href="/perguntas-frequentes" class="text-[#D4AF37]/70 hover:text-[#D4AF37] text-sm transition-colors underline underline-offset-2">
+        Ver todas as perguntas frequentes →
+      </a>
+    </section>
+
+  </main>
+
+  <LandingFooter client:visible />
+</LandingLayout>

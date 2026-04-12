@@ -12,10 +12,11 @@ interface Plan {
   id: string;
   name: string;
   subtitle: string;
+  emoji: string;
   period: string;
-  description: string;
-  features: string[];
+  highlights: string[];
   cta: string;
+  href: string;
   popular: boolean;
 }
 
@@ -30,61 +31,45 @@ const PLANS: Plan[] = [
     id: 'nome_social',
     name: 'Nome Social',
     subtitle: 'Análise Pessoal',
-    period: 'acesso por 30 dias',
-    description: 'Análise completa do seu nome de nascimento com os 4 triângulos cabalísticos e IA especializada.',
-    features: [
-      '5 números principais + interpretação',
-      '4 triângulos cabalísticos detalhados',
-      'Lições kármics e tendências ocultas',
-      'Débitos kármicos detectados',
-      'Análise de bloqueios energéticos',
-      'Descubra seu Arquétipo Junguiano',
-      '3 variações do nome personalizadas',
-      'Guia de implementação (30 dias)',
-      'PDF para download',
-      'Suporte por 30 dias',
+    emoji: '✦',
+    period: 'pagamento único',
+    highlights: [
+      '4 triângulos cabalísticos + bloqueios',
+      'Lições kármicas e tendências ocultas',
+      '3 variações do nome harmonizadas',
     ],
     cta: 'Quero Meu Nome Social',
+    href: '/nome-social',
     popular: true,
   },
   {
     id: 'nome_bebe',
     name: 'Nome de Bebê',
     subtitle: 'Para seu filho',
-    period: 'acesso por 30 dias',
-    description: 'Encontre o nome perfeito para o seu bebê — sem bloqueios e alinhado ao destino da família.',
-    features: [
+    emoji: '👶',
+    period: 'pagamento único',
+    highlights: [
       'Análise de múltiplos nomes candidatos',
-      'Compatibilidade com sobrenome da família',
-      'Alinhamento com data de nascimento',
-      '4 triângulos cabalísticos por candidato',
+      'Compatibilidade com sobrenome e destino',
       'Ranking com score 0–100 por harmonia',
-      'Identificação do Arquétipo da Criança',
-      'Relatório completo para os pais',
-      'PDF para download',
-      'Suporte por 30 dias',
     ],
     cta: 'Analisar Nome do Bebê',
+    href: '/nome-bebe',
     popular: false,
   },
   {
     id: 'nome_empresa',
     name: 'Nome Empresarial',
     subtitle: 'Para sua empresa',
-    period: 'acesso por 30 dias',
-    description: 'Avalie nomes empresariais pela compatibilidade com o fundador e o destino da empresa.',
-    features: [
-      'Análise de múltiplos nomes candidatos',
+    emoji: '🏢',
+    period: 'pagamento único',
+    highlights: [
       'Compatibilidade com destino do fundador',
       'Análise da data de fundação',
-      'Alerta de tendência oculta do 8',
-      'Ranking com score 0–100',
-      'Revelação do Arquétipo da Marca',
-      'Relatório estratégico completo',
-      'PDF para download',
-      'Suporte por 30 dias',
+      'Ranking dos candidatos com score',
     ],
     cta: 'Analisar Minha Empresa',
+    href: '/nome-empresarial',
     popular: false,
   },
 ];
@@ -104,33 +89,23 @@ function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInf
   if (showDiscount) {
     return (
       <div>
-        <div className="flex items-baseline gap-3 flex-wrap">
-          <span
-            className="font-cinzel text-2xl font-bold text-gray-500 line-through opacity-60"
-            aria-label={`Preço original: ${priceInfo.formatted}`}
-          >
+        <div className="flex items-baseline gap-2">
+          <span className="font-cinzel text-base font-bold text-gray-500 line-through opacity-60">
             {priceInfo.formatted}
           </span>
-          <span className="font-cinzel text-4xl font-bold text-[#D4AF37]">
+          <span className="font-cinzel text-3xl font-bold text-[#D4AF37]">
             {priceInfo.discountedFormatted}
           </span>
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="bg-[#D4AF37] text-black text-xs font-bold px-2 py-0.5 rounded-full">
-            {promotion!.discountType === 'percent'
-              ? `−${promotion!.discountValue}%`
-              : `−R$ ${promotion!.discountValue}`}
-          </span>
-          <span className="text-[#D4AF37] text-xs font-medium">{promotion!.name}</span>
-        </div>
+        <span className="inline-block bg-[#D4AF37] text-black text-xs font-bold px-2 py-0.5 rounded-full mt-1">
+          {promotion!.discountType === 'percent' ? `−${promotion!.discountValue}%` : `−R$ ${promotion!.discountValue}`}
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-baseline gap-2">
-      <span className="font-cinzel text-4xl font-bold text-[#D4AF37]">{priceInfo.formatted}</span>
-    </div>
+    <span className="font-cinzel text-3xl font-bold text-[#D4AF37]">{priceInfo.formatted}</span>
   );
 }
 
@@ -151,7 +126,6 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
     return () => observer.disconnect();
   }, [highlight]);
 
-  // Resolve prices: prefer hqPrices, then build from legacy stripePrices, then use fallback
   const resolvedPrices: Record<string, PriceInfo> = hqPrices ?? (
     stripePrices
       ? {
@@ -163,18 +137,16 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
   );
 
   return (
-    <section id="precos" className="py-20 md:py-32 bg-[#1a1a1a]">
+    <section id="precos" className="py-20 md:py-28 bg-[#1a1a1a]">
       <div className="max-w-5xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-16">
-          <p className="text-[#D4AF37] text-sm font-medium tracking-widest uppercase mb-3">
-            Investimento
-          </p>
-          <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
-            Seu Investimento em Clareza e Magnetismo
+        <div className="text-center mb-12">
+          <p className="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Produtos</p>
+          <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-[#e5e2e1] mb-4">
+            Escolha Sua Análise
           </h2>
-          <p className="text-gray-400 max-w-xl mx-auto">
-            Pagamento único. Sem assinatura. Acesso completo por 30 dias à análise mais profunda que você já fez sobre o seu nome.
+          <p className="text-gray-400 max-w-lg mx-auto text-sm leading-relaxed">
+            Pagamento único. Sem assinatura. Acesso completo à análise mais profunda que você já fez sobre um nome.
           </p>
           {promotion && (
             <div className="inline-flex items-center gap-2 mt-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5">
@@ -183,73 +155,79 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
           )}
         </div>
 
-        {/* Cards */}
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* Cards compactos */}
+        <div className="grid md:grid-cols-3 gap-6">
           {PLANS.map(plan => {
             const isHighlighted = highlight ? plan.id === highlight : plan.popular;
             const priceInfo = resolvedPrices[plan.id] ?? FALLBACK_PRICES[plan.id];
             return (
               <div
                 key={plan.id}
-                id={`plano-${plan.id}`}
-                className={`relative rounded-2xl p-8 flex flex-col ${
+                className={`relative rounded-2xl p-7 flex flex-col transition-all duration-300 ${
                   isHighlighted
-                    ? 'bg-white/5 border-2 border-[#D4AF37]/50 shadow-xl shadow-yellow-500/10'
-                    : 'bg-white/3 border border-white/10 hover:border-[#D4AF37]/30 hover:bg-white/5'
-                } transition-all duration-300`}
+                    ? 'bg-white/5 border-2 border-[#D4AF37]/50 shadow-[0_20px_50px_rgba(212,175,55,0.10)]'
+                    : 'bg-white/3 border border-white/8 hover:border-[#D4AF37]/25 hover:bg-white/4'
+                }`}
               >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-black text-xs font-bold px-4 py-1.5 rounded-full">
+                {isHighlighted && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-black text-xs font-bold px-4 py-1 rounded-full tracking-wide">
                     MAIS POPULAR
                   </div>
                 )}
-                {highlight && plan.id === highlight && !plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-black text-xs font-bold px-4 py-1.5 rounded-full">
-                    SELECIONADO
+
+                {/* Nome + preço */}
+                <div className="mb-5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg leading-none">{plan.emoji}</span>
+                    <h3 className="font-cinzel text-lg font-bold text-white">{plan.name}</h3>
                   </div>
-                )}
-
-                <div className="mb-6">
-                  <h3 className="font-cinzel text-xl font-bold text-white mb-1">{plan.name}</h3>
-                  <p className="text-gray-500 text-sm">{plan.subtitle}</p>
-                </div>
-
-                <div className="mb-6">
+                  <p className="text-gray-500 text-xs mb-4">{plan.subtitle}</p>
                   <PriceDisplay priceInfo={priceInfo} promotion={promotion} productId={plan.id} />
-                  <p className="text-gray-500 text-sm mt-1">{plan.period}</p>
+                  <p className="text-gray-600 text-xs mt-1">{plan.period}</p>
                 </div>
 
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">{plan.description}</p>
-
-                <ul className="space-y-3 mb-8 flex-1">
-                  {plan.features.map(feature => (
-                    <li key={feature} className="flex items-start gap-2 text-sm text-gray-300">
+                {/* 3 destaques */}
+                <ul className="space-y-2 mb-6 flex-1">
+                  {plan.highlights.map(h => (
+                    <li key={h} className="flex items-start gap-2 text-sm text-gray-400">
                       <svg className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      {feature}
+                      {h}
                     </li>
                   ))}
                 </ul>
 
+                {/* CTA */}
                 <button
                   onClick={() => window.location.assign(`/auth/cadastro?produto=${plan.id}`)}
-                  className={`w-full block text-center font-medium px-6 py-3 rounded-lg transition-all duration-300 ${
+                  className={`w-full text-center font-medium px-6 py-3 rounded-xl transition-all duration-300 text-sm mb-3 ${
                     isHighlighted
                       ? 'bg-[#D4AF37] text-[#1A1A1A] hover:bg-[#f2ca50] hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20'
-                      : 'border border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37] hover:scale-[1.02] active:scale-[0.98]'
+                      : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37] hover:scale-[1.02] active:scale-[0.98]'
                   }`}
                 >
                   {plan.cta}
                 </button>
+
+                {/* Link para detalhes */}
+                <a
+                  href={plan.href}
+                  className="block text-center text-gray-600 hover:text-[#D4AF37] text-xs transition-colors"
+                >
+                  Ver todos os detalhes →
+                </a>
               </div>
             );
           })}
         </div>
 
-        {/* Garantia */}
-        <div className="text-center mt-12 text-gray-500 text-sm">
-          <p>🔒 Pagamento seguro via Stripe · Garantia de 7 dias · Suporte incluso</p>
+        {/* Rodapé */}
+        <div className="text-center mt-10 space-y-2">
+          <p className="text-gray-600 text-xs">🔒 Pagamento seguro via Stripe · Garantia de 7 dias · Suporte incluso</p>
+          <a href="/precos" className="inline-block text-[#D4AF37]/70 hover:text-[#D4AF37] text-xs transition-colors underline underline-offset-2">
+            Comparar planos e ver todos os detalhes →
+          </a>
         </div>
       </div>
     </section>
