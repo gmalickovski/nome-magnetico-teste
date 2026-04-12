@@ -1,6 +1,6 @@
 ---
-import LandingLayout from '../../layouts/LandingLayout.astro';
-import { LandingHeader } from '../../frontend/components/landing/LandingHeader';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import { BlogHeader } from '../../frontend/components/blog/BlogHeader';
 import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
 import { createClient } from '@supabase/supabase-js';
 import { marked } from 'marked';
@@ -23,116 +23,355 @@ if (!post) {
   return Astro.redirect('/blog', 302);
 }
 
-const contentHtml = await marked.parse(post.content_markdown ?? '', { gfm: true });
+// Parse markdown
+let contentHtml = await marked.parse(post.content_markdown ?? '', { gfm: true });
+
+// ── Remove o primeiro H1 do conteúdo markdown se existir.
+// O título já é renderizado pela página — não duplicar.
+contentHtml = contentHtml.replace(/^<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
+
+// ── Adiciona IDs aos H2/H3 para navegação por âncora
+contentHtml = contentHtml.replace(
+  /<h([23])([^>]*)>([\s\S]*?)<\/h[23]>/gi,
+  (_match, level, attrs, inner) => {
+    const text = inner.replace(/<[^>]+>/g, '').trim();
+    const id = text
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .slice(0, 60);
+    return `<h${level}${attrs} id="${id}">${inner}</h${level}>`;
+  }
+);
+
+// ── Extrai TOC (H2s apenas) para sumário lateral
+interface TocItem { id: string; text: string }
+const toc: TocItem[] = [];
+const tocRegex = /<h2[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/gi;
+let m: RegExpExecArray | null;
+while ((m = tocRegex.exec(contentHtml)) !== null) {
+  toc.push({ id: m[1], text: m[2].replace(/<[^>]+>/g, '').trim() });
+}
+
+// Artigos relacionados (mesma categoria ou mesmo produto, excluindo o atual)
+const { data: related } = await supabase
+  .from('blog_posts')
+  .select('slug, title, description, category, produto_relacionado, published_at, content_markdown')
+  .eq('is_published', true)
+  .neq('slug', slug)
+  .or(
+    post.category
+      ? `category.eq.${post.category},produto_relacionado.eq.${post.produto_relacionado ?? 'null'}`
+      : `produto_relacionado.eq.${post.produto_relacionado ?? 'null'}`
+  )
+  .order('published_at', { ascending: false })
+  .limit(3);
 
 const PRODUTO_HREF: Record<string, string> = {
-  nome_social: '/comprar?produto=nome_social',
-  nome_bebe: '/comprar?produto=nome_bebe',
-  nome_empresa: '/comprar?produto=nome_empresa',
+  nome_social:  '/nome-social',
+  nome_bebe:    '/nome-bebe',
+  nome_empresa: '/nome-empresarial',
 };
 
 const PRODUTO_LABEL: Record<string, string> = {
-  nome_social: 'Nome Social',
-  nome_bebe: 'Nome Bebê',
+  nome_social:  'Nome Social',
+  nome_bebe:    'Nome Bebê',
   nome_empresa: 'Nome Empresarial',
 };
 
-const schemaArticle = {
-  '@context': 'https://schema.org',
-  '@type': 'Article',
-  headline: post.title,
-  description: post.description ?? '',
-  url: `https://nomemagnetico.com.br/blog/${post.slug}`,
-  datePublished: post.published_at ?? post.created_at,
-  dateModified: post.updated_at ?? post.published_at ?? post.created_at,
-  author: { '@type': 'Organization', name: 'Nome Magnético' },
-  publisher: {
-    '@type': 'Organization',
-    name: 'Nome Magnético',
-    url: 'https://nomemagnetico.com.br',
-  },
-  inLanguage: 'pt-BR',
+const CATEGORIA_LABEL: Record<string, string> = {
+  numerologia:    'Numerologia',
+  bloqueios:      'Bloqueios',
+  'nome-social':  'Nome Social',
+  'nome-bebe':    'Nome Bebê',
+  'nome-empresa': 'Nome Empresarial',
+  desenvolvimento:'Desenvolvimento',
+  espiritualidade:'Espiritualidade',
 };
 
-const schemaBreadcrumb = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://nomemagnetico.com.br' },
-    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://nomemagnetico.com.br/blog' },
-    { '@type': 'ListItem', position: 3, name: post.title, item: `https://nomemagnetico.com.br/blog/${post.slug}` },
-  ],
+const CATEGORY_COLOR: Record<string, string> = {
+  numerologia:    'bg-[#D4AF37]/15 text-[#D4AF37]',
+  bloqueios:      'bg-amber-500/15 text-amber-400',
+  'nome-social':  'bg-[#D4AF37]/15 text-[#D4AF37]',
+  'nome-bebe':    'bg-purple-500/15 text-purple-300',
+  'nome-empresa': 'bg-sky-500/15 text-sky-300',
+  desenvolvimento:'bg-emerald-500/15 text-emerald-400',
+  espiritualidade:'bg-violet-500/15 text-violet-300',
 };
+
+function catLabel(p: { category?: string | null; produto_relacionado?: string | null }): string | null {
+  if (p.category) return CATEGORIA_LABEL[p.category] ?? p.category;
+  if (p.produto_relacionado) return PRODUTO_LABEL[p.produto_relacionado] ?? null;
+  return null;
+}
+
+function catColor(p: { category?: string | null; produto_relacionado?: string | null }): string {
+  const key = p.category ?? (p.produto_relacionado?.replace('_', '-') ?? '');
+  return CATEGORY_COLOR[key] ?? 'bg-white/10 text-gray-400';
+}
+
+function readingTime(md?: string | null): number {
+  return Math.max(1, Math.ceil((md?.trim().split(/\s+/).length ?? 0) / 200));
+}
+
+function formatDateFull(dateStr?: string | null): string {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function formatDateShort(dateStr?: string | null): string {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+const readMins = readingTime(post.content_markdown);
+const seoKeywords = (post.keywords ?? post.meta_tags ?? []).join(', ');
+const categorySlug = post.category ?? null;
 ---
 
-<LandingLayout
-  title={`${post.title} | Nome Magnético`}
+<BlogLayout
+  title={post.title}
   description={post.description ?? `Leia sobre ${post.title} no blog de numerologia cabalística do Nome Magnético.`}
-  keywords={post.keywords?.join(', ') ?? 'numerologia cabalística, nome magnético'}
+  keywords={seoKeywords || 'numerologia cabalística, nome magnético, bloqueios energéticos'}
+  isArticle={true}
+  articleSlug={post.slug}
+  articlePublishedTime={post.published_at ?? post.created_at}
+  articleModifiedTime={post.updated_at ?? post.published_at ?? post.created_at}
+  articleAuthor={post.author ?? 'Nome Magnético'}
 >
-  <script type="application/ld+json" set:html={JSON.stringify(schemaArticle)} />
-  <script type="application/ld+json" set:html={JSON.stringify(schemaBreadcrumb)} />
   <link rel="canonical" href={`https://nomemagnetico.com.br/blog/${post.slug}`} />
 
-  <LandingHeader client:load />
+  <BlogHeader client:load activeCategory={categorySlug ?? ''} />
 
-  <main class="min-h-screen bg-[#111111] pt-24 pb-20">
-    <div class="max-w-3xl mx-auto px-4">
+  <main class="min-h-screen bg-[#111111] pt-20 pb-20">
+    <div class="max-w-6xl mx-auto px-4">
 
-      <article>
-        {post.produto_relacionado && (
-          <span class="inline-block bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-medium px-2.5 py-1 rounded-full mb-4">
-            {PRODUTO_LABEL[post.produto_relacionado] ?? post.produto_relacionado}
-          </span>
-        )}
+      {/* ── LAYOUT: conteúdo + sidebar (quando há TOC) ── */}
+      <div class={`${toc.length >= 3 ? 'lg:grid lg:grid-cols-[1fr_240px] lg:gap-12' : ''} mt-8`}>
 
-        <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-          {post.title}
-        </h1>
+        {/* ── COLUNA PRINCIPAL ── */}
+        <article class="min-w-0">
 
-        {post.description && (
-          <p class="text-gray-400 text-lg leading-relaxed mb-6">{post.description}</p>
-        )}
+          {/* Breadcrumb */}
+          <nav class="flex items-center gap-2 text-xs text-gray-600 mb-6" aria-label="Navegação estrutural">
+            <a href="/" class="hover:text-[#D4AF37] transition-colors">Início</a>
+            <span aria-hidden="true">›</span>
+            <a href="/blog" class="hover:text-[#D4AF37] transition-colors">Blog</a>
+            {categorySlug && (
+              <>
+                <span aria-hidden="true">›</span>
+                <a href={`/blog?categoria=${categorySlug}`} class="hover:text-[#D4AF37] transition-colors">
+                  {CATEGORIA_LABEL[categorySlug] ?? categorySlug}
+                </a>
+              </>
+            )}
+          </nav>
 
-        {post.published_at && (
-          <p class="text-gray-600 text-xs mb-10">
-            Publicado em {new Date(post.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-          </p>
-        )}
+          {/* ── CABEÇALHO DO ARTIGO ── */}
+          <header class="mb-8">
+            {/* Categoria badge */}
+            {catLabel(post) && (
+              <span class={`inline-block text-xs font-medium px-3 py-1 rounded-full mb-4 ${catColor(post)}`}>
+                {catLabel(post)}
+              </span>
+            )}
 
-        <div class="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:font-cinzel prose-a:text-[#D4AF37] prose-strong:text-white prose-p:text-gray-400 prose-p:leading-relaxed">
-          <Fragment set:html={contentHtml} />
-        </div>
-      </article>
+            {/* Título */}
+            <h1 class="font-cinzel text-3xl md:text-4xl lg:text-5xl font-bold text-[#e5e2e1] leading-tight mb-5">
+              {post.title}
+            </h1>
 
-      {/* CTA ao final do artigo */}
-      {post.produto_relacionado && (
-        <div class="mt-14 bg-white/4 border border-[#D4AF37]/20 rounded-2xl p-8 text-center">
-          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Próximo Passo</p>
-          <h3 class="font-cinzel text-xl font-bold text-white mb-3">
-            Descubra os Bloqueios do Seu Nome
-          </h3>
-          <p class="text-gray-400 text-sm mb-6 max-w-md mx-auto">
-            A análise completa vai além deste artigo — veja os 4 triângulos cabalísticos, bloqueios energéticos e sugestões de nome harmonizado.
-          </p>
-          <a
-            href={PRODUTO_HREF[post.produto_relacionado] ?? '/comprar'}
-            class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-8 py-3.5 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20 text-sm"
+            {/* Description / lead */}
+            {post.description && (
+              <p class="text-gray-400 text-lg leading-relaxed mb-6 max-w-2xl">
+                {post.description}
+              </p>
+            )}
+
+            {/* Metadados */}
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-600">
+              <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {post.author ?? 'Nome Magnético'}
+              </span>
+              {post.published_at && (
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <time datetime={post.published_at}>{formatDateFull(post.published_at)}</time>
+                </span>
+              )}
+              <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {readMins} min de leitura
+              </span>
+            </div>
+
+            {/* Divisor */}
+            <div class="mt-6 h-px w-full opacity-20"
+              style="background: linear-gradient(90deg, transparent, #D4AF37 30%, #D4AF37 70%, transparent);">
+            </div>
+          </header>
+
+          {/* ── AD SLOT 1: antes do conteúdo (leaderboard) ── */}
+          {/* Ativar quando tiver AdSense aprovado — remova o comentário e adicione o script: */}
+          {/*
+          <div class="ad-slot my-6 flex items-center justify-center rounded-xl border border-dashed border-white/8 h-20 text-gray-700 text-xs" data-ad="before-content">
+            [ Publicidade ]
+          </div>
+          */}
+
+          {/* ── CONTEÚDO MARKDOWN ── */}
+          <div
+            class="prose prose-invert prose-base max-w-none
+              prose-headings:font-cinzel prose-headings:text-[#e5e2e1] prose-headings:font-bold
+              prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+              prose-p:text-gray-400 prose-p:leading-relaxed prose-p:mb-4
+              prose-a:text-[#D4AF37] prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-[#e5e2e1] prose-strong:font-semibold
+              prose-em:text-gray-300
+              prose-blockquote:border-l-[#D4AF37] prose-blockquote:border-l-4 prose-blockquote:bg-white/3 prose-blockquote:rounded-r-xl prose-blockquote:py-3 prose-blockquote:px-5 prose-blockquote:not-italic
+              prose-blockquote:text-gray-300
+              prose-code:text-[#D4AF37] prose-code:bg-white/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
+              prose-pre:bg-[#0d0d0d] prose-pre:border prose-pre:border-white/8 prose-pre:rounded-2xl
+              prose-ul:text-gray-400 prose-ol:text-gray-400
+              prose-li:mb-1
+              prose-hr:border-white/10"
           >
-            Ver Análise de {PRODUTO_LABEL[post.produto_relacionado] ?? 'Nome'} →
-          </a>
-        </div>
-      )}
+            <Fragment set:html={contentHtml} />
+          </div>
 
-      {/* Voltar */}
-      <div class="mt-8 text-center">
-        <a href="/blog" class="text-gray-600 hover:text-gray-400 text-sm transition-colors">
-          ← Voltar para o Blog
-        </a>
+          {/* ── AD SLOT 2: após o conteúdo ── */}
+          {/*
+          <div class="ad-slot my-10 flex items-center justify-center rounded-xl border border-dashed border-white/8 h-24 text-gray-700 text-xs" data-ad="after-content">
+            [ Publicidade ]
+          </div>
+          */}
+
+          {/* Tags / Keywords */}
+          {(post.meta_tags ?? post.keywords)?.length > 0 && (
+            <div class="mt-10 pt-6 border-t border-white/8">
+              <div class="flex flex-wrap gap-2">
+                {(post.meta_tags ?? post.keywords).map((tag: string) => (
+                  <span class="text-xs text-gray-600 bg-white/3 border border-white/8 px-3 py-1 rounded-full">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── CTA PRODUTO RELACIONADO ── */}
+          {post.produto_relacionado && (
+            <div class="mt-12 relative rounded-3xl overflow-hidden p-px"
+              style="background: linear-gradient(135deg, rgba(212,175,55,0.5) 0%, rgba(212,175,55,0.08) 100%);">
+              <div class="rounded-3xl p-8 text-center"
+                style="background: radial-gradient(ellipse at top, #1d1a0d 0%, #131313 65%);">
+                <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Próximo Passo</p>
+                <h3 class="font-cinzel text-xl font-bold text-white mb-3">
+                  Descubra os Bloqueios do Seu Nome
+                </h3>
+                <p class="text-gray-400 text-sm mb-6 max-w-md mx-auto leading-relaxed">
+                  A análise completa vai além deste artigo — veja os 4 triângulos cabalísticos, bloqueios energéticos, lições kármicas e sugestões de nome harmonizado.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                  <a
+                    href={PRODUTO_HREF[post.produto_relacionado] ?? '/precos'}
+                    class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-8 py-3.5 rounded-2xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.99] shadow-lg shadow-[#D4AF37]/20 text-sm"
+                  >
+                    Ver Análise de {PRODUTO_LABEL[post.produto_relacionado] ?? 'Nome'} →
+                  </a>
+                  <a
+                    href="/calcular-numero"
+                    class="inline-block border border-[#D4AF37]/40 text-[#D4AF37] font-medium px-8 py-3.5 rounded-2xl hover:bg-[#D4AF37]/10 transition-all duration-300 text-sm"
+                  >
+                    Teste Gratuito Primeiro
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── ARTIGOS RELACIONADOS ── */}
+          {related && related.length > 0 && (
+            <div class="mt-14">
+              <p class="text-gray-600 text-xs font-medium uppercase tracking-widest mb-5">Continue lendo</p>
+              <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {related.map(rel => (
+                  <a
+                    href={`/blog/${rel.slug}`}
+                    class="group flex flex-col bg-white/3 border border-white/8 rounded-2xl p-5 hover:border-[#D4AF37]/25 hover:bg-white/4 transition-all duration-300"
+                  >
+                    {catLabel(rel) && (
+                      <span class={`text-xs font-medium px-2 py-0.5 rounded-full mb-3 w-fit ${catColor(rel)}`}>
+                        {catLabel(rel)}
+                      </span>
+                    )}
+                    <h3 class="font-cinzel text-sm font-bold text-white leading-snug line-clamp-3 group-hover:text-[#D4AF37] transition-colors mb-3 flex-1">
+                      {rel.title}
+                    </h3>
+                    <div class="flex items-center justify-between text-gray-700 text-xs mt-auto pt-3 border-t border-white/5">
+                      <span>{formatDateShort(rel.published_at)}</span>
+                      <span class="text-[#D4AF37]/40 group-hover:text-[#D4AF37] transition-colors">→</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Navegação final */}
+          <div class="mt-12 pt-6 border-t border-white/8 flex items-center justify-between">
+            <a href="/blog" class="text-gray-600 hover:text-[#D4AF37] text-sm transition-colors">
+              ← Voltar para o Blog
+            </a>
+            <a href="/calcular-numero" class="text-[#D4AF37]/70 hover:text-[#D4AF37] text-sm transition-colors">
+              Fazer Teste Grátis →
+            </a>
+          </div>
+
+        </article>
+
+        {/* ── SIDEBAR: TOC (só quando artigo tem ≥3 H2s) ── */}
+        {toc.length >= 3 && (
+          <aside class="hidden lg:block">
+            <div class="sticky top-24">
+              <p class="text-gray-600 text-xs font-medium uppercase tracking-widest mb-4">Neste artigo</p>
+              <nav class="space-y-1">
+                {toc.map(item => (
+                  <a
+                    href={`#${item.id}`}
+                    class="block text-gray-500 hover:text-[#D4AF37] text-xs leading-relaxed py-1 border-l-2 border-white/5 hover:border-[#D4AF37]/40 pl-3 transition-all duration-200 line-clamp-2"
+                  >
+                    {item.text}
+                  </a>
+                ))}
+              </nav>
+
+              {/* ── AD SLOT SIDEBAR ── */}
+              {/* 300×250 retângulo médio — ideal para sidebar */}
+              {/*
+              <div class="ad-slot mt-8 flex items-center justify-center rounded-xl border border-dashed border-white/8 h-64 text-gray-700 text-xs" data-ad="sidebar">
+                [ Publicidade ]
+              </div>
+              */}
+            </div>
+          </aside>
+        )}
+
       </div>
-
     </div>
   </main>
 
   <LandingFooter client:visible />
-</LandingLayout>
+</BlogLayout>

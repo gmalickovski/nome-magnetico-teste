@@ -1,0 +1,110 @@
+---
+/**
+ * BlogLayout — layout dedicado ao blog.
+ * Usa BaseLayout diretamente (sem os schemas da landing page)
+ * e injeta os schemas corretos para Blog / BlogPosting.
+ */
+import BaseLayout from './BaseLayout.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+  keywords?: string;
+  ogImage?: string;
+  // Article-specific
+  isArticle?: boolean;
+  articlePublishedTime?: string;
+  articleModifiedTime?: string;
+  articleAuthor?: string;
+  articleSlug?: string;
+  // Blog index
+  activeCategory?: string;
+}
+
+const {
+  title,
+  description,
+  keywords,
+  ogImage = '/og-image.jpg',
+  isArticle = false,
+  articlePublishedTime,
+  articleModifiedTime,
+  articleAuthor = 'Nome Magnético',
+  articleSlug,
+} = Astro.props;
+
+// Schema para o blog (índice)
+const schemaBlog = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  name: 'Blog de Numerologia Cabalística — Nome Magnético',
+  url: 'https://nomemagnetico.com.br/blog',
+  description: 'Artigos educativos sobre numerologia cabalística, bloqueios energéticos no nome, análise de nomes e desenvolvimento pessoal.',
+  inLanguage: 'pt-BR',
+  publisher: {
+    '@type': 'Organization',
+    name: 'Nome Magnético',
+    url: 'https://nomemagnetico.com.br',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://nomemagnetico.com.br/logo-nome-magnetico.png',
+    },
+  },
+};
+
+// Schema para artigo individual
+const schemaArticle = isArticle ? {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description: description ?? '',
+  url: articleSlug ? `https://nomemagnetico.com.br/blog/${articleSlug}` : 'https://nomemagnetico.com.br/blog',
+  datePublished: articlePublishedTime ?? '',
+  dateModified: articleModifiedTime ?? articlePublishedTime ?? '',
+  author: {
+    '@type': 'Organization',
+    name: articleAuthor,
+    url: 'https://nomemagnetico.com.br',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Nome Magnético',
+    url: 'https://nomemagnetico.com.br',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://nomemagnetico.com.br/logo-nome-magnetico.png',
+    },
+  },
+  image: ogImage.startsWith('http') ? ogImage : `https://nomemagnetico.com.br${ogImage}`,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': articleSlug ? `https://nomemagnetico.com.br/blog/${articleSlug}` : 'https://nomemagnetico.com.br/blog',
+  },
+  inLanguage: 'pt-BR',
+} : null;
+
+const schemaBreadcrumb = isArticle && articleSlug ? {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://nomemagnetico.com.br' },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://nomemagnetico.com.br/blog' },
+    { '@type': 'ListItem', position: 3, name: title, item: `https://nomemagnetico.com.br/blog/${articleSlug}` },
+  ],
+} : null;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  keywords={keywords}
+  ogImage={ogImage}
+  ogType={isArticle ? 'article' : 'website'}
+  articlePublishedTime={articlePublishedTime}
+  articleModifiedTime={articleModifiedTime}
+>
+  {!isArticle && <script type="application/ld+json" set:html={JSON.stringify(schemaBlog)} />}
+  {isArticle && schemaArticle && <script type="application/ld+json" set:html={JSON.stringify(schemaArticle)} />}
+  {isArticle && schemaBreadcrumb && <script type="application/ld+json" set:html={JSON.stringify(schemaBreadcrumb)} />}
+  <slot />
+</BaseLayout>
