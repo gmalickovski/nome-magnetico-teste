@@ -189,6 +189,13 @@ type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa'
 ### Modelo de negócio
 Pagamento único por ciclo de 30 dias (não recorrente)
 
+### Modelo de entrega — IMPORTANTE para copy e comunicação
+- **NÃO existe "entrega"**: o produto é 100% self-service. O usuário paga, acessa o painel imediatamente e roda as análises por conta própria, na hora que quiser e quantas vezes quiser.
+- **Acesso é imediato**: liberado automaticamente após confirmação do Stripe, sem etapa manual.
+- **NÃO usar** nas landing pages, preços ou CTAs: "Entrega em 24h", "entregue em até X horas", "receba sua análise".
+- **USAR**: "Acesso imediato", "Análise na hora", "Você mesmo faz sua análise", "self-service".
+- **Suporte**: existe suporte geral por e-mail via sistema de tickets (`/suporte`), com SLA de resposta em até 24h úteis. Porém, a equipe **NÃO** faz revisão individual de análises nem oferece suporte específico por análise. No copy, usar "Suporte por e-mail" — nunca "Suporte por 30 dias sobre sua análise" ou "revisão da análise".
+
 ---
 
 ## Banco de Dados

@@ -72,7 +72,7 @@ function originalPrice(id: string): string {
       <p class="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed mb-3">
         Pagamento único. Sem assinatura. Acesso completo por 30 dias à análise numerológica mais profunda que você já fez sobre um nome.
       </p>
-      <p class="text-gray-600 text-sm">Garantia de 7 dias · Entrega em até 24h · Suporte incluso</p>
+      <p class="text-gray-600 text-sm">Garantia de 7 dias · Acesso imediato · Suporte por e-mail</p>
     </section>
 
     {/* ── CARDS COMPLETOS ── */}
@@ -149,7 +149,7 @@ function originalPrice(id: string): string {
                   ['3 variações do nome harmonizadas e prontas para assinar', true],
                   ['Guia de implementação para os 30 dias', true],
                   ['PDF para download e impressão', true],
-                  ['Suporte por 30 dias', true],
+                  ['Suporte por e-mail incluso', true],
                 ].map(([feature, included]) => (
                   <li class="flex items-start gap-3 text-sm">
                     <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -216,7 +216,7 @@ function originalPrice(id: string): string {
                 'Identificação do Arquétipo da Criança',
                 'Relatório completo para os pais',
                 'PDF para download',
-                'Suporte por 30 dias',
+                'Suporte por e-mail incluso',
               ].map(feature => (
                 <li class="flex items-start gap-3 text-sm">
                   <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -282,7 +282,7 @@ function originalPrice(id: string): string {
                 'Revelação do Arquétipo da Marca',
                 'Relatório estratégico completo',
                 'PDF para download',
-                'Suporte por 30 dias',
+                'Suporte por e-mail incluso',
               ].map(feature => (
                 <li class="flex items-start gap-3 text-sm">
                   <svg class="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -306,10 +306,10 @@ function originalPrice(id: string): string {
       </div>
       <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
         {[
-          { icon: '⚡', title: 'Entrega em até 24h', desc: 'Análise processada e entregue em até 24 horas úteis' },
+          { icon: '⚡', title: 'Acesso Imediato', desc: 'Assim que o pagamento é confirmado, o acesso é liberado automaticamente — sem esperar' },
           { icon: '🔒', title: 'Pagamento Seguro', desc: 'Via Stripe — sem armazenar dados do cartão' },
           { icon: '🛡', title: 'Garantia de 7 Dias', desc: 'Reembolso total sem perguntas dentro de 7 dias' },
-          { icon: '💬', title: 'Suporte Incluso', desc: '30 dias de suporte para dúvidas sobre sua análise' },
+          { icon: '💬', title: 'Suporte por E-mail', desc: 'Equipe disponível para dúvidas gerais sobre o produto e seu acesso' },
         ].map(item => (
           <div class="bg-white/3 rounded-2xl p-6 text-center border border-white/5">
             <div class="text-3xl mb-3">{item.icon}</div>
@@ -348,8 +348,8 @@ function originalPrice(id: string): string {
             a: 'Pagamento único. Você paga uma vez e tem acesso completo à análise por 30 dias. Não existe cobrança recorrente ou assinatura.',
           },
           {
-            q: 'Quanto tempo demora para receber a análise?',
-            a: 'A análise é processada automaticamente após a confirmação do pagamento e entregue em até 24 horas úteis. Na maioria dos casos, o acesso é imediato.',
+            q: 'Quanto tempo leva para ter acesso?',
+            a: 'O acesso é liberado automaticamente assim que o pagamento é confirmado. Você começa sua análise na hora, sem esperar. Não há entrega — o sistema é self-service.',
           },
           {
             q: 'Posso adquirir mais de um produto?',
