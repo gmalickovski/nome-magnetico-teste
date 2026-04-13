@@ -45,7 +45,7 @@ export function LandingHeader() {
             Como Funciona
           </a>
           <a href="/calcular-numero" className={navLinkClass}>
-            Teste de Bloqueios
+            Análise Gratuita
           </a>
 
           {/* Dropdown Produtos */}
@@ -148,7 +148,7 @@ export function LandingHeader() {
       {menuOpen && (
         <div className="lg:hidden bg-[#111111]/95 backdrop-blur-md border-t border-[#D4AF37]/20 px-4 py-6 space-y-1">
           <a href="/#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Como Funciona</a>
-          <a href="/calcular-numero" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Teste de Bloqueios</a>
+          <a href="/calcular-numero" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Análise Gratuita</a>
           <a href="/precos" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Preços</a>
           <a href="/blog" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Blog</a>
           <a href="/perguntas-frequentes" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Perguntas Frequentes</a>
