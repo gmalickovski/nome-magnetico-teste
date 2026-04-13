@@ -4,7 +4,12 @@ export function LandingHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
+  const [currentPath, setCurrentPath] = useState('');
   const productsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCurrentPath(window.location.pathname);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -22,8 +27,21 @@ export function LandingHeader() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navLinkClass =
-    'relative text-gray-400 hover:text-[#D4AF37] transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#D4AF37] hover:after:w-full after:transition-all after:duration-300';
+  const PRODUCT_PATHS = ['/nome-social', '/nome-bebe', '/nome-empresarial'];
+  const isProductsActive = PRODUCT_PATHS.some(p => currentPath === p || currentPath.startsWith(p + '/'));
+
+  function navLink(href: string): string {
+    const active = currentPath === href || (href !== '/' && currentPath.startsWith(href + '/'));
+    const base = 'relative transition-colors text-sm after:absolute after:bottom-0 after:left-0 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300';
+    return active
+      ? `${base} text-[#D4AF37] after:w-full`
+      : `${base} text-gray-400 hover:text-[#D4AF37] after:w-0 hover:after:w-full`;
+  }
+
+  function mobileLink(href: string): string {
+    const active = currentPath === href || (href !== '/' && currentPath.startsWith(href + '/'));
+    return `block py-2.5 text-sm transition-colors ${active ? 'text-[#D4AF37] font-medium' : 'text-gray-400 hover:text-[#D4AF37]'}`;
+  }
 
   return (
     <header
