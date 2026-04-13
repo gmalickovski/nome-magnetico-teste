@@ -84,7 +84,7 @@ export function GlossaryHeader() {
 
           {/* Análise Gratuita */}
           <a
-            href="/calcular-numero"
+            href="/analise-gratis"
             className="flex items-center gap-1.5 bg-[#D4AF37] text-[#1A1A1A] font-semibold text-xs px-3 py-2 rounded-xl
                        hover:bg-[#f2ca50] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
                        shadow-md shadow-[#D4AF37]/20 whitespace-nowrap"
@@ -189,7 +189,7 @@ export function GlossaryHeader() {
       {menuOpen && (
         <div className="md:hidden bg-[#111111]/98 border-t border-[#D4AF37]/12 px-4 py-5 space-y-3">
           <a
-            href="/calcular-numero"
+            href="/analise-gratis"
             className="flex items-center justify-center bg-[#D4AF37] text-[#1A1A1A] font-semibold text-sm py-3 rounded-xl hover:bg-[#f2ca50] transition-colors"
             onClick={() => setMenuOpen(false)}
           >

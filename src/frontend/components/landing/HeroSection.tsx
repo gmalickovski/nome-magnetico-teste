@@ -59,7 +59,7 @@ export function HeroSection() {
         {/* CTA Principal */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           <a
-            href="/calcular-numero"
+            href="/analise-gratis"
             id="cta-hero-principal"
             className="w-full sm:w-auto bg-[#D4AF37] text-[#1A1A1A] font-semibold text-lg px-8 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
             aria-label="Descobrir a frequência do meu nome gratuitamente"

@@ -6,14 +6,24 @@
 type UmamiEvent =
   | 'cta_hero_click'
   | 'cta_produto_click'
+  | 'cta_nome_social_hero'
+  | 'cta_nome_bebe_hero'
+  | 'cta_nome_empresarial_hero'
   | 'pricing_view'
+  | 'precos_view'
+  | 'lp_view'
   | 'checkout_start'
+  | 'checkout_redirect_start'
   | 'coupon_applied'
   | 'purchase_complete'
   | 'report_generated'
   | 'pdf_downloaded'
+  | 'analise_gratis_submit'
+  | 'analise_resultado_cta_click'
   | 'calculadora_submit'
-  | 'blog_cta_click';
+  | 'blog_cta_click'
+  | 'blog_cta_lp_click'
+  | 'blog_article_view';
 
 interface EventData {
   produto?: 'nome_social' | 'nome_bebe' | 'nome_empresa';

@@ -25,6 +25,11 @@ const productType: ProductType | null = (produtosValidos as readonly string[]).i
   ? (produto as ProductType)
   : null;
 
+// Não-logados com produto específico → enviar para cadastro/login
+if (!user && productType) {
+  return Astro.redirect(`/auth/cadastro?produto=${productType}`);
+}
+
 // isOwned só é relevante quando há produto específico
 let isOwned = false;
 if (user && productType) {

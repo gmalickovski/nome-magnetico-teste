@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
 import { track } from '../../lib/analytics';
 
@@ -119,6 +119,14 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
   const [loading, setLoading] = useState<ProductType | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [couponCode, setCouponCode] = useState('');
+
+  // Auto-disparar checkout quando usuário chega logado com produto específico
+  useEffect(() => {
+    if (productType && isLoggedIn && !isOwned) {
+      track('checkout_redirect_start', { produto: productType });
+      triggerCheckout(productType);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const prices = hqPrices ?? FALLBACK_PRICES;
 
@@ -387,17 +395,37 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
   }
 
   const type = productType!;
+
+  // Sem erro → auto-trigger em progresso, mostrar spinner
+  if (!errorMsg) {
+    return (
+      <div className="min-h-screen bg-[#111111]">
+        <StickyHeader />
+        <div className="flex flex-col items-center justify-center py-32 px-4">
+          <div className="w-16 h-16 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin mb-6" />
+          <p className="font-cinzel text-lg font-bold text-[#e5e2e1] mb-2">Preparando seu pagamento...</p>
+          <p className="text-gray-500 text-sm">Você será redirecionado ao Stripe em instantes.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Erro no checkout — mostrar produto com opção de tentar novamente
   return (
     <div className="min-h-screen bg-[#111111]">
       <StickyHeader />
       <div className="pt-10 pb-20 px-4">
         <div className="max-w-md mx-auto">
           <PageHeader singular={true} />
-          {errorMsg && (
-            <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm text-center">
-              {errorMsg}
-            </div>
-          )}
+          <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm text-center">
+            {errorMsg}
+            <button
+              onClick={() => { setErrorMsg(''); triggerCheckout(type); }}
+              className="block mt-3 mx-auto text-[#D4AF37] hover:underline text-sm font-medium"
+            >
+              Tentar novamente
+            </button>
+          </div>
           <ProductCard type={type} showPayButton={true} forceHighlight={true} />
         </div>
       </div>
