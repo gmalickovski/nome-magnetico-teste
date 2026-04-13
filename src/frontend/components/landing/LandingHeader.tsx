@@ -59,10 +59,10 @@ export function LandingHeader() {
 
         {/* Nav desktop */}
         <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
-          <a href="/#como-funciona" className={navLinkClass}>
+          <a href="/#como-funciona" className={navLink('/#como-funciona')}>
             Como Funciona
           </a>
-          <a href="/analise-gratis" className={navLinkClass}>
+          <a href="/analise-gratis" className={navLink('/analise-gratis')}>
             Análise Gratuita
           </a>
 
@@ -127,13 +127,13 @@ export function LandingHeader() {
             )}
           </div>
 
-          <a href="/precos" className={navLinkClass}>
+          <a href="/precos" className={navLink('/precos')}>
             Preços
           </a>
-          <a href="/blog" className={navLinkClass}>
+          <a href="/blog" className={navLink('/blog')}>
             Blog
           </a>
-          <a href="/perguntas-frequentes" className={navLinkClass}>
+          <a href="/perguntas-frequentes" className={navLink('/perguntas-frequentes')}>
             FAQ
           </a>
           <a href="/auth/login" className="bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-sm px-5 py-2 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">
