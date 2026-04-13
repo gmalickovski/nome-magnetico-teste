@@ -48,9 +48,11 @@ try {
 const pathname = Astro.url.pathname;
 const isActive = (path: string) =>
   pathname === path || pathname.startsWith(path + '/');
+
+const showChatwoot = pathname.startsWith('/app/suporte');
 ---
 
-<BaseLayout title={title} description={description} noIndex={true} hasBottomNav={true}>
+<BaseLayout title={title} description={description} noIndex={true} hasBottomNav={true} showChatwoot={showChatwoot}>
   <div class="min-h-screen bg-[#1a1a1a]">
     <!-- Banner usuário teste -->
     {isTest && (
@@ -169,13 +171,9 @@ const isActive = (path: string) =>
   </div>
 
   <!-- Layout Scripts Removered: Logout forms are handled by React (AvatarMenu) -->
-  <script define:vars={{ _uid: user.id, _email: user.email ?? '', _name: userNome, _showBubble: pathname.startsWith('/app/suporte') }}>
+  <script define:vars={{ _uid: user.id, _email: user.email ?? '', _name: userNome }}>
     function _syncChatwoot() {
       window.$chatwoot.setUser(_uid, { email: _email, name: _name });
-      // Balão visível apenas na página de suporte — nas demais o usuário abre via botão
-      if (!_showBubble) {
-        window.$chatwoot.toggleBubbleVisibility('hide');
-      }
     }
     if (window.$chatwoot) {
       _syncChatwoot();
