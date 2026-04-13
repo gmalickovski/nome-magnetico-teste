@@ -13,7 +13,7 @@ const activeCategory = Astro.url.searchParams.get('categoria') ?? '';
 
 let query = supabase
   .from('blog_posts')
-  .select('id, slug, title, description, category, produto_relacionado, published_at, content_markdown, is_featured')
+  .select('id, slug, title, description, category, produto_relacionado, published_at, content_markdown, is_featured, cover_image_url')
   .eq('is_published', true)
   .order('is_featured', { ascending: false })
   .order('published_at', { ascending: false });
@@ -137,43 +137,81 @@ const pageTitle = activeCategory
               class="group block mb-8 md:mb-10 rounded-2xl bg-white/3 border border-white/8
                      hover:border-[#D4AF37]/30 hover:bg-white/4
                      transition-all duration-500 hover:shadow-[0_20px_60px_rgba(212,175,55,0.08)]
-                     p-5 sm:p-7 md:p-9"
+                     overflow-hidden"
             >
-              {/* Topo: badge + meta */}
-              <div class="flex flex-wrap items-center gap-2 mb-3 md:mb-4">
-                <span class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase">Destaque</span>
-                {categoryLabel(featured) && (
-                  <span class={`text-[10px] font-medium px-2 py-0.5 rounded-full ${categoryColor(featured)}`}>
-                    {categoryLabel(featured)}
-                  </span>
+              <div class={featured.cover_image_url ? 'md:grid md:grid-cols-[1fr_280px]' : ''}>
+                {/* Conteúdo textual */}
+                <div class="p-5 sm:p-7 md:p-9 flex flex-col justify-between">
+                  {/* Topo: badge + meta */}
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-3 md:mb-4">
+                      <span class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase">Destaque</span>
+                      {categoryLabel(featured) && (
+                        <span class={`text-[10px] font-medium px-2 py-0.5 rounded-full ${categoryColor(featured)}`}>
+                          {categoryLabel(featured)}
+                        </span>
+                      )}
+                      <span class="text-gray-700 text-[10px] ml-auto hidden sm:inline">
+                        {formatDate(featured.published_at)}{featured.content_markdown ? ` · ${readingTime(featured.content_markdown)} min` : ''}
+                      </span>
+                    </div>
+
+                    {/* Título */}
+                    <h2 class="font-cinzel text-xl sm:text-2xl md:text-3xl font-bold text-white
+                               leading-snug mb-3 md:mb-4
+                               group-hover:text-[#D4AF37] transition-colors duration-300">
+                      {featured.title}
+                    </h2>
+
+                    {/* Descrição */}
+                    {featured.description && (
+                      <p class="text-gray-400 text-sm sm:text-base leading-relaxed line-clamp-2 sm:line-clamp-3 mb-4 md:mb-5 max-w-3xl">
+                        {featured.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Rodapé do card */}
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700 text-xs sm:hidden">
+                      {formatDate(featured.published_at)}{featured.content_markdown ? ` · ${readingTime(featured.content_markdown)} min` : ''}
+                    </span>
+                    <span class="text-[#D4AF37]/60 group-hover:text-[#D4AF37] text-xs sm:text-sm font-medium transition-colors ml-auto">
+                      Ler artigo completo →
+                    </span>
+                  </div>
+                </div>
+
+                {/* Imagem (só quando disponível) */}
+                {featured.cover_image_url && (
+                  <div class="hidden md:block relative overflow-hidden">
+                    <img
+                      src={featured.cover_image_url}
+                      alt={featured.title}
+                      width={560}
+                      height={560}
+                      loading="lazy"
+                      decoding="async"
+                      class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    />
+                  </div>
                 )}
-                <span class="text-gray-700 text-[10px] ml-auto hidden sm:inline">
-                  {formatDate(featured.published_at)}{featured.content_markdown ? ` · ${readingTime(featured.content_markdown)} min` : ''}
-                </span>
-              </div>
 
-              {/* Título */}
-              <h2 class="font-cinzel text-xl sm:text-2xl md:text-3xl font-bold text-white
-                         leading-snug mb-3 md:mb-4
-                         group-hover:text-[#D4AF37] transition-colors duration-300">
-                {featured.title}
-              </h2>
-
-              {/* Descrição */}
-              {featured.description && (
-                <p class="text-gray-400 text-sm sm:text-base leading-relaxed line-clamp-2 sm:line-clamp-3 mb-4 md:mb-5 max-w-3xl">
-                  {featured.description}
-                </p>
-              )}
-
-              {/* Rodapé do card */}
-              <div class="flex items-center justify-between">
-                <span class="text-gray-700 text-xs sm:hidden">
-                  {formatDate(featured.published_at)}{featured.content_markdown ? ` · ${readingTime(featured.content_markdown)} min` : ''}
-                </span>
-                <span class="text-[#D4AF37]/60 group-hover:text-[#D4AF37] text-xs sm:text-sm font-medium transition-colors ml-auto">
-                  Ler artigo completo →
-                </span>
+                {/* Imagem mobile (banda horizontal) */}
+                {featured.cover_image_url && (
+                  <div class="md:hidden w-full overflow-hidden" style="max-height:200px">
+                    <img
+                      src={featured.cover_image_url}
+                      alt={featured.title}
+                      width={800}
+                      height={400}
+                      loading="lazy"
+                      decoding="async"
+                      class="w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                      style="aspect-ratio:16/9"
+                    />
+                  </div>
+                )}
               </div>
             </a>
           )}
@@ -193,11 +231,27 @@ const pageTitle = activeCategory
                   <a
                     href={`/blog/${post.slug}`}
                     data-searchable={`${post.title ?? ''} ${post.description ?? ''} ${categoryLabel(post) ?? ''}`}
-                    class="group flex flex-col bg-white/3 border border-white/8 rounded-2xl p-5
+                    class="group flex flex-col bg-white/3 border border-white/8 rounded-2xl overflow-hidden
                            hover:border-[#D4AF37]/25 hover:bg-white/4
                            hover:shadow-[0_16px_40px_rgba(212,175,55,0.07)]
                            transition-all duration-500"
                   >
+                    {/* Imagem de capa (quando disponível) */}
+                    {post.cover_image_url && (
+                      <div class="w-full overflow-hidden" style="aspect-ratio:16/9">
+                        <img
+                          src={post.cover_image_url}
+                          alt={post.title}
+                          width={600}
+                          height={338}
+                          loading="lazy"
+                          decoding="async"
+                          class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                        />
+                      </div>
+                    )}
+
+                    <div class="flex flex-col flex-1 p-5">
                     {/* Categoria + tempo */}
                     <div class="flex items-center gap-2 mb-3">
                       {categoryLabel(post) && (
@@ -228,6 +282,7 @@ const pageTitle = activeCategory
                     <div class="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
                       <span class="text-gray-700 text-[10px]">{formatDate(post.published_at)}</span>
                       <span class="text-[#D4AF37]/40 group-hover:text-[#D4AF37] text-sm transition-colors">→</span>
+                    </div>
                     </div>
                   </a>
                 ))}

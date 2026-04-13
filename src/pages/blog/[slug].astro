@@ -134,6 +134,7 @@ const categorySlug = post.category ?? null;
   title={post.title}
   description={post.description ?? `Leia sobre ${post.title} no blog de numerologia cabalística do Nome Magnético.`}
   keywords={seoKeywords || 'numerologia cabalística, nome magnético, bloqueios energéticos'}
+  ogImage={post.cover_image_url ?? undefined}
   isArticle={true}
   articleSlug={post.slug}
   articlePublishedTime={post.published_at ?? post.created_at}
@@ -167,6 +168,22 @@ const categorySlug = post.category ?? null;
               </>
             )}
           </nav>
+
+          {/* ── HERO IMAGE ── */}
+          {post.cover_image_url && (
+            <div class="relative w-full overflow-hidden rounded-2xl mb-8" style="max-height:480px">
+              <img
+                src={post.cover_image_url}
+                alt={`Imagem de capa: ${post.title}`}
+                width={1080}
+                height={1080}
+                loading="eager"
+                decoding="async"
+                class="w-full object-cover object-center"
+                style="aspect-ratio:16/9"
+              />
+            </div>
+          )}
 
           {/* ── CABEÇALHO DO ARTIGO ── */}
           <header class="mb-6 sm:mb-8">
