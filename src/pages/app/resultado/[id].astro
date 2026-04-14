@@ -152,10 +152,13 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
         <div id="timeout-state" class="hidden rounded-2xl bg-amber-500/10 border border-amber-500/20 p-8 text-center">
           <div class="text-3xl mb-4">⏱</div>
           <h3 class="font-cinzel text-xl font-bold text-amber-400 mb-2">A análise está demorando mais que o esperado</h3>
-          <p class="text-gray-400 mb-6">O processamento pode estar lento. Aguarde mais alguns minutos e recarregue a página manualmente.</p>
-          <button onclick="window.location.reload()" class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-medium px-6 py-2.5 rounded-full hover:bg-amber-400 transition-all">
-            Verificar agora
-          </button>
+          <p class="text-gray-400 mb-6">O processamento pode estar lento devido a instabilidades da Inteligência Artificial. Aguarde mais alguns minutos e recarregue a página, ou relate o problema caso persista.</p>
+          <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <button onclick="window.location.reload()" class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-medium px-6 py-2.5 rounded-full hover:bg-amber-400 transition-all">
+              Verificar agora
+            </button>
+            <a href="/suporte" target="_blank" class="text-amber-400 hover:text-amber-300 text-sm underline underline-offset-4">Relatar atraso no Suporte</a>
+          </div>
         </div>
         <script define:vars={{ analysisId: id }}>
           (function () {
@@ -189,9 +192,14 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
       <div class="rounded-2xl bg-red-500/10 p-8 text-center">
         <h3 class="font-cinzel text-xl font-bold text-red-400 mb-2">Erro na Análise</h3>
         <p class="text-gray-400 mb-4">{errorMessage}</p>
-        <a href="/app/analise/nome-social" class="inline-flex items-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium px-6 py-2.5 rounded-full hover:bg-[#f2ca50] transition-all duration-300">
-          Tentar Novamente
-        </a>
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+          <a href={isFree ? "/app/analise-gratuita" : `/app/analise/${analysis.product_type?.replace('_', '-') ?? 'nome-social'}`} class="inline-flex items-center gap-2 bg-[#D4AF37] text-[#1A1A1A] font-medium px-6 py-2.5 rounded-full hover:bg-[#f2ca50] transition-all duration-300">
+            Tentar Novamente
+          </a>
+          <a href="/suporte" target="_blank" class="text-red-400 hover:text-red-300 text-sm underline underline-offset-4">
+            Relatar erro no Suporte
+          </a>
+        </div>
       </div>
     )}
 

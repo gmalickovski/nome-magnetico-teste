@@ -63,11 +63,23 @@ function toISODate(date: string): string {
 export async function hasUsedFreeAnalysis(userId: string): Promise<boolean> {
   const { data } = await supabase
     .from('analyses')
-    .select('id')
+    .select('status, created_at')
     .eq('user_id', userId)
-    .eq('is_free', true)
-    .limit(1);
-  return (data?.length ?? 0) > 0;
+    .eq('is_free', true);
+
+  if (!data || data.length === 0) return false;
+
+  // Verifica se há alguma análise concluída
+  const hasComplete = data.some(a => a.status === 'complete');
+  if (hasComplete) return true;
+
+  // Verifica se há alguma análise em andamento (menos de 15 minutos atrás)
+  const fifteenMinsAgo = new Date(Date.now() - 15 * 60000).toISOString();
+  const isCurrentlyProcessing = data.some(
+    a => (a.status === 'pending' || a.status === 'processing') && a.created_at > fifteenMinsAgo
+  );
+
+  return isCurrentlyProcessing;
 }
 
 export async function createAnalysis(params: {
