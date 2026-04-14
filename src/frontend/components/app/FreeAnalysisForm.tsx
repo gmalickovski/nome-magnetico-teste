@@ -57,7 +57,7 @@ export default function FreeAnalysisForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 mt-8">
 
       {/* Alerta de uso único — visível antes dos campos */}
       <div className="rounded-xl p-4 bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
