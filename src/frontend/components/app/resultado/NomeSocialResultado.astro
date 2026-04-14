@@ -313,7 +313,7 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
     </h2>
   </div>
   {bloqueios.length > 0 ? (
-    <div class="space-y-3">
+    <div class="flex flex-col gap-4">
       {bloqueios.map((b, i) => (
         <BlockAnalysisCard client:load bloqueio={b as any} defaultOpen={i === 0} />
       ))}
@@ -338,12 +338,17 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
       <h2 class="font-cinzel text-2xl font-bold text-white">Karma e Lições</h2>
     </div>
     {debitosRaw !== null && (
-      <div class="mb-4">
+      <div class="mb-8">
         <KarmicDebts client:load debitos={debitosRaw as any} nomeCompleto={nomeExibido} />
       </div>
     )}
+    {debitosRaw !== null && licoesRaw !== null && (
+      <hr class="border-t border-[#D4AF37]/20 my-8" />
+    )}
     {licoesRaw !== null && (
-      <KarmicLessons client:load licoes={licoesRaw as any} nomeCompleto={nomeExibido} />
+      <div class="mb-4">
+        <KarmicLessons client:load licoes={licoesRaw as any} nomeCompleto={nomeExibido} />
+      </div>
     )}
   </section>
 )}

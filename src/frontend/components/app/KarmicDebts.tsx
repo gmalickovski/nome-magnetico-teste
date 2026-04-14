@@ -5,8 +5,6 @@
  * Débitos "variáveis" vêm de Motivação e/ou Expressão — podem ser eliminados por variação do nome.
  */
 
-import { useState } from 'react';
-
 interface DebitoCarmico {
   numero: number;
   titulo: string;
@@ -22,7 +20,6 @@ interface Props {
 }
 
 function DebitoCard({ debito }: { debito: DebitoCarmico }) {
-  const [expandido, setExpandido] = useState(false);
   const isFixo = debito.fixo === true;
 
   const tituloCapitalizado = debito.titulo
@@ -35,10 +32,7 @@ function DebitoCard({ debito }: { debito: DebitoCarmico }) {
         ? 'border-amber-500/40 bg-amber-500/5'
         : 'border-purple-500/30 bg-purple-500/10'
     }`}>
-      <button
-        className="w-full text-left p-4 flex items-center gap-4"
-        onClick={() => setExpandido(!expandido)}
-      >
+      <div className="w-full text-left p-4 flex items-start gap-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 border ${
           isFixo
             ? 'bg-amber-500/20 border-amber-500/30 text-amber-300'
@@ -61,29 +55,24 @@ function DebitoCard({ debito }: { debito: DebitoCarmico }) {
             </p>
           )}
         </div>
-        <span className="text-gray-400 shrink-0 transition-transform duration-300 transform">
-          {expandido ? '▲' : '▼'}
-        </span>
-      </button>
+      </div>
 
-      {expandido && (
-        <div className={`px-4 pb-4 space-y-4 border-t bg-opacity-5 ${
-          isFixo ? 'border-amber-500/10 bg-amber-500/5' : 'border-purple-500/10 bg-purple-500/5'
-        }`}>
-          <p className="text-gray-300 text-sm leading-relaxed pt-4 break-words">
-            {debito.descricao}
+      <div className={`px-4 pb-4 space-y-4 border-t bg-opacity-5 ${
+        isFixo ? 'border-amber-500/10 bg-amber-500/5' : 'border-purple-500/10 bg-purple-500/5'
+      }`}>
+        <p className="text-gray-300 text-sm leading-relaxed pt-4 break-words">
+          {debito.descricao}
+        </p>
+        {isFixo ? (
+          <p className="text-xs text-amber-400/60 italic border-t border-amber-500/10 pt-3">
+            Este débito está vinculado à data de nascimento e persiste independentemente do nome utilizado. Trabalhe-o com consciência e ação focada.
           </p>
-          {isFixo ? (
-            <p className="text-xs text-amber-400/60 italic border-t border-amber-500/10 pt-3">
-              Este débito está vinculado à data de nascimento e persiste independentemente do nome utilizado. Trabalhe-o com consciência e ação focada.
-            </p>
-          ) : (
-            <p className="text-xs text-purple-400/60 italic border-t border-purple-500/10 pt-3">
-              Este débito pode ser reduzido ou eliminado por uma variação do nome que ajuste os números de Motivação e/ou Expressão.
-            </p>
-          )}
-        </div>
-      )}
+        ) : (
+          <p className="text-xs text-purple-400/60 italic border-t border-purple-500/10 pt-3">
+            Este débito pode ser reduzido ou eliminado por uma variação do nome que ajuste os números de Motivação e/ou Expressão.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

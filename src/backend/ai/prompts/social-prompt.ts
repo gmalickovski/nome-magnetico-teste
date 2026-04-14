@@ -188,7 +188,7 @@ Escreva uma conclusão profunda e emocionante (3–4 parágrafos):
 REGRAS ESTRITAS DE FORMATAÇÃO:
 1. Use estruturação Markdown rigorosa com Hash Headers (##, ###).
 2. NUNCA use títulos apenas com letras maiúsculas. SEMPRE use Hash Headers com emoticon.
-3. **Negrito:** Use EXCLUSIVAMENTE para termos numerológicos e os números em si.
+3. **Negrito:** Utilize negrito (**) de forma natural e estratégica para destacar ideias principais, palavras-chave e pontos de atenção importantes no texto. Evite colocar trechos inteiros ou frases longas em negrito.
 4. SEMPRE duplo espaçamento entre parágrafos — texto arejado e escaneável.
 5. Parágrafos com no máximo 4 linhas.
 6. Escreva com profundidade, precisão e calor humano — esta pessoa está diante de uma das escolhas mais importantes da sua identidade pública.

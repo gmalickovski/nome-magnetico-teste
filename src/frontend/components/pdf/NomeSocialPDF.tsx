@@ -514,61 +514,7 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
         <PDFFooter />
       </Page>
 
-      {/* ── PÁGINA: OS 4 TRIÂNGULOS NUMEROLÓGICOS ─────────────────────────── */}
-      {triangleMap && (
-        <Page size="A4" style={styles.page}>
-          <PDFPageHeader subtitle={`${nomeParaExibir} — A Geometria da Alma`} />
 
-          <View style={{ marginTop: 20, marginBottom: 8 }}>
-            <Text style={styles.hugeTitle}>A Geometria da Alma (Os 4 Triângulos)</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={{ ...styles.bodyText, marginBottom: 8 }}>
-              Os Triângulos Numerológicos formam a anatomia vibratória do seu nome. Eles revelam, em camadas progressivas, a energia que atravessa cada letra da sua identidade, expondo os pontos de fluxo livre e as zonas de tensão ou bloqueio em quatro dimensões distintas da sua vida.
-            </Text>
-            <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
-              Enquanto o Triângulo da Vida rege sua vitalidade e expansão material, o Triângulo Pessoal desvenda sua vida íntima e emocional. O Triângulo Social mapeia seu magnetismo nas relações e parcerias, e o Triângulo do Destino aponta a convergência final — a grande força que orquestra os resultados e realizações da sua missão.
-            </Text>
-
-            {([
-              {
-                data: tVida,
-                key: 'Triângulo da Vida',
-                desc: 'O Triângulo da Vida materializa os alicerces de sua sobrevivência e ambição prática. É a bússola dourada da sua vitalidade biológica, da sua resiliência e de todo o seu potencial de atração financeira. Ele dita os limites palpáveis da sua expansão material e a intensidade com que o universo manifesta oportunidades ao seu redor.',
-              },
-              {
-                data: tPessoal,
-                key: 'Triângulo Pessoal',
-                desc: 'Este triângulo desvenda as profundezas da sua vida íntima. Ele atua sobre o subconsciente, curando ou criando fissuras no amor-próprio e nas reações sentimentais. Através dele visualizamos se você é movido por clareza emocional ou por tempestades invisíveis do seu afeto, revelando os padrões que guiam seus relacionamentos mais próximos.',
-              },
-              {
-                data: tSocial,
-                key: 'Triângulo Social',
-                desc: 'Aqui mapeamos a arquitetura do seu magnetismo de grupo. Este vértice define o peso do seu networking, a fluidez das parcerias de negócios e como a sociedade em geral curva-se perante os seus argumentos e dons de comunicação. É a arte do posicionamento projetada em numerologia pura.',
-              },
-              {
-                data: tDestino,
-                key: 'Triângulo do Destino',
-                desc: 'O ápice sagrado: sua convergência final. O Triângulo do Destino revela as circunstâncias incontornáveis e o fluxo principal do projeto que o universo exige de você nesta Era. É para cá que os ventos sopram; é a grande força gravitacional em direção ao topo da sua montanha evolutiva e ao cumprimento da sua missão de vida.',
-              },
-            ] as const).filter(t => t.data != null).map(({ data, key, desc }) => (
-              <View key={key} style={{ marginTop: 8, marginBottom: 12 }}>
-                <Text style={{ fontSize: 13, fontFamily: TITLE_FONT, color: GOLD, marginBottom: 4 }}>{key}</Text>
-                <Text style={{ ...styles.bodyText, marginBottom: 8 }}>{desc}</Text>
-                <TrianguloPiramideInline
-                  data={data!}
-                  label={key}
-                  cellSize={triCellSize}
-                  letras={letrasNome}
-                />
-              </View>
-            ))}
-          </View>
-
-          <PDFFooter />
-        </Page>
-      )}
 
       {/* ── PÁGINAS 6+: ANÁLISE IA COMPLETA COM INJEÇÕES DE QUEBRA E TEXTOS ─── */}
       {analiseCorpo && (

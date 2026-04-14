@@ -3,8 +3,6 @@
  * Lições = números de 1 a 8 ausentes no nome.
  */
 
-import { useState } from 'react';
-
 interface LicaoCarmica {
   numero: number;
   titulo: string;
@@ -20,35 +18,28 @@ interface Props {
 const COR_LICAO = 'border-[#D4AF37]/30 bg-[#D4AF37]/10';
 
 function LicaoCard({ licao }: { licao: LicaoCarmica }) {
-  const [expandido, setExpandido] = useState(false);
   const cor = COR_LICAO;
 
   const tituloCapitalizado = licao.titulo ? licao.titulo.charAt(0).toUpperCase() + licao.titulo.slice(1) : '';
 
   return (
     <div className={`rounded-xl border overflow-hidden ${cor}`}>
-      <button
-        className="w-full text-left p-4 flex items-center gap-4"
-        onClick={() => setExpandido(!expandido)}
-      >
+      <div className="w-full text-left p-4 flex items-center gap-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 border text-[#D4AF37] border-[#D4AF37]/30 bg-[#D4AF37]/10`}>
           {licao.numero}
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-gray-200 text-sm leading-snug">{tituloCapitalizado}</p>
         </div>
-        <span className="text-gray-400 shrink-0">{expandido ? '▲' : '▼'}</span>
-      </button>
+      </div>
 
-      {expandido && (
-        <div className="px-4 pb-4 space-y-4 border-t border-white/5">
-          <p className="text-gray-300 text-sm leading-relaxed pt-4">{licao.descricao}</p>
-          <div className="rounded-lg p-3 bg-emerald-500/10 border border-emerald-500/20">
-            <p className="text-xs text-emerald-400 uppercase tracking-wider mb-2">Como Trabalhar</p>
-            <p className="text-emerald-200 text-sm leading-relaxed">{licao.comoTrabalhar}</p>
-          </div>
+      <div className="px-4 pb-4 space-y-4 border-t border-white/5">
+        <p className="text-gray-300 text-sm leading-relaxed pt-4">{licao.descricao}</p>
+        <div className="rounded-lg p-3 bg-emerald-500/10 border border-emerald-500/20">
+          <p className="text-xs text-emerald-400 uppercase tracking-wider mb-2">Como Trabalhar</p>
+          <p className="text-emerald-200 text-sm leading-relaxed">{licao.comoTrabalhar}</p>
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -293,7 +293,7 @@ const dataFundacaoFormatted: string = (() => {
         {bloqueios.length} Bloqueio{bloqueios.length > 1 ? 's' : ''} Energético{bloqueios.length > 1 ? 's' : ''}
       </h2>
     </div>
-    <div class="space-y-3">
+    <div class="flex flex-col gap-4">
       {bloqueios.map((b, i) => (
         <BlockAnalysisCard client:load bloqueio={b as any} defaultOpen={i === 0} />
       ))}
@@ -309,14 +309,19 @@ const dataFundacaoFormatted: string = (() => {
       <h2 class="font-cinzel text-2xl font-bold text-white">Padrões Kármicos do Sócio</h2>
     </div>
     {rankingEmpresa?.melhorNome?.debitosCarmicos?.length > 0 && (
-      <KarmicDebts
-        client:load
-        debitos={rankingEmpresa.melhorNome.debitosCarmicos as any}
-        nomeCompleto={analysis.nome_completo}
-      />
+      <div class="mb-8">
+        <KarmicDebts
+          client:load
+          debitos={rankingEmpresa.melhorNome.debitosCarmicos as any}
+          nomeCompleto={analysis.nome_completo}
+        />
+      </div>
+    )}
+    {rankingEmpresa?.melhorNome?.debitosCarmicos?.length > 0 && rankingEmpresa?.melhorNome?.licoesCarmicas?.length > 0 && (
+      <hr class="border-t border-[#D4AF37]/20 my-8" />
     )}
     {rankingEmpresa?.melhorNome?.licoesCarmicas?.length > 0 && (
-      <div class="mt-4">
+      <div class="mb-4">
         <KarmicLessons
           client:load
           licoes={rankingEmpresa.melhorNome.licoesCarmicas as any}

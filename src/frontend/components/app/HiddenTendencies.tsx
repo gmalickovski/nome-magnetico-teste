@@ -3,8 +3,6 @@
  * Tendência oculta = número que aparece ≥4 vezes no nome.
  */
 
-import { useState } from 'react';
-
 interface TendenciaOculta {
   numero: number;
   frequencia: number;
@@ -45,16 +43,11 @@ function FrequencyBar({ numero, frequencia, max }: { numero: number; frequencia:
 }
 
 function TendenciaCard({ tendencia }: { tendencia: TendenciaOculta }) {
-  const [expandido, setExpandido] = useState(false);
-
   const tituloCapitalizado = tendencia.titulo ? tendencia.titulo.charAt(0).toUpperCase() + tendencia.titulo.slice(1) : '';
 
   return (
     <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 overflow-hidden">
-      <button
-        className="w-full text-left p-4 flex items-center gap-4"
-        onClick={() => setExpandido(!expandido)}
-      >
+      <div className="w-full text-left p-4 flex items-start gap-4">
         <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold font-mono shrink-0 bg-blue-500/20 border border-blue-500/30 text-blue-300">
           {tendencia.numero}
         </div>
@@ -62,18 +55,15 @@ function TendenciaCard({ tendencia }: { tendencia: TendenciaOculta }) {
           <p className="font-semibold text-gray-200 text-sm leading-snug">{tituloCapitalizado}</p>
           <p className="text-xs text-blue-400 mt-0.5">aparece {tendencia.frequencia}× no nome</p>
         </div>
-        <span className="text-gray-400 shrink-0">{expandido ? '▲' : '▼'}</span>
-      </button>
+      </div>
 
-      {expandido && (
-        <div className="px-4 pb-4 space-y-4 border-t border-blue-500/10">
-          <p className="text-gray-300 text-sm leading-relaxed pt-4">{tendencia.descricao}</p>
-          <div className="rounded-lg p-3 bg-blue-500/10 border border-blue-500/20">
-            <p className="text-xs text-blue-400 uppercase tracking-wider mb-2">Como Equilibrar</p>
-            <p className="text-blue-200 text-sm leading-relaxed">{tendencia.comoEquilibrar}</p>
-          </div>
+      <div className="px-4 pb-4 space-y-4 border-t border-blue-500/10">
+        <p className="text-gray-300 text-sm leading-relaxed pt-4">{tendencia.descricao}</p>
+        <div className="rounded-lg p-3 bg-blue-500/10 border border-blue-500/20">
+          <p className="text-xs text-blue-400 uppercase tracking-wider mb-2">Como Equilibrar</p>
+          <p className="text-blue-200 text-sm leading-relaxed">{tendencia.comoEquilibrar}</p>
         </div>
-      )}
+      </div>
     </div>
   );
 }

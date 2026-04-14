@@ -286,7 +286,7 @@ Escreva uma conclusão profunda e poderosa (4 parágrafos) que:
 REGRAS ESTRITAS DE FORMATAÇÃO:
 1. Use estruturação Markdown rigorosa com Hash Headers (##, ###, ####).
 2. NUNCA use títulos apenas com letras maiúsculas. SEMPRE use Hash Headers com emoticon.
-3. **Negrito:** Use EXCLUSIVAMENTE para termos numerológicos cabalísticos (Expressão, Destino, Motivação, Bloqueio, Arcano, etc.) e para os números. O restante do texto em formato normal.
+3. **Negrito:** Utilize negrito (**) de forma natural e estratégica para destacar ideias principais, palavras-chave e pontos de atenção importantes no texto. Evite colocar trechos inteiros ou frases longas em negrito.
 4. SEMPRE duplo espaçamento entre parágrafos — texto arejado e escaneável.
 5. Parágrafos com no máximo 4 linhas.
 6. Escreva em segunda pessoa de forma natural e direta.

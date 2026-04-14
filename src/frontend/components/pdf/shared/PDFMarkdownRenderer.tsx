@@ -304,9 +304,14 @@ export function TrianguloPiramideInline({
       })()}
       
       {data.sequenciasNegativas.length > 0 ? (
-        <Text style={triStyles.bloqueioAlert}>
-          Bloqueio: {data.sequenciasNegativas.join(', ')}
-        </Text>
+        <View style={{ marginTop: 12, borderWidth: 1, borderColor: '#fca5a5', backgroundColor: '#fef2f2', borderRadius: 8, padding: 10 }}>
+          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#b91c1c', textAlign: 'center', marginBottom: 4 }}>
+            ⚠ BLOQUEIO ENERGÉTICO DETECTADO
+          </Text>
+          <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#dc2626', textAlign: 'center', letterSpacing: 1 }}>
+            {data.sequenciasNegativas.join(' • ')}
+          </Text>
+        </View>
       ) : null}
     </View>
   );

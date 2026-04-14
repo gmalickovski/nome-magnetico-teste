@@ -22,14 +22,9 @@ const TRIANGULO_LABELS: Record<string, string> = {
 };
 
 export default function BlockAnalysisCard({ bloqueio, defaultOpen = false }: BlockAnalysisCardProps) {
-  const [open, setOpen] = useState(defaultOpen);
-
   return (
     <div className="rounded-2xl bg-red-500/5 overflow-hidden">
-      <button
-        className="w-full flex items-center justify-between p-5 text-left"
-        onClick={() => setOpen(o => !o)}
-      >
+      <div className="w-full flex items-center justify-between p-5 text-left border-b border-red-500/10">
         <div className="flex items-center gap-3">
           <span className="text-red-400 text-xl leading-none">⚠</span>
           <div>
@@ -38,13 +33,9 @@ export default function BlockAnalysisCard({ bloqueio, defaultOpen = false }: Blo
             <span className="font-medium text-gray-200">{bloqueio.titulo}</span>
           </div>
         </div>
-        <span className={`text-gray-500 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}>
-          ▾
-        </span>
-      </button>
+      </div>
 
-      {open && (
-        <div className="px-5 pb-5 space-y-4">
+      <div className="px-5 py-5 space-y-4">
           <p className="text-gray-300 text-sm leading-relaxed">{bloqueio.descricao}</p>
 
           {bloqueio.aspectoSaude && (
@@ -77,7 +68,6 @@ export default function BlockAnalysisCard({ bloqueio, defaultOpen = false }: Blo
             </div>
           )}
         </div>
-      )}
     </div>
   );
 }

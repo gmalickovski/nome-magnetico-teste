@@ -213,7 +213,7 @@ Escreva uma conclusão calorosa, profunda e empoderada (3–4 parágrafos):
 REGRAS ESTRITAS DE FORMATAÇÃO:
 1. Use estruturação Markdown rigorosa com Hash Headers (##, ###).
 2. NUNCA use títulos apenas com letras maiúsculas. SEMPRE use Hash Headers com emoticon.
-3. **Negrito:** Use EXCLUSIVAMENTE para termos numerológicos e os números em si.
+3. **Negrito:** Utilize negrito (**) de forma natural e estratégica para destacar ideias principais, palavras-chave e pontos de atenção importantes no texto. Evite colocar trechos inteiros ou frases longas em negrito.
 4. SEMPRE duplo espaçamento entre parágrafos — texto arejado e escaneável.
 5. Parágrafos com no máximo 4 linhas.
 6. Escreva com calor humano, leveza e profundidade — os pais estão diante da criança mais importante do mundo.
@@ -396,7 +396,7 @@ Com base nos nomes dos pais (${parentesco}) e no nome do bebê, escreva 3 parág
 REGRAS ESTRITAS DE FORMATAÇÃO:
 1. Use estruturação Markdown rigorosa com Hash Headers (##, ###).
 2. NUNCA use títulos apenas com letras maiúsculas. SEMPRE use Hash Headers com emoticon.
-3. **Negrito:** Use EXCLUSIVAMENTE para termos numerológicos e os números em si.
+3. **Negrito:** Utilize negrito (**) de forma natural e estratégica para destacar ideias principais, palavras-chave e pontos de atenção importantes no texto. Evite colocar trechos inteiros ou frases longas em negrito.
 4. SEMPRE duplo espaçamento entre parágrafos — texto arejado e escaneável.
 5. Parágrafos com no máximo 4 linhas.
 6. Escreva com calor humano, leveza e profundidade — os pais estão diante de uma das decisões mais importantes da vida do filho.

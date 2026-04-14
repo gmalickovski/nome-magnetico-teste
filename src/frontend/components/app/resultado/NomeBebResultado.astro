@@ -213,7 +213,7 @@ const numSecundarios = [
         {bloqueios.length} Bloqueio{bloqueios.length > 1 ? 's' : ''} Detectado{bloqueios.length > 1 ? 's' : ''}
       </h2>
     </div>
-    <div class="space-y-3">
+    <div class="flex flex-col gap-4">
       {bloqueios.map((b, i) => (
         <BlockAnalysisCard client:load bloqueio={b as any} defaultOpen={i === 0} />
       ))}
