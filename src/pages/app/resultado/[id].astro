@@ -7,6 +7,7 @@ import ScoreDisplay from '../../../frontend/components/app/ScoreDisplay';
 import { formatAnalysisText } from '../../../utils/textFormatter';
 import { marked } from 'marked';
 import NomeSocialResultado from '../../../frontend/components/app/resultado/NomeSocialResultado.astro';
+import NomeAtualResultado from '../../../frontend/components/app/resultado/NomeAtualResultado.astro';
 import NomeBebResultado from '../../../frontend/components/app/resultado/NomeBebResultado.astro';
 import NomeEmpresaResultado from '../../../frontend/components/app/resultado/NomeEmpresaResultado.astro';
 
@@ -75,6 +76,7 @@ const rankingSocial  = (analysis.product_type === 'nome_social' && freqData?.ran
 const isNomeSocial  = analysis.product_type === 'nome_social';
 const isNomeBebe    = analysis.product_type === 'nome_bebe';
 const isNomeEmpresa = analysis.product_type === 'nome_empresa';
+const isFree        = (analysis as any).is_free === true;
 
 // ── Arcano regente ───────────────────────────────────────────────────
 const arcanoRawNum = (analysis as any).arcano_regente as number | null;
@@ -204,9 +206,10 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
           <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div class="flex-1 min-w-0">
               <p class="font-cinzel text-xs uppercase tracking-[0.2em] text-[#76746a] mb-2">
-                {isNomeSocial ? 'Análise de Nome Social — Certificado Cabalístico' :
-                 isNomeBebe      ? 'Análise de Nome de Bebê — O Portal do Nascimento' :
-                                   'Análise de Nome de Empresa — Relatório Estratégico'}
+                {isNomeSocial && isFree ? 'Análise do Nome de Nascimento — Diagnóstico Cabalístico' :
+                 isNomeSocial           ? 'Análise de Nome Social — Certificado Cabalístico' :
+                 isNomeBebe             ? 'Análise de Nome de Bebê — O Portal do Nascimento' :
+                                         'Análise de Nome de Empresa — Relatório Estratégico'}
               </p>
               <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-1">{primeiroNome}</h1>
               <p class="text-gray-400 text-sm">{nomeExibido}</p>
@@ -254,9 +257,34 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
         </section>
 
         {/* ══════════════════════════════════════════════════
-            NOME SOCIAL — ESTRUTURA PRINCIPAL
+            NOME ATUAL (análise gratuita) — ESTRUTURA SEPARADA
         ══════════════════════════════════════════════════ */}
-        {isNomeSocial && (
+        {isNomeSocial && isFree && (
+          <NomeAtualResultado
+            analysis={analysis}
+            nomeExibido={nomeExibido}
+            cincoNumeros={cinco_numeros}
+            expressao={analysis.numero_expressao}
+            arquetipoData={arquetipoData}
+            tVida={tVida}
+            tPessoal={tPessoal}
+            tSocial={tSocial}
+            tDestino={tDestino}
+            hasTriangulos={hasTriangulos}
+            bloqueios={bloqueios}
+            arcanoData={arcanoData}
+            licoesRaw={licoesRaw}
+            debitosRaw={debitosRaw}
+            tendenciasRaw={tendenciasRaw}
+            frequenciasRaw={frequenciasRaw}
+            analiseHtml={analiseHtml}
+          />
+        )}
+
+        {/* ══════════════════════════════════════════════════
+            NOME SOCIAL — ESTRUTURA PRINCIPAL (pago)
+        ══════════════════════════════════════════════════ */}
+        {isNomeSocial && !isFree && (
           <NomeSocialResultado
             analysis={analysis}
             nomeExibido={nomeExibido}

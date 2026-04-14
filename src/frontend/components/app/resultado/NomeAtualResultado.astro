@@ -1,0 +1,320 @@
+---
+/**
+ * NomeAtualResultado — seções do relatório HTML da Análise Gratuita (Nome Atual).
+ * Focado na análise do nome de nascimento. SEM sugestões de nomes.
+ *
+ * Ordem das seções:
+ *   1. A Estrela de 5 Pontas (Expressão em destaque)
+ *   2. Arquétipo
+ *   3. Os 4 Triângulos
+ *   4. Arcano Regente
+ *   5. O Raio-X dos Bloqueios + CTA se houver bloqueios
+ *   6. Karma, Lições e Tendências
+ *   7. Análise Completa da IA
+ *   8. CTA Final — convite para o Nome Social
+ */
+import ArquetipoCard from '../ArquetipoCard';
+import TriangleVisualization from '../TriangleVisualization';
+import KarmicLessons from '../KarmicLessons';
+import KarmicDebts from '../KarmicDebts';
+import HiddenTendencies from '../HiddenTendencies';
+import BlockAnalysisCard from '../BlockAnalysisCard';
+import ArcanoCard from '../ArcanoCard';
+
+interface Props {
+  analysis: any;
+  nomeExibido: string;
+  cincoNumeros: Array<{ label: string; sublabel: string; value: number | null; icon: string }>;
+  expressao: number | null;
+  arquetipoData: any;
+  tVida: any;
+  tPessoal: any;
+  tSocial: any;
+  tDestino: any;
+  hasTriangulos: boolean;
+  bloqueios: any[];
+  arcanoData: any;
+  licoesRaw: any[] | null;
+  debitosRaw: any[] | null;
+  tendenciasRaw: any[] | null;
+  frequenciasRaw: Record<number, number> | null;
+  analiseHtml: string | null;
+}
+
+const {
+  analysis,
+  nomeExibido,
+  cincoNumeros,
+  expressao,
+  arquetipoData,
+  tVida, tPessoal, tSocial, tDestino,
+  hasTriangulos,
+  bloqueios,
+  arcanoData,
+  licoesRaw,
+  debitosRaw,
+  tendenciasRaw,
+  frequenciasRaw,
+  analiseHtml,
+} = Astro.props;
+
+const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
+const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 0) || (licoesRaw && licoesRaw.length > 0);
+---
+
+{/* ── SEÇÃO 1: A ESTRELA DE 5 PONTAS — EXPRESSÃO EM DESTAQUE ───────────── */}
+<section class="mb-12">
+  <div class="mb-3 px-1">
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">A Estrela de 5 Pontas</p>
+    <h2 class="font-cinzel text-2xl font-bold text-white">Os 5 Números do Seu Nome</h2>
+    <p class="text-sm text-gray-400 mt-1">Calculados com base no seu nome de nascimento e data de nascimento.</p>
+  </div>
+
+  {/* Expressão em destaque */}
+  <div class="flex justify-center mb-4">
+    <div class="rounded-2xl bg-[#D4AF37]/10 border-2 border-[#D4AF37] p-6 text-center flex flex-col items-center gap-1 w-56 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-yellow-500/10">
+      <span class="text-[#D4AF37]/50 text-2xl leading-none">✦</span>
+      <div class="font-cinzel text-6xl font-bold text-[#D4AF37] leading-none">{expressao ?? '?'}</div>
+      <div class="text-white text-sm font-semibold mt-1">Expressão</div>
+      <div class="text-[#c084fc] text-xs">O Dom</div>
+    </div>
+  </div>
+
+  {/* Outros 4 números */}
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    {outrosNumeros.map(n => (
+      <div class="rounded-2xl bg-white/5 p-4 text-center flex flex-col items-center gap-1">
+        <span class="text-[#D4AF37]/60 text-lg leading-none">{n.icon}</span>
+        <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{n.value ?? '?'}</div>
+        <div class="text-white text-xs font-medium">{n.label}</div>
+        <div class="text-gray-600 text-[10px]">{n.sublabel}</div>
+      </div>
+    ))}
+  </div>
+</section>
+
+{/* ── SEÇÃO 2: ARQUÉTIPO ───────────────────────────────────────────────── */}
+{arquetipoData && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Identidade Mítica</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Seu Arquétipo</h2>
+    </div>
+    <ArquetipoCard client:visible arquetipo={arquetipoData} mode="pessoa" />
+  </section>
+)}
+
+{/* ── SEÇÃO 3: OS 4 TRIÂNGULOS ────────────────────────────────────────── */}
+{hasTriangulos && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Mapa de Triângulos</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Os 4 Triângulos Numerológicos</h2>
+    </div>
+    <TriangleVisualization
+      client:load
+      nome={nomeExibido}
+      vida={tVida!}
+      pessoal={tPessoal!}
+      social={tSocial!}
+      destino={tDestino!}
+      bloqueios={bloqueios as any}
+    />
+  </section>
+)}
+
+{/* ── SEÇÃO 4: ARCANO REGENTE ─────────────────────────────────────────── */}
+{arcanoData && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Ciclo Atual</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Arcano Regente</h2>
+    </div>
+    <ArcanoCard
+      client:load
+      arcano={{
+        numero: arcanoData.numero,
+        nome: arcanoData.nome,
+        palavraChave: arcanoData.palavraChave,
+        descricao: arcanoData.descricao,
+      }}
+      label="Arcano que governa seu ciclo de vida"
+    />
+  </section>
+)}
+
+{/* ── SEÇÃO 5: O RAIO-X DOS BLOQUEIOS ─────────────────────────────────── */}
+<section class="mb-8">
+  <div class="mb-3 px-1">
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Raio-X dos Bloqueios</p>
+    <h2 class={`font-cinzel text-2xl font-bold ${bloqueios.length > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+      {bloqueios.length > 0
+        ? `${bloqueios.length} Bloqueio${bloqueios.length > 1 ? 's' : ''} Energético${bloqueios.length > 1 ? 's' : ''} Detectado${bloqueios.length > 1 ? 's' : ''}`
+        : 'Energia Limpa — Sem Bloqueios'}
+    </h2>
+  </div>
+  {bloqueios.length > 0 ? (
+    <div class="flex flex-col gap-4">
+      {bloqueios.map((b, i) => (
+        <BlockAnalysisCard client:load bloqueio={b as any} defaultOpen={i === 0} />
+      ))}
+    </div>
+  ) : (
+    <div class="rounded-2xl bg-emerald-500/5 p-6 text-center">
+      <div class="text-4xl mb-3">✦</div>
+      <p class="text-emerald-400 font-medium mb-1">Todos os 4 triângulos estão limpos</p>
+      <p class="text-gray-400 text-sm">Nenhuma sequência energética negativa foi detectada no seu nome. Isso indica um fluxo energético natural e desobstruído.</p>
+    </div>
+  )}
+</section>
+
+{/* ── CTA PÓS-BLOQUEIOS (só exibe se tiver bloqueios) ───────────────────── */}
+{bloqueios.length > 0 && (
+  <section class="mb-12">
+    <div class="rounded-2xl border border-[#D4AF37]/30 bg-gradient-to-br from-[#D4AF37]/5 to-[#7C3AED]/5 p-6 md:p-8 text-center">
+      <div class="text-3xl mb-3">⚡</div>
+      <h3 class="font-cinzel text-xl font-bold text-white mb-2">
+        Esses bloqueios podem ser eliminados
+      </h3>
+      <p class="text-gray-300 text-sm leading-relaxed mb-2 max-w-xl mx-auto">
+        A numerologia cabalística possui uma solução precisa: o <strong class="text-[#D4AF37]">Nome Social Harmonizado</strong>.
+        Um nome calculado para que nenhuma sequência dos seus triângulos forme esses padrões de trava — alinhando
+        sua Expressão com seu Destino e injetando as vibrações exatas que você deseja atrair.
+      </p>
+      <p class="text-gray-400 text-xs mb-5 max-w-lg mx-auto">
+        Com o Nome Social, nossa IA analisa variações do seu nome, elimina os bloqueios e gera um guia completo de como
+        usar o novo nome para reprogramar seu campo magnético.
+      </p>
+      <a
+        href="/nome-social"
+        class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold px-8 py-3 rounded-full hover:bg-[#f2ca50] transition-all duration-300 hover:scale-105"
+      >
+        ✦ Quero eliminar meus bloqueios — Ver Nome Social
+      </a>
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 6: O PESO DO PASSADO — KARMA E LIÇÕES ─────────────────────── */}
+{(licoesRaw !== null || debitosRaw !== null) && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Peso do Passado</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Karma e Lições</h2>
+    </div>
+    {debitosRaw !== null && (
+      <div class="mb-8">
+        <KarmicDebts client:load debitos={debitosRaw as any} nomeCompleto={nomeExibido} />
+      </div>
+    )}
+    {debitosRaw !== null && licoesRaw !== null && (
+      <hr class="border-t border-[#D4AF37]/20 my-8" />
+    )}
+    {licoesRaw !== null && (
+      <div class="mb-4">
+        <KarmicLessons client:load licoes={licoesRaw as any} nomeCompleto={nomeExibido} />
+      </div>
+    )}
+  </section>
+)}
+
+{/* ── SEÇÃO 7: TENDÊNCIAS OCULTAS ─────────────────────────────────────── */}
+{(tendenciasRaw !== null || (frequenciasRaw && Object.keys(frequenciasRaw).length > 0)) && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Frequências Numéricas</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Tendências Ocultas</h2>
+    </div>
+    <HiddenTendencies
+      client:load
+      tendencias={tendenciasRaw as any}
+      frequencias={frequenciasRaw ?? {}}
+      nomeCompleto={nomeExibido}
+    />
+  </section>
+)}
+
+{/* ── SEÇÃO 8: ANÁLISE COMPLETA DA IA ─────────────────────────────────── */}
+{analiseHtml && (
+  <section class="mb-12">
+    <div class="mb-3 px-1">
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Análise Cabalística</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo</h2>
+    </div>
+    <div class="rounded-2xl bg-white/5 p-6 md:p-8">
+      <div
+        class="prose prose-invert prose-base max-w-none
+               prose-headings:font-cinzel
+               prose-h1:text-xl prose-h1:text-[#D4AF37] prose-h1:!mt-8 prose-h1:!mb-3
+               prose-h2:text-lg prose-h2:text-[#D4AF37] prose-h2:!mt-8 prose-h2:!mb-3
+               prose-h3:text-base prose-h3:text-[#c084fc] prose-h3:!mt-5 prose-h3:!mb-2
+               prose-h4:text-sm prose-h4:text-amber-400 prose-h4:font-inter prose-h4:!mt-4 prose-h4:!mb-2
+               prose-strong:text-white prose-a:text-[#D4AF37]
+               prose-p:text-gray-300 prose-p:leading-relaxed prose-p:!mb-4
+               prose-li:text-gray-300 prose-li:leading-relaxed prose-li:!mb-2
+               prose-ul:!mt-2 prose-ul:!mb-4
+               prose-ol:!mt-2 prose-ol:!mb-4"
+        set:html={analiseHtml}
+      />
+    </div>
+  </section>
+)}
+
+{/* ── SEÇÃO 9: CTA FINAL — CONVITE PARA O NOME SOCIAL ──────────────────── */}
+<section class="mb-12">
+  <div class="rounded-2xl overflow-hidden border border-[#D4AF37]/20" style="background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(124,58,237,0.06) 100%);">
+    <div class="p-8 md:p-10 text-center">
+      <div class="inline-block px-4 py-1 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold uppercase tracking-wider mb-5">
+        🔮 Próximo Passo
+      </div>
+
+      <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">
+        Você conhece o problema. <br class="hidden md:block" />Agora é hora de resolver.
+      </h2>
+
+      <p class="text-gray-300 leading-relaxed mb-3 max-w-2xl mx-auto">
+        Esta análise mapeou as frequências do seu <strong class="text-[#D4AF37]">nome de nascimento</strong> — os bloqueios
+        nos triângulos, as lições kármicas, os débitos e as tendências que moldam sua realidade sem que você perceba.
+        Mas saber o problema não o resolve. O poder de transformação real está na <strong class="text-white">harmonização vibracional</strong>.
+      </p>
+
+      <p class="text-gray-400 text-sm leading-relaxed mb-3 max-w-xl mx-auto">
+        O produto <strong class="text-[#D4AF37]">Nome Social</strong> vai além: nossa inteligência cabalística calcula
+        variações do seu nome que eliminam os bloqueios dos 4 triângulos, reduzem débitos kármicos, equilibram lições e
+        alinham sua Expressão com seu Destino. Você escolhe como quer ser visto e sentido no mundo — e nós construímos
+        o nome que entrega isso energeticamente.
+      </p>
+
+      {temProblemas && (
+        <div class="flex flex-wrap justify-center gap-4 mb-6 text-xs">
+          {bloqueios.length > 0 && (
+            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 text-red-400 font-medium">
+              🔒 {bloqueios.length} bloqueio{bloqueios.length > 1 ? 's' : ''} a eliminar
+            </span>
+          )}
+          {debitosRaw && debitosRaw.length > 0 && (
+            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 font-medium">
+              ⚖️ {debitosRaw.length} débito{debitosRaw.length > 1 ? 's' : ''} kármico{debitosRaw.length > 1 ? 's' : ''} a reduzir
+            </span>
+          )}
+          {licoesRaw && licoesRaw.length > 0 && (
+            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-400 font-medium">
+              📚 {licoesRaw.length} lição{licoesRaw.length > 1 ? 'ões' : ''} kármica{licoesRaw.length > 1 ? 's' : ''} a integrar
+            </span>
+          )}
+        </div>
+      )}
+
+      <a
+        href="/nome-social"
+        class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold px-10 py-4 rounded-full text-base hover:bg-[#f2ca50] transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/20"
+      >
+        ✦ Quero meu Nome Social Harmonizado
+      </a>
+
+      <p class="text-gray-600 text-xs mt-4">
+        Pagamento único · Relatório PDF completo · Guia de implementação incluído
+      </p>
+    </div>
+  </div>
+</section>

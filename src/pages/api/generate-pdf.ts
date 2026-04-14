@@ -3,6 +3,7 @@ import { getAnalysis, getMagneticNames } from '../../backend/db/analyses';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import { NomeSocialPDF } from '../../frontend/components/pdf/NomeSocialPDF';
+import { NomeAtualPDF } from '../../frontend/components/pdf/NomeAtualPDF';
 import { NomeBebePDF } from '../../frontend/components/pdf/NomeBebePDF';
 import { NomeEmpresaPDF } from '../../frontend/components/pdf/NomeEmpresaPDF';
 
@@ -55,12 +56,15 @@ export const GET: APIRoute = async ({ url, locals }) => {
     filename = `analise-nome-social-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
   }
 
+  const isFree = (analysis as any).is_free === true;
   const PDFComponent =
     productType === 'nome_bebe'
       ? NomeBebePDF
       : productType === 'nome_empresa'
         ? NomeEmpresaPDF
-        : NomeSocialPDF;
+        : isFree
+          ? NomeAtualPDF
+          : NomeSocialPDF;
 
   const pdfBuffer = await renderToBuffer(
     React.createElement(PDFComponent, {
