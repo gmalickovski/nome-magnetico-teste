@@ -430,6 +430,58 @@ export function NomeEmpresaPDF({ analysis, magneticNames }: ProductPDFProps) {
         </Page>
       )}
 
+      {/* ── PÁGINA 4: OS 4 TRIÂNGULOS ─────────────────────────────────────── */}
+      {hasTriangulos && (
+        <Page size="A4" style={styles.page}>
+          <PDFPageHeader subtitle={`${nomeParaExibir} — Os 4 Triângulos Numerológicos`} />
+
+          <Text style={styles.hugeTitle}>Geometria do Crescimento</Text>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>A Geometria Sagrada no Business</Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 8 }}>
+              Os Quatro Triângulos Numerológicos formam a anatomia vibratória e a estrutura arquitetônica do nome da sua empresa. Na Numerologia Cabalística, o nome da marca funciona como um campo de atração contínuo: cada vez que é pronunciado, escrito ou veiculado, ele irradia uma frequência de posicionamento. Para compreender a real profundidade e as nuances dessa frequência no mercado, dividimos o estudo do nome corporativo em quatro "Pirâmides de Fluxo", onde cada camada mapeia um aspecto diferente do seu negócio.
+            </Text>
+            <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
+              A leitura desses triângulos funciona de forma sequencial e estratégica. Eles desdobram as influências desde a fundação financeira e vital da empresa, passando pelo seu universo de cultura interna, pela forma como o mercado externo a posicionará, até culminar no propósito corporativo maior que ela inevitavelmente alcançará. A seguir, detalharemos cada uma dessas quatro engrenagens essenciais.
+            </Text>
+
+            {([
+              {
+                data: tVida,
+                key: 'Triângulo da Vida',
+                desc: 'O Triângulo da Vida revela a vibração primária que o nome empresarial projeta ao mundo. Ele dita a primeira impressão que clientes, parceiros e o mercado formam sobre a marca no momento do contato — é a energia de fachada que abre ou fecha portas antes mesmo de qualquer apresentação. Bloqueios aqui agem como ruídos visuais que repelem oportunidades e comprometem a credibilidade orgânica do negócio.',
+              },
+              {
+                data: tPessoal,
+                key: 'Triângulo Pessoal',
+                desc: 'O Triângulo Pessoal mapeia a dimensão íntima do negócio: a cultura interna, os valores não declarados e a forma como os sócios, colaboradores e o time fundador vivenciam a empresa no dia a dia. Ele revela se o ambiente interno tem coesão vibracional para sustentar crescimento a longo prazo ou se carrega tensões que fragmentam a equipe. Harmonia neste triângulo é o alicerce invisível da consistência operacional.',
+              },
+              {
+                data: tSocial,
+                key: 'Triângulo Social',
+                desc: 'O Triângulo Social governa o posicionamento de mercado e o magnetismo relacional do nome. Ele determina como clientes, concorrentes, fornecedores e a mídia percebem e descrevem espontaneamente esta marca — sem que a empresa precise explicar. Um triângulo social limpo gera autoridade percebida, facilita parcerias estratégicas e reduz o esforço necessário para conquistar confiança no mercado.',
+              },
+              {
+                data: tDestino,
+                key: 'Triângulo do Destino',
+                desc: 'O Triângulo do Destino aponta para o propósito máximo e o legado que este nome empresarial foi criado para construir. Ele traça a trajetória de longo prazo do negócio, revelando em quais ciclos a empresa encontrará seus maiores alavancamentos e onde as forças do mercado conspirarão naturalmente a seu favor. É a bússola numerológica que confirma — ou questiona — se o nome está alinhado com a missão maior dos seus fundadores.',
+              },
+            ] as const).filter(t => t.data != null).map(({ data, key, desc }) => {
+              return (
+                <View key={key} style={{ marginBottom: 12 }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 6 }}>{key}</Text>
+                  <Text style={{ fontSize: 10, color: GRAY, marginBottom: 8, lineHeight: 1.6 }}>{desc}</Text>
+                  <TrianguloPiramideInline data={data!} label={key} cellSize={triCellSize} letras={letrasNome} />
+                </View>
+              );
+            })}
+          </View>
+
+          <PDFFooter />
+        </Page>
+      )}
+
 
 
       {/* ── PÁGINA 5: KARMA EMPRESARIAL ───────────────────────────────────── */}

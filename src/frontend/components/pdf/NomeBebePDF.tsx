@@ -461,8 +461,36 @@ export function NomeBebePDF({ analysis, magneticNames }: ProductPDFProps) {
               )}
             </View>
           )}
+          {hasTriangulos && (
+            <View style={!(debitos.length > 0 || licoes.length > 0 || tendencias.length > 0) ? styles.section : { ...styles.section, marginTop: 12 }} minPresenceAhead={350}>
+              <Text style={styles.hugeTitle}>A Geometria da Alma (Os 4 Triângulos)</Text>
+              <Text style={{ ...styles.bodyText, marginBottom: 8 }}>
+                Os Quatro Triângulos Numerológicos formam a anatomia vibratória e a estrutura geométrica do nome. Na Numerologia Cabalística, o nome funciona como um campo de força contínuo: cada vez que é pronunciado ou escrito, ele irradia uma frequência específica. Para compreender a real profundidade e as nuances dessa frequência, dividimos o estudo do nome em quatro "Pirâmides de Fluxo", onde cada camada mapeia um aspecto diferente da jornada da sua criança.
+              </Text>
+              <Text style={{ ...styles.bodyText, marginBottom: 16 }}>
+                A leitura desses triângulos funciona de forma orgânica e reveladora. Eles desdobram as influências desde a fundação física e vital, passando pelo universo íntimo e emocional, pela forma como o mundo externo perceberá a criança, até culminar no propósito maior que o destino inevitavelmente atrairá. A seguir, detalharemos cada uma dessas quatro dimensões essenciais.
+              </Text>
 
-
+              {([
+                { data: tVida, key: 'Triângulo da Vida', desc: 'O Triângulo da Vida representa a fundação energética e física do seu bebê. Ele revela a vibração primária que protegerá a saúde da criança e definirá a forma como ela se expressará e brilhará no mundo. Esta pirâmide dita a resistência vital e os aspectos mais visíveis da sua personalidade durante toda a jornada, operando como a grande âncora de segurança que sustentará os seus primeiros passos na matéria.' },
+                { data: tPessoal, key: 'Triângulo Pessoal', desc: 'O Triângulo Pessoal explora o universo íntimo e silencioso da criança. Ele desvenda como o seu bebê irá processar internamente o medo, a alegria, as frustrações e o apego. Conhecer este aspecto trará empatia para acolher as reações emocionais mais profundas do seu filho, auxiliando-o a construir autoconfiança e a navegar com segurança pelo turbilhão fluído da sensibilidade humana.' },
+                { data: tSocial, key: 'Triângulo Social', desc: 'O Triângulo Social mapeia as conexões externas e o magnetismo interativo inerente ao nome. Ele dita a forma exata como os amiguinhos, os professores e a sociedade irão enxergar e receber a criança. Esta arquitetura vibracional determina a facilidade do bebê para transitar em grupo, semear interações frutíferas e exercer o seu pertencimento de maneira naturalmente carismática.' },
+                { data: tDestino, key: 'Triângulo do Destino', desc: 'A pirâmide áurea do Triângulo do Destino aponta para o propósito maior e a vocação a longo prazo desta nova vida. Ela corrobora a sua missão irrevogável na ausência de bloqueios em seu topo. As frequências reveladas aqui agirão como uma bússola imantada e serena, arquitetando sincronicidades para que a criança vença obstáculos e honre com graciosidade a sabedoria do seu legado e as vitórias do seu futuro.' },
+              ] as const).filter(t => t.data != null).map(({ data, key, desc }, idx) => {
+                const arcanoNum = data!.arcanoRegente;
+                const arcanoInfo = arcanoNum != null ? (ARCANOS as any)[arcanoNum] ?? null : null;
+                return (
+                  <View key={key} style={{ marginTop: 8, marginBottom: 12 }}>
+                    <Text style={{ fontSize: 13, fontFamily: 'Helvetica-Bold', color: '#a855f7', marginBottom: 4 }}>{key}</Text>
+                    <Text style={{ ...styles.bodyText, marginBottom: 8 }}>{desc}</Text>
+                    <View>
+                      <TrianguloPiramideInline data={data!} label={key} cellSize={triCellSize} letras={letrasNome} />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
 
           {analiseCorpo && (
             <View style={{ ...styles.section, marginTop: 12 }} minPresenceAhead={350}>
