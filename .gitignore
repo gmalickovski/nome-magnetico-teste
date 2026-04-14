@@ -41,6 +41,7 @@ secretkey-*.tx
 
 # temp / scripts locais
 tmp/
+supabase/.temp/
 
 # ==========================================
 # REGRAS PARA EVITAR TRAVAMENTO DA IA
