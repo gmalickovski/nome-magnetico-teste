@@ -1,0 +1,35 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { hasUsedFreeAnalysis } from '../../../backend/db/analyses';
+import FreeAnalysisForm from '../../../frontend/components/app/FreeAnalysisForm';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/auth/login');
+
+// Se já usou a análise gratuita, redirecionar para Minhas Análises
+const jaUsou = await hasUsedFreeAnalysis(user.id);
+if (jaUsou) return Astro.redirect('/app/analises');
+---
+
+<AppLayout title="Análise Gratuita — Nome de Nascimento">
+  <div class="max-w-2xl mx-auto space-y-8 pb-16">
+
+    <div>
+      <div class="flex items-center gap-3 mb-3">
+        <h1 class="font-cinzel text-3xl font-bold text-white">
+          Análise do Seu Nome de Nascimento
+        </h1>
+        <span class="text-xs bg-[#d7c6ff]/15 text-[#d7c6ff] px-3 py-1 rounded-full border border-[#d7c6ff]/20 font-medium whitespace-nowrap">
+          GRÁTIS
+        </span>
+      </div>
+      <p class="text-gray-400 text-base leading-relaxed">
+        Descubra como o seu nome atual atua na sua vida — bloqueios energéticos, lições kármicas,
+        tendências ocultas e a harmonia entre seus números base. Análise completa com os 4 triângulos numerológicos.
+      </p>
+    </div>
+
+    <FreeAnalysisForm client:load />
+
+  </div>
+</AppLayout>

@@ -1,6 +1,7 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import { hasActiveSubscription, hasAnySubscription } from '../../backend/db/subscriptions';
+import { hasUsedFreeAnalysis } from '../../backend/db/analyses';
 import { createUserClient } from '../../backend/db/supabase';
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
@@ -34,6 +35,10 @@ const hasAnyAccess = hasNomeSocial || hasNomeBebe || hasNomeEmpresa;
 
 // Detectar estado expirado (já comprou antes, mas nenhuma ativa)
 const isExpired = !isAdmin && !hasAnyAccess && await hasAnySubscription(user.id);
+
+// Card Análise Gratuita: aparece apenas se o usuário não tiver nenhum acesso ativo
+// e ainda não tiver usado a análise gratuita
+const mostrarCardGratuito = !isAdmin && !hasAnyAccess && !(await hasUsedFreeAnalysis(user.id));
 
 const products = [
   {
@@ -105,6 +110,43 @@ const products = [
           class="flex-shrink-0 bg-[#D4AF37] text-[#1A1A1A] font-medium px-6 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
         >
           Ver Todos os Produtos
+        </a>
+      </div>
+    )}
+
+    <!-- Card: Análise Gratuita (aparece só uma vez, antes de adquirir qualquer produto) -->
+    {mostrarCardGratuito && (
+      <div>
+        <h2 class="font-cinzel text-xl font-bold text-gray-100 mb-4">Disponível para Você</h2>
+        <a
+          href="/app/analise/gratuita"
+          class="block group bg-gradient-to-br from-[#d7c6ff]/8 to-[#bea5ff]/5 border border-[#d7c6ff]/20 rounded-2xl p-6 hover:border-[#d7c6ff]/40 hover:from-[#d7c6ff]/12 hover:to-[#bea5ff]/8 transition-all duration-300 hover:scale-[1.01] cursor-pointer"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-3">
+                <span class="text-3xl">🔮</span>
+                <span class="text-xs bg-[#d7c6ff]/15 text-[#d7c6ff] px-3 py-1 rounded-full border border-[#d7c6ff]/20 font-semibold uppercase tracking-wider">
+                  Grátis
+                </span>
+              </div>
+              <h3 class="font-cinzel text-xl font-bold text-white mb-2 group-hover:text-[#d7c6ff] transition-colors">
+                Análise do Seu Nome de Nascimento
+              </h3>
+              <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                Descubra os bloqueios energéticos, lições kármicas e tendências ocultas do seu nome atual. Análise completa com os 4 triângulos numerológicos.
+              </p>
+              <div class="flex items-center gap-2 text-[#d7c6ff] text-sm font-medium">
+                <span>Analisar meu nome agora</span>
+                <span class="group-hover:translate-x-1 transition-transform duration-200">→</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-[#d7c6ff]/10">
+            <p class="text-xs text-gray-500">
+              Disponível uma única vez · Relatório completo com PDF · Acesso permanente em Minhas Análises
+            </p>
+          </div>
         </a>
       </div>
     )}

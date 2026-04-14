@@ -29,6 +29,7 @@ export interface Analysis {
   analise_texto: string | null;
   score: number | null;
   status: AnalysisStatus;
+  is_free: boolean;
   error_message: string | null;
   created_at: string;
   updated_at: string;
@@ -59,14 +60,25 @@ function toISODate(date: string): string {
   return date;
 }
 
+export async function hasUsedFreeAnalysis(userId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('analyses')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('is_free', true)
+    .limit(1);
+  return (data?.length ?? 0) > 0;
+}
+
 export async function createAnalysis(params: {
   userId: string;
   productType: ProductType;
   nomeCompleto: string;
   dataNascimento: string;
+  isFree?: boolean;
 }): Promise<Analysis> {
   const { data, error } = await supabase
-    
+
     .from('analyses')
     .insert({
       user_id: params.userId,
@@ -74,6 +86,7 @@ export async function createAnalysis(params: {
       nome_completo: params.nomeCompleto,
       data_nascimento: toISODate(params.dataNascimento),
       status: 'pending',
+      is_free: params.isFree ?? false,
     })
     .select()
     .single();

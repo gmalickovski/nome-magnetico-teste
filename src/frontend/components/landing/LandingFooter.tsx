@@ -30,7 +30,7 @@ export function LandingFooter() {
           <div>
             <h4 className="text-gray-300 font-medium mb-4 text-sm">Ferramentas</h4>
             <ul className="space-y-2">
-              <li><a href="/analise-gratis" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Análise Gratuita</a></li>
+              <li><a href="/analise-gratuita" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Análise Gratuita</a></li>
               <li><a href="/perguntas-frequentes" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Perguntas Frequentes</a></li>
               <li><a href="/blog" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Blog</a></li>
               <li><a href="/glossario" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">Glossário</a></li>

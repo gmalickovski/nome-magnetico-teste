@@ -39,9 +39,6 @@ const VIBRACOES_SUGESTOES = [
 ];
 
 export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onSuccess }: Props) {
-  type Mode = 'criar_social' | 'analisar_atual';
-  const [modo, setModo] = useState<Mode>('criar_social');
-
   const [form, setForm] = useState<FormState>({
     nome_completo: nomeInicial,
     data_nascimento: dataInicial,
@@ -53,19 +50,8 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
     nomes_candidatos: '',
   });
 
-  const [formAtual, setFormAtual] = useState({
-    nome_completo: nomeInicial,
-    data_nascimento: dataInicial,
-  });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  function handleModoChange(novoModo: Mode) {
-    if (modo === novoModo) return;
-    setModo(novoModo);
-    setError('');
-  }
 
   function set<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -144,87 +130,9 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
     }
   }
 
-  async function handleSubmitAtual(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-
-    if (!formAtual.nome_completo.trim() || formAtual.nome_completo.trim().length < 2) {
-      setError('Informe o nome completo a ser analisado.');
-      return;
-    }
-
-    if (!formAtual.data_nascimento) {
-      setError('Informe a data de nascimento.');
-      return;
-    }
-
-    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(formAtual.data_nascimento)) {
-      setError('A data de nascimento deve estar no formato DD/MM/AAAA.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product_type: 'nome_social',
-          nome_completo: formAtual.nome_completo.trim(),
-          data_nascimento: formAtual.data_nascimento,
-          nome_ja_escolhido: true,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Erro ao iniciar análise');
-
-      if (onSuccess) {
-        onSuccess(data.analysisId);
-      } else {
-        window.location.href = `/app/resultado/${data.analysisId}`;
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="space-y-6">
-      {/* Seletor de modo */}
-      <div className="glass rounded-xl p-1 flex gap-1">
-        <button
-          type="button"
-          onClick={() => handleModoChange('criar_social')}
-          className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
-            modo === 'criar_social'
-              ? 'bg-gold text-black shadow-lg shadow-gold/20'
-              : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-          }`}
-        >
-          <span>🔍</span>
-          <span className="hidden sm:inline">Criar Novo Nome Social</span>
-          <span className="sm:hidden">Criar Nome</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => handleModoChange('analisar_atual')}
-          className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
-            modo === 'analisar_atual'
-              ? 'bg-gold text-black shadow-lg shadow-gold/20'
-              : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-          }`}
-        >
-          <span>✨</span>
-          <span className="hidden sm:inline">Analisar Nome Atual (Registro)</span>
-          <span className="sm:hidden">Nome Atual</span>
-        </button>
-      </div>
-
-      {modo === 'criar_social' ? (
-        <form onSubmit={handleSubmitCriar} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <form onSubmit={handleSubmitCriar} className="space-y-6">
           {/* ── SEÇÃO 1: Dados de Nascimento (âncora) ── */}
           <div className="glass rounded-xl p-5 space-y-4">
             <h3 className="text-gold font-semibold flex items-center gap-2">
@@ -422,73 +330,7 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
               'Gerar Novo Nome Social'
             )}
           </button>
-        </form>
-      ) : (
-        <form onSubmit={handleSubmitAtual} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* ── SEÇÃO ÚNICA: Dados de Nascimento ── */}
-          <div className="glass rounded-xl p-5 space-y-4">
-            <div className="mb-4">
-              <h3 className="text-gold font-semibold flex items-center gap-2 text-lg">
-                <span>🔍</span> Relatório Completo do Nome de Batismo
-              </h3>
-              <p className="text-sm text-gray-400 mt-2">
-                Esta análise detalhada mostrará como o seu nome atual atua na sua vida, revelando todos os bloqueios e harmonia entre seus números base.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Nome completo atual (de registro) *</label>
-              <input
-                type="text"
-                value={formAtual.nome_completo}
-                onChange={e => {
-                  setFormAtual(prev => ({ ...prev, nome_completo: e.target.value }));
-                  setError('');
-                }}
-                placeholder="Ex: Maria da Silva Santos"
-                className="input-dark w-full"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Data de nascimento *</label>
-              <div className="w-full sm:w-1/2">
-                <DateInput
-                  value={formAtual.data_nascimento}
-                  onChangeValue={v => {
-                    setFormAtual(prev => ({ ...prev, data_nascimento: v }));
-                    setError('');
-                  }}
-                  className="input-dark w-full"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {error && (
-            <div className="rounded-xl p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full py-4 text-base font-semibold disabled:opacity-60"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                Analisando Nome Atual...
-              </span>
-            ) : (
-              'Analisar e Verificar Bloqueios'
-            )}
-          </button>
-        </form>
-      )}
+      </form>
     </div>
   );
 }

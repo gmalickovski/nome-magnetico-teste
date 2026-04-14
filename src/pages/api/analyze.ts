@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { createUserClient } from '../../backend/db/supabase';
 import { hasActiveSubscription } from '../../backend/db/subscriptions';
-import { createAnalysis, updateAnalysis, saveMagneticNames } from '../../backend/db/analyses';
+import { createAnalysis, updateAnalysis, saveMagneticNames, hasUsedFreeAnalysis } from '../../backend/db/analyses';
 import { calcularTodosTriangulos, detectarBloqueios, todasSequenciasNegativas } from '../../backend/numerology/triangle';
 import { calcularCincoNumeros } from '../../backend/numerology/numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, mapearFrequencias, calcularDebitosCarmicos } from '../../backend/numerology/karmic';
@@ -45,6 +45,8 @@ const schema = z.object({
   contexto_uso: z.string().optional(),
   // flag de modo nome_bebe: indica que o nome já foi registrado em cartório
   nome_ja_escolhido: z.boolean().optional(),
+  // análise gratuita (uma por usuário, sem subscription)
+  is_free: z.boolean().optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -84,6 +86,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     nome_socio2, data_nascimento_socio2,
     objetivo_apresentacao, vibracoes_desejadas, contexto_uso,
     nome_ja_escolhido,
+    is_free,
   } = parsed.data;
 
   const { data: profile } = await supabase
@@ -96,12 +99,23 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const gender = profile?.gender || 'Neutro';
   const isAdmin = profile?.role === 'admin';
 
-  // Verificar subscription
-  const hasAccess = await hasActiveSubscription(user.id, product_type as ProductType);
-  if (!hasAccess && !isAdmin) {
-    return new Response(JSON.stringify({ error: 'Subscription inativa para este produto' }), {
-      status: 403, headers: { 'Content-Type': 'application/json' },
-    });
+  // Verificar acesso
+  if (is_free) {
+    // Análise gratuita: verificar se já foi utilizada
+    const jaUsou = await hasUsedFreeAnalysis(user.id);
+    if (jaUsou) {
+      return new Response(JSON.stringify({ error: 'Análise gratuita já utilizada. Acesse "Minhas Análises" para ver seu relatório.' }), {
+        status: 403, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  } else {
+    // Análise paga: verificar subscription
+    const hasAccess = await hasActiveSubscription(user.id, product_type as ProductType);
+    if (!hasAccess && !isAdmin) {
+      return new Response(JSON.stringify({ error: 'Subscription inativa para este produto' }), {
+        status: 403, headers: { 'Content-Type': 'application/json' },
+      });
+    }
   }
 
   // Criar análise no banco
@@ -110,6 +124,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     productType: product_type as ProductType,
     nomeCompleto: nome_completo,
     dataNascimento: data_nascimento,
+    isFree: is_free ?? false,
   });
 
   // Processar em background (não bloqueia a resposta)

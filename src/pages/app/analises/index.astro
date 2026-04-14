@@ -155,11 +155,16 @@ const hasMultipleProducts = uniqueProducts.length > 1;
                     )}
                   </div>
 
-                  {/* Tags de produto + status */}
+                  {/* Tags de produto + status + grátis */}
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-white/10 text-gray-300 font-medium whitespace-nowrap uppercase tracking-wider border border-white/5">
                       {analysis.productName}
                     </span>
+                    {(analysis as any).is_free && (
+                      <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded font-semibold bg-[#d7c6ff]/10 text-[#d7c6ff] border border-[#d7c6ff]/20 whitespace-nowrap uppercase tracking-wider">
+                        Grátis
+                      </span>
+                    )}
                     <span class={analysis.statusCls}>{analysis.statusLbl}</span>
                   </div>
                 </div>

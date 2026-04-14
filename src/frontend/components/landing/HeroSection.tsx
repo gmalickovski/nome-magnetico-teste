@@ -59,7 +59,7 @@ export function HeroSection() {
         {/* CTA Principal */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           <a
-            href="/analise-gratis"
+            href="/analise-gratuita"
             id="cta-hero-principal"
             className="w-full sm:w-auto bg-[#D4AF37] text-[#1A1A1A] font-semibold text-lg px-8 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
             aria-label="Descobrir a frequência do meu nome gratuitamente"
@@ -71,7 +71,7 @@ export function HeroSection() {
 
         {/* Micro-copy de confiança */}
         <p className="text-gray-600 text-sm mb-8">
-          Teste gratuito · Sem cadastro · Resultado imediato
+          Análise completa gratuita · Crie sua conta · Relatório com PDF
         </p>
 
         {/* Trust Indicators atualizados */}

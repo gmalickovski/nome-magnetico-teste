@@ -1,0 +1,148 @@
+---
+import LandingLayout from '../layouts/LandingLayout.astro';
+import { LandingHeader } from '../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+
+const user = Astro.locals.user;
+
+// Usuário já logado → vai direto para a análise no app
+if (user) return Astro.redirect('/app/analise/gratuita');
+
+const REDIRECT_URL = '/app/analise/gratuita';
+const CADASTRO_URL = `/auth/cadastro?redirect=${encodeURIComponent(REDIRECT_URL)}`;
+const LOGIN_URL = `/auth/login?redirect=${encodeURIComponent(REDIRECT_URL)}`;
+---
+
+<LandingLayout
+  title="Análise Gratuita do Seu Nome de Nascimento | Nome Magnético"
+  description="Descubra os bloqueios energéticos, lições kármicas e tendências ocultas do seu nome. Análise completa com os 4 triângulos numerológicos — gratuita, sem limite de tempo."
+  keywords="análise gratuita nome, bloqueios energéticos nome, numerologia gratuita, lições kármicas, triângulos numerológicos, numerologia cabalística"
+>
+  <link rel="canonical" href="https://nomemagnetico.com.br/analise-gratuita" />
+
+  <LandingHeader client:load />
+
+  <main class="min-h-screen bg-[#111111] pt-20 pb-20">
+
+    <!-- HERO -->
+    <section class="max-w-3xl mx-auto px-4 pt-16 pb-8 text-center">
+      <div class="inline-flex items-center gap-2 bg-[#d7c6ff]/10 border border-[#d7c6ff]/30 rounded-full px-5 py-2 mb-8">
+        <span class="text-[#d7c6ff] text-xs" aria-hidden="true">✦</span>
+        <span class="text-[#d7c6ff] text-sm font-medium tracking-wide">Análise Gratuita — Uma por Conta</span>
+        <span class="text-[#d7c6ff] text-xs" aria-hidden="true">✦</span>
+      </div>
+
+      <h1 class="font-cinzel text-4xl sm:text-5xl font-bold text-[#e5e2e1] mb-6 leading-tight">
+        Análise Completa<br/>
+        <span style="background: linear-gradient(135deg, #f2ca50, #D4AF37, #B8960E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          do Seu Nome de Nascimento
+        </span>
+      </h1>
+
+      <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-3">
+        Descubra o que seu nome atual está gerando na sua vida — bloqueios energéticos, lições kármicas
+        e tendências ocultas calculadas com os 4 triângulos da numerologia cabalística.
+      </p>
+      <p class="text-gray-500 text-sm mb-12">
+        Análise completa com PDF para download · Acesso permanente · Gratuito para sempre
+      </p>
+
+      <!-- Bloco de CTAs -->
+      <div class="bg-white/[0.03] border border-white/10 rounded-2xl p-8 max-w-md mx-auto">
+        <p class="text-gray-300 font-medium mb-6">
+          Crie sua conta gratuita para gerar sua análise
+        </p>
+
+        <a
+          href={CADASTRO_URL}
+          class="block w-full bg-[#D4AF37] text-[#1A1A1A] font-bold text-base px-8 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20 mb-4 text-center"
+        >
+          Criar conta grátis →
+        </a>
+
+        <a
+          href={LOGIN_URL}
+          class="block w-full text-center border border-white/20 text-gray-300 font-medium text-sm px-8 py-3 rounded-xl hover:border-white/40 hover:text-white transition-all duration-300"
+        >
+          Já tenho conta — Entrar
+        </a>
+
+        <p class="text-gray-600 text-xs mt-5">
+          Conta gratuita · Sem cartão de crédito · Cancele quando quiser
+        </p>
+      </div>
+    </section>
+
+    <!-- O QUE A ANÁLISE REVELA -->
+    <section class="max-w-4xl mx-auto px-4 py-16">
+      <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-center text-white mb-12">
+        O Que Sua Análise Vai Revelar
+      </h2>
+      <div class="grid sm:grid-cols-2 gap-6">
+
+        <div class="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div class="text-2xl mb-3">🔺</div>
+          <h3 class="font-cinzel text-lg font-bold text-white mb-2">4 Triângulos Numerológicos</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Triângulo da Vida, Pessoal, Social e do Destino — cada um revela uma dimensão diferente da influência do seu nome.
+          </p>
+        </div>
+
+        <div class="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div class="text-2xl mb-3">⚡</div>
+          <h3 class="font-cinzel text-lg font-bold text-white mb-2">Bloqueios Energéticos</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Sequências repetidas nos triângulos que criam padrões de travamento — identificados com precisão matemática.
+          </p>
+        </div>
+
+        <div class="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div class="text-2xl mb-3">🌀</div>
+          <h3 class="font-cinzel text-lg font-bold text-white mb-2">Lições Kármicas</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Números ausentes no seu nome revelam qualidades que você veio desenvolver nesta encarnação.
+          </p>
+        </div>
+
+        <div class="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div class="text-2xl mb-3">📊</div>
+          <h3 class="font-cinzel text-lg font-bold text-white mb-2">Tendências Ocultas</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Números que aparecem em excesso no seu nome, revelando qualidades hiperativas que podem gerar desequilíbrio.
+          </p>
+        </div>
+
+        <div class="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div class="text-2xl mb-3">🔢</div>
+          <h3 class="font-cinzel text-lg font-bold text-white mb-2">5 Números Principais</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Expressão, Destino, Motivação, Missão e Personalidade — o mapa vibracional completo do seu nome.
+          </p>
+        </div>
+
+        <div class="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div class="text-2xl mb-3">📄</div>
+          <h3 class="font-cinzel text-lg font-bold text-white mb-2">Relatório em PDF</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Baixe sua análise completa em PDF com todos os dados, acesso permanente em "Minhas Análises".
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="max-w-2xl mx-auto px-4 pb-8 text-center">
+      <a
+        href={CADASTRO_URL}
+        class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20"
+      >
+        Gerar Minha Análise Gratuita →
+      </a>
+      <p class="text-gray-600 text-sm mt-4">Disponível uma única vez por conta · Acesso permanente ao relatório</p>
+    </section>
+
+  </main>
+
+  <LandingFooter client:load />
+</LandingLayout>

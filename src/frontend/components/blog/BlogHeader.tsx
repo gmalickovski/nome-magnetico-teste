@@ -165,7 +165,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
           {/* Análise Gratuita */}
           <a
-            href="/analise-gratis"
+            href="/analise-gratuita"
             className="flex items-center gap-1.5 bg-[#D4AF37] text-[#1A1A1A] font-semibold text-xs px-3 py-2 rounded-xl
                        hover:bg-[#f2ca50] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
                        shadow-md shadow-[#D4AF37]/20 whitespace-nowrap"
@@ -265,7 +265,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           {/* Botões principais */}
           <div className="flex gap-3">
             <a
-              href="/analise-gratis"
+              href="/analise-gratuita"
               className="flex-1 flex items-center justify-center bg-[#D4AF37] text-[#1A1A1A] font-semibold text-sm py-3 rounded-xl hover:bg-[#f2ca50] transition-colors"
               onClick={() => setMenuOpen(false)}
             >
