@@ -574,6 +574,94 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
 
       {/* A seção de Variações Numerológicas foi removida do PDF (só aparece no HTML) */}
 
+      {/* ── PÁGINA: GUIA DE UTILIZAÇÃO DO NOME HARMONIZADO ───────────────── */}
+      <Page size="A4" style={styles.page}>
+        <PDFPageHeader subtitle={`${nomeParaExibir} — Guia de Utilização`} />
+
+        <View style={{ marginTop: 20, marginBottom: 8 }}>
+          <Text style={styles.hugeTitle}>Guia de Utilização do Seu Nome</Text>
+          <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 20 }}>
+            Primeiros Passos da Sua Nova Identidade
+          </Text>
+        </View>
+
+        {/* Introdução */}
+        <View style={{ ...styles.section, marginBottom: 14 }}>
+          <Text style={{ ...styles.bodyText, fontSize: 10, lineHeight: 1.65 }}>
+            O Nome Social não exige nenhuma mudança legal ou documental obrigatória — ele funciona como a identidade vibracional que você escolhe projetar ao mundo. A ativação começa no momento em que você passa a usá-lo com consciência e consistência. Quanto mais contextos do seu cotidiano ele habitar, maior e mais rápida será a reorganização do seu campo magnético.
+          </Text>
+        </View>
+
+        {/* BLOCO 1: Primeiro Dia */}
+        <View style={{ marginBottom: 14 }}>
+          <Text style={[styles.sectionTitle, { fontSize: 11, color: GOLD, borderBottomColor: GOLD }]}>
+            📍 Fase 1 — Primeiros 7 Dias (Plantio)
+          </Text>
+          <Text style={{ fontSize: 9, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.6, marginBottom: 4 }}>
+            <Text style={{ fontFamily: BODY_FONT_BOLD, color: DARK }}>Dia 1:</Text> Escreva seu novo nome à mão 21 vezes seguidas com intenção clara. Essa é a âncora inicial da reprogramação vibracional.
+          </Text>
+          <Text style={{ fontSize: 9, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.6, marginBottom: 4 }}>
+            <Text style={{ fontFamily: BODY_FONT_BOLD, color: DARK }}>Dias 2–7:</Text> Adapte seus perfis digitais principais (Instagram, LinkedIn, WhatsApp) para o novo nome. Comece pelos que têm mais frequência de uso no seu dia a dia.
+          </Text>
+          <Text style={{ fontSize: 9, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.6 }}>
+            <Text style={{ fontFamily: BODY_FONT_BOLD, color: DARK }}>Comunicação pessoal:</Text> Peça às pessoas próximas que te chamem pelo novo nome. A forma como os outros nos chamam reforça (ou enfraquece) a identidade vibracional.
+          </Text>
+        </View>
+
+        {/* BLOCO 2: Onde usar */}
+        <View style={{ marginBottom: 14 }}>
+          <Text style={[styles.sectionTitle, { fontSize: 11, color: GOLD, borderBottomColor: GOLD }]}>
+            🌐 Onde Usar o Nome Social
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 6 }}>
+            {[
+              ['✦ E-mail profissional', 'Assinar todos os e-mails de trabalho e networking com o novo nome.'],
+              ['✦ Redes sociais', 'Instagram, LinkedIn, YouTube, TikTok — nome de perfil e @handle quando possível.'],
+              ['✦ Cartão de visitas', 'O próximo lote já deve sair com o nome harmonizado.'],
+              ['✦ Apresentações orais', '"Olá, me chamo [Nome Social]" — use nos eventos, reuniões e calls.'],
+              ['✦ Site / portfólio', 'Domínio ou nome de seção no site pessoal/profissional.'],
+              ['✦ Assinatura', 'Documentos não-oficiais, e-mails, postagens e contratos não-jurídicos.'],
+            ].map(([titulo, desc], i) => (
+              <View key={i} style={{ width: '47%', backgroundColor: '#F9FAFB', borderRadius: 5, padding: 7, borderWidth: 1, borderColor: '#E5E7EB' }}>
+                <Text style={{ fontSize: 8, fontFamily: BODY_FONT_BOLD, color: DARK, marginBottom: 2 }}>{titulo}</Text>
+                <Text style={{ fontSize: 7.5, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.5 }}>{desc}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* BLOCO 3: Documentos legais */}
+        <View style={{ marginBottom: 14 }}>
+          <Text style={[styles.sectionTitle, { fontSize: 11, color: '#D97706', borderBottomColor: '#D97706' }]}>
+            📋 E os Documentos Oficiais?
+          </Text>
+          <Text style={{ fontSize: 9, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.6, marginBottom: 4 }}>
+            O Nome Social <Text style={{ fontFamily: BODY_FONT_BOLD, color: DARK }}>não substitui legalmente</Text> o nome de nascimento em CPF, RG, passaporte ou contratos jurídicos. Esses documentos permanecem com o nome original. Porém, em qualquer contexto de apresentação pessoal, marketing, redes sociais, contratos informais, e-mails e cartões de visita — o Nome Social é soberano e recomendado.
+          </Text>
+          <Text style={{ fontSize: 9, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.6 }}>
+            Se desejar oficializar a mudança no cartório (retificação de registro civil), isso é possível juridicamente — mas é opcional e independente da ativação vibracional, que começa no uso cotidiano consciente.
+          </Text>
+        </View>
+
+        {/* BLOCO 4: Período de integração */}
+        <View style={{ backgroundColor: 'rgba(212, 175, 55, 0.04)', borderWidth: 1, borderColor: GOLD, borderRadius: 7, padding: 12 }}>
+          <Text style={{ fontSize: 10, fontFamily: TITLE_FONT, color: GOLD, marginBottom: 6 }}>
+            ⏳ Os 90 Dias de Integração Vibracional
+          </Text>
+          <Text style={{ fontSize: 9, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.65, marginBottom: 5 }}>
+            Nos primeiros 30 dias, é comum sentir uma leve estranheza ao ser chamado pelo novo nome — esse é o sinal de que a reprogramação está ativa. O campo energético antigo ainda opera em paralelo enquanto o novo padrão se consolida.
+          </Text>
+          <Text style={{ fontSize: 9, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.65, marginBottom: 5 }}>
+            Entre o 30º e o 60º dia, observe com atenção: novas oportunidades, convites, conexões ou mudanças de percepção por parte das pessoas ao seu redor são sinais concretos de que a frequência do nome está agindo. Anote em um diário.
+          </Text>
+          <Text style={{ fontSize: 9, fontFamily: BODY_FONT, color: GRAY, lineHeight: 1.65 }}>
+            Ao completar 90 dias de uso consistente, o campo vibracional do Nome Social se estabiliza como sua frequência dominante. A partir daqui, a atração das vibrações que você escolheu se torna mais fluida e orgânica.
+          </Text>
+        </View>
+
+        <PDFFooter />
+      </Page>
+
       {/* ── PÁGINA FINAL: FOLHA DE TREINO DE ASSINATURA ───────────────────── */}
       <Page size="A4" style={styles.assinaturaPage}>
         <Text style={styles.assinaturaTitle}>Folha de Treino de Assinatura</Text>
