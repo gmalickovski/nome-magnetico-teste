@@ -36,9 +36,10 @@ const hasAnyAccess = hasNomeSocial || hasNomeBebe || hasNomeEmpresa;
 // Detectar estado expirado (já comprou antes, mas nenhuma ativa)
 const isExpired = !isAdmin && !hasAnyAccess && await hasAnySubscription(user.id);
 
-// Card Análise Gratuita: aparece apenas se o usuário não tiver nenhum acesso ativo
-// e ainda não tiver usado a análise gratuita
-const mostrarCardGratuito = !isAdmin && !hasAnyAccess && !(await hasUsedFreeAnalysis(user.id));
+// Card Análise Gratuita:
+// - Admins: sempre visível (para testes, sem restrição)
+// - Usuários comuns: apenas se não tiver acesso ativo E ainda não usou
+const mostrarCardGratuito = isAdmin || (!hasAnyAccess && !(await hasUsedFreeAnalysis(user.id)));
 
 const products = [
   {
