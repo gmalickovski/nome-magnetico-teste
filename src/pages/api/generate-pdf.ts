@@ -42,7 +42,9 @@ export const GET: APIRoute = async ({ url, locals }) => {
   }
 
   const productType = analysis.product_type ?? 'nome_social';
+  const isFree = (analysis as any).is_free === true;
   let filename: string;
+
   if (productType === 'nome_bebe') {
     const sobrenome = toSlug(
       analysis.nome_completo.split(' ').slice(1).join(' ') || analysis.nome_completo
@@ -53,10 +55,13 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const nomeEmpresa = freqData?.melhorNome?.nomeEmpresa ?? analysis.nome_completo;
     filename = `analise-nome-empresa-${toSlug(nomeEmpresa)}-nome-magnetico.pdf`;
   } else {
-    filename = `analise-nome-social-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
+    if (isFree) {
+      filename = `analise-gratuita-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
+    } else {
+      filename = `analise-nome-social-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
+    }
   }
 
-  const isFree = (analysis as any).is_free === true;
   const PDFComponent =
     productType === 'nome_bebe'
       ? NomeBebePDF

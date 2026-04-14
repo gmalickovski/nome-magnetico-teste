@@ -283,19 +283,21 @@ export function TrianguloPiramideInline({
       {(() => {
         const arcanoInfo = data.arcanoRegente !== null ? (ARCANOS as any)[data.arcanoRegente] ?? null : null;
         return arcanoInfo ? (
-          <View style={{ borderWidth: 1, borderColor: '#f3f4f6', backgroundColor: '#F9FAFB', borderRadius: 8, marginTop: 16 }}>
-            <Text style={{ fontSize: 9, textAlign: 'center', color: '#6b7280', padding: 8, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
-              Arcano Regente: {data.arcanoRegente}
-            </Text>
-            <View style={{ borderLeftWidth: 4, borderLeftColor: '#8b5cf6', padding: 12, backgroundColor: '#faf5ff', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
-              <View style={{ paddingBottom: 6 }}>
-                <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#6d28d9' }}>
-                  Arcano {data.arcanoRegente} — {arcanoInfo.nome}: {arcanoInfo.palavraChave.toLowerCase()}
+          <View style={{ marginTop: 12, marginBottom: 12 }} wrap={false}>
+            <View style={{ borderWidth: 1, borderColor: '#f3f4f6', backgroundColor: '#F9FAFB', borderRadius: 8 }}>
+              <Text style={{ fontSize: 9, textAlign: 'center', color: '#6b7280', padding: 8, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
+                Arcano Regente: {data.arcanoRegente}
+              </Text>
+              <View style={{ borderLeftWidth: 4, borderLeftColor: '#8b5cf6', padding: 12, backgroundColor: '#faf5ff', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
+                <View style={{ paddingBottom: 6 }}>
+                  <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#6d28d9' }}>
+                    Arcano {data.arcanoRegente} — {arcanoInfo.nome}: {arcanoInfo.palavraChave.toLowerCase()}
+                  </Text>
+                </View>
+                <Text style={{ fontFamily: 'Helvetica', fontSize: 10, lineHeight: 1.5, marginBottom: 0, color: '#4b5563' }}>
+                  {arcanoInfo.descricao.split('.')[0]}.
                 </Text>
               </View>
-              <Text style={{ fontFamily: 'Helvetica', fontSize: 10, lineHeight: 1.5, marginBottom: 0, color: '#4b5563' }}>
-                {arcanoInfo.descricao.split('.')[0]}.
-              </Text>
             </View>
           </View>
         ) : data.arcanoRegente !== null ? (
@@ -304,7 +306,7 @@ export function TrianguloPiramideInline({
       })()}
       
       {data.sequenciasNegativas.length > 0 ? (
-        <View style={{ marginTop: 12, borderWidth: 1, borderColor: '#fca5a5', backgroundColor: '#fef2f2', borderRadius: 8, padding: 10 }}>
+        <View style={{ marginTop: 12, borderWidth: 1, borderColor: '#fca5a5', backgroundColor: '#fef2f2', borderRadius: 8, padding: 10 }} wrap={false}>
           <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#b91c1c', textAlign: 'center', marginBottom: 4 }}>
             ⚠ BLOQUEIO ENERGÉTICO DETECTADO
           </Text>

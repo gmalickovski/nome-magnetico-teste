@@ -76,7 +76,7 @@ export const THEMES: Record<ProductType, ProductTheme> = {
 
 /** Tema extra usado apenas pelo NomeAtualPDF (análise gratuita) */
 export const THEME_NOME_ATUAL: ProductTheme = {
-  primaryColor: '#2DD4BF',        // Teal vibrante
+  primaryColor: '#0F766E',        // Teal 700 (mais escuro para textos em fundo branco)
   accentColor: '#818CF8',         // Indigo claro
   coverBgColor: '#0D1F1E',        // Verde-escuro profundo
   coverTitleColor: '#CCFBF1',     // Teal glacial

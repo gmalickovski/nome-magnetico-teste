@@ -259,7 +259,7 @@ export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
   return (
     <View style={styles.sectionBlock}>
       {bloqueios.map((b, i) => (
-        <View key={i} style={styles.bloqueioRow}>
+        <View key={i} style={styles.bloqueioRow} wrap={false}>
           <Text style={styles.bloqueioTitle}>{b.codigo} — {b.titulo}</Text>
           <Text style={styles.bloqueioDesc}>{b.descricao}</Text>
           {b.aspectoSaude ? (
@@ -292,7 +292,7 @@ export function DebitosBlock({ debitos }: { debitos: DebitoData[] }) {
       {debitos.map((d, i) => {
         const isFixed = d.fixo === true;
         return (
-          <View key={i} style={isFixed ? styles.debitoRow : styles.debitoRowVariable}>
+          <View key={i} style={isFixed ? styles.debitoRow : styles.debitoRowVariable} wrap={false}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 3 }}>
               <Text style={isFixed ? styles.debitoTitle : styles.debitoTitleVariable}>
                 {d.titulo}
@@ -330,7 +330,7 @@ export function LicoesBlock({ licoes }: { licoes: LicaoData[] }) {
   return (
     <View style={styles.sectionBlock}>
       {licoes.map((l, i) => (
-        <View key={i} style={styles.licaoRow}>
+        <View key={i} style={styles.licaoRow} wrap={false}>
           <Text style={styles.licaoTitle}>{l.titulo}</Text>
           <Text style={styles.licaoDesc}>{l.descricao}</Text>
         </View>
@@ -393,7 +393,7 @@ export function TendenciasBlock({
       ) : (
         <>
           {tendencias.map((t, i) => (
-            <View key={i} style={styles.tendenciaRow}>
+            <View key={i} style={styles.tendenciaRow} wrap={false}>
               <Text style={styles.tendenciaTitle}>
                 {t.titulo} — {t.frequencia}x no nome
               </Text>
