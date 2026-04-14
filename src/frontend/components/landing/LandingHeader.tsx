@@ -140,7 +140,7 @@ export function LandingHeader() {
             Entrar
           </a>
           <a
-            href="/precos"
+            href="/auth/cadastro"
             className="bg-[#D4AF37] text-[#1A1A1A] font-medium text-sm px-5 py-2.5 rounded-lg hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20"
           >
             Começar Agora
@@ -186,7 +186,7 @@ export function LandingHeader() {
 
           <div className="pt-3 space-y-3">
             <a href="/auth/login" className="block bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-center py-2.5 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300" onClick={() => setMenuOpen(false)}>Entrar</a>
-            <a href="/precos" className="block bg-[#D4AF37] text-[#1A1A1A] font-medium text-center py-3 rounded-lg hover:bg-[#f2ca50] transition-all duration-300" onClick={() => setMenuOpen(false)}>
+            <a href="/auth/cadastro" className="block bg-[#D4AF37] text-[#1A1A1A] font-medium text-center py-3 rounded-lg hover:bg-[#f2ca50] transition-all duration-300" onClick={() => setMenuOpen(false)}>
               Começar Agora
             </a>
           </div>
