@@ -48,6 +48,9 @@ export default function FreeAnalysisForm() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? 'Erro ao iniciar análise.');
 
+      if (typeof window !== 'undefined' && (window as any).umami) {
+        (window as any).umami.track('analise_gratis_submit');
+      }
       window.location.href = `/app/resultado/${json.analysisId}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado. Tente novamente.');
