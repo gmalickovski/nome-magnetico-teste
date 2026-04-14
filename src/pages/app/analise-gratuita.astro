@@ -19,7 +19,7 @@ try {
 // Se já usou a análise gratuita, redirecionar para Minhas Análises
 // Admins são isentos: podem acessar sempre para fins de teste
 const jaUsou = !isAdmin && await hasUsedFreeAnalysis(user.id);
-if (jaUsou) return Astro.redirect('/app/analises');
+if (jaUsou) return Astro.redirect('/app?free_used=true');
 ---
 
 <AppLayout title="Análise Gratuita — Nome de Nascimento">

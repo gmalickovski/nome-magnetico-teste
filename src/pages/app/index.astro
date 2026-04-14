@@ -11,6 +11,13 @@ Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate
 Astro.response.headers.set('Pragma', 'no-cache');
 Astro.response.headers.set('Expires', '0');
 
+import FreeUsedModal from '../../frontend/components/app/FreeUsedModal';
+import { getHqPricesAndPromo } from '../../backend/payments/prices';
+import type { PriceInfo, ActivePromotion } from '../../backend/payments/prices';
+
+// Verifica se tem modal
+const showFreeUsedModal = Astro.url.searchParams.get('free_used') === 'true';
+
 // Verificar admin e dados
 let isAdmin = false;
 let profileData: any = null;
@@ -207,5 +214,6 @@ const products = [
 
   </div>
   
+  {showFreeUsedModal && <FreeUsedModal client:only="react" />}
 
 </AppLayout>
