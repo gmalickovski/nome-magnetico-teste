@@ -9,7 +9,7 @@
  *   5. CTA / Oferta para a Harmonização (Nome Social)
  */
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
-import { THEMES } from './shared/PDFTheme';
+import { THEMES, THEME_NOME_ATUAL } from './shared/PDFTheme';
 import { PDFCover } from './shared/PDFCover';
 import { PDFStandardIntro } from './shared/PDFStandardIntro';
 import { PDFPageHeader } from './shared/PDFPageHeader';
@@ -81,7 +81,7 @@ function ArquetipoCardPDF({ arquetipo }: { arquetipo: Arquetipo }) {
   );
 }
 
-const theme = THEMES.nome_social;
+const theme = THEME_NOME_ATUAL;
 
 const GOLD = theme.primaryColor;
 const GRAY = '#4B5563';

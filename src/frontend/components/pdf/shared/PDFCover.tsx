@@ -194,6 +194,92 @@ function EmpresaShapes({ color, accentColor }: { color: string; accentColor: str
   );
 }
 
+/** Círculos côncentricos + rombômbico — Diagnóstico (Nome Atual) */
+function AtualShapes({ color, accentColor }: { color: string; accentColor: string }) {
+  const cx = 297;
+  const cy = 400;
+  // Oló do Destino: anéis concêntricos finos e gradé radial
+  const rings = [40, 80, 130, 190, 260];
+  // Losango (diamante) central
+  const diamondPts = `${cx},${cy - 50} ${cx + 50},${cy} ${cx},${cy + 50} ${cx - 50},${cy}`;
+  return (
+    <View style={{ position: 'absolute', top: -72, left: -48, width: 595, height: 842, opacity: 0.7 }}>
+      <Svg width="595" height="842">
+        {/* Anéis concêntricos */}
+        {rings.map((r, i) => (
+          <Circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r={r}
+            fill={i === 0 ? color : 'none'}
+            fillOpacity={i === 0 ? 0.08 : 0}
+            stroke={color}
+            strokeOpacity={0.06 - i * 0.008}
+            strokeWidth={i === 0 ? 1.2 : 0.6}
+          />
+        ))}
+        {/* Losango central */}
+        <Polygon
+          points={diamondPts}
+          fill={color}
+          fillOpacity={0.06}
+          stroke={color}
+          strokeOpacity={0.15}
+          strokeWidth={0.8}
+        />
+        {/* Linhas radiais do losango (8 eixos) */}
+        {Array.from({ length: 12 }).map((_, i) => {
+          const angle = (Math.PI / 6) * i;
+          const x1 = cx + 42 * Math.cos(angle);
+          const y1 = cy + 42 * Math.sin(angle);
+          const x2 = cx + 188 * Math.cos(angle);
+          const y2 = cy + 188 * Math.sin(angle);
+          return (
+            <Line
+              key={i}
+              x1={x1} y1={y1} x2={x2} y2={y2}
+              stroke={color}
+              strokeOpacity={0.03}
+              strokeWidth={0.5}
+            />
+          );
+        })}
+        {/* Pontos de acento nos cruzamentos */}
+        {[0, 60, 120, 180, 240, 300].map((deg, i) => {
+          const rad = (deg * Math.PI) / 180;
+          return (
+            <Circle
+              key={i}
+              cx={cx + 130 * Math.cos(rad)}
+              cy={cy + 130 * Math.sin(rad)}
+              r={3}
+              fill={accentColor}
+              fillOpacity={0.25}
+            />
+          );
+        })}
+        {/* Triângulo no topo esquerdo */}
+        <Polygon
+          points={`80,100 160,100 120,170`}
+          fill="none"
+          stroke={accentColor}
+          strokeOpacity={0.08}
+          strokeWidth={0.7}
+        />
+        {/* Triângulo invertido no canto inferior direito */}
+        <Polygon
+          points={`430,660 510,660 470,730`}
+          fill="none"
+          stroke={color}
+          strokeOpacity={0.07}
+          strokeWidth={0.7}
+        />
+      </Svg>
+    </View>
+  );
+}
+
 // ── Componente de capa ────────────────────────────────────────────────────────
 
 function CoverShapes({
@@ -207,6 +293,7 @@ function CoverShapes({
 }) {
   if (style === 'social') return <SocialShapes color={primaryColor} />;
   if (style === 'bebe') return <BebeShapes color={primaryColor} />;
+  if (style === 'atual') return <AtualShapes color={primaryColor} accentColor={accentColor} />;
   return <EmpresaShapes color={primaryColor} accentColor={accentColor} />;
 }
 

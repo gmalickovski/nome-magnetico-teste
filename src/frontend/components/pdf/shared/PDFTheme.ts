@@ -5,7 +5,7 @@
 
 export type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 export type FeaturedNumberKey = 'expressao' | 'destino';
-export type CoverShapeStyle = 'social' | 'bebe' | 'empresa';
+export type CoverShapeStyle = 'social' | 'bebe' | 'empresa' | 'atual';
 
 export interface ProductTheme {
   /** Cor primária do produto (headings, bordas de destaque) */
@@ -72,6 +72,21 @@ export const THEMES: Record<ProductType, ProductTheme> = {
     productLabel: 'Análise de Nome Empresarial',
     coverSubtitle: 'Numerologia Cabalística Aplicada',
   },
+};
+
+/** Tema extra usado apenas pelo NomeAtualPDF (análise gratuita) */
+export const THEME_NOME_ATUAL: ProductTheme = {
+  primaryColor: '#2DD4BF',        // Teal vibrante
+  accentColor: '#818CF8',         // Indigo claro
+  coverBgColor: '#0D1F1E',        // Verde-escuro profundo
+  coverTitleColor: '#CCFBF1',     // Teal glacial
+  coverLogoColor: '#2DD4BF',
+  coverShapeStyle: 'atual',
+  featuredNumberKey: 'expressao',
+  featuredNumberLabel: 'Expressão',
+  featuredNumberSublabel: 'O Dom',
+  productLabel: 'Análise do Nome de Nascimento',
+  coverSubtitle: 'Diagnóstico Numérico Cabalístico',
 };
 
 /** Cores comuns a todos os PDFs (conteúdo, não capa) */
