@@ -6,9 +6,9 @@ import { LandingFooter } from '../frontend/components/landing/LandingFooter';
 const user = Astro.locals.user;
 
 // Usuário já logado → vai direto para a análise no app
-if (user) return Astro.redirect('/app/analise/gratuita');
+if (user) return Astro.redirect('/app/analise-gratuita');
 
-const REDIRECT_URL = '/app/analise/gratuita';
+const REDIRECT_URL = '/app/analise-gratuita';
 const CADASTRO_URL = `/auth/cadastro?redirect=${encodeURIComponent(REDIRECT_URL)}`;
 const LOGIN_URL = `/auth/login?redirect=${encodeURIComponent(REDIRECT_URL)}`;
 ---
