@@ -183,14 +183,20 @@
 [data-blog-theme="light"] .blog-card {
   background: var(--blog-surface) !important;
   border-color: var(--blog-border) !important;
-  transition: border-color 500ms, box-shadow 500ms, background 500ms;
+  transition: border-color 500ms, box-shadow 500ms;
 }
 
-/* Hover do card no light mode */
+/* Hover do card no light mode — apenas borda e sombra, sem mudar fundo */
 [data-blog-theme="light"] .blog-card:hover {
   border-color: rgba(146, 112, 10, 0.35) !important;
-  background: rgba(0, 0, 0, 0.04) !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10) !important;
+}
+
+/* CTA card interno (fundo escuro inline via style=) não deve ser sobrescrito */
+[data-blog-theme="light"] .blog-card [style*="radial-gradient"],
+[data-blog-theme="light"] .blog-card [style*="linear-gradient"] {
+  background: unset !important;
+  background-color: #2a2415 !important;
 }
 
 /* Texto branco/claro → escuro no light mode */
@@ -227,6 +233,19 @@
 [data-blog-theme="light"] .blog-main .text-\[\#D4AF37\],
 [data-blog-theme="light"] .blog-header .text-\[\#D4AF37\] {
   color: #92700a !important;
+}
+
+/* EXCEÇÃO: texto dourado dentro de botão escuro/colorido — manter legível */
+[data-blog-theme="light"] .blog-main a.bg-\[\#D4AF37\],
+[data-blog-theme="light"] .blog-main button.bg-\[\#D4AF37\] {
+  color: #1a1a1a !important;
+}
+
+/* Botões CTA com fundo colorido (roxo, azul) — forçar texto branco */
+[data-blog-theme="light"] .blog-main a[style*="background"],
+[data-blog-theme="light"] .blog-main button[style*="background"],
+[data-blog-theme="light"] .prose-invert a[class*="bg-"][class*="text-"] {
+  color: #ffffff !important;
 }
 
 [data-blog-theme="light"] .blog-main .text-\[\#D4AF37\]\/60,
