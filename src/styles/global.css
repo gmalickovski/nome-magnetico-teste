@@ -289,3 +289,62 @@
     text-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
   }
 }
+
+/* =============================================
+   BLOG — TEMA CLARO (OVERRIDES DE HEADER/FOOTER/TAGS)
+   ============================================= */
+
+[data-blog-theme="light"] .blog-header {
+  background-color: rgba(250, 249, 247, 0.95) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-blog-theme="light"] .blog-header span.text-\[\#e5e2e1\] {
+  color: #1c1917 !important;
+}
+
+[data-blog-theme="light"] .blog-dropdown {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-blog-theme="light"] .blog-dropdown a {
+  color: #57534e;
+}
+[data-blog-theme="light"] .blog-dropdown a:hover {
+  color: #1c1917;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-blog-theme="light"] .blog-footer {
+  background-color: #f5f4f0 !important;
+  border-top-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-blog-theme="light"] .blog-footer p,
+[data-blog-theme="light"] .blog-footer a {
+  color: #57534e !important;
+}
+[data-blog-theme="light"] .blog-footer a:hover {
+  color: #92700a !important;
+}
+[data-blog-theme="light"] .blog-footer h3,
+[data-blog-theme="light"] .blog-footer h4 {
+  color: #1c1917 !important;
+}
+
+/* Tags de Categorias no Light Mode (Cores de Contraste Vibrantes) */
+[data-blog-theme="light"] .blog-main .text-amber-400 { color: #d97706 !important; }
+[data-blog-theme="light"] .blog-main .bg-amber-500\/15 { background-color: rgba(217, 119, 6, 0.15) !important; }
+
+[data-blog-theme="light"] .blog-main .text-purple-300 { color: #7e22ce !important; }
+[data-blog-theme="light"] .blog-main .bg-purple-500\/15 { background-color: rgba(126, 34, 206, 0.15) !important; }
+
+[data-blog-theme="light"] .blog-main .text-sky-300 { color: #0369a1 !important; }
+[data-blog-theme="light"] .blog-main .bg-sky-500\/15 { background-color: rgba(3, 105, 161, 0.15) !important; }
+
+[data-blog-theme="light"] .blog-main .text-emerald-400 { color: #047857 !important; }
+[data-blog-theme="light"] .blog-main .bg-emerald-500\/15 { background-color: rgba(4, 120, 87, 0.15) !important; }
+
+[data-blog-theme="light"] .blog-main .text-violet-300 { color: #6d28d9 !important; }
+[data-blog-theme="light"] .blog-main .bg-violet-500\/15 { background-color: rgba(109, 40, 217, 0.15) !important; }
+

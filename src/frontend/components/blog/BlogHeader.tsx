@@ -72,7 +72,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`blog-header fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-[#111111]/95 backdrop-blur-md border-b border-[#D4AF37]/15 py-3'
           : 'bg-[#111111]/80 backdrop-blur-sm py-4'
@@ -152,7 +152,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
             </button>
 
             {catOpen && (
-              <div className="absolute top-full right-0 mt-2 w-56 bg-[#1a1a1a] border border-[#D4AF37]/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden py-1.5 z-50">
+              <div className="blog-dropdown absolute top-full right-0 mt-2 w-56 bg-[#1a1a1a] border border-[#D4AF37]/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden py-1.5 z-50">
                 {CATEGORIES.map(cat => (
                   <a
                     key={cat.slug}
@@ -182,21 +182,21 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200 ${
+            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 border ${
               theme === 'dark'
-                ? 'bg-white/5 text-gray-400 hover:text-[#D4AF37] hover:bg-white/10'
-                : 'bg-black/5 text-[#78716c] hover:text-[#92700a] hover:bg-black/10'
+                ? 'bg-transparent border-white/10 text-gray-400 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 hover:bg-white/5'
+                : 'bg-transparent border-black/10 text-[#78716c] hover:text-[#92700a] hover:border-[#92700a]/30 hover:bg-black/5'
             }`}
             aria-label="Alternar tema"
             title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
           >
             {theme === 'dark' ? (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
             ) : (
-              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             )}
           </button>
@@ -262,7 +262,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
       {/* ── Painel de busca mobile ── */}
       {searchOpen && (
-        <div className="md:hidden border-t border-white/8 bg-[#111111]/98 px-4 py-3">
+        <div className="blog-dropdown md:hidden border-t border-white/8 bg-[#111111]/98 px-4 py-3">
           {/* max-w-lg limita a largura em iPads (não ocupa tela inteira no tablet) */}
           <div className="max-w-lg mx-auto relative">
             <svg
@@ -298,7 +298,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
       {/* ── Menu mobile ── */}
       {menuOpen && (
-        <div className="md:hidden bg-[#111111]/98 border-t border-[#D4AF37]/12 px-4 py-5 space-y-4">
+        <div className="blog-dropdown md:hidden bg-[#111111]/98 border-t border-[#D4AF37]/12 px-4 py-5 space-y-4">
 
           {/* Botões principais */}
           <div className="flex gap-3">
@@ -328,17 +328,17 @@ export function BlogHeader({ activeCategory = '' }: Props) {
               <p className="text-gray-700 text-xs font-medium uppercase tracking-widest">Categorias</p>
               <button
                 onClick={toggleTheme}
-                className={`flex items-center justify-center p-1.5 rounded-full transition-colors ${
+                className={`flex items-center justify-center p-1.5 rounded-full border transition-colors ${
                   theme === 'dark'
-                    ? 'text-gray-400 hover:text-[#D4AF37]'
-                    : 'text-gray-500 hover:text-[#92700a]'
+                    ? 'border-white/10 text-gray-400 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 hover:bg-white/5'
+                    : 'border-black/10 text-gray-500 hover:text-[#92700a] hover:border-[#92700a]/30 hover:bg-black/5'
                 }`}
                 aria-label="Alternar tema"
               >
                 {theme === 'dark' ? (
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                 ) : (
-                  <svg className="w-4.5 h-4.5 text-[#92700a]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                  <svg className="w-4 h-4 text-[#92700a]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 )}
               </button>
             </div>
