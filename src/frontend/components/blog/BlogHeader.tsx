@@ -133,7 +133,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
                 catOpen || activeCategory
                   ? 'bg-[#D4AF37]/12 text-[#D4AF37] border border-[#D4AF37]/25'
-                  : 'text-gray-400 hover:text-[#e5e2e1] hover:bg-white/6 border border-transparent'
+                  : 'text-[#e5e2e1] hover:text-white hover:bg-white/6 border border-transparent'
               }`}
               aria-expanded={catOpen}
             >
@@ -160,7 +160,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
                     className={`flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
                       activeCategory === cat.slug
                         ? 'text-[#D4AF37] bg-[#D4AF37]/8'
-                        : 'text-gray-400 hover:text-[#e5e2e1] hover:bg-white/5'
+                        : 'text-[#e5e2e1] hover:text-white hover:bg-white/5'
                     }`}
                     onClick={() => setCatOpen(false)}
                   >
@@ -177,14 +177,14 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           </div>
 
           {/* Separador */}
-          <span className="w-px h-4 bg-white/10 flex-shrink-0" aria-hidden="true" />
+          <span className="w-px h-4 bg-white/10 flex-shrink-0 blog-separator" aria-hidden="true" />
 
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
             className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 border ${
               theme === 'dark'
-                ? 'bg-transparent border-white/10 text-gray-400 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 hover:bg-white/5'
+                ? 'bg-transparent border-white/10 text-[#e5e2e1] hover:text-[#D4AF37] hover:border-[#D4AF37]/30 hover:bg-white/5'
                 : 'bg-transparent border-black/10 text-[#78716c] hover:text-[#92700a] hover:border-[#92700a]/30 hover:bg-black/5'
             }`}
             aria-label="Alternar tema"
@@ -214,7 +214,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           {/* Home */}
           <a
             href="/"
-            className="flex items-center text-gray-500 hover:text-[#e5e2e1] text-xs font-medium p-2 rounded-xl hover:bg-white/5 transition-all duration-200"
+            className="flex items-center text-[#e5e2e1] hover:text-white text-xs font-medium p-2 rounded-xl hover:bg-white/5 transition-all duration-200"
             title="Voltar ao site principal"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -229,7 +229,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           <button
             onClick={() => { setSearchOpen(v => !v); setMenuOpen(false); }}
             className={`p-2 rounded-xl transition-colors ${
-              searchOpen ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-gray-500 hover:text-[#D4AF37]'
+              searchOpen ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-[#e5e2e1] hover:text-[#D4AF37]'
             }`}
             aria-label={searchOpen ? 'Fechar busca' : 'Buscar'}
           >

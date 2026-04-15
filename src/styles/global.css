@@ -238,8 +238,10 @@
 [data-blog-theme="light"] .blog-main .bg-white\/4,
 [data-blog-theme="light"] .blog-main .bg-white\/5,
 [data-blog-theme="light"] .blog-header .bg-white\/5,
-[data-blog-theme="light"] .blog-header .bg-white\/6 {
-  background-color: rgba(0, 0, 0, 0.03) !important;
+[data-blog-theme="light"] .blog-header .bg-white\/6,
+[data-blog-theme="light"] .blog-header .bg-white\/10,
+[data-blog-theme="light"] .blog-separator {
+  background-color: rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Scrollbar adaptada para light */
