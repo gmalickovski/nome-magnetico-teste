@@ -183,10 +183,10 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 border ${
+            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border ${
               theme === 'dark'
-                ? 'bg-transparent border-white/10 text-[#e5e2e1] hover:text-[#D4AF37] hover:border-[#D4AF37]/30 hover:bg-white/5'
-                : 'bg-transparent border-black/10 text-[#78716c] hover:text-[#92700a] hover:border-[#92700a]/30 hover:bg-black/5'
+                ? 'bg-transparent border-white/30 text-white hover:text-[#D4AF37] hover:border-[#D4AF37]/50 hover:bg-white/5'
+                : 'bg-transparent border-black/30 text-[#1c1917] hover:text-[#92700a] hover:border-[#92700a]/50 hover:bg-black/5'
             }`}
             aria-label="Alternar tema"
             title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
