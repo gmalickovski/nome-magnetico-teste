@@ -186,26 +186,28 @@
 }
 
 /* Texto branco/claro → escuro no light mode */
-[data-blog-theme="light"] .blog-main .text-white,
-[data-blog-theme="light"] .blog-main .text-\[#e5e2e1\] {
+[data-blog-theme="light"] .blog-main h1,
+[data-blog-theme="light"] .blog-main h2,
+[data-blog-theme="light"] .blog-main h3,
+[data-blog-theme="light"] .blog-header .text-\[\#e5e2e1\],
+[data-blog-theme="light"] .blog-main .text-\[\#e5e2e1\],
+[data-blog-theme="light"] .blog-main .text-white {
   color: #1c1917 !important;
 }
 
-[data-blog-theme="light"] .blog-main .text-gray-400 {
-  color: #57534e !important;
+[data-blog-theme="light"] .blog-header input {
+  color: #1c1917 !important;
+  background-color: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.1) !important;
 }
-
-[data-blog-theme="light"] .blog-main .text-gray-500 {
+[data-blog-theme="light"] .blog-header input::placeholder {
   color: #78716c !important;
 }
 
-[data-blog-theme="light"] .blog-main .text-gray-600 {
-  color: #a8a29e !important;
-}
-
-[data-blog-theme="light"] .blog-main .text-gray-700 {
-  color: #c2bfbb !important;
-}
+[data-blog-theme="light"] .blog-main .text-gray-400 { color: #57534e !important; }
+[data-blog-theme="light"] .blog-main .text-gray-500 { color: #78716c !important; }
+[data-blog-theme="light"] .blog-main .text-gray-600 { color: #a8a29e !important; }
+[data-blog-theme="light"] .blog-main .text-gray-700 { color: #c2bfbb !important; }
 
 [data-blog-theme="light"] .blog-header .text-gray-400,
 [data-blog-theme="light"] .blog-header .text-gray-500,
@@ -213,25 +215,31 @@
   color: #57534e !important;
 }
 
-[data-blog-theme="light"] .blog-header .text-\[#e5e2e1\] {
-  color: #1c1917 !important;
-}
-
 /* Dourado adapta para light (contraste suficiente em fundo branco) */
-[data-blog-theme="light"] .blog-main .text-\[#D4AF37\],
-[data-blog-theme="light"] .blog-header .text-\[#D4AF37\] {
+[data-blog-theme="light"] .blog-main .text-\[\#D4AF37\],
+[data-blog-theme="light"] .blog-header .text-\[\#D4AF37\] {
   color: #92700a !important;
 }
 
-[data-blog-theme="light"] .blog-main .text-\[#D4AF37\]\/60 {
-  color: rgba(146, 112, 10, 0.7) !important;
+[data-blog-theme="light"] .blog-main .text-\[\#D4AF37\]\/60,
+[data-blog-theme="light"] .blog-main .text-\[\#D4AF37\]\/40 {
+  color: rgba(146, 112, 10, 0.8) !important;
 }
 
-/* Bordas */
+/* Bordas e Backgrounds Brancos viram Pretos no Light Mode */
 [data-blog-theme="light"] .blog-main .border-white\/5,
 [data-blog-theme="light"] .blog-main .border-white\/8,
-[data-blog-theme="light"] .blog-header .border-white\/8 {
-  border-color: rgba(0, 0, 0, 0.07) !important;
+[data-blog-theme="light"] .blog-header .border-white\/8,
+[data-blog-theme="light"] .blog-main .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-blog-theme="light"] .blog-main .bg-white\/3,
+[data-blog-theme="light"] .blog-main .bg-white\/4,
+[data-blog-theme="light"] .blog-main .bg-white\/5,
+[data-blog-theme="light"] .blog-header .bg-white\/5,
+[data-blog-theme="light"] .blog-header .bg-white\/6 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
 }
 
 /* Scrollbar adaptada para light */
