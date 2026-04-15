@@ -130,10 +130,11 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           <div ref={catRef} className="relative">
             <button
               onClick={() => setCatOpen(v => !v)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
+              className={`relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200
+                          after:absolute after:bottom-1 after:left-3 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300 ${
                 catOpen || activeCategory
-                  ? 'bg-[#D4AF37]/12 text-[#D4AF37] border border-[#D4AF37]/25'
-                  : 'text-[#e5e2e1] hover:text-white hover:bg-white/6 border border-transparent'
+                  ? 'text-[#D4AF37] after:w-[calc(100%-1.5rem)]'
+                  : 'text-[#e5e2e1] hover:text-[#D4AF37] after:w-0 hover:after:w-[calc(100%-1.5rem)]'
               }`}
               aria-expanded={catOpen}
             >

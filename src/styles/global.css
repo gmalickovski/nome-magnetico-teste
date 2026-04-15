@@ -183,6 +183,14 @@
 [data-blog-theme="light"] .blog-card {
   background: var(--blog-surface) !important;
   border-color: var(--blog-border) !important;
+  transition: border-color 500ms, box-shadow 500ms, background 500ms;
+}
+
+/* Hover do card no light mode */
+[data-blog-theme="light"] .blog-card:hover {
+  border-color: rgba(146, 112, 10, 0.35) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10) !important;
 }
 
 /* Texto branco/claro → escuro no light mode */
