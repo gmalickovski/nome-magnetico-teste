@@ -3,7 +3,6 @@ import BaseLayout from './BaseLayout.astro';
 import { createUserClient } from '../backend/db/supabase';
 import { hasUsedFreeAnalysis } from '../backend/db/analyses';
 import AvatarMenu from '../frontend/components/app/AvatarMenu';
-import logoSrc from '../frontend/assets/logo-nm-header.svg';
 
 export interface Props {
   title: string;
@@ -89,7 +88,7 @@ const showChatwoot = pathname.startsWith('/app/suporte');
 
         <!-- Title -->
         <a href="/app" class="hover:opacity-80 transition-opacity absolute left-1/2 -translate-x-1/2 md:static md:transform-none">
-          <img src={logoSrc} alt="Nome Magnético" class="h-8 sm:h-9 md:h-10 w-auto" />
+          <img src="/logo-nm-header.svg" alt="Nome Magnético" class="h-8 sm:h-9 md:h-10 w-auto" />
         </a>
 
         <!-- Mobile Avatar (Right side) -->

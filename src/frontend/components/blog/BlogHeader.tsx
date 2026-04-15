@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import logoDark from '../../assets/logo-nm-header-blog-dark.svg';
-import logoLight from '../../assets/logo-nm-header-blog-light.svg';
 
 const CATEGORIES = [
   { label: 'Todos os artigos', slug: '' },
@@ -85,7 +83,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
         {/* ── Logo ── */}
         <a href="/blog" className="hover:opacity-80 transition-opacity flex-shrink-0">
           <img
-            src={theme === 'light' ? logoLight : logoDark}
+            src={theme === 'light' ? '/logo-nm-header-blog-light.svg' : '/logo-nm-header-blog-dark.svg'}
             alt="Nome Magnético · Blog"
             className="h-7 sm:h-8 w-auto"
           />

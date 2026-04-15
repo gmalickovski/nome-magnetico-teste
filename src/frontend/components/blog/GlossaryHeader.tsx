@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import logoDark from '../../assets/logo-nm-header-blog-dark.svg';
 
 export function GlossaryHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -38,7 +37,7 @@ export function GlossaryHeader() {
 
         {/* ── Logo ── */}
         <a href="/glossario" className="hover:opacity-80 transition-opacity flex-shrink-0">
-          <img src={logoDark} alt="Nome Magnético · Glossário" className="h-7 sm:h-8 w-auto" />
+          <img src="/logo-nm-header-blog-dark.svg" alt="Nome Magnético · Glossário" className="h-7 sm:h-8 w-auto" />
         </a>
 
         {/* ── Search desktop (md+) ── */}
