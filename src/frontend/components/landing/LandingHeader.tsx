@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import logoSrc from '../../assets/logo-nm-header.svg';
 
 export function LandingHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -53,8 +54,8 @@ export function LandingHeader() {
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="font-cinzel text-base sm:text-lg md:text-xl font-bold text-[#D4AF37] tracking-wider hover:opacity-80 transition-opacity whitespace-nowrap">
-          NOME MAGNÉTICO
+        <a href="/" className="hover:opacity-80 transition-opacity flex-shrink-0">
+          <img src={logoSrc} alt="Nome Magnético" className="h-8 sm:h-9 md:h-10 w-auto" />
         </a>
 
         {/* Nav desktop */}

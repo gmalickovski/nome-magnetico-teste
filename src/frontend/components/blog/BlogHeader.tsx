@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import logoDark from '../../assets/logo-nm-header-blog-dark.svg';
+import logoLight from '../../assets/logo-nm-header-blog-light.svg';
 
 const CATEGORIES = [
   { label: 'Todos os artigos', slug: '' },
@@ -81,14 +83,12 @@ export function BlogHeader({ activeCategory = '' }: Props) {
       <div className="max-w-6xl mx-auto px-4 flex items-center gap-3">
 
         {/* ── Logo ── */}
-        <a href="/blog" className="flex items-center gap-2 flex-shrink-0 group">
-          <span className="font-cinzel text-sm font-bold text-[#D4AF37] tracking-wider group-hover:opacity-80 transition-opacity">
-            NOME MAGNÉTICO
-          </span>
-          <span className="text-[#D4AF37]/30 text-sm" aria-hidden="true">·</span>
-          <span className="font-cinzel text-sm font-bold text-[#e5e2e1] group-hover:text-[#D4AF37] transition-colors tracking-wide">
-            Blog
-          </span>
+        <a href="/blog" className="hover:opacity-80 transition-opacity flex-shrink-0">
+          <img
+            src={theme === 'light' ? logoLight : logoDark}
+            alt="Nome Magnético · Blog"
+            className="h-7 sm:h-8 w-auto"
+          />
         </a>
 
         {/* ── Search desktop (md+) ── */}
