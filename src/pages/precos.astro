@@ -309,7 +309,7 @@ function originalPrice(id: string): string {
         {[
           { icon: '⚡', title: 'Acesso Imediato', desc: 'Assim que o pagamento é confirmado, o acesso é liberado automaticamente — sem esperar' },
           { icon: '🔒', title: 'Pagamento Seguro', desc: 'Via Stripe — sem armazenar dados do cartão' },
-          { icon: '🛡', title: 'Garantia de 7 Dias', desc: 'Reembolso total sem perguntas dentro de 7 dias' },
+          { icon: '🛡', title: 'Garantia de 7 Dias', desc: 'Reembolso total em 7 dias conforme o CDC' },
           { icon: '💬', title: 'Suporte por E-mail', desc: 'Equipe disponível para dúvidas gerais sobre o produto e seu acesso' },
         ].map(item => (
           <div class="bg-white/3 rounded-2xl p-6 text-center border border-white/5">
@@ -328,9 +328,9 @@ function originalPrice(id: string): string {
         <div class="rounded-3xl p-10 text-center"
           style="background: radial-gradient(ellipse at top, #1d1a0d 0%, #131313 60%);">
           <div class="text-5xl mb-5">🛡</div>
-          <h2 class="font-cinzel text-2xl font-bold text-white mb-4">Garantia Incondicional de 7 Dias</h2>
+          <h2 class="font-cinzel text-2xl font-bold text-white mb-4">Garantia de 7 Dias</h2>
           <p class="text-gray-400 leading-relaxed max-w-xl mx-auto mb-2">
-            Se por qualquer motivo você não ficar satisfeito com sua análise, devolvemos 100% do valor pago — sem burocracia, sem perguntas, sem complicações. Basta enviar uma mensagem.
+            Se por qualquer motivo você não ficar satisfeito com sua análise, devolvemos 100% do valor pago sem burocracia. Basta entrar em contato pelo suporte dentro de 7 dias da compra.
           </p>
           <p class="text-gray-600 text-sm">Porque confiamos na qualidade do que entregamos.</p>
         </div>
@@ -362,7 +362,7 @@ function originalPrice(id: string): string {
           },
           {
             q: 'Como funciona a garantia?',
-            a: 'Se dentro de 7 dias após a compra você não estiver satisfeito, entre em contato pelo suporte e devolvemos 100% do valor, sem perguntas.',
+            a: 'Se dentro de 7 dias após a compra você não estiver satisfeito, entre em contato pelo suporte e devolvemos 100% do valor pago, conforme o Código de Defesa do Consumidor (art. 49).',
           },
           {
             q: 'Os dados informados ficam salvos?',

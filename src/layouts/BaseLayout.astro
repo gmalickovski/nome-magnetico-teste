@@ -1,4 +1,6 @@
 ---
+import { CookieBanner } from '../frontend/components/ui/CookieBanner';
+
 export interface Props {
   title: string;
   description?: string;
@@ -128,6 +130,7 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
   </head>
   <body class:list={['bg-[#1a1a1a] text-gray-200 min-h-screen font-inter antialiased', { 'has-bottom-nav': hasBottomNav }]}>
     <slot />
+    <CookieBanner client:only="react" />
     {chatwootBaseUrl && chatwootToken && (
       <script is:inline define:vars={{ chatwootBaseUrl, chatwootToken, showChatwoot }}>
         (function(d,t) {

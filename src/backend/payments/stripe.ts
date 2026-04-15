@@ -86,6 +86,11 @@ export async function createCheckoutSession(
     cancel_url: params.cancelUrl,
     locale: 'pt-BR',
     ...discountOptions,
+    payment_method_options: {
+      pix: {
+        expires_after_seconds: 3600, // QR Code expira em 1 hora
+      },
+    },
     payment_intent_data: {
       metadata: {
         user_id: params.userId,
@@ -109,6 +114,16 @@ export function constructWebhookEvent(
   }
 
   return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+}
+
+/**
+ * Cria um reembolso total no Stripe para o payment_intent informado.
+ */
+export async function createRefund(paymentIntentId: string): Promise<Stripe.Refund> {
+  return stripe.refunds.create({
+    payment_intent: paymentIntentId,
+    reason: 'requested_by_customer',
+  });
 }
 
 export { PRODUCT_NAMES };

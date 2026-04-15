@@ -12,6 +12,9 @@ export interface Subscription {
   starts_at: string;
   ends_at: string;
   created_at: string;
+  refunded_at?: string | null;
+  refund_stripe_refund_id?: string | null;
+  refund_reason?: string | null;
 }
 
 /**
@@ -192,6 +195,66 @@ export async function getActiveProductsPerUser(
     result.set(row.user_id, list);
   }
   return result;
+}
+
+/**
+ * Retorna subscriptions elegíveis para reembolso:
+ * compradas há menos de 7 dias e ainda não reembolsadas.
+ */
+export async function getRefundableSubscriptions(userId: string): Promise<Subscription[]> {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('starts_at', sevenDaysAgo)
+    .is('refunded_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) return [];
+  return (data ?? []) as Subscription[];
+}
+
+/**
+ * Registra o reembolso de uma subscription e revoga o acesso imediatamente
+ * (seta ends_at = now() e preenche campos de rastreio).
+ */
+export async function refundSubscription(
+  subscriptionId: string,
+  stripeRefundId: string | null,
+  reason?: string
+): Promise<void> {
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from('subscriptions')
+    .update({
+      refunded_at: now,
+      ends_at: now,
+      refund_stripe_refund_id: stripeRefundId,
+      refund_reason: reason ?? null,
+    })
+    .eq('id', subscriptionId);
+
+  if (error) throw error;
+}
+
+/**
+ * Busca subscription por stripe_payment_intent_id (usado pelo webhook charge.refunded).
+ */
+export async function getSubscriptionByPaymentIntent(
+  paymentIntentId: string
+): Promise<Subscription | null> {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .is('refunded_at', null)
+    .limit(1)
+    .single();
+
+  if (error) return null;
+  return data as Subscription;
 }
 
 /**

@@ -15,7 +15,8 @@ type NotificationEvent =
   | 'subscription.expiring_soon'
   | 'subscription.expired'
   | 'admin.new_user'
-  | 'admin.new_payment';
+  | 'admin.new_payment'
+  | 'payment.refunded';
 
 interface NotificationPayload {
   email?: string;

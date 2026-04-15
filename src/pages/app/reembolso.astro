@@ -1,0 +1,51 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { RefundRequestForm } from '../../frontend/components/app/RefundRequestForm';
+import { getRefundableSubscriptions } from '../../backend/db/subscriptions';
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/auth/login?redirect=/app/reembolso');
+}
+
+const refundable = await getRefundableSubscriptions(user.id);
+---
+
+<AppLayout title="Solicitar Reembolso">
+  <div class="max-w-2xl mx-auto space-y-8 mt-4 md:mt-8 pb-16">
+    {/* Breadcrumb */}
+    <nav class="flex items-center gap-2 text-sm text-gray-500">
+      <a href="/app" class="hover:text-gray-300 transition-colors">Dashboard</a>
+      <span>→</span>
+      <span class="text-gray-400">Solicitar Reembolso</span>
+    </nav>
+
+    <div>
+      <h1 class="font-cinzel text-3xl font-bold text-white mb-2">Solicitar Reembolso</h1>
+      <p class="text-gray-400">
+        Conforme o Código de Defesa do Consumidor (art. 49), você tem direito a reembolso integral
+        dentro de 7 dias corridos da compra.
+      </p>
+    </div>
+
+    <RefundRequestForm
+      client:load
+      subscriptions={refundable.map(s => ({
+        id: s.id,
+        product_type: s.product_type,
+        starts_at: s.starts_at,
+        amount_paid: s.amount_paid,
+      }))}
+    />
+
+    <div class="bg-white/3 rounded-2xl p-5 text-sm text-gray-500 leading-relaxed">
+      <p class="font-medium text-gray-400 mb-1">Sobre o reembolso</p>
+      <ul class="list-disc list-inside space-y-1">
+        <li>O estorno é processado no Stripe e aparece em <strong class="text-gray-400">até 10 dias úteis</strong>.</li>
+        <li>Para cartão de crédito pode levar até 2 faturas para aparecer.</li>
+        <li>Seu acesso à plataforma é revogado imediatamente após a confirmação.</li>
+        <li>Dúvidas? <a href="/app/suporte" class="text-[#D4AF37] hover:text-[#f2ca50] transition-colors">Abra um chamado de suporte</a>.</li>
+      </ul>
+    </div>
+  </div>
+</AppLayout>
