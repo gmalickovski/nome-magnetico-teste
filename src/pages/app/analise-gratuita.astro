@@ -1,8 +1,8 @@
 ---
-import AppLayout from '../../../layouts/AppLayout.astro';
-import { hasUsedFreeAnalysis } from '../../../backend/db/analyses';
-import { createUserClient } from '../../../backend/db/supabase';
-import FreeAnalysisForm from '../../../frontend/components/app/FreeAnalysisForm';
+import AppLayout from '../../layouts/AppLayout.astro';
+import { hasUsedFreeAnalysis } from '../../backend/db/analyses';
+import { createUserClient } from '../../backend/db/supabase';
+import FreeAnalysisForm from '../../frontend/components/app/FreeAnalysisForm';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
