@@ -54,7 +54,7 @@ export function LandingHeader() {
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
         <a href="/" className="hover:opacity-80 transition-opacity flex-shrink-0">
-          <img src="/logo-nm-header.svg" alt="Nome Magnético" className="h-8 sm:h-9 md:h-10 w-auto" />
+          <img src="/logo-nm-header.svg" alt="Nome Magnético" className="h-9 sm:h-10 md:h-11 w-auto" />
         </a>
 
         {/* Nav desktop */}

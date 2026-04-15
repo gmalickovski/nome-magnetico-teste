@@ -85,7 +85,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           <img
             src={theme === 'light' ? '/logo-nm-header-blog-light.svg' : '/logo-nm-header-blog-dark.svg'}
             alt="Nome Magnético · Blog"
-            className="h-7 sm:h-8 w-auto"
+            className="h-9 sm:h-10 md:h-11 w-auto"
           />
         </a>
 
