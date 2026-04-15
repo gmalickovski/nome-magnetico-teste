@@ -188,38 +188,50 @@
 /* Texto branco/claro → escuro no light mode */
 [data-blog-theme="light"] .blog-main .text-white,
 [data-blog-theme="light"] .blog-main .text-\[#e5e2e1\] {
-  color: #1c1917;
+  color: #1c1917 !important;
 }
 
 [data-blog-theme="light"] .blog-main .text-gray-400 {
-  color: #57534e;
+  color: #57534e !important;
 }
 
 [data-blog-theme="light"] .blog-main .text-gray-500 {
-  color: #78716c;
+  color: #78716c !important;
 }
 
 [data-blog-theme="light"] .blog-main .text-gray-600 {
-  color: #a8a29e;
+  color: #a8a29e !important;
 }
 
 [data-blog-theme="light"] .blog-main .text-gray-700 {
-  color: #c2bfbb;
+  color: #c2bfbb !important;
+}
+
+[data-blog-theme="light"] .blog-header .text-gray-400,
+[data-blog-theme="light"] .blog-header .text-gray-500,
+[data-blog-theme="light"] .blog-header .text-gray-600 {
+  color: #57534e !important;
+}
+
+[data-blog-theme="light"] .blog-header .text-\[#e5e2e1\] {
+  color: #1c1917 !important;
 }
 
 /* Dourado adapta para light (contraste suficiente em fundo branco) */
-[data-blog-theme="light"] .blog-main .text-\[#D4AF37\] {
-  color: #92700a;
+[data-blog-theme="light"] .blog-main .text-\[#D4AF37\],
+[data-blog-theme="light"] .blog-header .text-\[#D4AF37\] {
+  color: #92700a !important;
 }
 
 [data-blog-theme="light"] .blog-main .text-\[#D4AF37\]\/60 {
-  color: rgba(146, 112, 10, 0.7);
+  color: rgba(146, 112, 10, 0.7) !important;
 }
 
 /* Bordas */
 [data-blog-theme="light"] .blog-main .border-white\/5,
-[data-blog-theme="light"] .blog-main .border-white\/8 {
-  border-color: rgba(0, 0, 0, 0.07);
+[data-blog-theme="light"] .blog-main .border-white\/8,
+[data-blog-theme="light"] .blog-header .border-white\/8 {
+  border-color: rgba(0, 0, 0, 0.07) !important;
 }
 
 /* Scrollbar adaptada para light */
