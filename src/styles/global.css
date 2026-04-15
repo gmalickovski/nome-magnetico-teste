@@ -192,12 +192,42 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10) !important;
 }
 
-/* CTA card interno (fundo escuro inline via style=) não deve ser sobrescrito */
-[data-blog-theme="light"] .blog-card [style*="radial-gradient"],
-[data-blog-theme="light"] .blog-card [style*="linear-gradient"] {
-  background: unset !important;
-  background-color: #2a2415 !important;
+/* ── CTA CARD (Próximo Passo) no light mode ── */
+/* Wrapper externo: borda dourada suave em vez do gradiente luminoso */
+[data-blog-theme="light"] .blog-cta-outer {
+  background: linear-gradient(135deg, rgba(146,112,10,0.25) 0%, rgba(146,112,10,0.06) 100%) !important;
 }
+
+/* Div interna: fundo creme quente, sem o escuro da versão dark */
+[data-blog-theme="light"] .blog-cta-inner {
+  background: #fdf8ed !important;
+  border-color: rgba(146, 112, 10, 0.15) !important;
+}
+
+/* "Próximo Passo" label */
+[data-blog-theme="light"] .blog-cta-label {
+  color: #92700a !important;
+}
+
+/* Título do CTA */
+[data-blog-theme="light"] .blog-cta-title {
+  color: #1c1917 !important;
+}
+
+/* Descrição do CTA */
+[data-blog-theme="light"] .blog-cta-desc {
+  color: #57534e !important;
+}
+
+/* Botão secundário "Teste Gratuito" no light mode */
+[data-blog-theme="light"] .blog-cta-secondary {
+  border-color: rgba(146, 112, 10, 0.5) !important;
+  color: #92700a !important;
+}
+[data-blog-theme="light"] .blog-cta-secondary:hover {
+  background-color: rgba(146, 112, 10, 0.08) !important;
+}
+
 
 /* Texto branco/claro → escuro no light mode */
 [data-blog-theme="light"] .blog-main h1,
