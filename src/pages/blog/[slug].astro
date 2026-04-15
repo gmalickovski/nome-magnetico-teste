@@ -145,7 +145,7 @@ const categorySlug = post.category ?? null;
 
   <BlogHeader client:load activeCategory={categorySlug ?? ''} />
 
-  <main class="min-h-screen bg-[#111111] pt-[72px] pb-12 md:pb-20">
+  <main class="blog-main min-h-screen pt-[72px] pb-12 md:pb-20">
     <div class="max-w-6xl mx-auto px-4">
 
       {/* ── LAYOUT: conteúdo + sidebar (quando há TOC) ── */}
@@ -290,9 +290,9 @@ const categorySlug = post.category ?? null;
 
           {/* ── CTA PRODUTO RELACIONADO ── */}
           {post.produto_relacionado && (
-            <div class="mt-10 sm:mt-12 relative rounded-2xl sm:rounded-3xl overflow-hidden p-px"
+            <div class="blog-card mt-10 sm:mt-12 relative rounded-2xl sm:rounded-3xl overflow-hidden p-px"
               style="background: linear-gradient(135deg, rgba(212,175,55,0.5) 0%, rgba(212,175,55,0.08) 100%);">
-              <div class="rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center"
+              <div class="blog-card rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center"
                 style="background: radial-gradient(ellipse at top, #1d1a0d 0%, #131313 65%);">
                 <p class="text-[#D4AF37] text-[10px] sm:text-xs font-medium tracking-widest uppercase mb-2 sm:mb-3">Próximo Passo</p>
                 <h3 class="font-cinzel text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">
@@ -327,7 +327,7 @@ const categorySlug = post.category ?? null;
                 {related.map(rel => (
                   <a
                     href={`/blog/${rel.slug}`}
-                    class="group flex flex-col bg-white/3 border border-white/8 rounded-2xl p-5 hover:border-[#D4AF37]/25 hover:bg-white/4 transition-all duration-300"
+                    class="blog-card group flex flex-col bg-white/3 border border-white/8 rounded-2xl p-5 hover:border-[#D4AF37]/25 hover:bg-white/4 transition-all duration-300"
                   >
                     {catLabel(rel) && (
                       <span class={`text-xs font-medium px-2 py-0.5 rounded-full mb-3 w-fit ${catColor(rel)}`}>

@@ -7,7 +7,7 @@ Disallow: /auth/
 Disallow: /*.json$
 
 # Sitemap
-Sitemap: https://nomemagnetico.com.br/sitemap.xml
+Sitemap: https://www.nomemagnetico.com.br/sitemap.xml
 
 # Crawl delay (respeita os servidores — remove se quiser rastreamento mais rápido)
 Crawl-delay: 5

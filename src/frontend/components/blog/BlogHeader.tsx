@@ -20,8 +20,24 @@ export function BlogHeader({ activeCategory = '' }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const catRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
+
+  // Carrega o tema inicial
+  useEffect(() => {
+    const currentTheme = document.documentElement.getAttribute('data-blog-theme') as 'dark' | 'light';
+    if (currentTheme) {
+      setTheme(currentTheme);
+    }
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    document.documentElement.setAttribute('data-blog-theme', next);
+    localStorage.setItem('blog-theme', next);
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -163,6 +179,28 @@ export function BlogHeader({ activeCategory = '' }: Props) {
           {/* Separador */}
           <span className="w-px h-4 bg-white/10 flex-shrink-0" aria-hidden="true" />
 
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200 ${
+              theme === 'dark'
+                ? 'bg-white/5 text-gray-400 hover:text-[#D4AF37] hover:bg-white/10'
+                : 'bg-black/5 text-[#78716c] hover:text-[#92700a] hover:bg-black/10'
+            }`}
+            aria-label="Alternar tema"
+            title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+          >
+            {theme === 'dark' ? (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            ) : (
+              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            )}
+          </button>
+
           {/* Análise Gratuita */}
           <a
             href="/analise-gratuita"
@@ -286,7 +324,24 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
           {/* Categorias */}
           <div>
-            <p className="text-gray-700 text-xs font-medium uppercase tracking-widest mb-2.5">Categorias</p>
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-gray-700 text-xs font-medium uppercase tracking-widest">Categorias</p>
+              <button
+                onClick={toggleTheme}
+                className={`flex items-center justify-center p-1.5 rounded-full transition-colors ${
+                  theme === 'dark'
+                    ? 'text-gray-400 hover:text-[#D4AF37]'
+                    : 'text-gray-500 hover:text-[#92700a]'
+                }`}
+                aria-label="Alternar tema"
+              >
+                {theme === 'dark' ? (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                ) : (
+                  <svg className="w-4.5 h-4.5 text-[#92700a]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                )}
+              </button>
+            </div>
             <div className="grid grid-cols-2 gap-2">
               {CATEGORIES.map(cat => (
                 <a

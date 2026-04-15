@@ -127,6 +127,7 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
     </noscript>
     <!-- Analytics (Umami) — defer para não bloquear INP -->
     <script defer src="https://analytics.studiomlk.com.br/script.js" data-website-id="15b0df31-1cc8-4464-a3f7-89fd82c25bcf"></script>
+    <slot name="head" />
   </head>
   <body class:list={['bg-[#1a1a1a] text-gray-200 min-h-screen font-inter antialiased', { 'has-bottom-nav': hasBottomNav }]}>
     <slot />

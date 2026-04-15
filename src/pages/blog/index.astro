@@ -90,7 +90,7 @@ const pageTitle = activeCategory
 
   <BlogHeader client:load activeCategory={activeCategory} />
 
-  <main class="min-h-screen bg-[#111111] pt-[72px] pb-16 md:pb-20">
+  <main class="blog-main min-h-screen pt-[72px] pb-16 md:pb-20">
 
     {/* ── HERO ── */}
     <section class="max-w-5xl mx-auto px-4 pt-8 pb-8 md:pt-10 md:pb-10">
@@ -134,7 +134,7 @@ const pageTitle = activeCategory
               id="section-featured"
               href={`/blog/${featured.slug}`}
               data-searchable={`${featured.title ?? ''} ${featured.description ?? ''} ${categoryLabel(featured) ?? ''}`}
-              class="group block mb-8 md:mb-10 rounded-2xl bg-white/3 border border-white/8
+              class="blog-card group block mb-8 md:mb-10 rounded-2xl bg-white/3 border border-white/8
                      hover:border-[#D4AF37]/30 hover:bg-white/4
                      transition-all duration-500 hover:shadow-[0_20px_60px_rgba(212,175,55,0.08)]
                      overflow-hidden"
@@ -231,7 +231,7 @@ const pageTitle = activeCategory
                   <a
                     href={`/blog/${post.slug}`}
                     data-searchable={`${post.title ?? ''} ${post.description ?? ''} ${categoryLabel(post) ?? ''}`}
-                    class="group flex flex-col bg-white/3 border border-white/8 rounded-2xl overflow-hidden
+                    class="blog-card group flex flex-col bg-white/3 border border-white/8 rounded-2xl overflow-hidden
                            hover:border-[#D4AF37]/25 hover:bg-white/4
                            hover:shadow-[0_16px_40px_rgba(212,175,55,0.07)]
                            transition-all duration-500"

@@ -143,6 +143,115 @@
 }
 
 /* =============================================
+   BLOG — TEMA CLARO / ESCURO
+   ============================================= */
+
+/* Variáveis do tema escuro (padrão) */
+:root,
+[data-blog-theme="dark"] {
+  --blog-bg: #111111;
+  --blog-surface: rgba(255, 255, 255, 0.03);
+  --blog-surface-h: rgba(255, 255, 255, 0.04);
+  --blog-border: rgba(255, 255, 255, 0.08);
+  --blog-border-h: rgba(212, 175, 55, 0.25);
+  --blog-gold: #D4AF37;
+  --blog-gold-dim: rgba(212, 175, 55, 0.4);
+}
+
+/* Variáveis do tema claro */
+[data-blog-theme="light"] {
+  --blog-bg: #faf9f7;
+  --blog-surface: rgba(0, 0, 0, 0.025);
+  --blog-surface-h: rgba(0, 0, 0, 0.04);
+  --blog-border: rgba(0, 0, 0, 0.08);
+  --blog-border-h: rgba(146, 112, 10, 0.35);
+  --blog-gold: #92700a;
+  --blog-gold-dim: rgba(146, 112, 10, 0.4);
+}
+
+/* Body background no modo claro */
+[data-blog-theme="light"] body {
+  background-color: #faf9f7;
+}
+
+/* Container principal das páginas de blog */
+.blog-main {
+  background-color: var(--blog-bg);
+}
+
+/* Cards do blog */
+[data-blog-theme="light"] .blog-card {
+  background: var(--blog-surface) !important;
+  border-color: var(--blog-border) !important;
+}
+
+/* Texto branco/claro → escuro no light mode */
+[data-blog-theme="light"] .blog-main .text-white,
+[data-blog-theme="light"] .blog-main .text-\[#e5e2e1\] {
+  color: #1c1917;
+}
+
+[data-blog-theme="light"] .blog-main .text-gray-400 {
+  color: #57534e;
+}
+
+[data-blog-theme="light"] .blog-main .text-gray-500 {
+  color: #78716c;
+}
+
+[data-blog-theme="light"] .blog-main .text-gray-600 {
+  color: #a8a29e;
+}
+
+[data-blog-theme="light"] .blog-main .text-gray-700 {
+  color: #c2bfbb;
+}
+
+/* Dourado adapta para light (contraste suficiente em fundo branco) */
+[data-blog-theme="light"] .blog-main .text-\[#D4AF37\] {
+  color: #92700a;
+}
+
+[data-blog-theme="light"] .blog-main .text-\[#D4AF37\]\/60 {
+  color: rgba(146, 112, 10, 0.7);
+}
+
+/* Bordas */
+[data-blog-theme="light"] .blog-main .border-white\/5,
+[data-blog-theme="light"] .blog-main .border-white\/8 {
+  border-color: rgba(0, 0, 0, 0.07);
+}
+
+/* Scrollbar adaptada para light */
+[data-blog-theme="light"] ::-webkit-scrollbar-track {
+  background: #f0ede8;
+}
+
+[data-blog-theme="light"] ::-webkit-scrollbar-thumb {
+  border-color: #f0ede8;
+}
+
+/* Prose (artigo) — inverte as variáveis do Tailwind Typography no light mode */
+[data-blog-theme="light"] .prose-invert {
+  --tw-prose-body: #44403c;
+  --tw-prose-headings: #1c1917;
+  --tw-prose-lead: #57534e;
+  --tw-prose-links: #92700a;
+  --tw-prose-bold: #1c1917;
+  --tw-prose-counters: #57534e;
+  --tw-prose-bullets: #92700a;
+  --tw-prose-hr: rgba(0, 0, 0, 0.1);
+  --tw-prose-quotes: #1c1917;
+  --tw-prose-quote-borders: #92700a;
+  --tw-prose-captions: #78716c;
+  --tw-prose-code: #92700a;
+  --tw-prose-pre-code: #e5e2e1;
+  --tw-prose-pre-bg: #1c1c1c;
+  --tw-prose-th-borders: rgba(0, 0, 0, 0.1);
+  --tw-prose-td-borders: rgba(0, 0, 0, 0.06);
+}
+
+/* =============================================
    ANIMAÇÕES
    ============================================= */
 @layer utilities {

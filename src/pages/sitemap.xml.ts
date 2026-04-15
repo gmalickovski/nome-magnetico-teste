@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 
 export const GET: APIRoute = async () => {
-  const baseUrl = 'https://nomemagnetico.com.br';
+  const baseUrl = 'https://www.nomemagnetico.com.br';
 
   // Configuração do Supabase para puxar artigos publicados em tempo real
   const supabase = createClient(
