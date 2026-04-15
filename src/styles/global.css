@@ -243,24 +243,31 @@
   border-color: #f0ede8;
 }
 
-/* Prose (artigo) — inverte as variáveis do Tailwind Typography no light mode */
-[data-blog-theme="light"] .prose-invert {
-  --tw-prose-body: #44403c;
-  --tw-prose-headings: #1c1917;
-  --tw-prose-lead: #57534e;
-  --tw-prose-links: #92700a;
-  --tw-prose-bold: #1c1917;
-  --tw-prose-counters: #57534e;
-  --tw-prose-bullets: #92700a;
-  --tw-prose-hr: rgba(0, 0, 0, 0.1);
-  --tw-prose-quotes: #1c1917;
-  --tw-prose-quote-borders: #92700a;
-  --tw-prose-captions: #78716c;
-  --tw-prose-code: #92700a;
-  --tw-prose-pre-code: #e5e2e1;
-  --tw-prose-pre-bg: #1c1c1c;
-  --tw-prose-th-borders: rgba(0, 0, 0, 0.1);
-  --tw-prose-td-borders: rgba(0, 0, 0, 0.06);
+/* Prose (artigo) — inverte cores mesmo com utility classes do Tailwind Typography configuradas fixas */
+[data-blog-theme="light"] .prose-invert :is(h1, h2, h3, h4, h5, h6, strong) {
+  color: #1c1917 !important;
+}
+[data-blog-theme="light"] .prose-invert :is(p, li, em, blockquote, th, td) {
+  color: #44403c !important;
+}
+[data-blog-theme="light"] .prose-invert a {
+  color: #92700a !important;
+}
+[data-blog-theme="light"] .prose-invert blockquote {
+  border-left-color: #92700a !important;
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+[data-blog-theme="light"] .prose-invert code {
+  color: #92700a !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+[data-blog-theme="light"] .prose-invert pre {
+  background-color: #f3f4f6 !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-blog-theme="light"] .prose-invert pre code {
+  color: #57534e !important;
+  background-color: transparent !important;
 }
 
 /* =============================================
