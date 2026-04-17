@@ -397,7 +397,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
             <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626' }]}>
               Bloqueios Energéticos ({bloqueios.length})
             </Text>
-            <BloqueiosBlock bloqueios={bloqueios} showAntidoto={false} />
+            <BloqueiosBlock bloqueios={bloqueios} />
           </View>
         ) : (
           <View style={styles.section}>
@@ -517,74 +517,49 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
       {/* A seção de Variações Numerológicas foi removida do PDF (só aparece no HTML) */}
 
       {/* ── PÁGINA FINAL: CTA PARA HARMONIZAÇÃO (NOME SOCIAL) ───────────────────── */}
-      <Page size="A4" style={styles.darkPage}>
-        <View style={{ marginTop: 24, marginBottom: 8 }}>
-          <Text style={styles.hugeTitle}>
-            {bloqueios.length > 0
-              ? 'O Diagnóstico É Claro — E o Nome Continua Emitindo'
-              : 'Sua Frequência Pode Ser Ainda Mais Poderosa'}
-          </Text>
-          <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 20 }}>
-            A Diferença Entre Saber e Transformar
-          </Text>
+      <Page size="A4" style={styles.page}>
+        <View style={{ marginTop: 24, marginBottom: 16 }}>
+           <Text style={styles.hugeTitle}>Sua Jornada Acaba de Começar</Text>
+           <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 24 }}>
+             O Poder da Harmonização
+           </Text>
         </View>
 
         <View style={styles.section}>
+          <Text style={{ ...styles.bodyText, marginBottom: 12 }}>
+            Esta análise revelou as correntes invisíveis que atuam na sua vida através do seu Nome de Nascimento. {bloqueios.length > 0 || debitos.length > 0 || licoes.length > 0 ? "Como vimos, existem travas estruturais importantes que dificultam a expressão plena do seu talento e o alcance fácil da prosperidade e saúde." : "Ainda que as correntes não apresentem bloqueios severos, todo nome pode ser ajustado em sua potência máxima de atração."}
+          </Text>
 
-          {/* Bloco de urgência — só aparece se há bloqueios */}
-          {bloqueios.length > 0 && (
-            <View style={{ backgroundColor: '#450A0A', borderRadius: 8, padding: 14, marginBottom: 16, borderLeftWidth: 4, borderLeftColor: '#EF4444' }}>
-              <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: '#FCA5A5', marginBottom: 8 }}>
-                {bloqueios.length === 1
-                  ? 'Este diagnóstico revelou 1 bloqueio ativo no seu nome de nascimento.'
-                  : `Este diagnóstico revelou ${bloqueios.length} bloqueios ativos no seu nome de nascimento.`}
-              </Text>
-              <Text style={{ fontSize: 10, color: '#FEE2E2', lineHeight: 1.6 }}>
-                Práticas espirituais, meditação e disciplina ajudam — mas nenhuma delas muda a frequência que o seu nome emite. Enquanto o nome não for harmonizado, esses bloqueios continuam transmitindo suas limitações{' '}
-                <Text style={{ fontFamily: BODY_FONT_BOLD, color: '#FCA5A5' }}>24 horas por dia, 7 dias por semana</Text>
-                {' '}— operando silenciosamente nas suas finanças, relacionamentos e saúde.
-              </Text>
-            </View>
-          )}
-
-          {/* O que o Nome Social resolve */}
-          <View style={{ backgroundColor: 'rgba(212, 175, 55, 0.07)', padding: 14, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.3)', marginBottom: 14 }}>
-            <Text style={{ fontFamily: TITLE_FONT, fontSize: 12, color: GOLD, marginBottom: 10, textAlign: 'center' }}>
-              O Que a Harmonização Faz pelo Seu Nome
+          <View style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: 16, borderRadius: 8, borderWidth: 1, borderColor: GOLD, marginBottom: 16 }}>
+            <Text style={{ fontFamily: TITLE_FONT, fontSize: 13, color: GOLD, marginBottom: 8, textAlign: 'center' }}>
+              Por que Criar um Nome Social Harmonizado?
             </Text>
-            <Text style={{ fontSize: 10, color: '#e5e2e1', lineHeight: 1.6, marginBottom: 8 }}>
-              Na numerologia cabalística, o nome pelo qual você assina e se apresenta atua como uma antena que pode neutralizar — ou ampliar — as frequências negativas. Um Nome Social harmonizado não apaga seu passado; ele reconfigura o sinal que você emite a partir de agora.
+            <Text style={{ ...styles.bodyText, fontSize: 10, marginBottom: 8, textAlign: 'left' }}>
+              Na numerologia cabalística, o nome pelo qual você assina e se apresenta possui o poder tangível de neutralizar energias negativas. Uma harmonização ou Nome Social não apaga o seu passado, mas reconfigura a antena emissora do seu magnetismo no presente.
             </Text>
-            <Text style={{ fontSize: 10, color: '#e5e2e1', lineHeight: 1.5, marginBottom: 5 }}>
-              <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Bloqueios eliminados: </Text>
-              Calculamos variações do seu nome que não formam nenhuma sequência vibratória negativa.
+            <Text style={{ ...styles.bodyText, fontSize: 10, textAlign: 'left', marginBottom: 4 }}>
+              <Text style={{ fontFamily: BODY_FONT_BOLD, color: '#D4AF37' }}>1. Elimine Bloqueios e Travas:</Text> Nós calculamos novas variações do seu nome que não formam sequências negativas.
             </Text>
-            <Text style={{ fontSize: 10, color: '#e5e2e1', lineHeight: 1.5, marginBottom: 5 }}>
-              <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Destino alinhado: </Text>
-              Casamos o seu número de Expressão com o seu número de Destino para máxima ressonância.
+            <Text style={{ ...styles.bodyText, fontSize: 10, textAlign: 'left', marginBottom: 4 }}>
+              <Text style={{ fontFamily: BODY_FONT_BOLD, color: '#D4AF37' }}>2. Alinhe com seu Destino:</Text> O objetivo é casar o seu número de Expressão de forma perfeita com o seu número de Destino.
             </Text>
-            <Text style={{ fontSize: 10, color: '#e5e2e1', lineHeight: 1.5 }}>
-              <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Intenção codificada: </Text>
-              Você define como quer ser percebido — a IA injeta essas características numéricas no arranjo final.
+            <Text style={{ ...styles.bodyText, fontSize: 10, textAlign: 'left' }}>
+              <Text style={{ fontFamily: BODY_FONT_BOLD, color: '#D4AF37' }}>3. Alcance Objetivos Específicos:</Text> Ao gerar seu Nome Social, você diz à nossa Inteligência como quer ser visto, e ela injeta essas características numéricas no arranjo final.
             </Text>
           </View>
 
-          {/* Citação de impacto */}
-          <View style={{ backgroundColor: 'rgba(212, 175, 55, 0.04)', padding: 12, borderRadius: 8, borderWidth: 0.5, borderColor: 'rgba(212, 175, 55, 0.2)', marginBottom: 16 }}>
-            <Text style={{ fontFamily: TITLE_FONT, fontSize: 10, color: GOLD, textAlign: 'center', fontStyle: 'italic', lineHeight: 1.6 }}>
-              "Conhecer os bloqueios sem harmonizá-los é como saber que a torneira está furada{'\n'}e continuar enchendo o balde."
-            </Text>
-          </View>
+          <Text style={{ ...styles.bodyText, marginBottom: 20 }}>
+            Após conhecer essas realidades profundas sobre si mesmo(a), permanecer na mesma frequência é uma escolha que não faz mais sentido. O Universo exige clareza e facilidade de fluxo.
+          </Text>
 
-          {/* CTA */}
-          <View style={{ alignItems: 'center', marginTop: 6 }}>
-            <Text style={{ fontFamily: TITLE_FONT, fontSize: 12, color: '#e5e2e1', marginBottom: 6, textAlign: 'center' }}>
-              Pronto para mudar a frequência que você emite?
+          <View style={{ alignItems: 'center', marginTop: 10 }}>
+            <Text style={{ fontFamily: TITLE_FONT, fontSize: 12, color: DARK, marginBottom: 8 }}>
+              Pronto para construir sua Nova Identidade e assumir o controle?
             </Text>
-            <Text style={{ fontFamily: BODY_FONT, fontSize: 9, color: '#76746a', marginBottom: 14, textAlign: 'center' }}>
-              Acesse sua conta ou abra a URL abaixo no navegador para gerar seu Nome Social Harmonizado.
+            <Text style={{ fontFamily: BODY_FONT, fontSize: 9, color: GRAY, marginBottom: 16 }}>
+              Acesse sua conta ou digite a URL abaixo no seu navegador para solicitar seu Nome Social.
             </Text>
-            <View style={{ backgroundColor: GOLD, paddingVertical: 12, paddingHorizontal: 28, borderRadius: 30 }}>
+            <View style={{ backgroundColor: GOLD, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 30 }}>
               <Text style={{ color: '#000', fontFamily: BODY_FONT_BOLD, fontSize: 12 }}>
                 nomemagnetico.com.br/nome-social
               </Text>
