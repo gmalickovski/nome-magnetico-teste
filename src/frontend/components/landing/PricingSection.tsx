@@ -186,6 +186,18 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
                   <p className="text-gray-600 text-xs mt-1">{plan.period}</p>
                 </div>
 
+                {/* Social proof — apenas no card popular */}
+                {isHighlighted && (
+                  <div className="flex items-center gap-1.5 mb-4">
+                    <span className="flex -space-x-1">
+                      <span className="w-6 h-6 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center text-[9px] text-[#D4AF37] font-bold">A</span>
+                      <span className="w-6 h-6 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center text-[9px] text-[#D4AF37] font-bold">M</span>
+                      <span className="w-6 h-6 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center text-[9px] text-[#D4AF37] font-bold">L</span>
+                    </span>
+                    <span className="text-[11px] text-gray-400">+47 pessoas analisaram esta semana</span>
+                  </div>
+                )}
+
                 {/* 3 destaques */}
                 <ul className="space-y-2 mb-6 flex-1">
                   {plan.highlights.map(h => (
@@ -209,6 +221,11 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
                 >
                   {plan.cta}
                 </button>
+
+                {/* Garantia — visível dentro do card, mobile-first */}
+                <p className="text-center text-[11px] text-gray-500 mt-2 mb-1 leading-snug">
+                  {isHighlighted ? '⚡ Acesso imediato · 🛡 7 dias de garantia' : '🛡 7 dias de garantia'}
+                </p>
 
                 {/* Link para detalhes */}
                 <a

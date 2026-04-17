@@ -14,6 +14,7 @@ type UmamiEvent =
   | 'lp_view'
   | 'checkout_start'
   | 'checkout_redirect_start'
+  | 'checkout_failed'
   | 'coupon_applied'
   | 'purchase_complete'
   | 'report_generated'
@@ -35,6 +36,7 @@ interface EventData {
   valor?: number;
   tempo_segundos?: number;
   origem?: string;
+  erro?: string;
 }
 
 export function track(event: UmamiEvent, data?: EventData): void {

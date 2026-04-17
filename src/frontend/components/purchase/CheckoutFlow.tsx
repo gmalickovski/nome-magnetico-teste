@@ -119,6 +119,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
   const [loading, setLoading] = useState<ProductType | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [couponCode, setCouponCode] = useState('');
+  const [showRetry, setShowRetry] = useState(false);
 
   // Auto-disparar checkout quando usuário chega logado com produto específico
   useEffect(() => {
@@ -128,11 +129,20 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Fallback para 3G: mostrar botão de retry após 10s no spinner
+  useEffect(() => {
+    if (productType && isLoggedIn && !isOwned && !errorMsg) {
+      const timer = setTimeout(() => setShowRetry(true), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [productType, isLoggedIn, isOwned, errorMsg]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const prices = hqPrices ?? FALLBACK_PRICES;
 
   async function triggerCheckout(type: ProductType) {
     setLoading(type);
     setErrorMsg('');
+    setShowRetry(false);
     try {
       // Auto-aplica cupom da promoção se o usuário não digitou um código manual
       const appliesToThis = !promotion?.productType || promotion.productType === type;
@@ -170,7 +180,9 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
         window.location.href = data.url;
       }
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Erro ao criar sessão de pagamento');
+      const errMsg = err instanceof Error ? err.message : 'Erro ao criar sessão de pagamento';
+      track('checkout_failed', { produto: type, erro: errMsg });
+      setErrorMsg(errMsg);
       setLoading(null);
     }
   }
@@ -405,6 +417,14 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
           <div className="w-16 h-16 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin mb-6" />
           <p className="font-cinzel text-lg font-bold text-[#e5e2e1] mb-2">Preparando seu pagamento...</p>
           <p className="text-gray-500 text-sm">Você será redirecionado ao Stripe em instantes.</p>
+          {showRetry && (
+            <button
+              onClick={() => { setShowRetry(false); triggerCheckout(type); }}
+              className="mt-8 text-[#D4AF37] text-sm underline underline-offset-4 hover:text-[#f2ca50] transition-colors active:scale-95"
+            >
+              Problemas com o redirecionamento? Toque aqui
+            </button>
+          )}
         </div>
       </div>
     );

@@ -1,4 +1,19 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Nome Magnético — Contexto do Projeto para Agentes IA
+
+## Comandos
+
+```bash
+npm run dev      # servidor local (porta 4321 por padrão)
+npm run build    # build de produção
+npm run preview  # preview do build
+npx astro check  # type-check TypeScript + Astro
+```
+
+Não há testes automatizados no projeto. Type-checking é feito via `npx astro check`.
 
 ## Identidade
 

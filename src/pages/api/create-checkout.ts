@@ -108,7 +108,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
       userId: user.id,
       userEmail: user.email ?? '',
       productType: product_type as ProductType,
-      successUrl: `${baseUrl}/app?checkout=success`,
+      successUrl: `${baseUrl}/app?checkout=success&produto=${product_type}`,
       cancelUrl: `${baseUrl}/comprar?checkout=cancel`,
       couponId,
       promotionCodeId,

@@ -11,6 +11,27 @@ const GOLD = PDF_COLORS.gold;
 const GRAY = PDF_COLORS.gray;
 const LIGHT_GRAY = PDF_COLORS.lightGray;
 
+// Frases personalizadas do "Custo da Inércia" por código de bloqueio.
+// Usadas no PDF gratuito em vez do antídoto — cria o gap que motiva a compra.
+const CUSTO_INERCIA_MAP: Record<string, string> = {
+  '111': 'Você pode se forçar a agir e buscar disciplina, mas enquanto o 111 dominar sua frequência vibratória, toda tentativa de liderança encontrará resistência invisível — a paralisia está codificada no nome, emitindo este sinal 24 horas por dia.',
+  '222': 'Você pode tentar se relacionar mais e praticar comunicação, mas enquanto o 222 emitir sua frequência, cada parceria de valor tende a escorrer pelos dedos — a dependência e a indecisão operam antes mesmo que você perceba.',
+  '333': 'Você pode praticar falar em público e trabalhar a autoconfiança, mas enquanto o 333 bloquear sua vibração, as palavras certas chegam tarde demais — o travamento de expressão age antes que você abra a boca.',
+  '444': 'Você pode trabalhar o dobro e mostrar resultados, mas enquanto o 444 emitir esta frequência, o esforço não se converte em reconhecimento nem remuneração justa — a estrutura da recompensa está travada no nome.',
+  '555': 'Você pode planejar com perfeição e criar rotinas sólidas, mas enquanto o 555 dominar sua vibração, mudanças não desejadas chegam sem aviso — a inconstância está programada e emitida pelo nome a cada instante.',
+  '666': 'Você pode cuidar de todos ao redor e praticar o desapego, mas enquanto o 666 operar no nome, o cuidado que você oferece volta transformado em sobrecarga e exploração — o desequilíbrio está na raiz da frequência.',
+  '777': 'Você pode meditar horas por dia e buscar práticas espirituais, mas enquanto o 777 bloquear sua frequência, a introspecção vira isolamento — suas melhores ideias nunca saem do plano mental para o mundo real.',
+  '888': 'Você pode se esforçar 10x mais e aplicar toda a disciplina financeira do mundo, mas enquanto sua assinatura emitir a frequência 888, o dinheiro continuará saindo por entre seus dedos — a luta pela abundância está codificada no nome.',
+  '999': 'Você pode buscar novos começos e praticar o perdão, mas enquanto o 999 dominar sua vibração, os ciclos não fecham — perdas e rancores se acumulam, impedindo que o próximo capítulo comece de verdade.',
+};
+
+/** Remove a sentença do antídoto da descrição para exibição no PDF gratuito */
+function stripAntidoto(descricao: string): string {
+  const idx = descricao.search(/\s*O antídoto é/i);
+  if (idx !== -1) return descricao.slice(0, idx).trim();
+  return descricao;
+}
+
 const styles = StyleSheet.create({
   sectionBlock: {
     marginTop: 6,
@@ -53,6 +74,41 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#991b1b',
     marginTop: 4,
+  },
+  bloqueioAtivoBadge: {
+    backgroundColor: '#DC2626',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 3,
+    marginLeft: 8,
+    alignSelf: 'center',
+  },
+  bloqueioAtivoBadgeText: {
+    fontSize: 7,
+    color: '#FFFFFF',
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 0.5,
+  },
+  custoInerciaBox: {
+    backgroundColor: '#450A0A',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#EF4444',
+  },
+  custoInerciaText: {
+    fontSize: 9,
+    color: '#FEE2E2',
+    lineHeight: 1.55,
+    fontStyle: 'italic',
+  },
+  emitindo24hText: {
+    fontSize: 8,
+    color: '#FCA5A5',
+    marginTop: 5,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 0.3,
   },
   // Débitos
   debitoRow: {
@@ -245,8 +301,16 @@ export interface TendenciaData {
 
 // ── Componentes de bloco ──────────────────────────────────────────────────────
 
-/** Cards de Bloqueios Energéticos */
-export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
+/** Cards de Bloqueios Energéticos.
+ *  showAntidoto=false → modo PDF gratuito: remove o antídoto, adiciona "Custo da Inércia".
+ */
+export function BloqueiosBlock({
+  bloqueios,
+  showAntidoto = true,
+}: {
+  bloqueios: BloqueioData[];
+  showAntidoto?: boolean;
+}) {
   if (bloqueios.length === 0) {
     return (
       <View style={styles.debitoNoneBox}>
@@ -260,8 +324,33 @@ export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
     <View style={styles.sectionBlock}>
       {bloqueios.map((b, i) => (
         <View key={i} style={styles.bloqueioRow} wrap={false}>
-          <Text style={styles.bloqueioTitle}>{b.codigo} — {b.titulo}</Text>
-          <Text style={styles.bloqueioDesc}>{b.descricao}</Text>
+          {/* Cabeçalho do bloqueio */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+            <Text style={[styles.bloqueioTitle, { marginBottom: 0 }]}>{b.codigo} — {b.titulo}</Text>
+            {!showAntidoto && (
+              <View style={styles.bloqueioAtivoBadge}>
+                <Text style={styles.bloqueioAtivoBadgeText}>ATIVO 24H</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Diagnóstico — sem o antídoto no modo gratuito */}
+          <Text style={styles.bloqueioDesc}>
+            {showAntidoto ? b.descricao : stripAntidoto(b.descricao)}
+          </Text>
+
+          {/* Custo da Inércia — apenas no modo gratuito */}
+          {!showAntidoto && CUSTO_INERCIA_MAP[b.codigo] && (
+            <View style={styles.custoInerciaBox}>
+              <Text style={styles.custoInerciaText}>
+                {CUSTO_INERCIA_MAP[b.codigo]}
+              </Text>
+              <Text style={styles.emitindo24hText}>
+                Esta frequência continua sendo emitida pelo seu nome enquanto ele não for harmonizado.
+              </Text>
+            </View>
+          )}
+
           {b.aspectoSaude ? (
             <Text style={styles.bloqueioSaude}>Aspecto de saúde: {b.aspectoSaude}</Text>
           ) : null}

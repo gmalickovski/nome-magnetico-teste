@@ -1,10 +1,16 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import { COLORS, pdfStyles } from './styles';
 import type { Analysis, MagneticName } from '../db/analyses';
 import { formatAnalysisText } from '../../utils/textFormatter';
 import { getArquetipo } from '../numerology/archetypes';
 import { getIdentidadeVisual } from '../numerology/branding';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const LOGO_CAPA = path.resolve(__dirname, '../../frontend/assets/logo-nomemagnetico-capa-pdf.png');
+const LOGO_HEADER = path.resolve(__dirname, '../../frontend/assets/logo-nomemagnetico-header-pdf.png');
 
 interface PDFTemplateProps {
   analysis: Analysis;
@@ -161,14 +167,9 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
       {/* Página 1 — Capa */}
       <Page size="A4" style={styles.page}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ fontSize: 11, color: COLORS.gold, letterSpacing: 4, marginBottom: 24 }}>
-            NOME MAGNÉTICO
-          </Text>
+          <Image src={LOGO_CAPA} style={{ width: 220, marginBottom: 32 }} />
           <Text style={{ ...styles.title, fontSize: 36, textAlign: 'center' }}>
             {primeiroNome}
-          </Text>
-          <Text style={{ ...styles.subtitle, textAlign: 'center', marginTop: 8 }}>
-            Análise Numerológica Cabalística Completa
           </Text>
           <View style={{ height: 1, width: 80, backgroundColor: COLORS.gold, opacity: 0.5, marginVertical: 24 }} />
           <Text style={{ fontSize: 10, color: textSecondary, textAlign: 'center' }}>
@@ -179,7 +180,7 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
           </Text>
         </View>
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Nome Magnético — Numerologia Cabalística</Text>
+          <Image src={LOGO_HEADER} style={{ height: 14, opacity: 0.6 }} />
           <Text style={styles.footerText}>Página 1</Text>
         </View>
       </Page>
@@ -260,7 +261,7 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
           </>
         )}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Nome Magnético — {analysis.nome_completo}</Text>
+          <Image src={LOGO_HEADER} style={{ height: 14, opacity: 0.6 }} />
           <Text style={styles.footerText}>Página 2</Text>
         </View>
       </Page>
@@ -272,7 +273,7 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
           <RenderMarkdownChunks text={formatAnalysisText(analysis.analise_texto)} styles={styles} />
           
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Nome Magnético — {analysis.nome_completo}</Text>
+            <Image src={LOGO_HEADER} style={{ height: 14, opacity: 0.6 }} />
             <Text style={styles.footerText}>Página 3</Text>
           </View>
         </Page>
@@ -399,7 +400,7 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
           </Text>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Nome Magnético — {analysis.nome_completo}</Text>
+            <Image src={LOGO_HEADER} style={{ height: 14, opacity: 0.6 }} />
             <Text style={styles.footerText}>Página 4</Text>
           </View>
         </Page>
@@ -452,7 +453,7 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
           )}
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Nome Magnético — {analysis.nome_completo}</Text>
+            <Image src={LOGO_HEADER} style={{ height: 14, opacity: 0.6 }} />
             <Text style={styles.footerText}>Página 5</Text>
           </View>
         </Page>

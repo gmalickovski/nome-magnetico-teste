@@ -100,15 +100,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const isAdmin = profile?.role === 'admin';
 
   // Verificar acesso
-  if (is_free) {
-    // Análise gratuita: verificar se já foi utilizada
+  if (is_free && !isAdmin) {
+    // Análise gratuita: verificar se já foi utilizada (admin isento para fins de teste)
     const jaUsou = await hasUsedFreeAnalysis(user.id);
     if (jaUsou) {
       return new Response(JSON.stringify({ error: 'Análise gratuita já utilizada. Acesse "Minhas Análises" para ver seu relatório.' }), {
         status: 403, headers: { 'Content-Type': 'application/json' },
       });
     }
-  } else {
+  } else if (!is_free) {
     // Análise paga: verificar subscription
     const hasAccess = await hasActiveSubscription(user.id, product_type as ProductType);
     if (!hasAccess && !isAdmin) {
