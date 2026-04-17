@@ -71,13 +71,24 @@ export const GET: APIRoute = async ({ url, locals }) => {
           ? NomeAtualPDF
           : NomeSocialPDF;
 
-  const pdfBuffer = await renderToBuffer(
-    React.createElement(PDFComponent, {
-      analysis: analysis as any,
-      magneticNames,
-      userName: firstName,
-    }) as any
-  );
+  let pdfBuffer: Buffer;
+  try {
+    pdfBuffer = await renderToBuffer(
+      React.createElement(PDFComponent, {
+        analysis: analysis as any,
+        magneticNames,
+        userName: firstName,
+      }) as any
+    );
+  } catch (err: any) {
+    const msg = err?.message ?? String(err);
+    const stack = err?.stack ?? '';
+    console.error('[generate-pdf] renderToBuffer FAILED:', msg, stack);
+    return new Response(
+      JSON.stringify({ error: 'Erro ao gerar PDF', detail: msg, stack }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 
   return new Response(new Uint8Array(pdfBuffer), {
     status: 200,

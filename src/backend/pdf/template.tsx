@@ -1,16 +1,15 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
-import { fileURLToPath } from 'url';
-import path from 'path';
 import { COLORS, pdfStyles } from './styles';
 import type { Analysis, MagneticName } from '../db/analyses';
 import { formatAnalysisText } from '../../utils/textFormatter';
 import { getArquetipo } from '../numerology/archetypes';
 import { getIdentidadeVisual } from '../numerology/branding';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const LOGO_CAPA = path.resolve(__dirname, '../../frontend/assets/logo-nomemagnetico-capa-pdf.png');
-const LOGO_HEADER = path.resolve(__dirname, '../../frontend/assets/logo-nomemagnetico-header-pdf.png');
+// Logos servidos via public/ — react-pdf faz fetch HTTP nativamente (funciona em SSR após build)
+const SITE_URL = 'https://nomemagnetico.com.br';
+const LOGO_CAPA   = `${SITE_URL}/logo-nomemagnetico-capa-pdf.png`;
+const LOGO_HEADER = `${SITE_URL}/logo-nomemagnetico-header-pdf.png`;
 
 interface PDFTemplateProps {
   analysis: Analysis;
