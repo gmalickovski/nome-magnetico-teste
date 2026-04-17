@@ -390,7 +390,7 @@ export function PDFCover({
 
       {/* Branding da capa: logo PNG dedicado (substitui ícone + texto) ou fallback */}
       {CAPA_LOGO_SRC ? (
-        <Image src={CAPA_LOGO_SRC} style={{ width: 220, marginBottom: 24 }} />
+        <Image src={CAPA_LOGO_SRC} style={{ width: 280, marginBottom: 24 }} />
       ) : (
         <>
           {/* Logo icon principal */}

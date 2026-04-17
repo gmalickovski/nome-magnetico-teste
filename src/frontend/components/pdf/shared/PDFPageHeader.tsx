@@ -41,7 +41,7 @@ export function PDFPageHeader({ brand = 'NOME MAGNETICO', subtitle }: PDFPageHea
   return (
     <View style={styles.header} fixed>
       {HEADER_LOGO_SRC ? (
-        <Image src={HEADER_LOGO_SRC} style={{ height: 20, objectFit: 'contain' }} />
+        <Image src={HEADER_LOGO_SRC} style={{ height: 14, objectFit: 'contain' }} />
       ) : (
         <Text style={styles.brand}>{brand}</Text>
       )}
