@@ -1,8 +1,13 @@
 /**
  * PDFPageHeader — cabeçalho fixo reutilizável para todas as páginas de conteúdo.
+ *
+ * Lado esquerdo: logo PNG (logo-nomemagnetico-header-pdf.png) se disponível,
+ *                senão texto "NOME MAGNETICO" como fallback.
+ * Lado direito:  subtítulo com nome/data do cliente.
  */
-import { View, Text, StyleSheet } from '@react-pdf/renderer';
+import { View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import { PDF_COLORS } from './PDFTheme';
+import { HEADER_LOGO_SRC } from './PDFFonts';
 
 const styles = StyleSheet.create({
   header: {
@@ -35,7 +40,11 @@ interface PDFPageHeaderProps {
 export function PDFPageHeader({ brand = 'NOME MAGNETICO', subtitle }: PDFPageHeaderProps) {
   return (
     <View style={styles.header} fixed>
-      <Text style={styles.brand}>{brand}</Text>
+      {HEADER_LOGO_SRC ? (
+        <Image src={HEADER_LOGO_SRC} style={{ height: 20, objectFit: 'contain' }} />
+      ) : (
+        <Text style={styles.brand}>{brand}</Text>
+      )}
       <Text style={styles.info}>{subtitle}</Text>
     </View>
   );

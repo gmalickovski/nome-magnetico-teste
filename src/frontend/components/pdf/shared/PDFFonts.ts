@@ -76,6 +76,45 @@ export function loadLogoSrc(): string {
   return '';
 }
 
+/** Helper: carrega um arquivo de public/ ou dist/client/ como base64 data URI */
+function tryLoadPngBase64(filename: string): string {
+  const candidates = [
+    path.resolve(process.cwd(), `public/${filename}`),
+    path.resolve(process.cwd(), `dist/client/${filename}`),
+    path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      `../../../../dist/client/${filename}`
+    ),
+    path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      `../../../../public/${filename}`
+    ),
+  ];
+  for (const p of candidates) {
+    try {
+      if (!fs.existsSync(p)) continue;
+      const buf = fs.readFileSync(p);
+      if (buf.length < 100) continue;
+      return `data:image/png;base64,${buf.toString('base64')}`;
+    } catch {
+      continue;
+    }
+  }
+  return '';
+}
+
+/**
+ * Logo da CAPA do PDF — substitui ícone + texto "NOME MAGNETICO" na capa.
+ * Carregado uma vez na inicialização do módulo.
+ */
+export const CAPA_LOGO_SRC = tryLoadPngBase64('logo-nomemagnetico-capa-pdf.png');
+
+/**
+ * Logo do HEADER das páginas do PDF — substitui o texto "NOME MAGNETICO" no cabeçalho.
+ * Carregado uma vez na inicialização do módulo.
+ */
+export const HEADER_LOGO_SRC = tryLoadPngBase64('logo-nomemagnetico-header-pdf.png');
+
 /** Formata data string (ISO ou YYYY-MM-DD) para pt-BR */
 export function formatDate(dateStr: string): string {
   if (!dateStr) return '';

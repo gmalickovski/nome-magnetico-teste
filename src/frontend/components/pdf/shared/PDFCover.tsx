@@ -13,6 +13,7 @@
  */
 import { Page, View, Text, Svg, Circle, Path, Line, Polygon, StyleSheet, Image } from '@react-pdf/renderer';
 import type { ProductTheme, CoverShapeStyle } from './PDFTheme';
+import { CAPA_LOGO_SRC } from './PDFFonts';
 
 // ── Shapes SVG ────────────────────────────────────────────────────────────────
 
@@ -387,17 +388,24 @@ export function PDFCover({
         accentColor={theme.accentColor}
       />
 
-      {/* Logo da marca */}
-      {logoSrc ? (
-        <Image src={logoSrc} style={coverStyles.logo} />
-      ) : null}
+      {/* Branding da capa: logo PNG dedicado (substitui ícone + texto) ou fallback */}
+      {CAPA_LOGO_SRC ? (
+        <Image src={CAPA_LOGO_SRC} style={{ width: 220, marginBottom: 24 }} />
+      ) : (
+        <>
+          {/* Logo icon principal */}
+          {logoSrc ? (
+            <Image src={logoSrc} style={coverStyles.logo} />
+          ) : null}
 
-      {/* Nome da marca */}
-      <Text
-        style={[coverStyles.brand, { color: theme.coverLogoColor, fontFamily: logoFont }]}
-      >
-        NOME MAGNETICO
-      </Text>
+          {/* Nome da marca (fallback quando logo PNG não disponível) */}
+          <Text
+            style={[coverStyles.brand, { color: theme.coverLogoColor, fontFamily: logoFont }]}
+          >
+            NOME MAGNETICO
+          </Text>
+        </>
+      )}
 
       {/* Linha accent */}
       <View style={[coverStyles.accentLine, { backgroundColor: theme.primaryColor }]} />
