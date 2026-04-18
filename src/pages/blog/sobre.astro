@@ -1,0 +1,230 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import { BlogHeader } from '../../frontend/components/blog/BlogHeader';
+import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
+---
+
+<BlogLayout
+  title="Sobre o Blog — Nome Magnético"
+  description="Conheça a proposta editorial do blog de numerologia cabalística do Nome Magnético: artigos sobre como o nome influencia carreira, relacionamentos, saúde e prosperidade."
+  keywords="sobre blog numerologia, numerologia cabalística artigos, bloqueios energéticos nome, nome magnético blog"
+>
+  <link rel="canonical" href="https://nomemagnetico.com.br/blog/sobre" />
+
+  <BlogHeader client:load activeCategory="" />
+
+  <main class="blog-main min-h-screen pt-[72px] pb-16 md:pb-24">
+
+    {/* ── HERO ── */}
+    <section class="max-w-3xl mx-auto px-4 pt-10 sm:pt-14 pb-10 sm:pb-14">
+
+      {/* Breadcrumb */}
+      <nav class="flex items-center gap-2 text-[10px] sm:text-xs text-gray-600 mb-8" aria-label="Navegação estrutural">
+        <a href="/" class="hover:text-[#D4AF37] transition-colors">Início</a>
+        <span aria-hidden="true">›</span>
+        <a href="/blog" class="hover:text-[#D4AF37] transition-colors">Blog</a>
+        <span aria-hidden="true">›</span>
+        <span class="text-gray-500">Sobre</span>
+      </nav>
+
+      {/* Ornamento superior */}
+      <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-4">
+        ✦ &nbsp;Proposta Editorial
+      </p>
+
+      <h1 class="font-cinzel text-3xl sm:text-4xl md:text-5xl font-bold text-[#e5e2e1] leading-tight mb-6">
+        Sobre o Blog
+      </h1>
+
+      <p class="text-gray-400 text-base sm:text-lg leading-relaxed max-w-2xl">
+        Um espaço dedicado a revelar como o vibração numérica do seu nome molda silenciosamente
+        sua trajetória — na carreira, nos relacionamentos, na saúde e na prosperidade.
+      </p>
+
+      {/* Divisor dourado */}
+      <div class="mt-8 h-px w-24 opacity-40"
+        style="background: linear-gradient(90deg, #D4AF37, transparent);">
+      </div>
+    </section>
+
+    {/* ── CONTEÚDO PRINCIPAL ── */}
+    <div class="max-w-3xl mx-auto px-4 space-y-16">
+
+      {/* 1. Nossa missão */}
+      <section>
+        <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-3">Nossa Missão</p>
+        <h2 class="font-cinzel text-xl sm:text-2xl font-bold text-[#e5e2e1] mb-5">
+          Tornar o conhecimento cabalístico acessível e aplicável
+        </h2>
+        <div class="space-y-4 text-gray-400 text-sm sm:text-base leading-relaxed">
+          <p>
+            A numerologia cabalística não é misticismo vago — é um sistema estruturado de padrões
+            numéricos que descreve influências energéticas sobre quem carrega aquele conjunto de
+            letras ao longo da vida. O problema é que boa parte do conteúdo disponível online
+            mistura tradições, simplifica conceitos e omite o que realmente importa: a <strong class="text-[#e5e2e1]">detecção de
+            bloqueios energéticos</strong> e a forma correta de resolvê-los.
+          </p>
+          <p>
+            Este blog existe para preencher essa lacuna. Cada artigo é escrito com base na mesma
+            metodologia que sustenta a plataforma Nome Magnético — os <strong class="text-[#e5e2e1]">4 triângulos
+            cabalísticos</strong>, a tabela hebraica de conversão letra-número, e os critérios objetivos
+            de harmonização de nome.
+          </p>
+        </div>
+      </section>
+
+      {/* 2. O que você encontrará aqui */}
+      <section>
+        <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-3">Temas Abordados</p>
+        <h2 class="font-cinzel text-xl sm:text-2xl font-bold text-[#e5e2e1] mb-6">
+          O que você encontrará aqui
+        </h2>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          {[
+            {
+              icon: '◈',
+              title: 'Numerologia Cabalística',
+              desc: 'Fundamentos da tabela hebraica, os 5 números principais do nome, lições kármicas e tendências ocultas.'
+            },
+            {
+              icon: '⧖',
+              title: 'Bloqueios Energéticos',
+              desc: 'Como sequências repetidas nos triângulos criam padrões de limitação — e como identificá-los no seu nome.'
+            },
+            {
+              icon: '✦',
+              title: 'Nome Social & Identidade',
+              desc: 'O impacto do nome na percepção profissional, autoconfiança e alinhamento com o número de Expressão.'
+            },
+            {
+              icon: '👶',
+              title: 'Nome para Bebê',
+              desc: 'Critérios para escolher um nome que favoreça a missão e evite bloqueios desde o início da vida.'
+            },
+            {
+              icon: '🏢',
+              title: 'Nome Empresarial',
+              desc: 'Como a vibração do nome da empresa influencia sua tração no mercado e compatibilidade com os sócios.'
+            },
+            {
+              icon: '☽',
+              title: 'Espiritualidade & Desenvolvimento',
+              desc: 'A interseção entre autoconhecimento, propósito de vida e os padrões numerológicos que os revelam.'
+            }
+          ].map(item => (
+            <div class="bg-white/3 rounded-2xl p-5 hover:bg-white/4 transition-colors duration-300">
+              <div class="flex items-start gap-3">
+                <span class="text-[#D4AF37] text-lg leading-none mt-0.5 flex-shrink-0">{item.icon}</span>
+                <div>
+                  <h3 class="font-cinzel text-sm font-bold text-[#e5e2e1] mb-2">{item.title}</h3>
+                  <p class="text-gray-500 text-xs leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. Nossa metodologia */}
+      <section>
+        <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-3">Metodologia</p>
+        <h2 class="font-cinzel text-xl sm:text-2xl font-bold text-[#e5e2e1] mb-5">
+          Rigor acima de tudo
+        </h2>
+        <div class="space-y-4 text-gray-400 text-sm sm:text-base leading-relaxed">
+          <p>
+            Todo conteúdo deste blog é revisado contra a metodologia cabalística formal. Não usamos
+            radiestesia, pêndulos ou interpretações intuitivas sem base estrutural. Quando afirmamos
+            que um nome tem um bloqueio de <strong class="text-[#e5e2e1]">555 (Liberdade)</strong>, calculamos isso nos 4
+            triângulos — não em apenas um.
+          </p>
+          <p>
+            Essa é a mesma lógica aplicada pela plataforma Nome Magnético ao gerar análises
+            personalizadas. O blog serve como espaço educativo para que você entenda <em class="text-gray-300">por que</em>
+            o sistema funciona — antes mesmo de contratar uma análise completa.
+          </p>
+        </div>
+
+        {/* Os 4 triângulos — callout visual */}
+        <div class="mt-6 rounded-2xl p-6 sm:p-8"
+          style="background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.12);">
+          <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-4">Os 4 Triângulos Cabalísticos</p>
+          <div class="grid sm:grid-cols-2 gap-3">
+            {[
+              { nome: 'Triângulo da Vida', desc: 'Aspectos gerais e tendências naturais do nome' },
+              { nome: 'Triângulo Pessoal', desc: 'Vida íntima e reações internas — letra + dia de nascimento' },
+              { nome: 'Triângulo Social', desc: 'Percepção do mundo externo — letra + mês de nascimento' },
+              { nome: 'Triângulo do Destino', desc: 'Resultados e missão de vida — letra + dia e mês somados' },
+            ].map(t => (
+              <div class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#D4AF37]/50 mt-1.5 flex-shrink-0"></span>
+                <div>
+                  <span class="text-[#e5e2e1] text-xs font-semibold">{t.nome}</span>
+                  <p class="text-gray-600 text-xs leading-relaxed mt-0.5">{t.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Frequência e autoria */}
+      <section>
+        <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-3">Equipe Editorial</p>
+        <h2 class="font-cinzel text-xl sm:text-2xl font-bold text-[#e5e2e1] mb-5">
+          Quem escreve aqui
+        </h2>
+        <div class="space-y-4 text-gray-400 text-sm sm:text-base leading-relaxed">
+          <p>
+            Os artigos são produzidos e revisados pela equipe do Nome Magnético — especialistas em
+            numerologia cabalística com foco em aplicação prática e evidência formal. O conteúdo
+            é publicado com periodicidade regular, priorizando profundidade em vez de volume.
+          </p>
+          <p>
+            Nosso objetivo é que cada artigo seja uma referência confiável — algo que vale ser
+            bookmarked e revisitado, não um texto genérico para consumo rápido.
+          </p>
+        </div>
+      </section>
+
+      {/* 5. CTA — Análise completa */}
+      <section>
+        <div class="rounded-2xl sm:rounded-3xl overflow-hidden p-px"
+          style="background: linear-gradient(135deg, rgba(212,175,55,0.5) 0%, rgba(212,175,55,0.08) 100%);">
+          <div class="rounded-2xl sm:rounded-3xl p-7 sm:p-10 text-center"
+            style="background: radial-gradient(ellipse at top, #1d1a0d 0%, #131313 65%);">
+            <p class="text-[#D4AF37] text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-3">
+              Pronto para ir além dos artigos?
+            </p>
+            <h3 class="font-cinzel text-xl sm:text-2xl font-bold text-white mb-3">
+              Descubra os Bloqueios do Seu Nome
+            </h3>
+            <p class="text-gray-400 text-sm sm:text-base leading-relaxed mb-7 max-w-lg mx-auto">
+              A análise personalizada aplica todos os 4 triângulos cabalísticos ao seu nome de
+              nascimento e data de nascimento — revelando bloqueios, lições kármicas e sugerindo
+              variações do nome harmonizadas com sua missão de vida.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href="/analise-gratuita"
+                class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.99] shadow-lg shadow-[#D4AF37]/20 text-sm"
+              >
+                Começar com Análise Gratuita →
+              </a>
+              <a
+                href="/blog"
+                class="inline-block border border-[#D4AF37]/30 text-[#D4AF37] font-medium px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl hover:bg-[#D4AF37]/8 transition-all duration-300 text-sm"
+              >
+                ← Voltar ao Blog
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <LandingFooter client:visible />
+</BlogLayout>
