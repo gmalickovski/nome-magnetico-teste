@@ -44,9 +44,10 @@ interface IntroProps {
   theme: ProductTheme;
   productType: ProductType;
   entityName: string;
+  isFreeAnalysis?: boolean;
 }
 
-export function PDFStandardIntro({ theme, productType, entityName }: IntroProps) {
+export function PDFStandardIntro({ theme, productType, entityName, isFreeAnalysis = false }: IntroProps) {
 
   const isLightBackground = productType === 'nome_bebe';
   const textColor = isLightBackground ? '#5C2D1E' : '#e5e2e1';
@@ -76,27 +77,48 @@ export function PDFStandardIntro({ theme, productType, entityName }: IntroProps)
       {/* ── PÁGINA 1: HOLÍSTICA / BENEFÍCIOS ────────────────────────────── */}
       <Page size="A4" style={[styles.page, { backgroundColor: theme.coverBgColor }]}>
         <PDFPageHeader subtitle={`${entityName} — ${introTitleSubtitleP1}`} />
-        
+
         <View style={styles.section}>
           <Text style={[styles.hugeTitle, { color: theme.accentColor, marginBottom: 16 }]}>
-            A Força Invisível das Palavras
-          </Text>
-          
-          <Text style={[styles.subHead, { color: textColor }]}>
-            O que é a Numerologia Cabalística?
-          </Text>
-          <Text style={[styles.bodyText, { color: textColor }]}>
-            Há milhares de anos, sabedorias da Cabala judaica e estudos do pensador grego Pitágoras descobriram que todo o universo funciona como uma grande música. Para eles, tudo é energia e a linguagem que escrevemos influencia o que colhemos do mundo. Cada letra que escrevemos tem um valor, um som e uma frequência energética. 
-            {'\n\n'}
-            Isso quer dizer que nosso nome não foi criado por acaso: ele dita o nosso propósito, quais serão os nossos talentos e também pode esconder nossos maiores desafios nessa vida material.
+            {isFreeAnalysis ? 'O Magnetismo da Sua Identidade' : 'A Força Invisível das Palavras'}
           </Text>
 
-          <Text style={[styles.subHead, { color: textColor }]}>
-            {productType === 'nome_empresa' ? 'O Peso do Nome na Empresa' : productType === 'nome_bebe' ? 'O Cuidado Mais Protetor de Todos' : 'O Magnetismo da Sua Identidade'}
-          </Text>
-          <Text style={[styles.bodyText, { color: textColor }]}>
-            {getHolisticText()}
-          </Text>
+          {isFreeAnalysis ? (
+            <>
+              <Text style={[styles.subHead, { color: textColor }]}>O Princípio</Text>
+              <Text style={[styles.bodyText, { color: textColor }]}>
+                Tudo é energia e frequência. Cada letra do nome que você assina emite um som e um valor que atraem resultados específicos — em finanças, relacionamentos e saúde. Isso não é metáfora: é a geometria invisível que organiza o que você atrai antes mesmo de agir.
+              </Text>
+
+              <Text style={[styles.subHead, { color: textColor }]}>A Dor</Text>
+              <Text style={[styles.bodyText, { color: textColor }]}>
+                Se você se esforça muito, mas sente as coisas "travando" na hora de dar certo, a causa pode estar nas repetições de letras da sua assinatura. Sequências específicas criam bloqueios que operam 24 horas por dia — silenciosamente, independentemente do quanto você trabalha ou se dedica.
+              </Text>
+
+              <Text style={[styles.subHead, { color: textColor }]}>A Solução</Text>
+              <Text style={[styles.bodyText, { color: textColor }]}>
+                Este relatório revela as falhas invisíveis do seu nome e como organizar essas letras para atrair fluidez, relacionamentos e prosperidade. O diagnóstico é objetivo e matemático. O que você faz com ele depende de você.
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={[styles.subHead, { color: textColor }]}>
+                O que é a Numerologia Cabalística?
+              </Text>
+              <Text style={[styles.bodyText, { color: textColor }]}>
+                Há milhares de anos, sabedorias da Cabala judaica e estudos do pensador grego Pitágoras descobriram que todo o universo funciona como uma grande música. Para eles, tudo é energia e a linguagem que escrevemos influencia o que colhemos do mundo. Cada letra que escrevemos tem um valor, um som e uma frequência energética.
+                {'\n\n'}
+                Isso quer dizer que nosso nome não foi criado por acaso: ele dita o nosso propósito, quais serão os nossos talentos e também pode esconder nossos maiores desafios nessa vida material.
+              </Text>
+
+              <Text style={[styles.subHead, { color: textColor }]}>
+                {productType === 'nome_empresa' ? 'O Peso do Nome na Empresa' : productType === 'nome_bebe' ? 'O Cuidado Mais Protetor de Todos' : 'O Magnetismo da Sua Identidade'}
+              </Text>
+              <Text style={[styles.bodyText, { color: textColor }]}>
+                {getHolisticText()}
+              </Text>
+            </>
+          )}
         </View>
 
         <PDFFooter />
@@ -112,13 +134,33 @@ export function PDFStandardIntro({ theme, productType, entityName }: IntroProps)
           </Text>
           
           <Text style={[styles.subHead, { color: textColor }]}>
-            Como o Sistema Avalia Tudo (A Arquitetura da Análise)
+            A Arquitetura da Análise
           </Text>
-          <Text style={[styles.bodyText, { color: textColor }]}>
-            As informações apresentadas a seguir não são adivinhações. Usamos cálculos lógicos e estritos. Primeiro, o nosso sistema cruza as letras e descobre os <Text style={[styles.bold, { color: boldColor }]}>5 Números Principais</Text>, que são os pilares da sua análise. Depois, montamos uma pirâmide chamada <Text style={[styles.bold, { color: boldColor }]}>Os 4 Triângulos Numerológicos</Text>, que mostram o mapa de como as coisas realmente vão funcionar no seu dia a dia.
-            {'\n\n'}
-            Também procuramos falhas perigosas que queremos evitar a todo custo: analisamos os <Text style={[styles.bold, { color: boldColor }]}>Bloqueios</Text> (sequências repetidas de números que paralisam a vida), verificamos as <Text style={[styles.bold, { color: boldColor }]}>Lições Kármicas</Text> (energias e aprendizados que estão faltando) e detectamos as <Text style={[styles.bold, { color: boldColor }]}>Tendências Ocultas</Text> (exageros de energia que fazem mal). Finalmente, tudo isso é envolvido em um grande perfil psicológico mundial (o <Text style={[styles.bold, { color: boldColor }]}>Arquétipo</Text>), para revelar qual papel este nome tem perante a sociedade.
-          </Text>
+          {isFreeAnalysis ? (
+            <View style={{ marginBottom: 14 }}>
+              {[
+                ['5 Números Principais', 'Os pilares da sua identidade vibracional.'],
+                ['Pirâmides de Fluxo', 'O mapa do seu dia a dia — como sua energia se organiza no mundo real.'],
+                ['Bloqueios e Falhas', 'Onde a sua energia está sendo drenada — sequências repetidas que travam os resultados.'],
+                ['Lições Kármicas', 'Vibrações ausentes no nome que criam pontos cegos na vida.'],
+                ['Tendências Ocultas', 'Excessos que distorcem comportamentos e sabotam potencial.'],
+                ['Arquétipo', 'O papel mítico que este nome projeta no mundo — sua identidade de força e sombra.'],
+              ].map(([title, desc], i) => (
+                <View key={i} style={{ flexDirection: 'row', marginBottom: 8 }}>
+                  <Text style={{ fontSize: 11, color: boldColor, fontFamily: 'Helvetica-Bold', marginRight: 4 }}>•</Text>
+                  <Text style={{ fontSize: 11, color: textColor, lineHeight: 1.5, flex: 1 }}>
+                    <Text style={{ fontFamily: 'Helvetica-Bold', color: boldColor }}>{title}:</Text>{' '}{desc}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={[styles.bodyText, { color: textColor }]}>
+              As informações apresentadas a seguir não são adivinhações. Usamos cálculos lógicos e estritos. Primeiro, o nosso sistema cruza as letras e descobre os <Text style={[styles.bold, { color: boldColor }]}>5 Números Principais</Text>, que são os pilares da sua análise. Depois, montamos uma pirâmide chamada <Text style={[styles.bold, { color: boldColor }]}>Os 4 Triângulos Numerológicos</Text>, que mostram o mapa de como as coisas realmente vão funcionar no seu dia a dia.
+              {'\n\n'}
+              Também procuramos falhas perigosas que queremos evitar a todo custo: analisamos os <Text style={[styles.bold, { color: boldColor }]}>Bloqueios</Text> (sequências repetidas de números que paralisam a vida), verificamos as <Text style={[styles.bold, { color: boldColor }]}>Lições Kármicas</Text> (energias e aprendizados que estão faltando) e detectamos as <Text style={[styles.bold, { color: boldColor }]}>Tendências Ocultas</Text> (exageros de energia que fazem mal). Finalmente, tudo isso é envolvido em um grande perfil psicológico mundial (o <Text style={[styles.bold, { color: boldColor }]}>Arquétipo</Text>), para revelar qual papel este nome tem perante a sociedade.
+            </Text>
+          )}
 
           <Text style={[styles.subHead, { color: textColor }]}>
             O Peso dos Dados Imutáveis e a Nota de 0 a 100

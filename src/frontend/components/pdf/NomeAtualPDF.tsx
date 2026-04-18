@@ -310,6 +310,14 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
   const debitos = Array.isArray(analysis.debitos_carmicos) ? analysis.debitos_carmicos : [];
   const licoes = Array.isArray(analysis.licoes_carmicas) ? analysis.licoes_carmicas : [];
   const tendencias = Array.isArray(analysis.tendencias_ocultas) ? analysis.tendencias_ocultas : [];
+
+  const rawScore = (analysis as any).score as number | null | undefined;
+  type ScoreNivel = 'baixo' | 'aceitavel' | 'excelente' | null;
+  const scoreNivel: ScoreNivel =
+    rawScore == null ? null
+    : rawScore >= 80 ? 'excelente'
+    : rawScore >= 50 ? 'aceitavel'
+    : 'baixo';
   const frequencias: Record<string, number> | null =
     freqData?.frequencias ?? (freqData && !freqData?.ranking ? freqData : null);
 
@@ -359,7 +367,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
       />
 
       {/* ── PÁGINA INTRODUTÓRIA: GUIA DE LEITURA ────────────────────────── */}
-      <PDFStandardIntro theme={theme} productType="nome_social" entityName={nomeParaExibir} />
+      <PDFStandardIntro theme={theme} productType="nome_social" entityName={nomeParaExibir} isFreeAnalysis={true} />
 
       {/* Rankeamento removido do relatório atual */}
 
@@ -459,33 +467,41 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           <TendenciasBlock tendencias={tendencias} frequencias={frequencias} showSolution={false} />
         </View>
 
-        {/* Diagnóstico Consolidado — box alarming */}
+        {/* Diagnóstico Consolidado */}
         {(bloqueios.length > 0 || debitos.length > 0 || licoes.length > 0 || tendencias.length > 0) && (
-          <View style={{ backgroundColor: '#1A0000', borderWidth: 1.5, borderColor: '#EF4444', borderRadius: 8, padding: 14, marginTop: 8 }} wrap={false}>
-            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 12, color: '#EF4444', marginBottom: 8, textAlign: 'center' }}>
-              ⚠ Diagnóstico Consolidado — Frequências Ativas no Seu Nome
+          <View style={{ backgroundColor: 'rgba(220,38,38,0.06)', borderWidth: 1.5, borderColor: '#C53030', borderRadius: 8, padding: 16, marginTop: 10 }} wrap={false}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 11, color: '#C53030', marginBottom: 10, textAlign: 'center', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              Diagnóstico Consolidado — Frequências Ativas no Seu Nome
             </Text>
             {bloqueios.length > 0 && (
-              <Text style={{ fontSize: 10, color: '#FCA5A5', marginBottom: 4 }}>
-                🔴 {bloqueios.length} bloqueio{bloqueios.length > 1 ? 's' : ''} energético{bloqueios.length > 1 ? 's' : ''} — emitindo frequências de travamento 24h/dia
-              </Text>
+              <View style={{ backgroundColor: 'rgba(220,38,38,0.08)', borderRadius: 4, padding: 7, marginBottom: 5 }}>
+                <Text style={{ fontSize: 10, color: '#7F1D1D', fontFamily: 'Helvetica-Bold' }}>
+                  {bloqueios.length} bloqueio{bloqueios.length > 1 ? 's' : ''} energético{bloqueios.length > 1 ? 's' : ''} — frequências de travamento ativas 24h/dia
+                </Text>
+              </View>
             )}
             {debitos.length > 0 && (
-              <Text style={{ fontSize: 10, color: '#FCD34D', marginBottom: 4 }}>
-                🟡 {debitos.length} débito{debitos.length > 1 ? 's' : ''} kármico{debitos.length > 1 ? 's' : ''} — padrões de encarnações passadas ainda ativos
-              </Text>
+              <View style={{ backgroundColor: 'rgba(180,83,9,0.07)', borderRadius: 4, padding: 7, marginBottom: 5 }}>
+                <Text style={{ fontSize: 10, color: '#92400E', fontFamily: 'Helvetica-Bold' }}>
+                  {debitos.length} débito{debitos.length > 1 ? 's' : ''} kármico{debitos.length > 1 ? 's' : ''} — padrões de encarnações passadas ainda ativos
+                </Text>
+              </View>
             )}
             {licoes.length > 0 && (
-              <Text style={{ fontSize: 10, color: '#93C5FD', marginBottom: 4 }}>
-                🔵 {licoes.length} lição{licoes.length > 1 ? 'ões' : ''} kármica{licoes.length > 1 ? 's' : ''} — vibrações ausentes criando lacunas crônicas
-              </Text>
+              <View style={{ backgroundColor: 'rgba(3,105,161,0.07)', borderRadius: 4, padding: 7, marginBottom: 5 }}>
+                <Text style={{ fontSize: 10, color: '#1E3A5F', fontFamily: 'Helvetica-Bold' }}>
+                  {licoes.length} lição{licoes.length > 1 ? 'ões' : ''} kármica{licoes.length > 1 ? 's' : ''} — vibrações ausentes criando lacunas crônicas
+                </Text>
+              </View>
             )}
             {tendencias.length > 0 && (
-              <Text style={{ fontSize: 10, color: '#C4B5FD', marginBottom: 4 }}>
-                🟣 {tendencias.length} tendência{tendencias.length > 1 ? 's' : ''} oculta{tendencias.length > 1 ? 's' : ''} — excessos que criam ciclos repetitivos
-              </Text>
+              <View style={{ backgroundColor: 'rgba(109,40,217,0.07)', borderRadius: 4, padding: 7, marginBottom: 5 }}>
+                <Text style={{ fontSize: 10, color: '#4C1D95', fontFamily: 'Helvetica-Bold' }}>
+                  {tendencias.length} tendência{tendencias.length > 1 ? 's' : ''} oculta{tendencias.length > 1 ? 's' : ''} — excessos que geram ciclos repetitivos
+                </Text>
+              </View>
             )}
-            <Text style={{ fontSize: 9, color: '#FCA5A5', marginTop: 8, fontStyle: 'italic', textAlign: 'center' }}>
+            <Text style={{ fontSize: 9, color: '#7F1D1D', marginTop: 8, fontStyle: 'italic', textAlign: 'center' }}>
               Nenhum desses padrões pode ser neutralizado por esforço ou força de vontade. A origem está na frequência emitida pelo nome.
             </Text>
           </View>
@@ -554,15 +570,51 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
       {/* ── PÁGINA FINAL: CTA — DIAGNÓSTICO CLARO (FUNDO ESCURO) ───────────── */}
       <Page size="A4" style={styles.darkPage}>
         <View style={{ marginTop: 24, marginBottom: 20 }}>
-          <Text style={[styles.hugeTitle, { color: bloqueios.length > 0 ? '#EF4444' : GOLD }]}>
-            {bloqueios.length > 0
+          <Text style={[styles.hugeTitle, {
+            color: scoreNivel === 'excelente' ? GOLD
+              : scoreNivel === 'aceitavel' ? '#F59E0B'
+              : bloqueios.length > 0 ? '#EF4444'
+              : GOLD
+          }]}>
+            {scoreNivel === 'excelente'
+              ? 'Sua Frequência Tem Base Sólida — Mas Há Refinamentos'
+              : scoreNivel === 'aceitavel'
+              ? 'O Diagnóstico Revelou: Seu Nome Pode Trabalhar Mais Por Você'
+              : bloqueios.length > 0
               ? 'O Diagnóstico É Claro — E o Nome Continua Emitindo'
               : 'Sua Frequência Pode Ser Ainda Mais Poderosa'}
           </Text>
+          {rawScore != null && (
+            <Text style={{ fontSize: 10, color: scoreNivel === 'excelente' ? '#10B981' : scoreNivel === 'aceitavel' ? '#F59E0B' : '#EF4444', textAlign: 'center', marginTop: 6 }}>
+              Score do nome atual: {rawScore}/100
+            </Text>
+          )}
         </View>
 
-        {/* Box urgência (se tiver bloqueios) */}
-        {bloqueios.length > 0 && (
+        {/* Box diagnóstico — varia por nível */}
+        {scoreNivel === 'excelente' ? (
+          <View style={{ backgroundColor: 'rgba(212,175,55,0.10)', borderWidth: 1, borderColor: GOLD, borderRadius: 8, padding: 14, marginBottom: 16 }} wrap={false}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 11, color: GOLD, textAlign: 'center', marginBottom: 6 }}>
+              Vibração acima da média — refinamentos identificados
+            </Text>
+            <Text style={{ fontSize: 10, color: '#e5e2e1', textAlign: 'center', lineHeight: 1.5 }}>
+              Mesmo com uma frequência favorável, a análise detectou padrões que ainda podem ser ajustados.{'\n'}
+              A harmonização remove os últimos pontos de resistência — tornando o campo vibracional completo.
+            </Text>
+          </View>
+        ) : scoreNivel === 'aceitavel' ? (
+          <View style={{ backgroundColor: 'rgba(245,158,11,0.10)', borderWidth: 1, borderColor: '#F59E0B', borderRadius: 8, padding: 14, marginBottom: 16 }} wrap={false}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 11, color: '#F59E0B', textAlign: 'center', marginBottom: 6 }}>
+              {bloqueios.length > 0
+                ? `${bloqueios.length} bloqueio${bloqueios.length > 1 ? 's' : ''} ativo${bloqueios.length > 1 ? 's' : ''} limitando seu potencial`
+                : 'Padrões que ainda limitam seus resultados'}
+            </Text>
+            <Text style={{ fontSize: 10, color: '#FDE68A', textAlign: 'center', lineHeight: 1.5 }}>
+              Seu nome opera em frequência parcialmente alinhada — mas aceitável não é o máximo que ele pode entregar.{'\n'}
+              Esses padrões continuam agindo enquanto o nome não for harmonizado.
+            </Text>
+          </View>
+        ) : bloqueios.length > 0 ? (
           <View style={{ backgroundColor: 'rgba(220,38,38,0.15)', borderWidth: 1, borderColor: '#EF4444', borderRadius: 8, padding: 14, marginBottom: 16 }} wrap={false}>
             <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 11, color: '#EF4444', textAlign: 'center', marginBottom: 6 }}>
               {bloqueios.length} bloqueio{bloqueios.length > 1 ? 's' : ''} energético{bloqueios.length > 1 ? 's' : ''} detectado{bloqueios.length > 1 ? 's' : ''} no seu nome
@@ -572,7 +624,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
               Comportamento e força de vontade não mudam o que está codificado no nome.
             </Text>
           </View>
-        )}
+        ) : null}
 
         {/* Box o que a harmonização faz */}
         <View style={{ backgroundColor: 'rgba(212,175,55,0.08)', borderWidth: 1, borderColor: GOLD, borderRadius: 8, padding: 14, marginBottom: 16 }} wrap={false}>
@@ -590,17 +642,38 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           </Text>
         </View>
 
-        {/* Citação */}
-        <View style={{ borderLeftWidth: 3, borderLeftColor: GOLD, paddingLeft: 14, marginBottom: 20 }}>
+        {/* Citação — varia por nível */}
+        <View style={{ borderLeftWidth: 3, borderLeftColor: scoreNivel === 'aceitavel' ? '#F59E0B' : GOLD, paddingLeft: 14, marginBottom: 20 }}>
           <Text style={{ fontSize: 10, color: '#9CA3AF', fontStyle: 'italic', lineHeight: 1.6 }}>
-            "Conhecer os bloqueios sem harmonizá-los é como saber que a torneira está furada e continuar enchendo o balde."
+            {scoreNivel === 'excelente'
+              ? '"Uma frequência boa pode ser excelente. A diferença entre os dois está nos últimos padrões que o nome ainda carrega."'
+              : scoreNivel === 'aceitavel'
+              ? '"Aceitável é o nível onde as pessoas param de procurar a causa dos resultados que faltam. O nome continua emitindo."'
+              : '"Conhecer os bloqueios sem harmonizá-los é como saber que a torneira está furada e continuar enchendo o balde."'}
+          </Text>
+        </View>
+
+        {/* Âncora de preço */}
+        <View style={{ backgroundColor: 'rgba(212,175,55,0.06)', borderWidth: 1, borderColor: 'rgba(212,175,55,0.3)', borderRadius: 8, padding: 12, marginBottom: 16 }} wrap={false}>
+          <Text style={{ fontSize: 10, color: '#92640F', fontStyle: 'italic', textAlign: 'center', lineHeight: 1.6 }}>
+            {scoreNivel === 'excelente'
+              ? `A Harmonização do seu nome é R$ 98 — um único ajuste para transformar uma boa frequência em uma frequência magneticamente irresistível.`
+              : scoreNivel === 'aceitavel'
+              ? `Quanto custa mais um ano com uma frequência que entrega 60% do que poderia? A Harmonização é R$ 98 — menos que um jantar, para destravar o que está sendo bloqueado silenciosamente.`
+              : bloqueios.length > 0
+              ? `Quanto custa mais um ano com o Bloqueio ${bloqueios[0]?.codigo ?? ''} repelindo seus resultados?\nA Harmonização do seu nome é R$ 98 — menos que um jantar, para uma frequência que muda o que está codificado no seu nome para sempre.`
+              : 'A Harmonização do seu nome é R$ 98 — um único investimento para recalibrar a frequência que você emite todos os dias da sua vida.'}
           </Text>
         </View>
 
         {/* CTA */}
         <View style={{ alignItems: 'center', marginTop: 8 }}>
           <Text style={{ fontFamily: TITLE_FONT, fontSize: 13, color: '#FFFFFF', marginBottom: 6, textAlign: 'center' }}>
-            O diagnóstico está feito. A transformação espera por você.
+            {scoreNivel === 'excelente'
+              ? 'O diagnóstico está feito. O próximo nível espera por você.'
+              : scoreNivel === 'aceitavel'
+              ? 'O diagnóstico está feito. Seu potencial completo espera por você.'
+              : 'O diagnóstico está feito. A transformação espera por você.'}
           </Text>
           <Text style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 18, textAlign: 'center' }}>
             Acesse o produto Nome Social para harmonizar sua frequência agora.

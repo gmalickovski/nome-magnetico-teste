@@ -130,7 +130,9 @@ ${debitosTexto}
 Elabore um relatório numerológico cabalístico completo e profundamente personalizado para **${primeiroNome}**.
 O sistema indicou que a pessoa se identifica com o gênero: **${gender}**. Adapte pronomes, adjetivos e tom para refletir esse gênero ao longo de todo o texto.
 
-Escreva cada seção com pelo menos 3 parágrafos densos e específicos. Evite generalidades — cada afirmação deve estar ancorada nos números concretos desta pessoa. Este relatório vale R$150+ e deve justificar esse valor com revelações que a pessoa nunca ouviu sobre si mesma.
+${isFreeAnalysis
+  ? `MODO DIAGNÓSTICO: Máximo 2 parágrafos curtos por seção (≤120 palavras cada). Estilo: médico diagnosticador, não terapeuta. NÃO descreva virtudes de forma isolada — sempre conecte a qualidade ao conflito com outro número que a sabota ou ao problema que ela não resolve sozinha. O objetivo é o usuário reconhecer um problema urgente, não sentir-se bem consigo mesmo.`
+  : `Escreva cada seção com pelo menos 3 parágrafos densos e específicos. Evite generalidades — cada afirmação deve estar ancorada nos números concretos desta pessoa. Este relatório vale R$150+ e deve justificar esse valor com revelações que a pessoa nunca ouviu sobre si mesma.`}
 
 Siga EXATAMENTE esta estrutura de seções, nesta ordem:
 
@@ -146,9 +148,11 @@ Escreva uma visão panorâmica e reveladora da energia do nome completo de ${pri
 
 ---
 
-## 🔢 2. A Estrela de 5 Pontas — Anatomia do Nome
+## 🔢 2. A Estrela de 5 Pontas — ${isFreeAnalysis ? 'O Conflito Central' : 'Anatomia do Nome'}
 
-Para cada um dos 5 números, escreva uma análise aprofundada e específica para ${primeiroNome}. Exigimos no mínimo 3 parágrafos densos (5 a 6 linhas cada) por número:
+${isFreeAnalysis
+  ? `Identifique o principal CONFLITO entre dois dos números de ${primeiroNome}. Escolha o par mais dissonante entre os 5 números (Expressão ${cincoNumeros.expressao}, Destino ${cincoNumeros.destino}, Motivação ${cincoNumeros.motivacao}, Impressão ${cincoNumeros.impressao}, Missão ${cincoNumeros.missao}) — por exemplo: "Motivação ${cincoNumeros.motivacao} exige X, mas Missão ${cincoNumeros.missao} joga para o Y". Escreva 1 parágrafo cirúrgico (máx 120 palavras) explicando a guerra interna que essa dissonância cria — em quais situações concretas ela sabota os resultados, drena energia ou faz ${primeiroNome} se sentir dividido(a) sem entender por quê.`
+  : `Para cada um dos 5 números, escreva uma análise aprofundada e específica para ${primeiroNome}. Exigimos no mínimo 3 parágrafos densos (5 a 6 linhas cada) por número:
 
 ### 2.1 Expressão ${cincoNumeros.expressao} — O Dom que Veio Manifestar
 Talentos naturais, forma de agir e comunicar, o que este número revela sobre como ${primeiroNome} cria impacto no mundo. Explore tanto a polaridade positiva (o dom em pleno florescimento) quanto o padrão de sombra (como esse dom pode virar excesso ou se bloquear). Como este número se manifesta especificamente na carreira e criatividade. Detalhe como a pessoa resolve problemas complexos usando essa Expressão.
@@ -163,7 +167,8 @@ O que move ${primeiroNome} por dentro — o desejo da alma que nem sempre é con
 Como ${primeiroNome} é percebido pelas outras pessoas antes mesmo de abrir a boca. A "máscara social" que este número cria — sua utilidade como escudo e seus limites para intimidade. Descreva a diferença entre quem ${primeiroNome} é por dentro (Motivação) e como aparece por fora (Impressão), detalhando a quebra de expectativa.
 
 ### 2.5 Missão ${cincoNumeros.missao} — A Síntese da Jornada
-O que a soma de Destino + Expressão revela como vocação máxima. Este número representa o campo onde ${primeiroNome} deixará seu legado definitivo. Aprofunde em como se manifesta a vida quando esta pessoa está ativamente vivendo sua missão plena contraposta aos dias em que está desviada dela.
+O que a soma de Destino + Expressão revela como vocação máxima. Este número representa o campo onde ${primeiroNome} deixará seu legado definitivo. Aprofunde em como se manifesta a vida quando esta pessoa está ativamente vivendo sua missão plena contraposta aos dias em que está desviada dela.`
+}
 
 ---
 
@@ -174,19 +179,29 @@ ATENÇÃO: Abaixo deste título, você DEVE escrever EXATAMENTE estes 2 parágra
 
 "A leitura desses triângulos funciona de forma orgânica e reveladora. Eles desdobram as influências desde a fundação física e vital, passando pelo universo íntimo e emocional, pela forma como o mundo externo lhe percebe, até culminar no propósito maior que o destino inevitably atrairá. A seguir, detalharemos cada uma dessas quatro dimensões essenciais."
 
-Após esses dois parágrafos obrigatórios, prossiga com a análise individual. Cada triângulo revela uma dimensão distinta da energia de ${primeiroNome}. Para cada um, escreva 2 parágrafos reveladores:
+Após esses dois parágrafos obrigatórios, prossiga com a análise individual. ${isFreeAnalysis ? `Expanda APENAS o Triângulo da Vida com 2 parágrafos completos. Para os outros 3 triângulos, escreva APENAS o título e 1 frase de diagnóstico (ex: "Triângulo Pessoal: revela sua vida emocional íntima — análise completa disponível na harmonização").` : `Cada triângulo revela uma dimensão distinta da energia de ${primeiroNome}. Para cada um, escreva 2 parágrafos reveladores:`}
 
 ### Triângulo da Vida (Arcano **${todosTriangulos.vida.arcanoRegente ?? '—'}**)
 A vibração base que permeia toda a trajetória de vida. Padrões que se repetem em diferentes fases e contextos. O que o Arcano **${todosTriangulos.vida.arcanoRegente ?? '—'}** revela como tema arquetípico dominante desta encarnação.
 
-### Triângulo Pessoal (Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}**)
+${isFreeAnalysis
+  ? `### Triângulo Pessoal (Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}**)
+Revela a vida emocional íntima e as reações internas de ${primeiroNome} — análise completa disponível na harmonização.
+
+### Triângulo Social (Arcano **${todosTriangulos.social.arcanoRegente ?? '—'}**)
+Mapeia como o mundo percebe e responde a ${primeiroNome} — análise completa disponível na harmonização.
+
+### Triângulo do Destino (Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}**)
+Revela os resultados e frutos que a energia deste nome tende a produzir ao longo da vida — análise completa disponível na harmonização.`
+  : `### Triângulo Pessoal (Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}**)
 Como ${primeiroNome} se sente por dentro — o mundo emocional, as reações íntimas, o que nunca mostra. Como o Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}** molda a vida afetiva, o autocuidado e a relação com a vulnerabilidade.
 
 ### Triângulo Social (Arcano **${todosTriangulos.social.arcanoRegente ?? '—'}**)
 Como o mundo percebe e responde a ${primeiroNome}. Que tipo de relações, oportunidades e desafios este triângulo atrai. O que o Arcano **${todosTriangulos.social.arcanoRegente ?? '—'}** diz sobre o papel social que esta pessoa tende a ocupar.
 
 ### Triângulo do Destino (Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}**)
-Os resultados que ${primeiroNome} tende a colher — o que a energia deste triângulo produz como frutos ao longo da vida. O Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}** como revelador da missão e dos ciclos de amadurecimento.
+Os resultados que ${primeiroNome} tende a colher — o que a energia deste triângulo produz como frutos ao longo da vida. O Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}** como revelador da missão e dos ciclos de amadurecimento.`
+}
 
 ${bloqueios.length > 0
   ? isFreeAnalysis
@@ -271,11 +286,16 @@ Manifestações positivas: ${arquetipo.expressaoPositiva.join(' | ')}
 Sombra a integrar: ${arquetipo.expressaoSombra.join(' | ')}
 Figuras míticas de referência: ${arquetipo.figurasMiticas.join(', ')}
 
-ATENÇÃO OBRIGATÓRIA: Descreva este arquétipo com no mínimo 4 parágrafos profundos, filosóficos e ancorados no cotidiano, com 5 a 6 linhas cada parágrafo:
+${isFreeAnalysis
+  ? `ATENÇÃO: Escreva APENAS 2 parágrafos curtos (máx 120 palavras cada):
+- Parágrafo 1 (essência): 1-2 frases sobre o dom central do(a) **${arquetipo.nome}** — o que torna essa energia poderosa.
+- Parágrafo 2 (sombra ativa): 2-3 frases descrevendo como a sombra do(a) ${arquetipo.nome} opera na prática — como sabota resultados, relacionamentos ou autoestima. O usuário precisa se reconhecer na disfunção, não se sentir exaltado.`
+  : `ATENÇÃO OBRIGATÓRIA: Descreva este arquétipo com no mínimo 4 parágrafos profundos, filosóficos e ancorados no cotidiano, com 5 a 6 linhas cada parágrafo:
 - Parágrafo 1: Apresente o arquétipo do(a) **${arquetipo.nome}** como o "avatar principal" que ${primeiroNome} usa para navegar na terra. O que isso significa na visão macro da vida?
 - Parágrafo 2: Como a essência profunda deste arquétipo interage organicamente com os bloqueios, dívidas e padrões numéricos apontados ao longo deste relatório.
 - Parágrafo 3: A disfunção do arquétipo (sua sombra): como o(a) ${arquetipo.nome} perde poder e sabota a própria grandeza (usar as manifestações sombrias apontadas acima).
-- Parágrafo 4: O resgate do poder: o que ${primeiroNome} precisa fazer na vida prática, na profissão e no amor para viver a oitava superior e mais vitoriosa deste arquétipo mítico.
+- Parágrafo 4: O resgate do poder: o que ${primeiroNome} precisa fazer na vida prática, na profissão e no amor para viver a oitava superior e mais vitoriosa deste arquétipo mítico.`
+}
 
 ---
 

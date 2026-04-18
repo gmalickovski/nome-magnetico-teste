@@ -86,7 +86,7 @@ export const THEME_NOME_ATUAL: ProductTheme = {
   featuredNumberLabel: 'Expressão',
   featuredNumberSublabel: 'O Dom',
   productLabel: 'Análise do Nome de Nascimento',
-  coverSubtitle: 'Diagnóstico Numérico Cabalístico',
+  coverSubtitle: 'Análise de Harmonia Vibracional',
 };
 
 /** Cores comuns a todos os PDFs (conteúdo, não capa) */

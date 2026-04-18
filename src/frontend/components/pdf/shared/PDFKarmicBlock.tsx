@@ -228,30 +228,46 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   custoInerciaBox: {
-    backgroundColor: '#2D0000',
-    borderLeftWidth: 3,
-    borderLeftColor: '#EF4444',
-    padding: 10,
-    borderRadius: 4,
+    backgroundColor: 'rgba(220,38,38,0.07)',
+    borderWidth: 1.5,
+    borderColor: '#DC2626',
+    borderRadius: 6,
+    padding: 12,
     marginTop: 8,
+  },
+  custoInerciaTitle: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#DC2626',
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.5,
+    marginBottom: 4,
   },
   custoInerciaText: {
-    fontSize: 9,
-    color: '#FECACA',
-    lineHeight: 1.5,
+    fontSize: 10,
+    color: '#7F1D1D',
+    lineHeight: 1.6,
   },
   licaoHarmonizacaoBox: {
-    backgroundColor: 'rgba(109,40,217,0.05)',
-    borderLeftWidth: 3,
-    borderLeftColor: '#6d28d9',
-    padding: 10,
-    borderRadius: 4,
-    marginTop: 8,
+    backgroundColor: 'rgba(212,175,55,0.07)',
+    borderWidth: 1.5,
+    borderColor: '#D4AF37',
+    borderRadius: 6,
+    padding: 12,
+    marginTop: 10,
+  },
+  licaoHarmonizacaoTitle: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#92640F',
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.8,
+    marginBottom: 5,
   },
   licaoHarmonizacaoText: {
-    fontSize: 9,
-    color: '#3b1f6b',
-    lineHeight: 1.5,
+    fontSize: 10,
+    color: '#1A202C',
+    lineHeight: 1.6,
   },
 });
 
@@ -335,14 +351,12 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: 
           ) : null}
           {!showAntidoto && (
             <View style={styles.custoInerciaBox}>
-              <Text style={[styles.custoInerciaText, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>
-                ⚠ Custo da Inércia
-              </Text>
+              <Text style={styles.custoInerciaTitle}>⚠ Custo da Inércia</Text>
               <Text style={styles.custoInerciaText}>
                 {CUSTO_INERCIA_MAP[b.codigo] ?? 'Esta frequência continua sendo emitida pelo nome 24 horas por dia — apenas a harmonização vibracional do Nome Social pode neutralizá-la.'}
               </Text>
-              <Text style={[styles.custoInerciaText, { marginTop: 6, fontStyle: 'italic' }]}>
-                Esta frequência continua sendo emitida 24h/dia — apenas a harmonização vibracional pode neutralizá-la.
+              <Text style={[styles.custoInerciaText, { marginTop: 6, fontStyle: 'italic', color: '#991B1B' }]}>
+                Esta frequência é emitida 24h/dia — apenas a harmonização vibracional pode neutralizá-la.
               </Text>
             </View>
           )}
@@ -389,10 +403,8 @@ export function DebitosBlock({ debitos, showSolution = true }: { debitos: Debito
         );
       })}
       {!showSolution && (
-        <View style={[styles.licaoHarmonizacaoBox, { marginTop: 8 }]} wrap={false}>
-          <Text style={[styles.licaoHarmonizacaoText, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>
-            Como a Harmonização Atua nos Débitos Kármicos
-          </Text>
+        <View style={styles.licaoHarmonizacaoBox} wrap={false}>
+          <Text style={styles.licaoHarmonizacaoTitle}>Como a Harmonização Atua nos Débitos Kármicos</Text>
           <Text style={styles.licaoHarmonizacaoText}>
             Débitos variáveis — originados nos números de Motivação ou Expressão — podem ser reduzidos ou eliminados por uma variação do nome que reajuste essas frequências. O processo de harmonização calcula combinações que minimizam esses padrões no campo vibracional.
           </Text>
@@ -422,10 +434,8 @@ export function LicoesBlock({ licoes, showSolution = true }: { licoes: LicaoData
         </View>
       ))}
       {!showSolution && (
-        <View style={[styles.licaoHarmonizacaoBox, { marginTop: 8 }]} wrap={false}>
-          <Text style={[styles.licaoHarmonizacaoText, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>
-            Como a Harmonização Resolve as Lições Kármicas
-          </Text>
+        <View style={styles.licaoHarmonizacaoBox} wrap={false}>
+          <Text style={styles.licaoHarmonizacaoTitle}>Como a Harmonização Resolve as Lições Kármicas</Text>
           <Text style={styles.licaoHarmonizacaoText}>
             O Nome Social Harmonizado pode introduzir as vibrações ausentes no seu campo energético. Quando o nome passa a conter esses números, a qualidade em falta começa a ser cultivada naturalmente — sem depender exclusivamente de esforço consciente.
           </Text>
@@ -499,10 +509,8 @@ export function TendenciasBlock({
             </View>
           ))}
           {!showSolution && (
-            <View style={[styles.licaoHarmonizacaoBox, { marginTop: 8 }]} wrap={false}>
-              <Text style={[styles.licaoHarmonizacaoText, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>
-                Como a Harmonização Reequilibra as Tendências
-              </Text>
+            <View style={styles.licaoHarmonizacaoBox} wrap={false}>
+              <Text style={styles.licaoHarmonizacaoTitle}>Como a Harmonização Reequilibra as Tendências</Text>
               <Text style={styles.licaoHarmonizacaoText}>
                 A redistribuição vibracional do Nome Social ajusta a proporção dos números em excesso na raiz do campo energético. O que hoje cria ciclos repetitivos encontra contrapeso natural no novo campo vibracional — algo que esforço consciente sozinho não consegue alcançar.
               </Text>
