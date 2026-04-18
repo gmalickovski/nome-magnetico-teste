@@ -334,11 +334,9 @@ ${isCurrentNameAnalysis ? '- **Prática Diária:** Como escrever o próprio nome
 ## 🌟 ${isFreeAnalysis ? (arquetipo ? '8' : '7') : (arquetipo ? '9' : '8')}. Síntese e Mensagem Final
 
 ${isFreeAnalysis
-  ? `Escreva uma conclusão poderosa (4 parágrafos) que:
-- Conecte todos os elementos revelados — números, bloqueios, karma, arcano e arquétipo — em uma narrativa coesa do padrão que o nome atual de ${primeiroNome} está criando na vida dela/dele
-- Fale em segunda pessoa direta: "você", "sua jornada", "sua realidade"
-- Nomeie com clareza o que continuará acontecendo enquanto essa frequência não for harmonizada — sem dramatismo excessivo, mas com honestidade sobre o custo da inércia
-- Encerre com um convite direto e compassivo: o diagnóstico está feito, o problema está mapeado, e a solução existe — a harmonização do Nome Social é o próximo passo para transformar essa leitura em mudança real. Não dê passos práticos; apenas aponte para a harmonização como a porta.`
+  ? `Escreva uma síntese final no estilo de laudo médico — 2 parágrafos curtos (máx 120 palavras cada):
+- Parágrafo 1: Comece com "O diagnóstico confirma [N] padrões ativos no nome de ${primeiroNome}:" e liste concretamente os bloqueios, débitos e lições detectados. Afirme que esses padrões operam 24 horas por dia, independente de esforço, terapia ou força de vontade.
+- Parágrafo 2: Afirme que a única variável não tratada é a origem — o nome. Comportamento e intenção não alteram o campo vibracional emitido pelo nome a cada momento. Encerre com uma única pergunta retórica direta: quanto custa mais um ano com essa frequência operando em silêncio? NÃO mencione "vida equilibrada", "harmoniosa" ou "plena". NÃO ofereça conforto. O diagnóstico está feito — aponte a harmonização como a única solução objetiva.`
   : `Escreva uma conclusão profunda e poderosa (4 parágrafos) que:
 - Conecte todos os elementos — números, bloqueios, karma, arcano e arquétipo — em uma narrativa de propósito único para ${primeiroNome}
 - Fale em segunda pessoa direta: "você", "sua jornada", "sua missão"

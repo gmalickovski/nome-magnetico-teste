@@ -388,10 +388,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
             accentColor={theme.accentColor}
           />
           <Text style={{ ...styles.bodyText, marginTop: 16 }}>
-            Na geometria sagrada e na numerologia cabalística, a sua energia vital está ancorada em 5 frequências principais, formando o seu Pentagrama Pessoal de luz. 
-          </Text>
-          <Text style={{ ...styles.bodyText, marginTop: 4 }}>
-            A <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Expressão</Text> define suas qualidades inatas, enquanto a <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Motivação</Text> revela o combustível espiritual da sua Alma. Sua <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Impressão</Text> é o invólucro do seu carisma no plano social; e na base, moldando sua jornada e resultados a longo prazo, está o número do <Text style={{ fontFamily: BODY_FONT_BOLD, color: GOLD }}>Destino</Text>. Somente quando estes 5 polos operam em total alinhamento e ressonância cósmica, a estrela desperta — transmutando esforço em potência, fluidez e prosperidade manifesta em seu caminho e na sua Missão.
+            Cinco frequências regem sua identidade vibracional — cada uma amplificando ou sabotando as outras.
           </Text>
         </View>
 
@@ -400,7 +397,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
             O Arquétipo - Sua Identidade Mítica
           </Text>
           <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
-            Os arquétipos são energias primordiais que governam o comportamento humano. Na metodologia do Nome Magnético, o seu número de Expressão revela o seu Arquétipo Regente: o 'personagem' que você interpreta no palco da vida. Conhecer seu arquétipo permite que você use seus talentos naturais com maestria e neutralize as sombras que impedem seu crescimento.
+            O número de Expressão revela o arquétipo que você interpreta na vida — com seus talentos e suas sombras ativas.
           </Text>
           <ArquetipoCardPDF arquetipo={getArquetipo(analysis.numero_expressao ?? 1)} />
         </View>
@@ -444,8 +441,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706', fontSize: 13 }]}>
             Débitos Kármicos
           </Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Na visão da numerologia cabalística, a jornada da Alma não é uma linha reta, mas um espiral transcendente de ciclos evolutivos. Os Débitos Kármicos emergem como ecos das suas vidas anteriores, marcando áreas da sua existência onde o livre-arbítrio foi utilizado em desequilíbrio — seja pelo excesso de autoridade cega, rebeldia irresponsável, estagnação ou puro materialismo. Destaca-se que eles não são punições de um universo severo, mas puras leis de compensação exigindo reintegração espiritual.</Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Ao carregar estas pendências em seu código de nascimento, os mesmos cenários de traição, perda ou esforço redobrado tenderão a se repetir até que a lição moral matriz seja integrada. Identificar e compreender seus débitos através deste cálculo liberta você das prisões repetitivas; ao adotar a resposta consciente baseada na antítese dessa sombra, esse fardo se transmuta e você conquista a verdadeira sabedoria atemporal que liberta o seu fluxo.</Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Padrões de encarnações anteriores que se repetem como traição, perda ou esforço redobrado — até a lição ser integrada.</Text>
           <DebitosBlock debitos={debitos} showSolution={false} />
         </View>
 
@@ -453,8 +449,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           <Text style={[styles.sectionTitle, { color: '#0369a1', borderBottomColor: '#0369a1', fontSize: 13 }]}>
             Lições Kármicas
           </Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>As Lições Kármicas funcionam como os "quartos vazios" da sua grandiosa arquitetura energética: elas determinam exatamente quais virtudes, habilidades sutis ou atributos de maestria estão ausentes no momento de sua encarnação. Sendo traços que você não experenciou ou se negou a desenvolver nas vidas que precederam esta, você tenderá a se sentir inapto ou vulnerável sempre que uma situação de grande peso demandar o sacrifício destas características.</Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Entretanto, encarar essa constatação como uma fraqueza permanente seria um engano. Uma lição não é um atestado de ausência, mas um convite vibrante à expansão prática. O seu próprio Destino frequentemente orquestrará desafios propositais com a missão velada de forçar você a dominar essas ferramentas ocultas. Aplicar a ação disciplinada e paciente frente a esses números ausentes tornará este "déficit" inicial em um de seus maiores trunfos maduros no pico da sua jornada.</Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Vibrações ausentes no nome que criam pontos cegos crônicos — áreas onde você se sente inapto independente do esforço.</Text>
           <LicoesBlock licoes={licoes} showSolution={false} />
         </View>
 
@@ -462,8 +457,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           <Text style={[styles.sectionTitle, { color: '#6d28d9', borderBottomColor: '#6d28d9', fontSize: 13 }]}>
             Tendências Ocultas
           </Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Se as lições evidenciam aquilo que falta em seu arcabouço letal, as Tendências Ocultas escancaram exatamente aquilo que lhe sobra. Elas apontam para habilidades instintivas levadas ao absurdo; um talento e um foco de energia vital herdados cujas frequências, acumuladas e repetidas nos agrupamentos de memórias do seu nome, formaram um rio selvagem de grande ímpeto interno. Essa sobrecarga magnética, muitas vezes sutil e inquestionada, provoca uma inclinação subconsciente a focar inteiramente em determinado comportamento reativo.</Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Apesar destas vibrações concederem facilidade impressionante para comunicação ardente, ambição material intensa, poder de manipulação ou até altruísmo desgastante, é o excesso incontrolado que obscurece a clareza, convertendo sua habilidade primária em desequilíbrio e sabotando os resultados a longo prazo. O trunfo fundamental desta análise geométrica de repetição reside no mapeamento preciso dessas forças indomadas: ao compreendê-las sob as lentes da razão, você as direciona conscientemente, fazendo o rio trabalhar pelas turbinas a seu favor em vez de deixá-lo inundar o seu sucesso.</Text>
+          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Frequências repetidas em excesso no nome que criam comportamentos compulsivos — convertendo talento em sabotagem.</Text>
           <TendenciasBlock tendencias={tendencias} frequencias={frequencias} showSolution={false} />
         </View>
 
@@ -515,10 +509,10 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
       {/* ── PÁGINAS 6+: ANÁLISE IA COMPLETA COM INJEÇÕES DE QUEBRA E TEXTOS ─── */}
       {analiseCorpo && (
         <Page size="A4" style={styles.page}>
-          <PDFPageHeader subtitle={`${nomeParaExibir} — Análise Profunda`} />
+          <PDFPageHeader subtitle={`${nomeParaExibir} — Diagnóstico`} />
 
           <View style={{ marginTop: 20, marginBottom: 8 }}>
-            <Text style={styles.hugeTitle}>Sua Análise Profunda</Text>
+            <Text style={styles.hugeTitle}>Diagnóstico do Nome</Text>
           </View>
 
           <View style={styles.section}>
@@ -531,11 +525,10 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
               letrasNome={letrasNome}
               pageBreaks={['Os 4 Triângulos', 'Triângulo Pessoal', 'Triângulo Social', 'Triângulo do Destino', 'Bloqueios e', 'Como Harmonizar']}
               injections={{
-                'Triângulo da Vida': <Text style={styles.bodyText}>O Triângulo da Vida materializa os alicerces de sua sobrevivência e ambição prática. É a bússola dourada da sua vitalidade biológica, da sua resiliência e de todo o seu potencial de atração financeira. Ele dita os limites palpáveis da sua expansão material sob o sol.</Text>,
-                'Triângulo Pessoal': <Text style={styles.bodyText}>Este triângulo desvenda as profundezas da sua vida íntima. Ele atua sobre o subconsciente, curando ou criando fissuras no amor-próprio e nas reações sentimentais. Através dele visualizamos se você é movido por clareza emocional ou por tempestades invisíveis do seu afeto.</Text>,
-                'Triângulo Social': <Text style={styles.bodyText}>Aqui mapeamos a arquitetura do seu magnetismo de grupo. Este vértice define o peso do seu networking, a fluidez das parcerias de negócios e como a sociedade em geral curva-se perante os seus argumentos e dons de comunicação. É a arte do posicionamento projetada em numerologia pura.</Text>,
-                'Triângulo do Destino': <Text style={styles.bodyText}>O ápice sagrado: sua convergência final. O Triângulo do Destino revela as circunstâncias incontornáveis e o fluxo principal do projeto que o universo exige de você nesta Era. É para cá que os ventos sopram; é a grande força gravitacional em direção ao topo da sua montanha evolutiva.</Text>,
-                'Como Harmonizar': <Text style={styles.bodyText}>Radiografar os desafios é o primeiro elo; instaurar a transmutação é o movimento de mestre. Detalharemos com precisão cirúrgica a tática exata de adequação da sua nova assinatura, desconstruindo resíduos limitantes para consagrar de forma orgânica a sua verdadeira frequência de poder.</Text>
+                'Triângulo da Vida': <Text style={styles.bodyText}>Alicerces da sua vitalidade, resiliência e potencial financeiro.</Text>,
+                'Triângulo Pessoal': <Text style={{ ...styles.bodyText, color: GRAY, fontStyle: 'italic' }}>Este triângulo revela sua vida íntima e emocional — leitura disponível na Harmonização Completa.</Text>,
+                'Triângulo Social': <Text style={{ ...styles.bodyText, color: GRAY, fontStyle: 'italic' }}>Este triângulo mapeia seu magnetismo social e networking — leitura disponível na Harmonização Completa.</Text>,
+                'Triângulo do Destino': <Text style={{ ...styles.bodyText, color: GRAY, fontStyle: 'italic' }}>Este triângulo revela sua missão e convergência final — leitura disponível na Harmonização Completa.</Text>,
               }}
             />
           </View>
@@ -584,7 +577,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
               ? 'O Diagnóstico É Claro — E o Nome Continua Emitindo'
               : 'Sua Frequência Pode Ser Ainda Mais Poderosa'}
           </Text>
-          {rawScore != null && (
+          {rawScore != null && rawScore > 0 && (
             <Text style={{ fontSize: 10, color: scoreNivel === 'excelente' ? '#10B981' : scoreNivel === 'aceitavel' ? '#F59E0B' : '#EF4444', textAlign: 'center', marginTop: 6 }}>
               Score do nome atual: {rawScore}/100
             </Text>
