@@ -384,7 +384,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
             tendenciasOcultas,
             debitosCarmicos,
             gender,
-            isCurrentNameAnalysis: !!nome_ja_escolhido,
+            isCurrentNameAnalysis: !!nome_ja_escolhido || is_free === true,
+            isFreeAnalysis: is_free === true,
           },
           user.id,
           analysis.id

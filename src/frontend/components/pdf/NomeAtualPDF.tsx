@@ -330,9 +330,15 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
     ? { vida: tVida, pessoal: tPessoal, social: tSocial, destino: tDestino }
     : undefined;
 
-  const analiseFormatado = analysis.analise_texto
+  let analiseFormatado = analysis.analise_texto
     ? formatAnalysisText(analysis.analise_texto)
     : null;
+  if (analiseFormatado) {
+    // Remove leading # title (AI sometimes generates "# Análise Numerológica para {nome}")
+    analiseFormatado = analiseFormatado.replace(/^#{1,2}\s+[^\n]*\n+/, '');
+    // Remove "Manual de Assinatura Fluída" section (not relevant for free analysis diagnosis)
+    analiseFormatado = analiseFormatado.replace(/#{1,6}\s+[^\n]*Manual de Assinatura[^\n]*\n[\s\S]*?(?=#{1,6}\s|\s*$)/i, '');
+  }
   const conclusaoTexto = analiseFormatado ? extractConclusao(analiseFormatado) : null;
   const analiseCorpo = analiseFormatado && conclusaoTexto
     ? analiseFormatado.slice(0, analiseFormatado.indexOf(conclusaoTexto)).trim()
@@ -397,7 +403,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
             <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626' }]}>
               Bloqueios Energéticos ({bloqueios.length})
             </Text>
-            <BloqueiosBlock bloqueios={bloqueios} />
+            <BloqueiosBlock bloqueios={bloqueios} showAntidoto={false} />
           </View>
         ) : (
           <View style={styles.section}>
@@ -432,7 +438,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           </Text>
           <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Na visão da numerologia cabalística, a jornada da Alma não é uma linha reta, mas um espiral transcendente de ciclos evolutivos. Os Débitos Kármicos emergem como ecos das suas vidas anteriores, marcando áreas da sua existência onde o livre-arbítrio foi utilizado em desequilíbrio — seja pelo excesso de autoridade cega, rebeldia irresponsável, estagnação ou puro materialismo. Destaca-se que eles não são punições de um universo severo, mas puras leis de compensação exigindo reintegração espiritual.</Text>
           <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Ao carregar estas pendências em seu código de nascimento, os mesmos cenários de traição, perda ou esforço redobrado tenderão a se repetir até que a lição moral matriz seja integrada. Identificar e compreender seus débitos através deste cálculo liberta você das prisões repetitivas; ao adotar a resposta consciente baseada na antítese dessa sombra, esse fardo se transmuta e você conquista a verdadeira sabedoria atemporal que liberta o seu fluxo.</Text>
-          <DebitosBlock debitos={debitos} />
+          <DebitosBlock debitos={debitos} showSolution={false} />
         </View>
 
         <View style={{ ...styles.section, marginTop: 0 }}>
@@ -441,7 +447,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           </Text>
           <Text style={{ ...styles.bodyText, marginBottom: 6 }}>As Lições Kármicas funcionam como os "quartos vazios" da sua grandiosa arquitetura energética: elas determinam exatamente quais virtudes, habilidades sutis ou atributos de maestria estão ausentes no momento de sua encarnação. Sendo traços que você não experenciou ou se negou a desenvolver nas vidas que precederam esta, você tenderá a se sentir inapto ou vulnerável sempre que uma situação de grande peso demandar o sacrifício destas características.</Text>
           <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Entretanto, encarar essa constatação como uma fraqueza permanente seria um engano. Uma lição não é um atestado de ausência, mas um convite vibrante à expansão prática. O seu próprio Destino frequentemente orquestrará desafios propositais com a missão velada de forçar você a dominar essas ferramentas ocultas. Aplicar a ação disciplinada e paciente frente a esses números ausentes tornará este "déficit" inicial em um de seus maiores trunfos maduros no pico da sua jornada.</Text>
-          <LicoesBlock licoes={licoes} />
+          <LicoesBlock licoes={licoes} showSolution={false} />
         </View>
 
         <View style={{ ...styles.section, marginTop: 0 }}>
@@ -450,8 +456,40 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           </Text>
           <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Se as lições evidenciam aquilo que falta em seu arcabouço letal, as Tendências Ocultas escancaram exatamente aquilo que lhe sobra. Elas apontam para habilidades instintivas levadas ao absurdo; um talento e um foco de energia vital herdados cujas frequências, acumuladas e repetidas nos agrupamentos de memórias do seu nome, formaram um rio selvagem de grande ímpeto interno. Essa sobrecarga magnética, muitas vezes sutil e inquestionada, provoca uma inclinação subconsciente a focar inteiramente em determinado comportamento reativo.</Text>
           <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Apesar destas vibrações concederem facilidade impressionante para comunicação ardente, ambição material intensa, poder de manipulação ou até altruísmo desgastante, é o excesso incontrolado que obscurece a clareza, convertendo sua habilidade primária em desequilíbrio e sabotando os resultados a longo prazo. O trunfo fundamental desta análise geométrica de repetição reside no mapeamento preciso dessas forças indomadas: ao compreendê-las sob as lentes da razão, você as direciona conscientemente, fazendo o rio trabalhar pelas turbinas a seu favor em vez de deixá-lo inundar o seu sucesso.</Text>
-          <TendenciasBlock tendencias={tendencias} frequencias={frequencias} />
+          <TendenciasBlock tendencias={tendencias} frequencias={frequencias} showSolution={false} />
         </View>
+
+        {/* Diagnóstico Consolidado — box alarming */}
+        {(bloqueios.length > 0 || debitos.length > 0 || licoes.length > 0 || tendencias.length > 0) && (
+          <View style={{ backgroundColor: '#1A0000', borderWidth: 1.5, borderColor: '#EF4444', borderRadius: 8, padding: 14, marginTop: 8 }} wrap={false}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 12, color: '#EF4444', marginBottom: 8, textAlign: 'center' }}>
+              ⚠ Diagnóstico Consolidado — Frequências Ativas no Seu Nome
+            </Text>
+            {bloqueios.length > 0 && (
+              <Text style={{ fontSize: 10, color: '#FCA5A5', marginBottom: 4 }}>
+                🔴 {bloqueios.length} bloqueio{bloqueios.length > 1 ? 's' : ''} energético{bloqueios.length > 1 ? 's' : ''} — emitindo frequências de travamento 24h/dia
+              </Text>
+            )}
+            {debitos.length > 0 && (
+              <Text style={{ fontSize: 10, color: '#FCD34D', marginBottom: 4 }}>
+                🟡 {debitos.length} débito{debitos.length > 1 ? 's' : ''} kármico{debitos.length > 1 ? 's' : ''} — padrões de encarnações passadas ainda ativos
+              </Text>
+            )}
+            {licoes.length > 0 && (
+              <Text style={{ fontSize: 10, color: '#93C5FD', marginBottom: 4 }}>
+                🔵 {licoes.length} lição{licoes.length > 1 ? 'ões' : ''} kármica{licoes.length > 1 ? 's' : ''} — vibrações ausentes criando lacunas crônicas
+              </Text>
+            )}
+            {tendencias.length > 0 && (
+              <Text style={{ fontSize: 10, color: '#C4B5FD', marginBottom: 4 }}>
+                🟣 {tendencias.length} tendência{tendencias.length > 1 ? 's' : ''} oculta{tendencias.length > 1 ? 's' : ''} — excessos que criam ciclos repetitivos
+              </Text>
+            )}
+            <Text style={{ fontSize: 9, color: '#FCA5A5', marginTop: 8, fontStyle: 'italic', textAlign: 'center' }}>
+              Nenhum desses padrões pode ser neutralizado por esforço ou força de vontade. A origem está na frequência emitida pelo nome.
+            </Text>
+          </View>
+        )}
 
         <PDFFooter />
       </Page>
@@ -465,9 +503,6 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
           <View style={{ marginTop: 20, marginBottom: 8 }}>
             <Text style={styles.hugeTitle}>Sua Análise Profunda</Text>
-            <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 24 }}>
-              Estudo Numerológico Completo
-            </Text>
           </View>
 
           <View style={styles.section}>
@@ -516,54 +551,64 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
       {/* A seção de Variações Numerológicas foi removida do PDF (só aparece no HTML) */}
 
-      {/* ── PÁGINA FINAL: CTA PARA HARMONIZAÇÃO (NOME SOCIAL) ───────────────────── */}
-      <Page size="A4" style={styles.page}>
-        <View style={{ marginTop: 24, marginBottom: 16 }}>
-           <Text style={styles.hugeTitle}>Sua Jornada Acaba de Começar</Text>
-           <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 24 }}>
-             O Poder da Harmonização
-           </Text>
+      {/* ── PÁGINA FINAL: CTA — DIAGNÓSTICO CLARO (FUNDO ESCURO) ───────────── */}
+      <Page size="A4" style={styles.darkPage}>
+        <View style={{ marginTop: 24, marginBottom: 20 }}>
+          <Text style={[styles.hugeTitle, { color: bloqueios.length > 0 ? '#EF4444' : GOLD }]}>
+            {bloqueios.length > 0
+              ? 'O Diagnóstico É Claro — E o Nome Continua Emitindo'
+              : 'Sua Frequência Pode Ser Ainda Mais Poderosa'}
+          </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={{ ...styles.bodyText, marginBottom: 12 }}>
-            Esta análise revelou as correntes invisíveis que atuam na sua vida através do seu Nome de Nascimento. {bloqueios.length > 0 || debitos.length > 0 || licoes.length > 0 ? "Como vimos, existem travas estruturais importantes que dificultam a expressão plena do seu talento e o alcance fácil da prosperidade e saúde." : "Ainda que as correntes não apresentem bloqueios severos, todo nome pode ser ajustado em sua potência máxima de atração."}
-          </Text>
-
-          <View style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: 16, borderRadius: 8, borderWidth: 1, borderColor: GOLD, marginBottom: 16 }}>
-            <Text style={{ fontFamily: TITLE_FONT, fontSize: 13, color: GOLD, marginBottom: 8, textAlign: 'center' }}>
-              Por que Criar um Nome Social Harmonizado?
+        {/* Box urgência (se tiver bloqueios) */}
+        {bloqueios.length > 0 && (
+          <View style={{ backgroundColor: 'rgba(220,38,38,0.15)', borderWidth: 1, borderColor: '#EF4444', borderRadius: 8, padding: 14, marginBottom: 16 }} wrap={false}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 11, color: '#EF4444', textAlign: 'center', marginBottom: 6 }}>
+              {bloqueios.length} bloqueio{bloqueios.length > 1 ? 's' : ''} energético{bloqueios.length > 1 ? 's' : ''} detectado{bloqueios.length > 1 ? 's' : ''} no seu nome
             </Text>
-            <Text style={{ ...styles.bodyText, fontSize: 10, marginBottom: 8, textAlign: 'left' }}>
-              Na numerologia cabalística, o nome pelo qual você assina e se apresenta possui o poder tangível de neutralizar energias negativas. Uma harmonização ou Nome Social não apaga o seu passado, mas reconfigura a antena emissora do seu magnetismo no presente.
-            </Text>
-            <Text style={{ ...styles.bodyText, fontSize: 10, textAlign: 'left', marginBottom: 4 }}>
-              <Text style={{ fontFamily: BODY_FONT_BOLD, color: '#D4AF37' }}>1. Elimine Bloqueios e Travas:</Text> Nós calculamos novas variações do seu nome que não formam sequências negativas.
-            </Text>
-            <Text style={{ ...styles.bodyText, fontSize: 10, textAlign: 'left', marginBottom: 4 }}>
-              <Text style={{ fontFamily: BODY_FONT_BOLD, color: '#D4AF37' }}>2. Alinhe com seu Destino:</Text> O objetivo é casar o seu número de Expressão de forma perfeita com o seu número de Destino.
-            </Text>
-            <Text style={{ ...styles.bodyText, fontSize: 10, textAlign: 'left' }}>
-              <Text style={{ fontFamily: BODY_FONT_BOLD, color: '#D4AF37' }}>3. Alcance Objetivos Específicos:</Text> Ao gerar seu Nome Social, você diz à nossa Inteligência como quer ser visto, e ela injeta essas características numéricas no arranjo final.
+            <Text style={{ fontSize: 10, color: '#FCA5A5', textAlign: 'center', lineHeight: 1.5 }}>
+              Essas frequências são emitidas 24 horas por dia, 7 dias por semana — enquanto você dorme, trabalha, descansa.{'\n'}
+              Comportamento e força de vontade não mudam o que está codificado no nome.
             </Text>
           </View>
+        )}
 
-          <Text style={{ ...styles.bodyText, marginBottom: 20 }}>
-            Após conhecer essas realidades profundas sobre si mesmo(a), permanecer na mesma frequência é uma escolha que não faz mais sentido. O Universo exige clareza e facilidade de fluxo.
+        {/* Box o que a harmonização faz */}
+        <View style={{ backgroundColor: 'rgba(212,175,55,0.08)', borderWidth: 1, borderColor: GOLD, borderRadius: 8, padding: 14, marginBottom: 16 }} wrap={false}>
+          <Text style={{ fontFamily: TITLE_FONT, fontSize: 12, color: GOLD, marginBottom: 10, textAlign: 'center' }}>
+            O Que a Harmonização Faz pelo Seu Nome
           </Text>
+          <Text style={{ fontSize: 10, color: '#e5e2e1', lineHeight: 1.6, marginBottom: 6 }}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', color: GOLD }}>1. Elimina os bloqueios dos 4 triângulos</Text> — calcula variações do nome que não formam sequências de travamento em nenhum dos triângulos.
+          </Text>
+          <Text style={{ fontSize: 10, color: '#e5e2e1', lineHeight: 1.6, marginBottom: 6 }}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', color: GOLD }}>2. Alinha Expressão com Destino</Text> — encontra a combinação que faz o nome vibrar em harmonia com o propósito de vida.
+          </Text>
+          <Text style={{ fontSize: 10, color: '#e5e2e1', lineHeight: 1.6 }}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', color: GOLD }}>3. Reequilibra o campo energético completo</Text> — reduz débitos variáveis, introduz vibrações ausentes e neutraliza excessos que o nome atual mantém ativos.
+          </Text>
+        </View>
 
-          <View style={{ alignItems: 'center', marginTop: 10 }}>
-            <Text style={{ fontFamily: TITLE_FONT, fontSize: 12, color: DARK, marginBottom: 8 }}>
-              Pronto para construir sua Nova Identidade e assumir o controle?
+        {/* Citação */}
+        <View style={{ borderLeftWidth: 3, borderLeftColor: GOLD, paddingLeft: 14, marginBottom: 20 }}>
+          <Text style={{ fontSize: 10, color: '#9CA3AF', fontStyle: 'italic', lineHeight: 1.6 }}>
+            "Conhecer os bloqueios sem harmonizá-los é como saber que a torneira está furada e continuar enchendo o balde."
+          </Text>
+        </View>
+
+        {/* CTA */}
+        <View style={{ alignItems: 'center', marginTop: 8 }}>
+          <Text style={{ fontFamily: TITLE_FONT, fontSize: 13, color: '#FFFFFF', marginBottom: 6, textAlign: 'center' }}>
+            O diagnóstico está feito. A transformação espera por você.
+          </Text>
+          <Text style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 18, textAlign: 'center' }}>
+            Acesse o produto Nome Social para harmonizar sua frequência agora.
+          </Text>
+          <View style={{ backgroundColor: GOLD, paddingVertical: 12, paddingHorizontal: 28, borderRadius: 30 }}>
+            <Text style={{ color: '#000', fontFamily: 'Helvetica-Bold', fontSize: 12 }}>
+              nomemagnetico.com.br/nome-social
             </Text>
-            <Text style={{ fontFamily: BODY_FONT, fontSize: 9, color: GRAY, marginBottom: 16 }}>
-              Acesse sua conta ou digite a URL abaixo no seu navegador para solicitar seu Nome Social.
-            </Text>
-            <View style={{ backgroundColor: GOLD, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 30 }}>
-              <Text style={{ color: '#000', fontFamily: BODY_FONT_BOLD, fontSize: 12 }}>
-                nomemagnetico.com.br/nome-social
-              </Text>
-            </View>
           </View>
         </View>
 

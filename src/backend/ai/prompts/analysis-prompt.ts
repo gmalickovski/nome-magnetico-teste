@@ -16,6 +16,7 @@ export interface AnalysisPromptParams {
   gender: string;
   arquetipo?: Arquetipo;
   isCurrentNameAnalysis?: boolean;
+  isFreeAnalysis?: boolean;
 }
 
 export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
@@ -32,6 +33,7 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
     gender,
     arquetipo,
     isCurrentNameAnalysis,
+    isFreeAnalysis,
   } = params;
 
   const primeiroNome = nomeCompleto.split(' ')[0] ?? nomeCompleto;
@@ -52,7 +54,9 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
   const licoesTexto =
     licoesCarmicas.length > 0
       ? licoesCarmicas
-          .map(l => `- **${l.titulo}** — ${l.descricao}\n  *Como trabalhar:* ${l.comoTrabalhar}`)
+          .map(l => isFreeAnalysis
+            ? `- **${l.titulo}** — ${l.descricao}`
+            : `- **${l.titulo}** — ${l.descricao}\n  *Como trabalhar:* ${l.comoTrabalhar}`)
           .join('\n')
       : 'Nenhuma lição kármica — todos os números de 1 a 8 estão presentes no nome.';
 
@@ -60,7 +64,9 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
   const tendenciasTexto =
     tendenciasOcultas.length > 0
       ? tendenciasOcultas
-          .map(t => `- **${t.titulo}** (aparece ${t.frequencia}× no nome)\n  ${t.descricao}\n  *Como equilibrar:* ${t.comoEquilibrar}`)
+          .map(t => isFreeAnalysis
+            ? `- **${t.titulo}** (aparece ${t.frequencia}× no nome)\n  ${t.descricao}`
+            : `- **${t.titulo}** (aparece ${t.frequencia}× no nome)\n  ${t.descricao}\n  *Como equilibrar:* ${t.comoEquilibrar}`)
           .join('\n')
       : 'Nenhuma tendência oculta detectada.';
 
@@ -183,7 +189,15 @@ Como o mundo percebe e responde a ${primeiroNome}. Que tipo de relações, oport
 Os resultados que ${primeiroNome} tende a colher — o que a energia deste triângulo produz como frutos ao longo da vida. O Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}** como revelador da missão e dos ciclos de amadurecimento.
 
 ${bloqueios.length > 0
-  ? `**Para cada bloqueio detectado, escreva uma análise aprofundada de 2-3 parágrafos:**
+  ? isFreeAnalysis
+    ? `**Para cada bloqueio detectado, escreva uma análise aprofundada de 2-3 parágrafos:**
+- O impacto específico e concreto deste bloqueio na vida de ${primeiroNome} (em que situações ele aparece, como sabota)
+- Em quais áreas da vida (carreira, saúde, relacionamentos, finanças) ele se manifesta com mais força
+- O aspecto de saúde associado: a tensão emocional-somática que este padrão pode gerar no corpo (com sensibilidade)
+
+#### ⚠ Custo da Inércia para cada bloqueio:
+Para CADA bloqueio, escreva um subitem "**Custo da Inércia:**" descrevendo como esse bloqueio específico continua limitando ${primeiroNome} enquanto o nome não for harmonizado — o que está sendo impactado em termos de resultados financeiros, relacionamentos, saúde ou realização pessoal. Seja concreto e específico, sem dar ações práticas. Termine com: "Esta frequência continua sendo emitida pelo nome 24 horas por dia — apenas a harmonização vibracional do Nome Social pode neutralizá-la."`
+    : `**Para cada bloqueio detectado, escreva uma análise aprofundada de 2-3 parágrafos:**
 - O impacto específico e concreto deste bloqueio na vida de ${primeiroNome} (em que situações ele aparece, como sabota)
 - Em quais áreas da vida (carreira, saúde, relacionamentos, finanças) ele se manifesta com mais força
 - O aspecto de saúde associado: a tensão emocional-somática que este padrão pode gerar no corpo (com sensibilidade)
@@ -198,7 +212,12 @@ Para CADA bloqueio, escreva um subitem "**Antídoto Prático:**" com 3 ações c
 ## ⚖️ 4. O Peso do Passado — Karma, Lições e Tendências
 
 ${debitosCarmicos.length > 0
-  ? `${primeiroNome} carrega ${debitosCarmicos.length} débito(s) kármico(s) especificados nos dados (veja no painel acima). Para CADA débito, escreva uma análise extensa (mínimo de 3 parágrafos densos com 5 a 6 linhas cada):
+  ? isFreeAnalysis
+    ? `${primeiroNome} carrega ${debitosCarmicos.length} débito(s) kármico(s) especificados nos dados (veja no painel acima). Para CADA débito, escreva uma análise extensa (mínimo de 3 parágrafos densos com 5 a 6 linhas cada):
+- Parágrafo 1: O contexto espiritual-histórico deste débito (qual padrão comportamental ou erro de encarnações passadas ele representa).
+- Parágrafo 2: Como ele se manifesta especificamente na vida atual (dinâmicas tóxicas em relacionamentos, autossabotagem na carreira, finanças ou saúde) — seja concreto e detalhado sobre as consequências que ${primeiroNome} continua enfrentando.
+- Parágrafo 3: O custo de não agir — o que essa energia continua atraindo enquanto o padrão não for trabalhado. Para débitos variáveis (que vêm da Motivação ou Expressão), mencione que a harmonização do Nome Social pode reduzir ou eliminar esse peso. Para débitos fixos (ligados à data de nascimento), aprofunde o convite à consciência e ao trabalho espiritual.`
+    : `${primeiroNome} carrega ${debitosCarmicos.length} débito(s) kármico(s) especificados nos dados (veja no painel acima). Para CADA débito, escreva uma análise extensa (mínimo de 3 parágrafos densos com 5 a 6 linhas cada):
 - Parágrafo 1: O contexto espiritual-histórico deste débito (qual padrão comportamental ou erro de encarnações passadas ele representa).
 - Parágrafo 2: Como ele se manifesta especificamente na vida atual (dinâmicas tóxicas em relacionamentos, autossabotagem na carreira, finanças ou saúde).
 - Parágrafo 3: A "lei de compensação" que o universo exige para quitar este débito e 3 ações práticas transformadoras que podem ser iniciadas hoje.`
@@ -206,7 +225,12 @@ ${debitosCarmicos.length > 0
 }
 
 ${licoesCarmicas.length > 0
-  ? `${primeiroNome} traz ${licoesCarmicas.length} lição(ões) kármica(s) (números essenciais ausentes). Para CADA lição ausente, escreva com muita profundidade (mínimo de 3 parágrafos densos com 5 a 6 linhas cada):
+  ? isFreeAnalysis
+    ? `${primeiroNome} traz ${licoesCarmicas.length} lição(ões) kármica(s) (números essenciais ausentes). Para CADA lição ausente, escreva com muita profundidade (mínimo de 3 parágrafos densos com 5 a 6 linhas cada):
+- Parágrafo 1: O "talento cego" por trás dessa lição — o que significa a falta dessa vibração e como a pessoa compensa essa ausência instintivamente.
+- Parágrafo 2: Como essa ausência cria dificuldades crônicas no dia a dia (timidez exagerada, sobrecarga, dificuldade de cobrar, ciclos que se repetem) — seja específico e detalhado.
+- Parágrafo 3: A verdade sobre essa ausência — ela está codificada no nome atual. O Nome Social Harmonizado pode introduzir essa vibração faltante no campo energético de ${primeiroNome}, reequilibrando o que o nome de nascimento deixou descoberto. Sem a harmonização, esse padrão continuará se repetindo independentemente do esforço consciente.`
+    : `${primeiroNome} traz ${licoesCarmicas.length} lição(ões) kármica(s) (números essenciais ausentes). Para CADA lição ausente, escreva com muita profundidade (mínimo de 3 parágrafos densos com 5 a 6 linhas cada):
 - Parágrafo 1: O "talento cego" por trás dessa lição — o que significa a falta dessa vibração e como a pessoa compensa essa ausência instintivamente.
 - Parágrafo 2: Como isso cria dor ou dificuldade crônica no dia a dia (timidez exagerada, sobrecarga, dificuldade de cobrar, etc.).
 - Parágrafo 3: O "caminho de integração": 3 hábitos específicos para equilibrar esta ausência.`
@@ -214,7 +238,12 @@ ${licoesCarmicas.length > 0
 }
 
 ${tendenciasOcultas.length > 0
-  ? `Tendências ocultas presentes (números em excesso). Para CADA tendência, explique (mínimo de 3 parágrafos longos com 5 a 6 linhas cada):
+  ? isFreeAnalysis
+    ? `Tendências ocultas presentes (números em excesso). Para CADA tendência, explique (mínimo de 3 parágrafos longos com 5 a 6 linhas cada):
+- Parágrafo 1: O "superpoder excessivo": como o acúmulo dessa vibração gera um talento fantástico que frequentemente engole as outras qualidades da pessoa.
+- Parágrafo 2: A fronteira do exagero: em que situações esse superpoder vira teimosia, exaustão ou obsessão, e como essa frequência em excesso cria ciclos repetitivos que se retroalimentam.
+- Parágrafo 3: A armadilha da inércia — esse desequilíbrio está inscrito na estrutura do nome atual. Esforço consciente pode amenizar os efeitos, mas não muda a frequência emitida. Apenas a redistribuição vibracional promovida pelo Nome Social Harmonizado pode reequilibrar essa tendência na raiz.`
+    : `Tendências ocultas presentes (números em excesso). Para CADA tendência, explique (mínimo de 3 parágrafos longos com 5 a 6 linhas cada):
 - Parágrafo 1: O "superpoder excessivo": como o acúmulo dessa vibração gera um talento fantástico que frequentemente engole as outras qualidades da pessoa.
 - Parágrafo 2: A fronteira do exagero: em que situações esse superpoder vira teimosia, exaustão ou obsessão, e repetição de ciclos.
 - Parágrafo 3: A "arte do equilíbrio": como domar esse instinto brilhante para que atue a favor de ${primeiroNome} e não contra.`
@@ -252,7 +281,12 @@ ATENÇÃO OBRIGATÓRIA: Descreva este arquétipo com no mínimo 4 parágrafos pr
 
 ` : ''}## 🔮 ${arquetipo ? '7' : '6'}. O Nome como Ferramenta de Poder Energético
 
-${isCurrentNameAnalysis 
+${isFreeAnalysis
+  ? `O nome de ${primeiroNome} não é apenas uma identidade social — é um campo de frequência ativo que opera 24 horas por dia, 7 dias por semana. Escreva 3 parágrafos sobre:
+- Como a vibração atual do nome de nascimento organiza padrões específicos de atração (e repulsão) de forma contínua, mesmo quando ${primeiroNome} está dormindo, silencioso ou sozinho
+- Por que mudanças de comportamento, afirmações positivas e trabalho pessoal não conseguem neutralizar uma frequência que está sendo emitida pelo nome a cada momento — o campo vibracional do nome opera num nível mais profundo que a consciência
+- O que a harmonização do Nome Social representa na prática: não uma mudança superficial de identidade, mas a reprogramação da frequência emitida pelo campo do nome — eliminando os bloqueios dos triângulos, reequilibrando as ausências e excessos, e alinhando Expressão com Destino. Este é o trabalho que a análise do nome de nascimento torna visível e que o Nome Social resolve.`
+  : isCurrentNameAnalysis
   ? `A vibração que o seu nome de batismo produz não é apenas simbólica — ela organiza padrões concretos de atração e resposta do ambiente. Escreva 3 parágrafos sobre:
 - O que essa vibração-base cria naturalmente quando ${primeiroNome} passa a usá-la com intenção consciente
 - Quais padrões de relacionamento, oportunidade ou autossabotagem tendem a ressoar com essa frequência de nascença
@@ -263,7 +297,7 @@ ${isCurrentNameAnalysis
 - O período de adaptação vibracional: como funcionam os primeiros 90 dias de uso consciente do nome magnetizado, e o que observar como sinal de integração`
 }
 
----
+${!isFreeAnalysis ? `---
 
 ## ✍️ ${arquetipo ? '8' : '7'}. Manual de Assinatura Fluída
 
@@ -275,15 +309,22 @@ Com base nos números de ${primeiroNome}, escreva orientações práticas de gra
 - **Iniciais e Maiúsculas:** Como trabalhar as letras iniciais para maximizar a projeção energética deste perfil
 ${isCurrentNameAnalysis ? '- **Prática Diária:** Como escrever o próprio nome pode se tornar um ritual de presença e ancoramento' : '- **Prática Recomendada:** Um protocolo de ativação — quantas vezes por dia, em quais contextos, e como criar o hábito de usar o nome'}
 
----
+` : ''}---
 
-## 🌟 ${arquetipo ? '9' : '8'}. Síntese e Mensagem Final
+## 🌟 ${isFreeAnalysis ? (arquetipo ? '8' : '7') : (arquetipo ? '9' : '8')}. Síntese e Mensagem Final
 
-Escreva uma conclusão profunda e poderosa (4 parágrafos) que:
+${isFreeAnalysis
+  ? `Escreva uma conclusão poderosa (4 parágrafos) que:
+- Conecte todos os elementos revelados — números, bloqueios, karma, arcano e arquétipo — em uma narrativa coesa do padrão que o nome atual de ${primeiroNome} está criando na vida dela/dele
+- Fale em segunda pessoa direta: "você", "sua jornada", "sua realidade"
+- Nomeie com clareza o que continuará acontecendo enquanto essa frequência não for harmonizada — sem dramatismo excessivo, mas com honestidade sobre o custo da inércia
+- Encerre com um convite direto e compassivo: o diagnóstico está feito, o problema está mapeado, e a solução existe — a harmonização do Nome Social é o próximo passo para transformar essa leitura em mudança real. Não dê passos práticos; apenas aponte para a harmonização como a porta.`
+  : `Escreva uma conclusão profunda e poderosa (4 parágrafos) que:
 - Conecte todos os elementos — números, bloqueios, karma, arcano e arquétipo — em uma narrativa de propósito único para ${primeiroNome}
 - Fale em segunda pessoa direta: "você", "sua jornada", "sua missão"
 - Nomeie o presente que este trabalho numerológico representa e o que se abre com a nova vibração
-- Encerre com uma mensagem transformadora, esperançosa e de alta frequência sobre o que está por vir
+- Encerre com uma mensagem transformadora, esperançosa e de alta frequência sobre o que está por vir`
+}
 
 ---
 

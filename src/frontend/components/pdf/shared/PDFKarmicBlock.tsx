@@ -211,7 +211,63 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     letterSpacing: 0.5,
   },
+  // Custo da Inércia (free analysis)
+  bloqueioAtivoBadge: {
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 3,
+    backgroundColor: 'rgba(220,38,38,0.15)',
+    borderWidth: 0.5,
+    borderColor: '#EF4444',
+    marginLeft: 8,
+  },
+  bloqueioAtivoBadgeText: {
+    fontSize: 7,
+    color: '#DC2626',
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 0.5,
+  },
+  custoInerciaBox: {
+    backgroundColor: '#2D0000',
+    borderLeftWidth: 3,
+    borderLeftColor: '#EF4444',
+    padding: 10,
+    borderRadius: 4,
+    marginTop: 8,
+  },
+  custoInerciaText: {
+    fontSize: 9,
+    color: '#FECACA',
+    lineHeight: 1.5,
+  },
+  licaoHarmonizacaoBox: {
+    backgroundColor: 'rgba(109,40,217,0.05)',
+    borderLeftWidth: 3,
+    borderLeftColor: '#6d28d9',
+    padding: 10,
+    borderRadius: 4,
+    marginTop: 8,
+  },
+  licaoHarmonizacaoText: {
+    fontSize: 9,
+    color: '#3b1f6b',
+    lineHeight: 1.5,
+  },
 });
+
+// ── Custo da Inércia por bloqueio ─────────────────────────────────────────────
+
+const CUSTO_INERCIA_MAP: Record<string, string> = {
+  '111': 'Enquanto o bloqueio 111 permanecer ativo no seu nome, cada tentativa de iniciar algo novo será travada por hesitação crônica, procrastinação e medo de exposição — como se uma barreira invisível bloqueasse o primeiro passo antes mesmo de você tentar.',
+  '222': 'O bloqueio 222 sabota parcerias e associações: acordos que não se concretizam, colaborações que viram conflito, relacionamentos que perdem a harmonia no momento mais decisivo. A cooperação que deveria ser natural vira campo minado.',
+  '333': 'Com o bloqueio 333 ativo, sua voz, criatividade e capacidade de expressão ficam comprometidas. Oportunidades de visibilidade escorregam porque a comunicação trava exatamente quando mais importa — na apresentação, na negociação, no palco.',
+  '444': 'O bloqueio 444 fragmenta a base: projetos que não chegam ao fim, instabilidade financeira persistente, dificuldade de construir algo sólido. É como tentar erguer uma estrutura sobre areia — o esforço é real, o resultado some.',
+  '555': 'O bloqueio 555 cria turbulência contínua: mudanças que chegam sem avisar, impulsividade que destrói o que foi construído, uma inquietação que impede a colheita. A liberdade desejada se converte em prisão de caos.',
+  '666': 'Com o bloqueio 666, harmonia em casa e nos relacionamentos parece sempre fora de alcance. Responsabilidades que sufocam, desequilíbrio entre dar e receber, e a sensação crônica de que você carrega mais do que deveria — sozinho.',
+  '777': 'O bloqueio 777 isola espiritualmente: respostas que não chegam, conexões que ficam superficiais, uma desconexão com o propósito maior que corrói a motivação silenciosamente. A busca pelo sentido vira labirinto.',
+  '888': 'Você pode se esforçar 10x mais, mas enquanto o bloqueio 888 permanecer ativo, o dinheiro continuará saindo por entre seus dedos — a luta pela abundância está codificada no nome. O esforço financeiro dobra e o resultado não acompanha.',
+  '999': 'O bloqueio 999 perpetua ciclos de perda e sacrifício: relações que terminam em abandono, projetos que chegam ao fim prematuramente, e uma dificuldade crônica de fechar capítulos com paz. O fim sempre chega antes da hora.',
+};
 
 // ── Interfaces de dados ───────────────────────────────────────────────────────
 
@@ -246,7 +302,7 @@ export interface TendenciaData {
 // ── Componentes de bloco ──────────────────────────────────────────────────────
 
 /** Cards de Bloqueios Energéticos */
-export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
+export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: BloqueioData[]; showAntidoto?: boolean }) {
   if (bloqueios.length === 0) {
     return (
       <View style={styles.debitoNoneBox}>
@@ -260,7 +316,14 @@ export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
     <View style={styles.sectionBlock}>
       {bloqueios.map((b, i) => (
         <View key={i} style={styles.bloqueioRow} wrap={false}>
-          <Text style={styles.bloqueioTitle}>{b.codigo} — {b.titulo}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+            <Text style={[styles.bloqueioTitle, { marginBottom: 0 }]}>{b.codigo} — {b.titulo}</Text>
+            {!showAntidoto && (
+              <View style={styles.bloqueioAtivoBadge}>
+                <Text style={styles.bloqueioAtivoBadgeText}>ATIVO 24H</Text>
+              </View>
+            )}
+          </View>
           <Text style={styles.bloqueioDesc}>{b.descricao}</Text>
           {b.aspectoSaude ? (
             <Text style={styles.bloqueioSaude}>Aspecto de saúde: {b.aspectoSaude}</Text>
@@ -270,6 +333,19 @@ export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
               Presente em: {b.triangulos.join(', ')}
             </Text>
           ) : null}
+          {!showAntidoto && (
+            <View style={styles.custoInerciaBox}>
+              <Text style={[styles.custoInerciaText, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>
+                ⚠ Custo da Inércia
+              </Text>
+              <Text style={styles.custoInerciaText}>
+                {CUSTO_INERCIA_MAP[b.codigo] ?? 'Esta frequência continua sendo emitida pelo nome 24 horas por dia — apenas a harmonização vibracional do Nome Social pode neutralizá-la.'}
+              </Text>
+              <Text style={[styles.custoInerciaText, { marginTop: 6, fontStyle: 'italic' }]}>
+                Esta frequência continua sendo emitida 24h/dia — apenas a harmonização vibracional pode neutralizá-la.
+              </Text>
+            </View>
+          )}
         </View>
       ))}
     </View>
@@ -277,7 +353,7 @@ export function BloqueiosBlock({ bloqueios }: { bloqueios: BloqueioData[] }) {
 }
 
 /** Cards de Débitos Kármicos */
-export function DebitosBlock({ debitos }: { debitos: DebitoData[] }) {
+export function DebitosBlock({ debitos, showSolution = true }: { debitos: DebitoData[]; showSolution?: boolean }) {
   if (debitos.length === 0) {
     return (
       <View style={styles.debitoNoneBox}>
@@ -312,12 +388,22 @@ export function DebitosBlock({ debitos }: { debitos: DebitoData[] }) {
           </View>
         );
       })}
+      {!showSolution && (
+        <View style={[styles.licaoHarmonizacaoBox, { marginTop: 8 }]} wrap={false}>
+          <Text style={[styles.licaoHarmonizacaoText, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>
+            Como a Harmonização Atua nos Débitos Kármicos
+          </Text>
+          <Text style={styles.licaoHarmonizacaoText}>
+            Débitos variáveis — originados nos números de Motivação ou Expressão — podem ser reduzidos ou eliminados por uma variação do nome que reajuste essas frequências. O processo de harmonização calcula combinações que minimizam esses padrões no campo vibracional.
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
 
 /** Cards de Lições Kármicas */
-export function LicoesBlock({ licoes }: { licoes: LicaoData[] }) {
+export function LicoesBlock({ licoes, showSolution = true }: { licoes: LicaoData[]; showSolution?: boolean }) {
   if (licoes.length === 0) {
     return (
       <View style={styles.licaoNoneBox}>
@@ -335,6 +421,16 @@ export function LicoesBlock({ licoes }: { licoes: LicaoData[] }) {
           <Text style={styles.licaoDesc}>{l.descricao}</Text>
         </View>
       ))}
+      {!showSolution && (
+        <View style={[styles.licaoHarmonizacaoBox, { marginTop: 8 }]} wrap={false}>
+          <Text style={[styles.licaoHarmonizacaoText, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>
+            Como a Harmonização Resolve as Lições Kármicas
+          </Text>
+          <Text style={styles.licaoHarmonizacaoText}>
+            O Nome Social Harmonizado pode introduzir as vibrações ausentes no seu campo energético. Quando o nome passa a conter esses números, a qualidade em falta começa a ser cultivada naturalmente — sem depender exclusivamente de esforço consciente.
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -375,9 +471,11 @@ function FrequencyBar({ frequencias }: { frequencias: Record<string, number> }) 
 export function TendenciasBlock({
   tendencias,
   frequencias,
+  showSolution = true,
 }: {
   tendencias: TendenciaData[];
   frequencias?: Record<string, number> | null;
+  showSolution?: boolean;
 }) {
   return (
     <View style={styles.sectionBlock}>
@@ -400,6 +498,16 @@ export function TendenciasBlock({
               <Text style={styles.tendenciaDesc}>{t.descricao}</Text>
             </View>
           ))}
+          {!showSolution && (
+            <View style={[styles.licaoHarmonizacaoBox, { marginTop: 8 }]} wrap={false}>
+              <Text style={[styles.licaoHarmonizacaoText, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>
+                Como a Harmonização Reequilibra as Tendências
+              </Text>
+              <Text style={styles.licaoHarmonizacaoText}>
+                A redistribuição vibracional do Nome Social ajusta a proporção dos números em excesso na raiz do campo energético. O que hoje cria ciclos repetitivos encontra contrapeso natural no novo campo vibracional — algo que esforço consciente sozinho não consegue alcançar.
+              </Text>
+            </View>
+          )}
         </>
       )}
     </View>

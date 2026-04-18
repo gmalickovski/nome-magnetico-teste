@@ -71,9 +71,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 ---
 
 {/* ── SEÇÃO 1: A ESTRELA DE 5 PONTAS — EXPRESSÃO EM DESTAQUE ───────────── */}
-<section class="mb-12">
+<section class="pt-6 mb-12">
   <div class="mb-3 px-1">
-    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">A Estrela de 5 Pontas</p>
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">A Estrela de 5 Pontas</p>
     <h2 class="font-cinzel text-2xl font-bold text-white">Os 5 Números do Nome Social</h2>
   </div>
 
@@ -102,9 +102,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 1b: NOME DE OURO (novo fluxo) ──────────────────────────────── */}
 {rankingSocial?.melhorNome && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Nome de Ouro</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">O Nome de Ouro</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Nome Social Mais Indicado</h2>
     </div>
     <div class="rounded-2xl bg-[#D4AF37]/5 border border-[#D4AF37]/30 p-6 md:p-8">
@@ -148,9 +148,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 1c: TOP 3 ALTERNATIVAS CLICÁVEIS (novo fluxo) ──────────────── */}
 {rankingSocial?.top3?.length > 0 && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Alternativas de Alta Vibração</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Alternativas de Alta Vibração</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">3 Outras Excelentes Opções</h2>
       <p class="text-sm text-gray-400 mt-1">Clique em qualquer opção para gerar o relatório completo daquele nome.</p>
     </div>
@@ -203,9 +203,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 1d: RANKING COMPLETO CLICÁVEL (novo fluxo) ─────────────────── */}
 {rankingSocial?.nomesCandidatos?.length > 4 && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Tabela Comparativa</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Tabela Comparativa</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Ranking Completo dos Candidatos</h2>
       <p class="text-sm text-gray-400 mt-1">Clique em qualquer nome para gerar o relatório completo.</p>
     </div>
@@ -254,9 +254,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 2: ARQUÉTIPO ───────────────────────────────────────────────── */}
 {arquetipoData && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Identidade Mítica</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Identidade Mítica</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Seu Arquétipo</h2>
     </div>
     <ArquetipoCard client:visible arquetipo={arquetipoData} mode="pessoa" />
@@ -265,9 +265,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 3: OS 4 TRIÂNGULOS ────────────────────────────────────────── */}
 {hasTriangulos && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Mapa de Triângulos</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Mapa de Triângulos</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Os 4 Triângulos Numerológicos</h2>
     </div>
     <TriangleVisualization
@@ -284,9 +284,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 4: ARCANO REGENTE ─────────────────────────────────────────── */}
 {arcanoData && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Ciclo Atual</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Ciclo Atual</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Arcano Regente</h2>
     </div>
     <ArcanoCard
@@ -303,9 +303,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 )}
 
 {/* ── SEÇÃO 5: O RAIO-X DOS BLOQUEIOS ─────────────────────────────────── */}
-<section class="mb-12">
+<section class="mt-16 mb-12">
   <div class="mb-3 px-1">
-    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Raio-X dos Bloqueios</p>
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">O Raio-X dos Bloqueios</p>
     <h2 class={`font-cinzel text-2xl font-bold ${bloqueios.length > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
       {bloqueios.length > 0
         ? `${bloqueios.length} Bloqueio${bloqueios.length > 1 ? 's' : ''} Energético${bloqueios.length > 1 ? 's' : ''} Detectado${bloqueios.length > 1 ? 's' : ''}`
@@ -332,9 +332,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 6: O PESO DO PASSADO — KARMA E LIÇÕES ─────────────────────── */}
 {(licoesRaw !== null || debitosRaw !== null) && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Peso do Passado</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">O Peso do Passado</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Karma e Lições</h2>
     </div>
     {debitosRaw !== null && (
@@ -355,9 +355,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 7: TENDÊNCIAS OCULTAS ─────────────────────────────────────── */}
 {(tendenciasRaw !== null || (frequenciasRaw && Object.keys(frequenciasRaw).length > 0)) && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Frequências Numéricas</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Frequências Numéricas</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Tendências Ocultas</h2>
     </div>
     <HiddenTendencies
@@ -371,9 +371,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 8: ANÁLISE COMPLETA DA IA ─────────────────────────────────── */}
 {analiseHtml && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Análise Cabalística</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Análise Cabalística</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo</h2>
     </div>
     <div class="rounded-2xl bg-white/5 p-6 md:p-8">
@@ -435,9 +435,9 @@ const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
 
 {/* ── SEÇÃO 9: VARIAÇÕES DE NOME SOCIAL (legado) ───────────────────────── */}
 {topNames.length > 0 && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Harmonização</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Harmonização</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Variações de Nome Social</h2>
     </div>
     <div class="grid md:grid-cols-3 gap-4">

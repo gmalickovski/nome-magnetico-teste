@@ -19,6 +19,7 @@ interface Props {
   tendencias: TendenciaOculta[];
   frequencias: FrequenciasNumeros;
   nomeCompleto: string;
+  showSolution?: boolean;
 }
 
 function FrequencyBar({ numero, frequencia, max }: { numero: number; frequencia: number; max: number }) {
@@ -42,7 +43,7 @@ function FrequencyBar({ numero, frequencia, max }: { numero: number; frequencia:
   );
 }
 
-function TendenciaCard({ tendencia }: { tendencia: TendenciaOculta }) {
+function TendenciaCard({ tendencia, showSolution }: { tendencia: TendenciaOculta; showSolution: boolean }) {
   const tituloCapitalizado = tendencia.titulo ? tendencia.titulo.charAt(0).toUpperCase() + tendencia.titulo.slice(1) : '';
 
   return (
@@ -59,16 +60,18 @@ function TendenciaCard({ tendencia }: { tendencia: TendenciaOculta }) {
 
       <div className="px-4 pb-4 space-y-4 border-t border-blue-500/10">
         <p className="text-gray-300 text-sm leading-relaxed pt-4">{tendencia.descricao}</p>
-        <div className="rounded-lg p-3 bg-blue-500/10 border border-blue-500/20">
-          <p className="text-xs text-blue-400 uppercase tracking-wider mb-2">Como Equilibrar</p>
-          <p className="text-blue-200 text-sm leading-relaxed">{tendencia.comoEquilibrar}</p>
-        </div>
+        {showSolution && (
+          <div className="rounded-lg p-3 bg-blue-500/10 border border-blue-500/20">
+            <p className="text-xs text-blue-400 uppercase tracking-wider mb-2">Como Equilibrar</p>
+            <p className="text-blue-200 text-sm leading-relaxed">{tendencia.comoEquilibrar}</p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-export default function HiddenTendencies({ tendencias, frequencias, nomeCompleto }: Props) {
+export default function HiddenTendencies({ tendencias, frequencias, nomeCompleto, showSolution = true }: Props) {
   const primeiroNome = nomeCompleto.split(' ')[0] ?? nomeCompleto;
   const numeros = [1, 2, 3, 4, 5, 6, 7, 8];
   const maxFreq = Math.max(...numeros.map(n => frequencias[n] ?? 0), 1);
@@ -113,7 +116,16 @@ export default function HiddenTendencies({ tendencias, frequencias, nomeCompleto
               pode ser um superpoder. Quando não, torna-se um padrão limitante.
             </p>
           </div>
-          {tendencias.map((t, i) => <TendenciaCard key={i} tendencia={t} />)}
+          {tendencias.map((t, i) => <TendenciaCard key={i} tendencia={t} showSolution={showSolution} />)}
+
+          {!showSolution && (
+            <div className="mt-4 rounded-xl border border-[#bea5ff]/25 bg-[#bea5ff]/5 p-4">
+              <p className="text-xs text-[#c084fc] uppercase tracking-wider font-semibold mb-2">Como a Harmonização Reequilibra as Tendências</p>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                A redistribuição vibracional do Nome Social ajusta a proporção dos números em excesso na raiz do campo energético. O que hoje cria ciclos repetitivos encontra contrapeso natural no novo campo vibracional — algo que esforço consciente sozinho não consegue alcançar.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -76,9 +76,9 @@ const dataFundacaoFormatted: string = (() => {
 ---
 
 {/* ── SEÇÃO 1: A ESTRELA DE 5 PONTAS — EXPRESSÃO EM DESTAQUE ───────────── */}
-<section class="mb-12">
+<section class="pt-6 mb-12">
   <div class="mb-3 px-1">
-    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Identidade Numérica</p>
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Identidade Numérica</p>
     <h2 class="font-cinzel text-2xl font-bold text-white">A Estrela de 5 Pontas da Empresa</h2>
   </div>
 
@@ -107,9 +107,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 2: O MELHOR NOME EMPRESARIAL ──────────────────────────────── */}
 {melhorNome && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">O Nome de Maior Magnetismo</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">O Nome de Maior Magnetismo</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Nome Empresarial Mais Indicado</h2>
     </div>
 
@@ -149,9 +149,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 3: SINERGIA SÓCIO-EMPRESA ────────────────────────────────── */}
 {rankingEmpresa && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Sinergia Numerológica</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Sinergia Numerológica</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Perfil dos Sócios & Destinos</h2>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -194,9 +194,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 4: RANKING DOS CANDIDATOS CLICÁVEIS ───────────────────────── */}
 {nomesCandidatos.length > 0 && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Análise Comparativa</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Análise Comparativa</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Estudo dos Nomes Candidatos</h2>
       <p class="text-sm text-gray-400 mt-1">Clique em qualquer nome para gerar o relatório completo daquele candidato.</p>
     </div>
@@ -266,9 +266,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 5: OS 4 TRIÂNGULOS ────────────────────────────────────────── */}
 {hasTriangulos && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Mapa de Triângulos</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Mapa de Triângulos</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Os 4 Triângulos Numerológicos</h2>
     </div>
     <TriangleVisualization
@@ -286,9 +286,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 5b: MAPEAMENTO DE RISCOS (BLOQUEIOS) ───────────────────────── */}
 {bloqueios.length > 0 && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Mapeamento de Riscos</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Mapeamento de Riscos</p>
       <h2 class="font-cinzel text-2xl font-bold text-red-400">
         {bloqueios.length} Bloqueio{bloqueios.length > 1 ? 's' : ''} Energético{bloqueios.length > 1 ? 's' : ''}
       </h2>
@@ -303,9 +303,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 6: KARMA EMPRESARIAL ──────────────────────────────────────── */}
 {((rankingEmpresa?.melhorNome?.debitosCarmicos?.length > 0) || (rankingEmpresa?.melhorNome?.licoesCarmicas?.length > 0)) && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Karma Empresarial</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Karma Empresarial</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Padrões Kármicos do Sócio</h2>
     </div>
     {rankingEmpresa?.melhorNome?.debitosCarmicos?.length > 0 && (
@@ -334,9 +334,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 7: ARQUÉTIPO DA MARCA ─────────────────────────────────────── */}
 {arquetipoData && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Personalidade da Marca</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Personalidade da Marca</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Arquétipo da Empresa</h2>
     </div>
     <ArquetipoCard client:visible arquetipo={arquetipoData} mode="empresa" />
@@ -345,9 +345,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 7b: IDENTIDADE VISUAL MAGNÉTICA ──────────────────────────── */}
 {identidadeVisual && melhorNome && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Design & Branding Numerológico</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Design & Branding Numerológico</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Identidade Visual Magnética</h2>
       <p class="text-gray-500 text-sm mt-1">Cores, tipografia e símbolo derivados da vibração numerológica da empresa</p>
     </div>
@@ -362,9 +362,9 @@ const dataFundacaoFormatted: string = (() => {
 
 {/* ── SEÇÃO 8: ANÁLISE COMPLETA DA IA ─────────────────────────────────── */}
 {analiseHtml && (
-  <section class="mb-12">
+  <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mt-12 mb-2">Análise Estratégica — Nome de Empresa</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Análise Estratégica — Nome de Empresa</p>
       <h2 class="font-cinzel text-2xl font-bold text-white">Relatório Completo</h2>
     </div>
     <div class="rounded-2xl bg-white/5 p-6 md:p-8">

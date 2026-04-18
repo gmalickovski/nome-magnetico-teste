@@ -91,9 +91,14 @@ const expressaoParaArquetipo =
 const arquetipoData = expressaoParaArquetipo ? getArquetipo(expressaoParaArquetipo) : null;
 
 // ── Texto da IA ──────────────────────────────────────────────────────
-const analiseHtml = analysis.analise_texto
+const analiseHtmlRaw = analysis.analise_texto
   ? String(await marked(formatAnalysisText(analysis.analise_texto))).replace(/\*\*/g, '')
   : null;
+const analiseHtml = analiseHtmlRaw && isFree
+  ? analiseHtmlRaw
+      .replace(/^<h1>[^<]*<\/h1>\s*/i, '')
+      .replace(/<h[1-6][^>]*>[^<]*Manual de Assinatura[^<]*<\/h[1-6]>[\s\S]*?(?=<h[1-6]|$)/i, '')
+  : analiseHtmlRaw;
 
 // ── Score geral ──────────────────────────────────────────────────────
 const scoreGeral = (analysis as any).score as number | null;
@@ -146,7 +151,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
         <div id="processing-state" class="rounded-2xl bg-white/5 p-12 text-center">
           <div class="inline-block w-12 h-12 border-4 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mb-6"></div>
           <h3 class="font-cinzel text-xl font-bold text-white mb-2">Analisando seu nome...</h3>
-          <p class="text-gray-400">A IA está calculando sua análise completa. Isso pode levar 1–2 minutos.</p>
+          <p class="text-gray-400">A IA está calculando sua análise completa. Isso pode levar de 1 a 7 minutos.</p>
           <p id="poll-counter-text" class="text-gray-600 text-sm mt-4">Esta página atualiza automaticamente.</p>
         </div>
         <div id="timeout-state" class="hidden rounded-2xl bg-amber-500/10 border border-amber-500/20 p-8 text-center">
@@ -162,7 +167,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
         </div>
         <script define:vars={{ analysisId: id }}>
           (function () {
-            const MAX_POLLS = 36; // 3 minutos (36 × 5s)
+            const MAX_POLLS = 84; // 7 minutos (84 × 5s) — cobre fallback OpenAI que pode demorar 5-6 min
             const key = 'poll_' + analysisId;
             const count = parseInt(sessionStorage.getItem(key) || '0', 10);
 
@@ -175,9 +180,11 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
             }
 
             sessionStorage.setItem(key, String(count + 1));
-            const elapsed = (count + 1) * 5;
+            const elapsedSec = (count + 1) * 5;
+            const elapsedMin = Math.floor(elapsedSec / 60);
+            const elapsedLabel = elapsedSec >= 60 ? `${elapsedMin}min ${elapsedSec % 60}s` : `${elapsedSec}s`;
             const counterText = document.getElementById('poll-counter-text');
-            if (counterText) counterText.textContent = `Verificando em instantes... (${elapsed}s)`;
+            if (counterText) counterText.textContent = `Verificando em instantes... (${elapsedLabel})`;
             setTimeout(() => {
               sessionStorage.setItem(key, String(count + 1)); // garantir antes do reload
               window.location.reload();

@@ -13,11 +13,12 @@ interface LicaoCarmica {
 interface Props {
   licoes: LicaoCarmica[];
   nomeCompleto: string;
+  showSolution?: boolean;
 }
 
 const COR_LICAO = 'border-[#D4AF37]/30 bg-[#D4AF37]/10';
 
-function LicaoCard({ licao }: { licao: LicaoCarmica }) {
+function LicaoCard({ licao, showSolution }: { licao: LicaoCarmica; showSolution: boolean }) {
   const cor = COR_LICAO;
 
   const tituloCapitalizado = licao.titulo ? licao.titulo.charAt(0).toUpperCase() + licao.titulo.slice(1) : '';
@@ -35,16 +36,18 @@ function LicaoCard({ licao }: { licao: LicaoCarmica }) {
 
       <div className="px-4 pb-4 space-y-4 border-t border-white/5">
         <p className="text-gray-300 text-sm leading-relaxed pt-4">{licao.descricao}</p>
-        <div className="rounded-lg p-3 bg-emerald-500/10 border border-emerald-500/20">
-          <p className="text-xs text-emerald-400 uppercase tracking-wider mb-2">Como Trabalhar</p>
-          <p className="text-emerald-200 text-sm leading-relaxed">{licao.comoTrabalhar}</p>
-        </div>
+        {showSolution && (
+          <div className="rounded-lg p-3 bg-emerald-500/10 border border-emerald-500/20">
+            <p className="text-xs text-emerald-400 uppercase tracking-wider mb-2">Como Trabalhar</p>
+            <p className="text-emerald-200 text-sm leading-relaxed">{licao.comoTrabalhar}</p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-export default function KarmicLessons({ licoes, nomeCompleto }: Props) {
+export default function KarmicLessons({ licoes, nomeCompleto, showSolution = true }: Props) {
   const primeiroNome = nomeCompleto.split(' ')[0] ?? nomeCompleto;
 
   if (licoes.length === 0) {
@@ -69,7 +72,16 @@ export default function KarmicLessons({ licoes, nomeCompleto }: Props) {
         </p>
       </div>
 
-      {licoes.map((l, i) => <LicaoCard key={i} licao={l} />)}
+      {licoes.map((l, i) => <LicaoCard key={i} licao={l} showSolution={showSolution} />)}
+
+      {!showSolution && (
+        <div className="mt-4 rounded-xl border border-[#bea5ff]/25 bg-[#bea5ff]/5 p-4">
+          <p className="text-xs text-[#c084fc] uppercase tracking-wider font-semibold mb-2">Como a Harmonização Resolve as Lições Kármicas</p>
+          <p className="text-gray-300 text-sm leading-relaxed">
+            O Nome Social Harmonizado pode introduzir as vibrações ausentes no seu campo energético. Quando o nome passa a conter esses números, a qualidade que estava em falta começa a ser cultivada naturalmente — sem depender exclusivamente de esforço consciente.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
