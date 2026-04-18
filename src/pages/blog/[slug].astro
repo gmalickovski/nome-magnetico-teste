@@ -2,6 +2,7 @@
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import { BlogHeader } from '../../frontend/components/blog/BlogHeader';
 import { ShareButton } from '../../frontend/components/blog/ShareButton';
+import { ArticleReactions } from '../../frontend/components/blog/ArticleReactions';
 import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
 import { createClient } from '@supabase/supabase-js';
 import { marked } from 'marked';
@@ -297,6 +298,11 @@ const categorySlug = post.category ?? null;
               </div>
             </div>
           )}
+
+          {/* ── REACTIONS ── */}
+          <div class="mt-10 pt-6 border-t border-white/8">
+            <ArticleReactions client:visible slug={post.slug} />
+          </div>
 
           {/* ── CTA PRODUTO RELACIONADO ── */}
           {post.produto_relacionado && (
