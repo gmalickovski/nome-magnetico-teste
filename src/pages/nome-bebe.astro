@@ -5,6 +5,8 @@ import { LandingFooter } from '../frontend/components/landing/LandingFooter';
 import { getSupabaseFaqs } from '../backend/faqs/getSupabaseFaqs';
 import type { FaqItemProps } from '../frontend/components/landing/FAQSection';
 import { FAQSection } from '../frontend/components/landing/FAQSection';
+import { getHqPricesAndPromo } from '../backend/payments/prices';
+import type { PriceInfo } from '../backend/payments/prices';
 
 let faqItems: FaqItemProps[] = [];
 try {
@@ -12,6 +14,20 @@ try {
 } catch {
   // fallback silencioso
 }
+
+let hqPrices: Record<string, PriceInfo> | undefined;
+try {
+  const result = await getHqPricesAndPromo();
+  hqPrices = result.prices;
+} catch (err) {
+  console.warn('[nome-bebe] Falha ao carregar preços do HQ:', err);
+}
+
+const FALLBACK_PRICES: Record<string, PriceInfo> = {
+  nome_bebe: { cents: 14700, formatted: 'R$ 147', hasDiscount: false },
+};
+const prices = hqPrices ?? FALLBACK_PRICES;
+function getPrice(id: string) { return prices[id] ?? FALLBACK_PRICES[id]; }
 
 const schemaProduct = {
   '@context': 'https://schema.org',
@@ -22,7 +38,7 @@ const schemaProduct = {
   brand: { '@type': 'Brand', name: 'Nome Magnético' },
   offers: {
     '@type': 'Offer',
-    price: '147.00',
+    price: (getPrice('nome_bebe').cents / 100).toFixed(2),
     priceCurrency: 'BRL',
     availability: 'https://schema.org/InStock',
     url: 'https://nomemagnetico.com.br/comprar?produto=nome_bebe',
@@ -52,7 +68,7 @@ const schemaProduct = {
       <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
         <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
           <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
-          <span class="text-[#D4AF37] text-sm font-medium">Para o Futuro do Seu Filho · R$ 147</span>
+          <span class="text-[#D4AF37] text-sm font-medium">Para o Futuro do Seu Filho · {getPrice('nome_bebe').formatted}</span>
           <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
         </div>
 
@@ -75,7 +91,7 @@ const schemaProduct = {
           Escolher o Nome do Meu Bebê →
         </a>
         <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
-          <p class="text-gray-600 text-sm">Pagamento único · R$ 147 · Acesso imediato</p>
+          <p class="text-gray-600 text-sm">Pagamento único · {getPrice('nome_bebe').formatted} · Acesso imediato</p>
           <div class="flex items-center gap-1.5">
             <span class="text-[#D4AF37] text-xs">✦</span>
             <p class="text-gray-600 text-sm">Garantia de 7 dias</p>
@@ -265,7 +281,7 @@ const schemaProduct = {
       <div class="max-w-xl mx-auto px-4 text-center">
         <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Investimento</p>
         <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Garanta o Melhor Começo</h2>
-        <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">R$ 147</div>
+        <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">{getPrice('nome_bebe').formatted}</div>
         <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Resultados na hora</p>
         <a
           href="/auth/cadastro?produto=nome_bebe"
