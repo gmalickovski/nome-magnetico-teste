@@ -388,7 +388,7 @@ const categorySlug = post.category ?? null;
               {/* overflow-y-auto mas sem scrollbar visível.
                   O browser roteia o evento de roda para este elemento
                   quando o ponteiro está sobre ele. */}
-              <nav class="toc-nav flex-1 overflow-y-auto space-y-1">
+              <nav class="toc-nav flex-1 overflow-y-auto space-y-1 mr-2">
                 {toc.map(item => (
                   <a
                     href={`#${item.id}`}
