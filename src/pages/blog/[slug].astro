@@ -3,6 +3,7 @@ import BlogLayout from '../../layouts/BlogLayout.astro';
 import { BlogHeader } from '../../frontend/components/blog/BlogHeader';
 import { ShareButton } from '../../frontend/components/blog/ShareButton';
 import { ArticleReactions } from '../../frontend/components/blog/ArticleReactions';
+import { MobileTOC } from '../../frontend/components/blog/MobileTOC';
 import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
 import { createClient } from '@supabase/supabase-js';
 import { marked } from 'marked';
@@ -189,12 +190,21 @@ const categorySlug = post.category ?? null;
 
           {/* ── CABEÇALHO DO ARTIGO ── */}
           <header class="mb-6 sm:mb-8">
-            {/* Categoria badge */}
-            {catLabel(post) && (
-              <span class={`inline-block text-xs font-medium px-3 py-1 rounded-full mb-4 ${catColor(post)}`}>
-                {catLabel(post)}
-              </span>
-            )}
+            {/* Linha superior: badge de categoria + botão compartilhar */}
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <div>
+                {catLabel(post) && (
+                  <span class={`inline-block text-xs font-medium px-3 py-1 rounded-full ${catColor(post)}`}>
+                    {catLabel(post)}
+                  </span>
+                )}
+              </div>
+              <ShareButton
+                client:load
+                title={post.title}
+                description={post.description ?? ''}
+              />
+            </div>
 
             {/* Título */}
             <h1 class="font-cinzel text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#e5e2e1] leading-tight mb-4 sm:mb-5">
@@ -208,40 +218,31 @@ const categorySlug = post.category ?? null;
               </p>
             )}
 
-            {/* Metadados + Compartilhar */}
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-600">
+            {/* Metadados (sem botão de compartilhamento — movido para cima) */}
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-600">
+              <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {post.author ?? 'Nome Magnético'}
+              </span>
+              {post.published_at && (
                 <span class="flex items-center gap-1.5">
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  {post.author ?? 'Nome Magnético'}
+                  <time datetime={post.published_at}>{formatDateFull(post.published_at)}</time>
                 </span>
-                {post.published_at && (
-                  <span class="flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <time datetime={post.published_at}>{formatDateFull(post.published_at)}</time>
-                  </span>
-                )}
-                <span class="flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {readMins} min de leitura
-                </span>
-              </div>
-
-              {/* Botão de compartilhamento */}
-              <ShareButton
-                client:load
-                title={post.title}
-                description={post.description ?? ''}
-              />
+              )}
+              <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {readMins} min de leitura
+              </span>
             </div>
 
             {/* Divisor */}
@@ -382,9 +383,11 @@ const categorySlug = post.category ?? null;
         {/* ── SIDEBAR: TOC (só quando artigo tem ≥3 H2s) ── */}
         {toc.length >= 3 && (
           <aside class="hidden lg:block">
-            <div class="sticky top-24">
-              <p class="text-gray-600 text-xs font-medium uppercase tracking-widest mb-4">Neste artigo</p>
-              <nav class="space-y-1">
+            <div class="sticky top-24 flex flex-col" style="max-height: calc(100vh - 120px);">
+              <p class="flex-shrink-0 text-gray-600 text-xs font-medium uppercase tracking-widest mb-4">Neste artigo</p>
+              <nav class="flex-1 overflow-y-auto space-y-1 pr-1
+                          scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10
+                          hover:scrollbar-thumb-[#D4AF37]/25">
                 {toc.map(item => (
                   <a
                     href={`#${item.id}`}
@@ -394,16 +397,13 @@ const categorySlug = post.category ?? null;
                   </a>
                 ))}
               </nav>
-
-              {/* ── AD SLOT SIDEBAR ── */}
-              {/* 300×250 retângulo médio — ideal para sidebar */}
-              {/*
-              <div class="ad-slot mt-8 flex items-center justify-center rounded-xl border border-dashed border-white/8 h-64 text-gray-700 text-xs" data-ad="sidebar">
-                [ Publicidade ]
-              </div>
-              */}
             </div>
           </aside>
+        )}
+
+        {/* ── MOBILE TOC: botão flutuante + bottom sheet (só quando há TOC) ── */}
+        {toc.length >= 3 && (
+          <MobileTOC client:load items={toc} />
         )}
 
       </div>
