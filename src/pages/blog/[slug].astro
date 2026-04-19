@@ -413,3 +413,16 @@ const categorySlug = post.category ?? null;
 
   <LandingFooter client:visible />
 </BlogLayout>
+
+<style is:global>
+  /* ── TOC Sidebar: scrollbar oculto por padrão ──────────────────────────── */
+  /* Firefox */
+  .toc-nav {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  /* Chrome / Safari / Edge */
+  .toc-nav::-webkit-scrollbar {
+    display: none;
+  }
+</style>
