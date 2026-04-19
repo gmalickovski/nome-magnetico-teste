@@ -114,23 +114,11 @@ const schemaBreadcrumb = isArticle && articleSlug ? {
       })();
     </script>
     <style>
-      /* TOC lateral — scrollbar oculta por padrao, aparece só no hover */
-
-      /* Firefox */
-      .toc-nav {
-        scrollbar-width: thin;
-        scrollbar-color: transparent transparent;
-        transition: scrollbar-color 0.3s;
-      }
-      .toc-nav:hover {
-        scrollbar-color: rgba(212,175,55,0.25) transparent;
-      }
-
-      /* Chrome / Safari / Edge */
-      .toc-nav::-webkit-scrollbar       { width: 2px; }
-      .toc-nav::-webkit-scrollbar-track { background: transparent; }
-      .toc-nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 2px; }
-      .toc-nav:hover::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); }
+      /* TOC lateral: scrollável via roda do mouse, sem scrollbar visível.
+         Quando o ponteiro está sobre o índice → roda rola o índice.
+         Quando está sobre o artigo → roda rola a página. */
+      .toc-nav { scrollbar-width: none; -ms-overflow-style: none; }
+      .toc-nav::-webkit-scrollbar { display: none; }
     </style>
   </Fragment>
   {!isArticle && <script type="application/ld+json" set:html={JSON.stringify(schemaBlog)} />}
