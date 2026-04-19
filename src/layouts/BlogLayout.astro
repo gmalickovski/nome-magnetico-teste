@@ -113,6 +113,14 @@ const schemaBreadcrumb = isArticle && articleSlug ? {
         } catch(e) {}
       })();
     </script>
+    <style>
+      /* TOC lateral: scrollável mas sem scrollbar visível.
+         O browser roteia o evento de roda (wheel) para o elemento
+         sob o cursor — quando o ponteiro está no índice, rola o índice;
+         quando está no artigo, rola a página normalmente. */
+      .toc-nav { scrollbar-width: none; -ms-overflow-style: none; }
+      .toc-nav::-webkit-scrollbar { display: none; }
+    </style>
   </Fragment>
   {!isArticle && <script type="application/ld+json" set:html={JSON.stringify(schemaBlog)} />}
   {isArticle && schemaArticle && <script type="application/ld+json" set:html={JSON.stringify(schemaArticle)} />}
