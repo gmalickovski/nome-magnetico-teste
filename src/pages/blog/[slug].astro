@@ -4,6 +4,7 @@ import { BlogHeader } from '../../frontend/components/blog/BlogHeader';
 import { ShareButton } from '../../frontend/components/blog/ShareButton';
 import { ArticleReactions } from '../../frontend/components/blog/ArticleReactions';
 import { MobileTOC } from '../../frontend/components/blog/MobileTOC';
+import { TOCSidebar } from '../../frontend/components/blog/TOCSidebar';
 import { LandingFooter } from '../../frontend/components/landing/LandingFooter';
 import { createClient } from '@supabase/supabase-js';
 import { marked } from 'marked';
@@ -380,25 +381,10 @@ const categorySlug = post.category ?? null;
 
         </article>
 
-        {/* ── SIDEBAR: TOC (só quando artigo tem ≥3 H2s) ── */}
+        {/* ── SIDEBAR: TOC com setas dinâmicas (só quando artigo tem ≥3 H2s) ── */}
         {toc.length >= 3 && (
           <aside class="hidden lg:block">
-            <div class="sticky top-24 flex flex-col" style="max-height: calc(100vh - 120px);">
-              <p class="flex-shrink-0 text-gray-600 text-xs font-medium uppercase tracking-widest mb-4">Neste artigo</p>
-              {/* overflow-y-auto mas sem scrollbar visível.
-                  O browser roteia o evento de roda para este elemento
-                  quando o ponteiro está sobre ele. */}
-              <nav class="toc-nav flex-1 overflow-y-auto space-y-1 mr-2">
-                {toc.map(item => (
-                  <a
-                    href={`#${item.id}`}
-                    class="block text-gray-500 hover:text-[#D4AF37] text-xs leading-relaxed py-1 border-l-2 border-white/5 hover:border-[#D4AF37]/40 pl-3 transition-all duration-200 line-clamp-2"
-                  >
-                    {item.text}
-                  </a>
-                ))}
-              </nav>
-            </div>
+            <TOCSidebar client:visible items={toc} />
           </aside>
         )}
 
@@ -415,14 +401,19 @@ const categorySlug = post.category ?? null;
 </BlogLayout>
 
 <style is:global>
-  /* ── TOC Sidebar: scrollbar oculto por padrão ──────────────────────────── */
-  /* Firefox */
-  .toc-nav {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+  /* ── TOC Sidebar: scrollbar oculto por padrão ── */
+  .toc-nav { scrollbar-width: none; -ms-overflow-style: none; }
+  .toc-nav::-webkit-scrollbar { display: none; }
+
+  /* ── Animação sutil das setas do TOC ── */
+  @keyframes toc-arrow-up {
+    0%, 100% { transform: translateY(0);    opacity: 0.4; }
+    50%       { transform: translateY(-3px); opacity: 0.75; }
   }
-  /* Chrome / Safari / Edge */
-  .toc-nav::-webkit-scrollbar {
-    display: none;
+  @keyframes toc-arrow-down {
+    0%, 100% { transform: translateY(0);   opacity: 0.4; }
+    50%       { transform: translateY(3px); opacity: 0.75; }
   }
+  .toc-arrow-up   { animation: toc-arrow-up   2.4s ease-in-out infinite; }
+  .toc-arrow-down { animation: toc-arrow-down 2.4s ease-in-out infinite; }
 </style>
