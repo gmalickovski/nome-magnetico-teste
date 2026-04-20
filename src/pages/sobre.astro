@@ -1,0 +1,177 @@
+---
+import LandingLayout from '../layouts/LandingLayout.astro';
+import { LandingHeader } from '../frontend/components/landing/LandingHeader';
+import { LandingFooter } from '../frontend/components/landing/LandingFooter';
+---
+
+<LandingLayout
+  title="Sobre o Nome Magnético — Quem Está Por Trás da Ferramenta"
+  description="Conheça a história e os idealizadores do Nome Magnético — a plataforma de numerologia cabalística que nasceu da necessidade de tornar o diagnóstico do nome preciso, rigoroso e acessível."
+  keywords="sobre nome magnético, criadores nome magnético, Guilherme Malickovski, Claudia Delanni Vitoria, numerologia cabalística ferramenta, quem criou nome magnético"
+>
+  <link rel="canonical" href="https://nomemagnetico.com.br/sobre" />
+  <meta name="robots" content="index, follow" />
+
+  <LandingHeader client:load />
+
+  <main class="min-h-screen pt-[72px] pb-16 md:pb-24" style="background-color: #131313;">
+
+    {/* ── HERO ── */}
+    <section class="max-w-3xl mx-auto px-4 pt-12 sm:pt-20 pb-12 sm:pb-16">
+
+      {/* Breadcrumb */}
+      <nav class="flex items-center gap-2 text-[10px] sm:text-xs text-gray-600 mb-8" aria-label="Navegação estrutural">
+        <a href="/" class="hover:text-[#D4AF37] transition-colors">Início</a>
+        <span aria-hidden="true">›</span>
+        <span class="text-gray-500">Sobre</span>
+      </nav>
+
+      {/* Badge de identificação */}
+      <div class="inline-flex items-center gap-2 mb-5">
+        <span class="bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">
+          ✦ Nome Magnético — A Ferramenta
+        </span>
+      </div>
+
+      <h1 class="font-cinzel text-3xl sm:text-4xl md:text-5xl font-bold text-[#e5e2e1] leading-tight mb-6">
+        Por Que o Nome<br class="hidden sm:block" /> Magnético Existe
+      </h1>
+
+      <p class="text-gray-400 text-base sm:text-lg leading-relaxed max-w-2xl">
+        Existe uma pergunta que muda tudo quando você se permite fazê-la de verdade:
+        <em> "O meu nome está trabalhando a meu favor — ou contra mim?"</em>
+      </p>
+
+      {/* Divisor dourado */}
+      <div class="mt-10 h-px w-24 opacity-40"
+        style="background: linear-gradient(90deg, #D4AF37, transparent);">
+      </div>
+    </section>
+
+    {/* ── A HISTÓRIA ── */}
+    <section class="max-w-3xl mx-auto px-4 pb-16">
+      <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-3">A Origem</p>
+      <h2 class="font-cinzel text-xl sm:text-2xl font-bold text-[#e5e2e1] mb-6">
+        A história por trás da ferramenta
+      </h2>
+      <div class="space-y-5 text-gray-400 text-sm sm:text-base leading-relaxed">
+        <p>
+          A numerologia cabalística já sinalizava, com rigor e precisão, algo que muitas pessoas
+          experimentam sem conseguir nomear: um bloqueio silencioso. Uma sensação de que por mais
+          esforço que se coloque, algo sempre parece travar — no trabalho, nas relações, na saúde,
+          na sensação de estar no lugar certo.
+        </p>
+        <p>
+          A tradição cabalística revela que as letras do nome de nascimento formam padrões numéricos
+          que se repetem ao longo da vida. Quando esses padrões contêm sequências bloqueadas —
+          como o <strong class="text-[#e5e2e1]">bloqueio de 555 (Liberdade)</strong> ou o <strong class="text-[#e5e2e1]">bloqueio de 888 (Poder e Abundância)</strong>
+          — eles não são apenas curiosidades esotéricas. São registros energéticos que se manifestam
+          de forma objetiva, calculável, nos 4 triângulos cabalísticos do nome.
+        </p>
+        <p>
+          O problema era que realizar essa análise exigia horas de cálculo manual, conhecimento
+          aprofundado da tabela hebraica e experiência para interpretar os 4 triângulos em conjunto —
+          não apenas um. Era um diagnóstico acessível a poucos.
+        </p>
+        <p>
+          O Nome Magnético nasceu para mudar isso. A ideia era simples e ambiciosa ao mesmo tempo:
+          <strong class="text-[#e5e2e1]"> construir uma ferramenta que fizesse esse diagnóstico completo com a precisão de
+          um especialista — mas na velocidade e acessibilidade de um software</strong>. Um lugar onde
+          qualquer pessoa pudesse descobrir, com clareza e profundidade, o que o seu nome diz sobre
+          quem ela é e o que pode estar bloqueando sua trajetória.
+        </p>
+      </div>
+    </section>
+
+    {/* ── MISSÃO ── */}
+    <section class="max-w-3xl mx-auto px-4 pb-16">
+      <div class="rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-center"
+        style="background: linear-gradient(135deg, rgba(212,175,55,0.07) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.15);">
+        <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-4">Nossa Missão</p>
+        <p class="font-cinzel text-lg sm:text-xl md:text-2xl font-bold text-[#e5e2e1] leading-relaxed max-w-xl mx-auto">
+          Tornar o diagnóstico numerológico cabalístico preciso, profundo e acessível para qualquer pessoa.
+        </p>
+      </div>
+    </section>
+
+    {/* ── OS IDEALIZADORES ── */}
+    <section class="max-w-3xl mx-auto px-4 pb-16">
+      <p class="text-[#D4AF37] text-[10px] font-bold tracking-widest uppercase mb-3">Quem Está Por Trás</p>
+      <h2 class="font-cinzel text-xl sm:text-2xl font-bold text-[#e5e2e1] mb-8">
+        Os idealizadores
+      </h2>
+
+      <div class="grid sm:grid-cols-2 gap-5">
+
+        {/* Card — Guilherme */}
+        <div class="rounded-2xl p-6 sm:p-7 flex flex-col gap-5"
+          style="background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.06);">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-cinzel font-bold text-[#131313] flex-shrink-0"
+              style="background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06));">
+              G
+            </div>
+            <div>
+              <h3 class="font-cinzel text-sm sm:text-base font-bold text-[#e5e2e1] leading-snug">
+                Guilherme Malickovski Correa
+              </h3>
+              <p class="text-gray-600 text-xs mt-0.5 tracking-wide uppercase">Tecnologia & Operação</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Responsável pela arquitetura do sistema, construção da plataforma e operação técnica do
+            Nome Magnético. Projetou a lógica que permite calcular os 4 triângulos cabalísticos
+            automaticamente, detectar bloqueios energéticos e gerar análises personalizadas com
+            rigor e escala.
+          </p>
+        </div>
+
+        {/* Card — Claudia */}
+        <div class="rounded-2xl p-6 sm:p-7 flex flex-col gap-5"
+          style="background: linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.01) 100%); border: 1px solid rgba(212,175,55,0.10);">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-cinzel font-bold text-[#131313] flex-shrink-0"
+              style="background: linear-gradient(135deg, #f2ca50, #D4AF37);">
+              C
+            </div>
+            <div>
+              <h3 class="font-cinzel text-sm sm:text-base font-bold text-[#e5e2e1] leading-snug">
+                Claudia Delanni Vitoria
+              </h3>
+              <p class="text-[#D4AF37]/70 text-xs mt-0.5 tracking-wide uppercase">Numerologia & Comunicação</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Responsável pelo conhecimento numerológico cabalístico que fundamenta todo o sistema —
+            os critérios de bloqueio, a metodologia dos 4 triângulos, a interpretação das lições
+            kármicas e a linguagem das análises. Coordena também os textos, o marketing e toda a
+            divulgação do Nome Magnético.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    {/* ── LINKS DISCRETOS ── */}
+    <section class="max-w-3xl mx-auto px-4 pb-4">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <a
+          href="/analise-gratuita"
+          class="inline-flex items-center gap-2 text-[#D4AF37] text-sm font-medium hover:text-[#f2ca50] transition-colors duration-200"
+        >
+          Experimentar a análise gratuita →
+        </a>
+        <span class="hidden sm:inline text-gray-700">·</span>
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-gray-600 text-sm hover:text-gray-400 transition-colors duration-200"
+        >
+          Ler os artigos do blog →
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <LandingFooter client:visible />
+</LandingLayout>

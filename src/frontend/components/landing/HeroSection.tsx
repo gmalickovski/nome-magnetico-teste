@@ -16,24 +16,13 @@ export function HeroSection() {
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-24 pb-16">
-        {/* Badge de posicionamento */}
-        <div
-          className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-8"
-          role="note"
-          aria-label="Categoria do produto"
-        >
-          <span className="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
-          <span className="text-[#D4AF37] text-sm font-medium">Método Nome Magnético — Numerologia Cabalística</span>
-          <span className="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
-        </div>
-
         {/* Super Headline — keyword SEO + gancho emocional */}
         <p className="text-[#D4AF37] text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-4">
           Branding Pessoal com Fundamento Vibracional
         </p>
 
         {/* H1 Headline principal */}
-        <h1 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+        <h1 className="font-cinzel text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
           O Seu Nome É Um Ímã.{' '}
           <br />
           <span
