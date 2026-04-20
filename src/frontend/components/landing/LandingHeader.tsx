@@ -136,6 +136,9 @@ export function LandingHeader() {
           <a href="/perguntas-frequentes" className={navLink('/perguntas-frequentes')}>
             FAQ
           </a>
+          <a href="/sobre" className={navLink('/sobre')}>
+            Sobre
+          </a>
           <a href="/auth/login" className="bg-[#111111] border border-[#D4AF37] text-[#D4AF37] font-medium text-sm px-5 py-2 rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-md shadow-[#D4AF37]/10">
             Entrar
           </a>
@@ -170,6 +173,7 @@ export function LandingHeader() {
           <a href="/precos" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Preços</a>
           <a href="/blog" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Blog</a>
           <a href="/perguntas-frequentes" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Perguntas Frequentes</a>
+          <a href="/sobre" className={mobileLink('/sobre')} onClick={() => setMenuOpen(false)}>Sobre</a>
 
           <div className="border-t border-white/8 pt-3 mt-3 space-y-1">
             <p className="text-gray-600 text-xs uppercase tracking-widest px-1 pb-1">Produtos</p>
