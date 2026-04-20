@@ -2,22 +2,23 @@
 import BaseLayout from './BaseLayout.astro';
 import { supabase } from '../backend/db/supabase';
 import AvatarMenu from '../frontend/components/app/AvatarMenu';
+import { PDFFeedbackButton } from '../frontend/components/app/PDFFeedbackButton';
 
 export interface Props {
   title: string;
   analysisId: string;
+  productType?: string;
+  isFree?: boolean;
   showActions?: boolean;
 }
 
-const { title, analysisId, showActions = true } = Astro.props;
+const { title, analysisId, productType = 'nome_social', isFree = false, showActions = true } = Astro.props;
 
 const user = Astro.locals.user;
 if (!user) {
   return Astro.redirect('/auth/login?redirect=' + encodeURIComponent(Astro.url.pathname));
 }
 
-
-const pdfHref = '/api/generate-pdf?id=' + analysisId;
 
 let userNome = user.email?.split('@')[0] ?? '';
 try {
@@ -56,13 +57,7 @@ try {
               Minhas Análises
             </a>
             {showActions && (
-              <a
-                href={pdfHref}
-                class="inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_2px_16px_rgba(212,175,55,0.35)] hover:bg-[#f2ca50] hover:shadow-[0_4px_24px_rgba(212,175,55,0.5)] active:scale-95 transition-all duration-300"
-              >
-                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Baixar Análise
-              </a>
+              <PDFFeedbackButton client:load analysisId={analysisId} productType={productType} isFree={isFree} />
             )}
             <AvatarMenu client:load nome={userNome} />
           </div>
@@ -70,17 +65,7 @@ try {
       </div>
     </header>
 
-    <!-- Floating PDF Button — mobile only, centered above bottom nav -->
-    {showActions && (
-      <a
-        id="pdf-download-btn"
-        href={pdfHref}
-        class="md:hidden fixed bottom-[88px] left-1/2 -translate-x-1/2 z-50 inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(212,175,55,0.4)] hover:bg-[#f2ca50] hover:shadow-[0_4px_32px_rgba(212,175,55,0.55)] active:scale-95 transition-all duration-300"
-      >
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-        Baixar Análise
-      </a>
-    )}
+    <!-- Floating PDF Button — rendered by PDFFeedbackButton island (mobile FAB + desktop button) -->
 
     <!-- Mobile Bottom Navigation -->
     <nav class="md:hidden fixed bottom-0 left-0 w-full bg-[#111111]/95 backdrop-blur-xl border-t border-[#D4AF37]/20 z-50 flex items-center justify-around pt-2" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); transform: translateZ(0); will-change: transform;">
@@ -116,46 +101,4 @@ try {
     }
   </script>
 
-  <!-- Mobile FAB opacity: opaque at rest, semi-transparent while scrolling/interacting -->
-  <script is:inline>
-    (function () {
-      var btn = document.getElementById('pdf-download-btn');
-      if (!btn) return;
-
-      var FADE_DELAY  = 150;    // ms after interaction stops before going opaque again
-      var FADE_OPACITY = '0.3'; // opacity while user is actively scrolling/interacting
-      var FULL_OPACITY = '1';   // opacity when idle (resting)
-      var restoreTimer = null;
-      var isHovered = false;
-
-      btn.style.transition = 'opacity 0.4s ease, background-color 0.3s, box-shadow 0.3s, transform 0.1s';
-      // Start fully visible
-      btn.style.opacity = FULL_OPACITY;
-
-      function onInteractionStart() {
-        if (isHovered) return;
-        clearTimeout(restoreTimer);
-        btn.style.opacity = FADE_OPACITY;
-        // After brief pause in interaction, restore
-        restoreTimer = setTimeout(function () {
-          if (!isHovered) btn.style.opacity = FULL_OPACITY;
-        }, FADE_DELAY);
-      }
-
-      // Fade while actively interacting (scroll / touch)
-      ['scroll', 'touchstart', 'touchmove'].forEach(function (ev) {
-        window.addEventListener(ev, onInteractionStart, { passive: true });
-      });
-
-      // Hover always shows full opacity (desktop safety, irrelevant on mobile)
-      btn.addEventListener('mouseenter', function () {
-        isHovered = true;
-        clearTimeout(restoreTimer);
-        btn.style.opacity = FULL_OPACITY;
-      });
-      btn.addEventListener('mouseleave', function () {
-        isHovered = false;
-      });
-    })();
-  </script>
 </BaseLayout>

@@ -142,7 +142,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
 ] : cinco_numeros;
 ---
 
-<ResultadoLayout title="Resultado da Análise" analysisId={analysis.id} showActions={analysis.status === 'complete'}>
+<ResultadoLayout title="Resultado da Análise" analysisId={analysis.id} productType={analysis.product_type ?? 'nome_social'} isFree={isFree} showActions={analysis.status === 'complete'}>
   <div>
 
     {/* ── PROCESSANDO ─────────────────────────────────────────────── */}
