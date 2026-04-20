@@ -80,13 +80,13 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
   return (
     <header
-      className={`blog-header fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`blog-header fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
         scrolled
-          ? `bg-[#111111]/95 backdrop-blur-md py-3${menuOpen || searchOpen ? '' : ' border-b border-[#D4AF37]/15'}`
-          : 'bg-[#111111]/80 backdrop-blur-sm py-4'
+          ? `bg-[#111111]/95 backdrop-blur-md ${menuOpen || searchOpen ? 'border-transparent' : 'border-[#D4AF37]/15'}`
+          : 'bg-[#111111]/80 backdrop-blur-sm border-transparent'
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 flex items-center gap-3">
+      <div className={`max-w-6xl mx-auto px-4 flex items-center gap-3 ${scrolled ? 'py-3' : 'py-4'}`}>
 
         {/* ── Logo ── */}
         <a href="/blog" className="hover:opacity-80 transition-opacity flex-shrink-0">

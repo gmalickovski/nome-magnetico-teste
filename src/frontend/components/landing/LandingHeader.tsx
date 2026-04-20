@@ -45,13 +45,13 @@ export function LandingHeader() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
         scrolled
-          ? `bg-[#111111]/90 backdrop-blur-md py-3${menuOpen ? '' : ' border-b border-[#D4AF37]/20'}`
-          : 'bg-transparent py-5'
+          ? `bg-[#111111]/90 backdrop-blur-md ${menuOpen ? 'border-transparent' : 'border-[#D4AF37]/20'}`
+          : 'bg-transparent border-transparent'
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
+      <div className={`max-w-6xl mx-auto px-4 flex items-center justify-between ${scrolled ? 'py-3' : 'py-5'}`}>
         {/* Logo */}
         <a href="/" className="hover:opacity-80 transition-opacity flex-shrink-0">
           <img src="/logo-nm-header.svg" alt="Nome Magnético" className="h-9 sm:h-10 md:h-11 w-auto" />

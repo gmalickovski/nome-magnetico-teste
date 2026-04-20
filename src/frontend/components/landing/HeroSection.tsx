@@ -7,14 +7,14 @@ export function HeroSection() {
       id="inicio"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{
-        background: 'linear-gradient(160deg, #161209 0%, #111111 45%, #0e0e0e 100%)',
+        background: 'radial-gradient(ellipse 90% 70% at 50% 35%, #1c1609 0%, #111111 55%, #0e0e0e 100%)',
       }}
       aria-label="Seção principal — Nome Magnético"
     >
       {/* Background decorativo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        {/* Glow dourado superior — concentrado no topo para não competir com textos */}
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-3xl" />
+        {/* Glow dourado superior */}
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[400px] h-[300px] md:w-[700px] md:h-[400px] bg-[#D4AF37]/10 rounded-full blur-3xl" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/4 rounded-full blur-3xl" />
