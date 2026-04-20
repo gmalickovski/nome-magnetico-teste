@@ -82,7 +82,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
     <header
       className={`blog-header fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#111111]/95 backdrop-blur-md border-b border-[#D4AF37]/15 py-3'
+          ? `bg-[#111111]/95 backdrop-blur-md py-3${menuOpen || searchOpen ? '' : ' border-b border-[#D4AF37]/15'}`
           : 'bg-[#111111]/80 backdrop-blur-sm py-4'
       }`}
     >
@@ -273,7 +273,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
       {/* ── Painel de busca mobile ── */}
       {searchOpen && (
-        <div className="blog-dropdown md:hidden border-t border-white/8 bg-[#111111]/98 px-4 py-3">
+        <div className="blog-dropdown md:hidden border-t border-[#D4AF37]/12 bg-[#111111] px-4 py-3">
           <div className="max-w-lg mx-auto relative">
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none"
@@ -308,7 +308,7 @@ export function BlogHeader({ activeCategory = '' }: Props) {
 
       {/* ── Menu mobile ── */}
       {menuOpen && (
-        <div className="blog-dropdown md:hidden bg-[#111111]/98 border-t border-[#D4AF37]/12 px-4 py-5">
+        <div className="blog-dropdown md:hidden bg-[#111111] border-t border-[#D4AF37]/12 px-4 py-5">
 
           {/* Cabeçalho do menu: título + theme toggle */}
           <div className="flex items-center justify-between mb-4">

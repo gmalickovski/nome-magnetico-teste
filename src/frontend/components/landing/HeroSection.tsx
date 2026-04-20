@@ -5,14 +5,21 @@ export function HeroSection() {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#111111]"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      style={{
+        background: 'linear-gradient(160deg, #161209 0%, #111111 45%, #0e0e0e 100%)',
+      }}
       aria-label="Seção principal — Nome Magnético"
     >
       {/* Background decorativo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {/* Glow dourado superior — concentrado no topo para não competir com textos */}
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-3xl" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4AF37]/3 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/4 rounded-full blur-3xl" />
+        {/* Vinheta nas bordas para profundidade */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 120% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%)' }} />
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-24 pb-16">
@@ -37,12 +44,9 @@ export function HeroSection() {
           </span>
         </h1>
 
-        {/* Subheadline — foco no resultado, não no processo */}
-        <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-4 leading-relaxed font-light">
-          Cada letra do seu nome de nascimento carrega uma frequência matemática. Na numerologia cabalística, quando essas frequências colidem, surgem bloqueios invisíveis que sabotam sua carreira, seus relacionamentos e sua prosperidade.
-        </p>
-        <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-          O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> usa análise vibracional avançada para revelar esses bloqueios e encontrar a variação do seu nome que <em>alinha sua Expressão ao seu Destino</em> — com precisão matemática impossível de fazer manualmente.
+        {/* Subheadline — conciso */}
+        <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+          Cada letra do seu nome carrega uma frequência matemática. Quando essas frequências colidem, surgem bloqueios invisíveis na carreira, nos relacionamentos e na prosperidade. O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> revela esses bloqueios e encontra a variação do seu nome que alinha sua Expressão ao seu Destino.
         </p>
 
         {/* CTA Principal */}

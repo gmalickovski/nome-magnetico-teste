@@ -47,7 +47,7 @@ export function LandingHeader() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#111111]/90 backdrop-blur-md border-b border-[#D4AF37]/20 py-3'
+          ? `bg-[#111111]/90 backdrop-blur-md py-3${menuOpen ? '' : ' border-b border-[#D4AF37]/20'}`
           : 'bg-transparent py-5'
       }`}
     >
@@ -167,7 +167,7 @@ export function LandingHeader() {
 
       {/* Menu mobile aberto */}
       {menuOpen && (
-        <div className="lg:hidden bg-[#111111]/95 backdrop-blur-md border-t border-[#D4AF37]/20 px-4 py-6 space-y-1">
+        <div className="lg:hidden bg-[#111111] border-t border-[#D4AF37]/20 px-4 py-6 space-y-1">
           <a href="/#como-funciona" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Como Funciona</a>
           <a href="/analise-gratuita" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Análise Gratuita</a>
           <a href="/precos" className="block text-gray-400 hover:text-[#D4AF37] py-2.5 text-sm" onClick={() => setMenuOpen(false)}>Preços</a>
