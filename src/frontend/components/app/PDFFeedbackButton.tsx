@@ -19,7 +19,32 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
   const [comment, setComment]           = useState('');
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [feedbackError, setFeedbackError] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fabRef       = useRef<HTMLButtonElement | null>(null);
+  const restoreTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Opacidade do FAB ao rolar / interagir (só na instância fabOnly)
+  useEffect(() => {
+    if (!fabOnly) return;
+    const btn = fabRef.current;
+    if (!btn) return;
+
+    const fade = () => {
+      btn.style.opacity = '0.3';
+      if (restoreTimer.current) clearTimeout(restoreTimer.current);
+      restoreTimer.current = setTimeout(() => { btn.style.opacity = '1'; }, 800);
+    };
+
+    ['scroll', 'touchstart', 'touchmove'].forEach(ev =>
+      window.addEventListener(ev, fade, { passive: true }),
+    );
+    return () => {
+      ['scroll', 'touchstart', 'touchmove'].forEach(ev =>
+        window.removeEventListener(ev, fade),
+      );
+      if (restoreTimer.current) clearTimeout(restoreTimer.current);
+    };
+  }, [fabOnly]);
 
   // Timer de segundos decorridos durante o loading
   useEffect(() => {
@@ -120,8 +145,9 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
 
       {/* ── FAB mobile ── */}
       <button
+        ref={fabRef}
         onClick={handleDownload}
-        className="md:hidden fixed bottom-[88px] left-1/2 -translate-x-1/2 z-50 inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(212,175,55,0.4)] hover:bg-[#f2ca50] hover:shadow-[0_4px_32px_rgba(212,175,55,0.55)] active:scale-95 transition-all duration-300"
+        className="md:hidden fixed bottom-[116px] left-1/2 -translate-x-1/2 z-50 inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(212,175,55,0.4)] hover:bg-[#f2ca50] hover:shadow-[0_4px_32px_rgba(212,175,55,0.55)] active:scale-95 transition-all duration-300"
         style={{ opacity: 1, transition: 'opacity 0.4s ease, background-color 0.3s, box-shadow 0.3s, transform 0.1s' }}
         id="pdf-download-btn"
       >
