@@ -5,11 +5,12 @@ interface Props {
   analysisId: string;
   productType: string;
   isFree?: boolean;
+  fabOnly?: boolean;
 }
 
 type Status = 'idle' | 'loading' | 'done' | 'error';
 
-export function PDFFeedbackButton({ analysisId, productType, isFree = false }: Props) {
+export function PDFFeedbackButton({ analysisId, productType, isFree = false, fabOnly = false }: Props) {
   const [modalOpen, setModalOpen]       = useState(false);
   const [status, setStatus]             = useState<Status>('idle');
   const [elapsed, setElapsed]           = useState(0);
@@ -31,13 +32,7 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false }: P
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [status]);
 
-  // Fecha modal automaticamente 2.5s após concluir
-  useEffect(() => {
-    if (status === 'done') {
-      const t = setTimeout(() => setModalOpen(false), 2500);
-      return () => clearTimeout(t);
-    }
-  }, [status]);
+  // Modal permanece aberto após concluir — usuário fecha manualmente
 
   // Reseta estado ao fechar
   function closeModal() {
@@ -112,14 +107,16 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false }: P
 
   return (
     <>
-      {/* ── Botão desktop ── */}
-      <button
-        onClick={handleDownload}
-        className="hidden md:inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_2px_16px_rgba(212,175,55,0.35)] hover:bg-[#f2ca50] hover:shadow-[0_4px_24px_rgba(212,175,55,0.5)] active:scale-95 transition-all duration-300"
-      >
-        {downloadIcon}
-        Baixar Análise
-      </button>
+      {/* ── Botão desktop (omitido quando fabOnly) ── */}
+      {!fabOnly && (
+        <button
+          onClick={handleDownload}
+          className="hidden md:inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_2px_16px_rgba(212,175,55,0.35)] hover:bg-[#f2ca50] hover:shadow-[0_4px_24px_rgba(212,175,55,0.5)] active:scale-95 transition-all duration-300"
+        >
+          {downloadIcon}
+          Baixar Análise
+        </button>
+      )}
 
       {/* ── FAB mobile ── */}
       <button
@@ -137,7 +134,7 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false }: P
       {/* ── Modal ── */}
       {modalOpen && (
         <div
-          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
           onClick={(e) => { if (e.target === e.currentTarget && status !== 'loading') closeModal(); }}
         >
