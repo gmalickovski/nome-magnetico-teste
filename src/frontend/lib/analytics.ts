@@ -16,6 +16,8 @@ type UmamiEvent =
   | 'checkout_redirect_start'
   | 'checkout_failed'
   | 'coupon_applied'
+  | 'pix_start'
+  | 'pix_failed'
   | 'purchase_complete'
   | 'report_generated'
   | 'pdf_downloaded'

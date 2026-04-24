@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
 import { track } from '../../lib/analytics';
+import { PixModal } from './PixModal';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
@@ -119,30 +120,25 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
   const [loading, setLoading] = useState<ProductType | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [couponCode, setCouponCode] = useState('');
-  const [showRetry, setShowRetry] = useState(false);
 
-  // Auto-disparar checkout quando usuário chega logado com produto específico
-  useEffect(() => {
-    if (productType && isLoggedIn && !isOwned) {
-      track('checkout_redirect_start', { produto: productType });
-      triggerCheckout(productType);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  interface PixData {
+    chargeId: string;
+    pixCopiaECola: string;
+    qrCodeImage: string;
+    expiresAt: string;
+    productType: ProductType;
+  }
+  const [pixData, setPixData]     = useState<PixData | null>(null);
+  const [pixLoading, setPixLoading] = useState<ProductType | null>(null);
+  const [pixError, setPixError]   = useState('');
 
-  // Fallback para 3G: mostrar botão de retry após 10s no spinner
-  useEffect(() => {
-    if (productType && isLoggedIn && !isOwned && !errorMsg) {
-      const timer = setTimeout(() => setShowRetry(true), 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [productType, isLoggedIn, isOwned, errorMsg]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Sem auto-trigger: usuário escolhe cartão ou PIX na página
 
   const prices = hqPrices ?? FALLBACK_PRICES;
 
   async function triggerCheckout(type: ProductType) {
     setLoading(type);
     setErrorMsg('');
-    setShowRetry(false);
     try {
       // Auto-aplica cupom da promoção se o usuário não digitou um código manual
       const appliesToThis = !promotion?.productType || promotion.productType === type;
@@ -184,6 +180,46 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
       track('checkout_failed', { produto: type, erro: errMsg });
       setErrorMsg(errMsg);
       setLoading(null);
+    }
+  }
+
+  async function triggerPix(type: ProductType) {
+    setPixLoading(type);
+    setPixError('');
+    try {
+      track('pix_start', { produto: type });
+      const res = await fetch('/api/create-pix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_type: type }),
+      });
+      const data = await res.json() as {
+        bypass?: boolean;
+        redirectUrl?: string;
+        chargeId?: string;
+        pixCopiaECola?: string;
+        qrCodeImage?: string;
+        expiresAt?: string;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar PIX');
+      if (data.bypass && data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+        return;
+      }
+      setPixData({
+        chargeId:      data.chargeId!,
+        pixCopiaECola: data.pixCopiaECola!,
+        qrCodeImage:   data.qrCodeImage!,
+        expiresAt:     data.expiresAt!,
+        productType:   type,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao gerar PIX';
+      track('pix_failed', { produto: type, erro: msg });
+      setPixError(msg);
+    } finally {
+      setPixLoading(null);
     }
   }
 
@@ -310,17 +346,53 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
                 className="w-full bg-[#111111] border border-white/10 rounded-xl px-3 py-2 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/40 transition-colors"
               />
             </div>
+            {/* Cartão */}
             <button
               onClick={() => triggerCheckout(type)}
-              disabled={!!loading}
-              className={`w-full font-bold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
+              disabled={!!loading || !!pixLoading}
+              className={`w-full flex items-center justify-center gap-2 font-bold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
                 isHighlighted
                   ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
                   : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
               }`}
             >
-              {isLoadingThis ? 'Aguarde...' : 'Comprar'}
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              {isLoadingThis ? 'Aguarde...' : 'Pagar com Cartão'}
             </button>
+            {/* Divisor */}
+            <div className="flex items-center gap-3 my-1">
+              <div className="flex-1 h-px bg-white/8" />
+              <span className="text-gray-700 text-xs">ou</span>
+              <div className="flex-1 h-px bg-white/8" />
+            </div>
+            {/* PIX */}
+            <button
+              onClick={() => triggerPix(type)}
+              disabled={!!loading || !!pixLoading}
+              className="w-full flex items-center justify-center gap-2 border border-[#D4AF37]/30 text-[#D4AF37] font-bold py-3.5 rounded-xl hover:bg-[#D4AF37]/8 hover:border-[#D4AF37]/60 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300"
+            >
+              {pixLoading === type ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                    <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  Gerando QR Code…
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path fillRule="evenodd" d="M11.484 2.17a.75.75 0 01.032 0l8.73 4.998a.75.75 0 01.39.658V16.17a.75.75 0 01-.39.658l-8.73 4.998a.75.75 0 01-.064.002.75.75 0 01-.064-.002l-8.73-4.998A.75.75 0 013 16.17V7.826a.75.75 0 01.39-.658l8.094-4.996z" clipRule="evenodd" />
+                  </svg>
+                  Pagar com PIX
+                </>
+              )}
+            </button>
+            {pixError && (
+              <p className="text-red-400 text-xs text-center mt-1">{pixError}</p>
+            )}
           </>
         ) : (
           <a
@@ -385,70 +457,74 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
 
   if (showAll) {
     return (
-      <div className="min-h-screen bg-[#111111]">
-        <StickyHeader />
-        <div className="pt-10 pb-20 px-4">
-          <div className="max-w-6xl mx-auto">
-            <PageHeader singular={false} />
-            {errorMsg && (
-              <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm text-center">
-                {errorMsg}
+      <>
+        <div className="min-h-screen bg-[#111111]">
+          <StickyHeader />
+          <div className="pt-10 pb-20 px-4">
+            <div className="max-w-6xl mx-auto">
+              <PageHeader singular={false} />
+              {errorMsg && (
+                <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm text-center">
+                  {errorMsg}
+                </div>
+              )}
+              <div className="grid md:grid-cols-3 gap-8">
+                {ALL_PRODUCTS.map(t => (
+                  <ProductCard key={t} type={t} showPayButton={true} />
+                ))}
               </div>
-            )}
-            <div className="grid md:grid-cols-3 gap-8">
-              {ALL_PRODUCTS.map(type => (
-                <ProductCard key={type} type={type} showPayButton={true} />
-              ))}
             </div>
           </div>
         </div>
-      </div>
+        {pixData && (
+          <PixModal
+            productType={pixData.productType}
+            pixCopiaECola={pixData.pixCopiaECola}
+            qrCodeImage={pixData.qrCodeImage}
+            expiresAt={pixData.expiresAt}
+            chargeId={pixData.chargeId}
+            onClose={() => setPixData(null)}
+          />
+        )}
+      </>
     );
   }
 
   const type = productType!;
 
-  // Sem erro → auto-trigger em progresso, mostrar spinner
-  if (!errorMsg) {
-    return (
+  // Produto específico (logado, não possui) — mostrar card com seleção de método
+  return (
+    <>
       <div className="min-h-screen bg-[#111111]">
         <StickyHeader />
-        <div className="flex flex-col items-center justify-center py-32 px-4">
-          <div className="w-16 h-16 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin mb-6" />
-          <p className="font-cinzel text-lg font-bold text-[#e5e2e1] mb-2">Preparando seu pagamento...</p>
-          <p className="text-gray-500 text-sm">Você será redirecionado ao Stripe em instantes.</p>
-          {showRetry && (
-            <button
-              onClick={() => { setShowRetry(false); triggerCheckout(type); }}
-              className="mt-8 text-[#D4AF37] text-sm underline underline-offset-4 hover:text-[#f2ca50] transition-colors active:scale-95"
-            >
-              Problemas com o redirecionamento? Toque aqui
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Erro no checkout — mostrar produto com opção de tentar novamente
-  return (
-    <div className="min-h-screen bg-[#111111]">
-      <StickyHeader />
-      <div className="pt-10 pb-20 px-4">
-        <div className="max-w-md mx-auto">
-          <PageHeader singular={true} />
-          <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm text-center">
-            {errorMsg}
-            <button
-              onClick={() => { setErrorMsg(''); triggerCheckout(type); }}
-              className="block mt-3 mx-auto text-[#D4AF37] hover:underline text-sm font-medium"
-            >
-              Tentar novamente
-            </button>
+        <div className="pt-10 pb-20 px-4">
+          <div className="max-w-md mx-auto">
+            <PageHeader singular={true} />
+            {errorMsg && (
+              <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm text-center">
+                {errorMsg}
+                <button
+                  onClick={() => setErrorMsg('')}
+                  className="block mt-3 mx-auto text-[#D4AF37] hover:underline text-sm font-medium"
+                >
+                  Fechar
+                </button>
+              </div>
+            )}
+            <ProductCard type={type} showPayButton={true} forceHighlight={true} />
           </div>
-          <ProductCard type={type} showPayButton={true} forceHighlight={true} />
         </div>
       </div>
-    </div>
+      {pixData && (
+        <PixModal
+          productType={pixData.productType}
+          pixCopiaECola={pixData.pixCopiaECola}
+          qrCodeImage={pixData.qrCodeImage}
+          expiresAt={pixData.expiresAt}
+          chargeId={pixData.chargeId}
+          onClose={() => setPixData(null)}
+        />
+      )}
+    </>
   );
 }
