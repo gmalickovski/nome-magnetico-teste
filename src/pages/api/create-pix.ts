@@ -78,14 +78,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   try {
-    const userName = profile?.nome || user.email?.split('@')[0] || 'Cliente';
-    const userEmail = user.email ?? '';
-
     const result = await createPixCharge({
       userId: user.id,
       productType: product_type,
-      userEmail,
-      userName,
       value: PRICE_MAP_BRL[product_type as ProductType],
       description: PRODUCT_DESCRIPTIONS[product_type as ProductType],
     });

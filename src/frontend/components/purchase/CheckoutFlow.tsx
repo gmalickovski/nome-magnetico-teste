@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
 import { track } from '../../lib/analytics';
-import { PixModal } from './PixModal';
+import { CheckoutModal } from './CheckoutModal';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
@@ -77,8 +77,8 @@ const PRODUCT_STATIC: Record<ProductType, {
 
 const FALLBACK_PRICES: Record<string, PriceInfo> = {
   nome_social:  { cents: 9700,  formatted: 'R$ 97',  hasDiscount: false },
-  nome_bebe:    { cents: 14700, formatted: 'R$ 147', hasDiscount: false },
-  nome_empresa: { cents: 19700, formatted: 'R$ 197', hasDiscount: false },
+  nome_bebe:    { cents: 12700, formatted: 'R$ 127', hasDiscount: false },
+  nome_empresa: { cents: 7700,  formatted: 'R$ 77',  hasDiscount: false },
 };
 
 function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInfo; promotion?: ActivePromotion | null; productId: string }) {
@@ -116,33 +116,21 @@ function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInf
 }
 
 export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, hqPrices, promotion }: Props) {
-  const [showAll, setShowAll] = useState(productType === null);
-  const [loading, setLoading] = useState<ProductType | null>(null);
+  const [showAll, setShowAll]   = useState(productType === null);
+  const [loading, setLoading]   = useState<ProductType | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
-  const [couponCode, setCouponCode] = useState('');
 
-  interface PixData {
-    chargeId: string;
-    pixCopiaECola: string;
-    qrCodeImage: string;
-    expiresAt: string;
-    productType: ProductType;
-  }
-  const [pixData, setPixData]     = useState<PixData | null>(null);
-  const [pixLoading, setPixLoading] = useState<ProductType | null>(null);
-  const [pixError, setPixError]   = useState('');
-
-  // Sem auto-trigger: usuário escolhe cartão ou PIX na página
+  // Produto selecionado para abrir o pré-checkout modal
+  const [modalProduct, setModalProduct] = useState<ProductType | null>(null);
 
   const prices = hqPrices ?? FALLBACK_PRICES;
 
-  async function triggerCheckout(type: ProductType) {
+  async function triggerCheckout(type: ProductType, couponCode?: string) {
     setLoading(type);
     setErrorMsg('');
     try {
-      // Auto-aplica cupom da promoção se o usuário não digitou um código manual
       const appliesToThis = !promotion?.productType || promotion.productType === type;
-      const effectiveCoupon = couponCode.trim() || (promotion && appliesToThis ? promotion.stripePromoCode : null) || undefined;
+      const effectiveCoupon = couponCode || (promotion && appliesToThis ? promotion.stripePromoCode : null) || undefined;
 
       const priceInfo = prices[type] ?? FALLBACK_PRICES[type];
       track('checkout_start', {
@@ -150,14 +138,6 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
         preco: priceInfo.cents / 100,
         promocao: promotion?.name ?? null,
       });
-
-      // Se cupom foi digitado manualmente, registrar evento
-      if (couponCode.trim()) {
-        track('coupon_applied', {
-          codigo_cupom: couponCode.trim(),
-          produto: type,
-        });
-      }
 
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
@@ -180,46 +160,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
       track('checkout_failed', { produto: type, erro: errMsg });
       setErrorMsg(errMsg);
       setLoading(null);
-    }
-  }
-
-  async function triggerPix(type: ProductType) {
-    setPixLoading(type);
-    setPixError('');
-    try {
-      track('pix_start', { produto: type });
-      const res = await fetch('/api/create-pix', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_type: type }),
-      });
-      const data = await res.json() as {
-        bypass?: boolean;
-        redirectUrl?: string;
-        chargeId?: string;
-        pixCopiaECola?: string;
-        qrCodeImage?: string;
-        expiresAt?: string;
-        error?: string;
-      };
-      if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar PIX');
-      if (data.bypass && data.redirectUrl) {
-        window.location.href = data.redirectUrl;
-        return;
-      }
-      setPixData({
-        chargeId:      data.chargeId!,
-        pixCopiaECola: data.pixCopiaECola!,
-        qrCodeImage:   data.qrCodeImage!,
-        expiresAt:     data.expiresAt!,
-        productType:   type,
-      });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erro ao gerar PIX';
-      track('pix_failed', { produto: type, erro: msg });
-      setPixError(msg);
-    } finally {
-      setPixLoading(null);
+      setModalProduct(null);
     }
   }
 
@@ -333,67 +274,17 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
         </ul>
 
         {showPayButton ? (
-          <>
-            <div className="mb-4">
-              <label className="block text-xs text-[#76746a] font-medium uppercase tracking-widest mb-1.5">
-                Código promocional <span className="normal-case">(opcional)</span>
-              </label>
-              <input
-                type="text"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                placeholder={promotion?.stripePromoCode ? `Auto: ${promotion.stripePromoCode}` : 'Ex: VERAO20'}
-                className="w-full bg-[#111111] border border-white/10 rounded-xl px-3 py-2 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/40 transition-colors"
-              />
-            </div>
-            {/* Cartão */}
-            <button
-              onClick={() => triggerCheckout(type)}
-              disabled={!!loading || !!pixLoading}
-              className={`w-full flex items-center justify-center gap-2 font-bold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
-                isHighlighted
-                  ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
-                  : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
-              }`}
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-              {isLoadingThis ? 'Aguarde...' : 'Pagar com Cartão'}
-            </button>
-            {/* Divisor */}
-            <div className="flex items-center gap-3 my-1">
-              <div className="flex-1 h-px bg-white/8" />
-              <span className="text-gray-700 text-xs">ou</span>
-              <div className="flex-1 h-px bg-white/8" />
-            </div>
-            {/* PIX */}
-            <button
-              onClick={() => triggerPix(type)}
-              disabled={!!loading || !!pixLoading}
-              className="w-full flex items-center justify-center gap-2 border border-[#D4AF37]/30 text-[#D4AF37] font-bold py-3.5 rounded-xl hover:bg-[#D4AF37]/8 hover:border-[#D4AF37]/60 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300"
-            >
-              {pixLoading === type ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                    <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                  </svg>
-                  Gerando QR Code…
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path fillRule="evenodd" d="M11.484 2.17a.75.75 0 01.032 0l8.73 4.998a.75.75 0 01.39.658V16.17a.75.75 0 01-.39.658l-8.73 4.998a.75.75 0 01-.064.002.75.75 0 01-.064-.002l-8.73-4.998A.75.75 0 013 16.17V7.826a.75.75 0 01.39-.658l8.094-4.996z" clipRule="evenodd" />
-                  </svg>
-                  Pagar com PIX
-                </>
-              )}
-            </button>
-            {pixError && (
-              <p className="text-red-400 text-xs text-center mt-1">{pixError}</p>
-            )}
-          </>
+          <button
+            onClick={() => setModalProduct(type)}
+            disabled={isLoadingThis}
+            className={`w-full font-bold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
+              isHighlighted
+                ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
+                : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
+            }`}
+          >
+            {isLoadingThis ? 'Aguarde...' : p.cta}
+          </button>
         ) : (
           <a
             href={paymentLinks[type]}
@@ -412,6 +303,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     );
   }
 
+  // Produto já adquirido
   if (isOwned && productType) {
     const p = PRODUCT_STATIC[productType];
     return (
@@ -440,6 +332,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     );
   }
 
+  // Não logado — mostrar card sem botão de pagamento (link externo)
   if (!isLoggedIn) {
     const type = productType ?? 'nome_social';
     return (
@@ -455,6 +348,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     );
   }
 
+  // Todos os produtos
   if (showAll) {
     return (
       <>
@@ -476,23 +370,21 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
             </div>
           </div>
         </div>
-        {pixData && (
-          <PixModal
-            productType={pixData.productType}
-            pixCopiaECola={pixData.pixCopiaECola}
-            qrCodeImage={pixData.qrCodeImage}
-            expiresAt={pixData.expiresAt}
-            chargeId={pixData.chargeId}
-            onClose={() => setPixData(null)}
+        {modalProduct && (
+          <CheckoutModal
+            productType={modalProduct}
+            priceInfo={prices[modalProduct] ?? FALLBACK_PRICES[modalProduct]}
+            promotion={promotion}
+            onClose={() => setModalProduct(null)}
+            onTriggerCard={triggerCheckout}
           />
         )}
       </>
     );
   }
 
+  // Produto específico (logado, não possui)
   const type = productType!;
-
-  // Produto específico (logado, não possui) — mostrar card com seleção de método
   return (
     <>
       <div className="min-h-screen bg-[#111111]">
@@ -503,10 +395,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
             {errorMsg && (
               <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm text-center">
                 {errorMsg}
-                <button
-                  onClick={() => setErrorMsg('')}
-                  className="block mt-3 mx-auto text-[#D4AF37] hover:underline text-sm font-medium"
-                >
+                <button onClick={() => setErrorMsg('')} className="block mt-2 mx-auto text-[#D4AF37] text-xs hover:underline">
                   Fechar
                 </button>
               </div>
@@ -515,14 +404,13 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
           </div>
         </div>
       </div>
-      {pixData && (
-        <PixModal
-          productType={pixData.productType}
-          pixCopiaECola={pixData.pixCopiaECola}
-          qrCodeImage={pixData.qrCodeImage}
-          expiresAt={pixData.expiresAt}
-          chargeId={pixData.chargeId}
-          onClose={() => setPixData(null)}
+      {modalProduct && (
+        <CheckoutModal
+          productType={modalProduct}
+          priceInfo={prices[modalProduct] ?? FALLBACK_PRICES[modalProduct]}
+          promotion={promotion}
+          onClose={() => setModalProduct(null)}
+          onTriggerCard={triggerCheckout}
         />
       )}
     </>

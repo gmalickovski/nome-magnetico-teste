@@ -21,18 +21,26 @@ async function asaasFetch<T>(path: string, options: RequestInit = {}): Promise<T
   return res.json() as Promise<T>;
 }
 
-async function findOrCreateCustomer(userId: string, email: string, name: string): Promise<string> {
+// Cria (ou reutiliza) um único customer "guarda-chuva" para todas as cobranças PIX.
+// O rastreamento por usuário é feito via externalReference na cobrança, não no customer.
+async function getOrCreateUmbrellaCustomer(): Promise<string> {
   const list = await asaasFetch<{ data: Array<{ id: string }> }>(
-    `/api/v3/customers?externalReference=${encodeURIComponent(userId)}&limit=1`
+    '/v3/customers?externalReference=nomemagnetico-main&limit=1'
   );
   if (list.data.length > 0) return list.data[0].id;
 
-  const customer = await asaasFetch<{ id: string }>('/api/v3/customers', {
+  const cnpj    = process.env.ASAAS_MEI_CNPJ    ?? '';
+  const name    = process.env.ASAAS_COMPANY_NAME ?? 'Nome Magnético';
+  const email   = process.env.ASAAS_COMPANY_EMAIL ?? 'financeiro@nomemagnetico.com.br';
+
+  const customer = await asaasFetch<{ id: string }>('/v3/customers', {
     method: 'POST',
     body: JSON.stringify({
-      name: name || email.split('@')[0],
+      name,
       email,
-      externalReference: userId,
+      cpfCnpj: cnpj,
+      externalReference: 'nomemagnetico-main',
+      notificationDisabled: true,
     }),
   });
   return customer.id;
@@ -48,17 +56,15 @@ export interface PixChargeResult {
 export async function createPixCharge(params: {
   userId: string;
   productType: string;
-  userEmail: string;
-  userName: string;
   value: number;
   description: string;
 }): Promise<PixChargeResult> {
-  const customerId = await findOrCreateCustomer(params.userId, params.userEmail, params.userName);
+  const customerId = await getOrCreateUmbrellaCustomer();
 
   const d = new Date();
   const dueDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  const payment = await asaasFetch<{ id: string }>('/api/v3/payments', {
+  const payment = await asaasFetch<{ id: string }>('/v3/payments', {
     method: 'POST',
     body: JSON.stringify({
       customer: customerId,
@@ -71,7 +77,7 @@ export async function createPixCharge(params: {
   });
 
   const qr = await asaasFetch<{ encodedImage: string; payload: string; expirationDate: string }>(
-    `/api/v3/payments/${payment.id}/pixQrCode`
+    `/v3/payments/${payment.id}/pixQrCode`
   );
 
   return {
