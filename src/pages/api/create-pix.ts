@@ -95,9 +95,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err) {
-    console.error('[create-pix] Erro:', err);
+    const detail = err instanceof Error ? err.message : String(err);
+    console.error('[create-pix] Erro:', detail);
     return new Response(
-      JSON.stringify({ error: 'Erro ao gerar cobrança PIX. Tente novamente.' }),
+      JSON.stringify({ error: 'Erro ao gerar cobrança PIX. Tente novamente.', detail }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
