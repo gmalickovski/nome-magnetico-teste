@@ -196,25 +196,26 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                 </svg>
               </button>
 
-              {/* PIX */}
-              <button
-                onClick={handlePix}
-                className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-5 py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+              {/* PIX — em breve */}
+              {/* Logo PIX: Por Banco Central do Brasil (BACEN) — CC BY 3.0 https://www.bcb.gov.br/ */}
+              <div
+                className="w-full flex items-center gap-4 bg-white/2 border border-white/6 rounded-2xl px-5 py-4 opacity-50 cursor-not-allowed select-none"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0">
-                  {/* Ícone PIX */}
-                  <svg className="w-5 h-5 text-[#D4AF37]" viewBox="0 0 512 512" fill="currentColor">
-                    <path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.2 369.2C359.7 389.7 389.5 394.4 414.9 384.9L470.9 440.9C485.3 455.3 485.3 478.7 470.9 493.1C456.5 507.5 433.1 507.5 418.7 493.1L363.2 437.6C341.9 446.9 317.4 444.8 298.1 430.6L241.7 374.3C236.3 368.9 236.3 359.6 241.7 354.2L242.4 292.5zM444.3 98.7C451.9 94.09 461.7 95.17 468.1 101.6L411.4 158.3C395.8 173.9 395.8 199.5 411.4 215.1L452.8 256.5C468.4 272.1 494 272.1 509.6 256.5C525.1 240.9 525.1 215.4 509.6 199.8L469.5 159.7C462.5 152.7 462.5 141.3 469.5 134.3C476.5 127.3 487.9 127.3 494.9 134.3L535 174.4C568.5 207.9 568.5 262.3 535 295.8L492.9 337.9C459.4 371.4 405 371.4 371.5 337.9L330.1 296.5C296.6 263 296.6 208.6 330.1 175.1L372.2 133C395.8 109.4 431.2 102.7 461.4 116.7C465.8 118.7 469.8 121.4 473.4 124.7L444.3 98.7z"/>
-                  </svg>
+                <div className="w-10 h-10 rounded-xl bg-white/8 flex items-center justify-center flex-shrink-0">
+                  <img
+                    src="/Logo_-_pix_powered_by_Banco_Central_(Brazil,_2020).png"
+                    alt="PIX"
+                    className="w-7 h-7 object-contain"
+                  />
                 </div>
                 <div className="text-left flex-1">
-                  <p className="font-bold text-sm text-[#e5e2e1]">PIX</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">Aprovação instantânea · ~1 min</p>
+                  <p className="font-bold text-sm text-gray-500">PIX</p>
+                  <p className="text-[11px] text-gray-600 mt-0.5">Em breve</p>
                 </div>
-                <svg className="w-4 h-4 text-gray-600 group-hover:text-[#D4AF37] group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-600 bg-white/5 rounded-full px-2.5 py-1">
+                  Em breve
+                </span>
+              </div>
 
               {/* Promoção ativa */}
               {promotion && (!promotion.productType || promotion.productType === productType) && (
@@ -245,11 +246,36 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               </div>
 
               {/* Rodapé segurança */}
-              <div className="flex items-center justify-center gap-1.5 pt-1">
-                <svg className="w-3 h-3 text-gray-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span className="text-gray-700 text-[11px]">Pagamento 100% seguro e criptografado</span>
+              <div className="flex flex-col items-center gap-2.5 pt-1">
+                <div className="flex items-center justify-center gap-1.5">
+                  <svg className="w-3 h-3 text-gray-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span className="text-gray-700 text-[11px]">Pagamento 100% seguro e criptografado</span>
+                </div>
+                {/* Logos dos meios de pagamento aceitos */}
+                {/* PIX: Por Banco Central do Brasil (BACEN) — CC BY 3.0 https://www.bcb.gov.br/ */}
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  {/* Stripe */}
+                  <span className="text-[11px] font-extrabold tracking-tight" style={{ color: '#635BFF' }}>stripe</span>
+                  {/* Visa */}
+                  <span className="text-[10px] font-black tracking-widest text-white/35">VISA</span>
+                  {/* Mastercard */}
+                  <svg viewBox="0 0 24 16" className="h-3.5 w-auto" aria-label="Mastercard">
+                    <circle cx="8" cy="8" r="7" fill="#EB001B" opacity="0.65"/>
+                    <circle cx="16" cy="8" r="7" fill="#F79E1B" opacity="0.65"/>
+                  </svg>
+                  {/* PIX */}
+                  <div className="bg-white/10 rounded px-1 py-0.5">
+                    <img
+                      src="/Logo_-_pix_powered_by_Banco_Central_(Brazil,_2020).png"
+                      alt="PIX"
+                      className="h-3.5 object-contain"
+                    />
+                  </div>
+                  {/* Google Pay */}
+                  <span className="text-[10px] font-semibold text-white/35">G<span className="text-blue-400/70">Pay</span></span>
+                </div>
               </div>
             </div>
           )}
