@@ -25,7 +25,7 @@ async function asaasFetch<T>(path: string, options: RequestInit = {}): Promise<T
 // O rastreamento por usuário é feito via externalReference na cobrança, não no customer.
 async function getOrCreateUmbrellaCustomer(): Promise<string> {
   const list = await asaasFetch<{ data: Array<{ id: string }> }>(
-    '/api/v3/customers?externalReference=nomemagnetico-main&limit=1'
+    '/v3/customers?externalReference=nomemagnetico-main&limit=1'
   );
   if (list.data.length > 0) return list.data[0].id;
 
@@ -33,7 +33,7 @@ async function getOrCreateUmbrellaCustomer(): Promise<string> {
   const name    = process.env.ASAAS_COMPANY_NAME ?? 'Nome Magnético';
   const email   = process.env.ASAAS_COMPANY_EMAIL ?? 'financeiro@nomemagnetico.com.br';
 
-  const customer = await asaasFetch<{ id: string }>('/api/v3/customers', {
+  const customer = await asaasFetch<{ id: string }>('/v3/customers', {
     method: 'POST',
     body: JSON.stringify({
       name,
@@ -64,7 +64,7 @@ export async function createPixCharge(params: {
   const d = new Date();
   const dueDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  const payment = await asaasFetch<{ id: string }>('/api/v3/payments', {
+  const payment = await asaasFetch<{ id: string }>('/v3/payments', {
     method: 'POST',
     body: JSON.stringify({
       customer: customerId,
@@ -76,15 +76,16 @@ export async function createPixCharge(params: {
     }),
   });
 
-  const qr = await asaasFetch<{ encodedImage: string; payload: string; expirationDate: string }>(
-    `/api/v3/payments/${payment.id}/pixQrCode`
+  const qr = await asaasFetch<Record<string, unknown>>(
+    `/v3/payments/${payment.id}/pixQrCode`
   );
+  console.log('[asaas] pixQrCode response:', JSON.stringify(qr));
 
   return {
-    chargeId: payment.id,
-    pixCopiaECola: qr.payload,
-    qrCodeImage: qr.encodedImage,
-    expirationDate: qr.expirationDate,
+    chargeId:       payment.id,
+    pixCopiaECola:  qr.payload        as string,
+    qrCodeImage:    qr.encodedImage   as string,
+    expirationDate: qr.expirationDate as string,
   };
 }
 

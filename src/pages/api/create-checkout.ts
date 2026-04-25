@@ -72,33 +72,31 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
   }
 
   try {
-    // ── Desconto sazonal automático: consulta o HQ (stripeCouponId direto)
+    // ── Busca preço canônico do HQ (fonte de verdade)
+    let unitAmount: number;
     let couponId: string | undefined;
     let promotionCodeId: string | undefined;
 
     try {
-      const { promotion } = await getHqPricesAndPromo();
+      const { prices, promotion } = await getHqPricesAndPromo();
+      const priceInfo = prices[product_type];
+      unitAmount = priceInfo?.cents ?? 0;
+
       if (promotion?.stripeCouponId) {
         const appliesToThis = !promotion.productType || promotion.productType === product_type;
-        if (appliesToThis) {
-          couponId = promotion.stripeCouponId;
-        }
+        if (appliesToThis) couponId = promotion.stripeCouponId;
       }
     } catch {
-      // HQ indisponível — prosseguir sem desconto sazonal automático
+      // HQ indisponível — fallback para preços hardcoded
+      const FALLBACK: Record<string, number> = { nome_social: 9800, nome_bebe: 8000, nome_empresa: 12500 };
+      unitAmount = FALLBACK[product_type] ?? 9800;
     }
 
     // ── Código de promoção manual (só usado se não há cupom sazonal ativo)
     if (!couponId && couponCode) {
       try {
-        const promos = await stripe.promotionCodes.list({
-          code: couponCode,
-          active: true,
-          limit: 1,
-        });
-        if (promos.data.length > 0) {
-          promotionCodeId = promos.data[0].id;
-        }
+        const promos = await stripe.promotionCodes.list({ code: couponCode, active: true, limit: 1 });
+        if (promos.data.length > 0) promotionCodeId = promos.data[0].id;
       } catch {
         // Falha silenciosa ao resolver código manual
       }
@@ -108,6 +106,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
       userId: user.id,
       userEmail: user.email ?? '',
       productType: product_type as ProductType,
+      unitAmount,
       successUrl: `${baseUrl}/app?checkout=success&produto=${product_type}`,
       cancelUrl: `${baseUrl}/comprar?checkout=cancel`,
       couponId,

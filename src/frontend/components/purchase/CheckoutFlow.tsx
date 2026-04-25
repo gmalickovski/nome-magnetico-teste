@@ -76,9 +76,9 @@ const PRODUCT_STATIC: Record<ProductType, {
 };
 
 const FALLBACK_PRICES: Record<string, PriceInfo> = {
-  nome_social:  { cents: 9700,  formatted: 'R$ 97',  hasDiscount: false },
-  nome_bebe:    { cents: 12700, formatted: 'R$ 127', hasDiscount: false },
-  nome_empresa: { cents: 7700,  formatted: 'R$ 77',  hasDiscount: false },
+  nome_social:  { cents:  9800, formatted: 'R$ 98,00',  hasDiscount: false },
+  nome_bebe:    { cents:  8000, formatted: 'R$ 80,00',  hasDiscount: false },
+  nome_empresa: { cents: 12500, formatted: 'R$ 125,00', hasDiscount: false },
 };
 
 function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInfo; promotion?: ActivePromotion | null; productId: string }) {

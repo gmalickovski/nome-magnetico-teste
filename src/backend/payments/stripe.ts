@@ -12,10 +12,10 @@ export const stripe = new Stripe(stripeSecretKey, {
 
 export type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
-const PRICE_IDS: Record<ProductType, string> = {
-  nome_social: process.env.STRIPE_PRICE_NOME_SOCIAL ?? '',
-  nome_bebe: process.env.STRIPE_PRICE_NOME_BEBE ?? '',
-  nome_empresa: process.env.STRIPE_PRICE_NOME_EMPRESA ?? '',
+const PRODUCT_IDS: Record<ProductType, string> = {
+  nome_social: process.env.STRIPE_PRODUCT_NOME_SOCIAL ?? '',
+  nome_bebe:   process.env.STRIPE_PRODUCT_NOME_BEBE   ?? '',
+  nome_empresa: process.env.STRIPE_PRODUCT_NOME_EMPRESA ?? '',
 };
 
 const PRODUCT_NAMES: Record<ProductType, string> = {
@@ -34,6 +34,8 @@ export interface CreateCheckoutParams {
   userId: string;
   userEmail: string;
   productType: ProductType;
+  /** Preço em centavos (vem do HQ em tempo real) */
+  unitAmount: number;
   successUrl: string;
   cancelUrl: string;
   /** Cupom sazonal automático (ID do coupon Stripe, vindo do HQ) */
@@ -48,10 +50,10 @@ export interface CreateCheckoutParams {
 export async function createCheckoutSession(
   params: CreateCheckoutParams
 ): Promise<Stripe.Checkout.Session> {
-  const priceId = PRICE_IDS[params.productType];
+  const productId = PRODUCT_IDS[params.productType];
 
-  if (!priceId) {
-    throw new Error(`Price ID não configurado para o produto: ${params.productType}`);
+  if (!productId) {
+    throw new Error(`Product ID não configurado para o produto: ${params.productType}`);
   }
 
   // ── Desconto: coupon sazonal (HQ) > código manual > allow_promotion_codes
@@ -59,10 +61,8 @@ export async function createCheckoutSession(
   let discountOptions: Record<string, unknown> = { allow_promotion_codes: true };
 
   if (params.couponId) {
-    // Desconto sazonal automático: passa coupon diretamente (sem buscar promotion_code)
     discountOptions = { discounts: [{ coupon: params.couponId }] };
   } else if (params.promotionCodeId) {
-    // Código manual aplicado pelo usuário (já resolvido para promotion_code ID)
     discountOptions = { discounts: [{ promotion_code: params.promotionCodeId }] };
   }
 
@@ -71,7 +71,11 @@ export async function createCheckoutSession(
     payment_method_types: ['card'],
     line_items: [
       {
-        price: priceId,
+        price_data: {
+          currency: 'brl',
+          product: productId,
+          unit_amount: params.unitAmount,
+        },
         quantity: 1,
       },
     ],

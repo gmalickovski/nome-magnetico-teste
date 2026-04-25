@@ -49,7 +49,7 @@ const PRICE_IDS: Record<ProductType, string> = {
 
 function formatBRL(unitAmount: number | null): string {
   if (unitAmount == null) return '';
-  return `R$ ${(unitAmount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  return `R$ ${(unitAmount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /** Busca preços + promoção ativa via HQ (preferido) ou Stripe (fallback) */
@@ -87,7 +87,7 @@ export async function getHqPricesAndPromo(saasId = 'nome-magnetico'): Promise<Hq
 
 /** Compatibilidade retroativa — retorna apenas strings de preço */
 export async function getStripePrices(): Promise<StripePrices> {
-  const FALLBACK: StripePrices = { nome_social: 'R$ 97', nome_bebe: 'R$ 147', nome_empresa: 'R$ 197' };
+  const FALLBACK: StripePrices = { nome_social: 'R$ 98,00', nome_bebe: 'R$ 80,00', nome_empresa: 'R$ 125,00' };
   try {
     const { prices } = await getHqPricesAndPromo();
     return {

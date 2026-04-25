@@ -2,16 +2,18 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { supabase } from '../../backend/db/supabase';
 import { createPixCharge } from '../../backend/payments/asaas';
+import { getHqPricesAndPromo } from '../../backend/payments/prices';
 import type { ProductType } from '../../backend/payments/stripe';
 
 const schema = z.object({
   product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']),
+  coupon_code:  z.string().optional(),
 });
 
-const PRICE_MAP_BRL: Record<ProductType, number> = {
-  nome_social:   97.00,
-  nome_bebe:    127.00,
-  nome_empresa:  77.00,
+const FALLBACK_PRICES: Record<ProductType, number> = {
+  nome_social:   98.00,
+  nome_bebe:     80.00,
+  nome_empresa: 125.00,
 };
 
 const PRODUCT_DESCRIPTIONS: Record<ProductType, string> = {
@@ -49,11 +51,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     );
   }
 
-  const { product_type } = parsed.data;
+  const { product_type, coupon_code } = parsed.data;
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, is_test, test_ends_at, nome')
+    .select('role, is_test, test_ends_at')
     .eq('id', user.id)
     .single();
 
@@ -78,10 +80,39 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   try {
+    // ── Busca preço canônico do HQ e verifica cupom
+    let value = FALLBACK_PRICES[product_type as ProductType];
+
+    try {
+      const { prices, promotion } = await getHqPricesAndPromo();
+      const priceInfo = prices[product_type];
+      if (priceInfo?.cents) {
+        value = priceInfo.cents / 100;
+      }
+
+      // Aplica desconto se cupom ou promoção ativa for válida
+      if (promotion) {
+        const appliesToThis = !promotion.productType || promotion.productType === product_type;
+        const couponMatch = coupon_code &&
+          promotion.stripePromoCode?.toLowerCase() === coupon_code.toLowerCase();
+        const autoPromo = !coupon_code; // promoção automática sem cupom
+
+        if (appliesToThis && (couponMatch || autoPromo)) {
+          if (promotion.discountType === 'percent') {
+            value = parseFloat((value * (1 - promotion.discountValue / 100)).toFixed(2));
+          } else {
+            value = parseFloat((value - promotion.discountValue).toFixed(2));
+          }
+        }
+      }
+    } catch {
+      // HQ indisponível — usa fallback sem desconto
+    }
+
     const result = await createPixCharge({
       userId: user.id,
       productType: product_type,
-      value: PRICE_MAP_BRL[product_type as ProductType],
+      value,
       description: PRODUCT_DESCRIPTIONS[product_type as ProductType],
     });
 
