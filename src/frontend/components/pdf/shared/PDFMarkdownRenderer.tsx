@@ -19,7 +19,6 @@ import {
   type TendenciaData,
 } from './PDFKarmicBlock';
 import { TITLE_FONT } from './PDFFonts';
-import { ARCANOS } from '../../../../../src/backend/numerology/arcanos';
 
 // ── Helpers de texto ──────────────────────────────────────────────────────────
 
@@ -181,8 +180,12 @@ const triStyles = StyleSheet.create({
     borderColor: '#D1D5DB',
   },
   cellBloqueio: {
-    backgroundColor: '#FEE2E2',
-    borderColor: '#FCA5A5',
+    backgroundColor: '#DC2626',
+    borderColor: '#B91C1C',
+  },
+  cellRegent: {
+    backgroundColor: '#3B0764',
+    borderColor: '#6D28D9',
   },
   arcano: {
     fontSize: 7,
@@ -255,10 +258,14 @@ export function TrianguloPiramideInline({
             const isFirstRow = li === 0;
             const isRegent = li === data.linhas.length - 1;
 
-            const cellStyle = isBloqueio ? triStyles.cellBloqueio : triStyles.cellNormal;
-            let textColor = isBloqueio ? '#DC2626' : '#1F2937';
+            const cellStyle = isBloqueio
+              ? triStyles.cellBloqueio
+              : isRegent
+              ? triStyles.cellRegent
+              : triStyles.cellNormal;
+            let textColor = isBloqueio ? '#FFFFFF' : '#1F2937';
             if (isFirstRow && !isBloqueio) textColor = '#D4AF37';
-            if (isRegent && !isBloqueio) textColor = '#a78bfa';
+            if (isRegent && !isBloqueio) textColor = '#EDE9FE';
 
             return (
               <View
@@ -283,25 +290,6 @@ export function TrianguloPiramideInline({
           })}
         </View>
       ))}
-
-      {(() => {
-        const arcanoInfo = data.arcanoRegente !== null ? (ARCANOS as any)[data.arcanoRegente] ?? null : null;
-        if (!arcanoInfo) {
-          return data.arcanoRegente !== null ? (
-            <Text style={triStyles.arcano}>Arcano Regente: {data.arcanoRegente}</Text>
-          ) : null;
-        }
-        return (
-          <View style={{ marginTop: 10 }}>
-            <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 3 }}>
-              Arcano Regente {data.arcanoRegente} — {arcanoInfo.nome}: {arcanoInfo.palavraChave}
-            </Text>
-            <Text style={{ fontSize: 9, fontFamily: 'Helvetica', color: '#6b7280', lineHeight: 1.5 }}>
-              {arcanoInfo.descricao}
-            </Text>
-          </View>
-        );
-      })()}
 
       {bloqueios && triKey && (() => {
         const filtrados = bloqueios.filter(b => b.triangulos?.includes(triKey));

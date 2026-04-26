@@ -346,7 +346,7 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
           className="hidden md:inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_2px_16px_rgba(212,175,55,0.35)] hover:bg-[#f2ca50] hover:shadow-[0_4px_24px_rgba(212,175,55,0.5)] active:scale-95 transition-all duration-300"
         >
           {downloadIcon}
-          Baixar Análise
+          Baixar Análise Completa
         </button>
       )}
 
@@ -361,7 +361,7 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
         <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
-        Baixar Análise
+        Baixar Análise Completa
       </button>
 
       {/* ── Modal (Portal → document.body) ── */}

@@ -5,10 +5,9 @@
  *   1. Capa
  *   2. Guia de Leitura (intro)
  *   3. Os Números — Destino (card central) + 4 números do nome lado a lado
- *   4. Bloqueios Energéticos
+ *   4. Os 4 Triângulos (explicação — se disponíveis)
  *   5. Karma, Lições e Tendências Ocultas
- *   6. Os 4 Triângulos (explicação — se disponíveis)
- *   7+. Análise IA completa (triângulos + diagnóstico)
+ *   6+. Análise IA completa (triângulos + diagnóstico)
  *   8. CTA / Oferta para a Harmonização (Nome Social)
  */
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
@@ -23,6 +22,7 @@ import { RenderMarkdownChunks, TrianguloPiramideInline } from './shared/PDFMarkd
 import { BloqueiosBlock, DebitosBlock, LicoesBlock, TendenciasBlock } from './shared/PDFKarmicBlock';
 import { LOGO_FONT, TITLE_FONT, BODY_FONT, BODY_FONT_BOLD, loadLogoSrc, formatDate } from './shared/PDFFonts';
 import { formatAnalysisText } from '../../../utils/textFormatter';
+import { getArcano } from '../../../backend/numerology/arcanos';
 import type { ProductPDFProps } from './shared/PDFTypes';
 
 const theme = THEME_NOME_ATUAL;
@@ -259,9 +259,9 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
   type ScoreNivel = 'baixo' | 'aceitavel' | 'excelente' | null;
   const scoreNivel: ScoreNivel =
     rawScore == null ? null
-    : rawScore >= 80 ? 'excelente'
-    : rawScore >= 50 ? 'aceitavel'
-    : 'baixo';
+      : rawScore >= 80 ? 'excelente'
+        : rawScore >= 50 ? 'aceitavel'
+          : 'baixo';
   const frequencias: Record<string, number> | null =
     freqData?.frequencias ?? (freqData && !freqData?.ranking ? freqData : null);
 
@@ -278,23 +278,14 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
     tDestino?.linhas[0]?.length ?? 1,
   );
   const triCellSize = Math.min(18, Math.max(5, Math.floor(TRIANGLE_FULL_WIDTH / baseLen) - 1));
-  const triangleMap = (tVida || tPessoal || tSocial || tDestino)
-    ? { vida: tVida, pessoal: tPessoal, social: tSocial, destino: tDestino }
-    : undefined;
-
   let analiseFormatado = analysis.analise_texto
     ? formatAnalysisText(analysis.analise_texto)
     : null;
   if (analiseFormatado) {
-    // Remove leading # title (AI sometimes generates "# Análise Numerológica para {nome}")
     analiseFormatado = analiseFormatado.replace(/^#{1,2}\s+[^\n]*\n+/, '');
-    // Remove "Manual de Assinatura Fluída" section (not relevant for free analysis diagnosis)
     analiseFormatado = analiseFormatado.replace(/#{1,6}\s+[^\n]*Manual de Assinatura[^\n]*\n[\s\S]*?(?=#{1,6}\s|\s*$)/i, '');
   }
   const conclusaoTexto = analiseFormatado ? extractConclusao(analiseFormatado) : null;
-  const analiseCorpo = analiseFormatado && conclusaoTexto
-    ? analiseFormatado.slice(0, analiseFormatado.indexOf(conclusaoTexto)).trim()
-    : analiseFormatado;
 
   return (
     <Document title={`Nome Magnetico — ${nomeParaExibir}`} author="Nome Magnetico">
@@ -315,12 +306,12 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
       {/* Rankeamento removido do relatório atual */}
 
-      {/* ── PÁGINA 3: OS NÚMEROS ─────────────────────────────────────────── */}
+      {/* ── PÁGINA 3: A SUA ESSÊNCIA ─────────────────────────────────────── */}
       <Page size="A4" style={styles.page}>
-        <PDFPageHeader subtitle={`${nomeParaExibir} — O Projeto de Fábrica`} />
+        <PDFPageHeader subtitle={`${nomeParaExibir} — A Essência dos Seus Números`} />
 
         <View style={{ marginTop: 20, marginBottom: 12 }}>
-          <Text style={styles.hugeTitle}>O Número de Destino</Text>
+          <Text style={styles.hugeTitle}>A Sua Essência</Text>
         </View>
 
         {/* Card do Destino centralizado */}
@@ -362,57 +353,288 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
         </View>
 
         {/* Parágrafo 2 — sobre os 4 números mutáveis */}
-        <View style={{ borderRadius: 8, backgroundColor: 'rgba(212,175,55,0.06)', padding: 14 }}>
+        <View style={{ borderRadius: 8, backgroundColor: 'rgba(212,175,55,0.06)', padding: 14, marginBottom: 14 }}>
           <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: '#8A5C00', marginBottom: 8 }}>Os Números do Nome — O Veículo</Text>
           <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65 }}>
             Os outros quatro números — Expressão, Motivação, Impressão e Missão — emergem das letras do seu nome de batismo. Diferente do Destino, esses números respondem à vibração das letras que você usa. Quando o arranjo do nome muda, esses campos se reorganizam — podendo criar ou desfazer bloqueios, abrir ou fechar caminhos. Você não precisa mudar quem você é. Apenas o veículo através do qual a sua essência se expressa no mundo.
           </Text>
         </View>
 
-        <PDFFooter />
-      </Page>
+        {/* Os Seus Números — explicação individual de cada número */}
+        <View>
+          <Text style={[styles.sectionTitle, { color: GOLD, borderBottomColor: GOLD, fontSize: 13, marginBottom: 10 }]}>
+            Os Seus Números
+          </Text>
+          <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 12 }}>
+            O mapa numerológico não é uma abstração — é um diagnóstico preciso da frequência que o seu nome emite 24 horas por dia. Cada número representa uma camada distinta dessa frequência: uns são imutáveis, inscritos no momento do nascimento; outros respondem às letras do nome e podem ser ajustados. Compreender cada um separadamente é o primeiro passo para entender por que certas áreas da vida fluem e outras travam.
+          </Text>
 
-      {/* ── PÁGINA 4: BLOQUEIOS ENERGÉTICOS ──────────────────────────────── */}
-      <Page size="A4" style={styles.page}>
-        <PDFPageHeader subtitle={`${nomeParaExibir} — Raio-X dos Bloqueios`} />
-
-        <View style={{ marginTop: 20, marginBottom: 12 }}>
-          <Text style={styles.hugeTitle}>Bloqueios Energéticos</Text>
-        </View>
-
-        {bloqueios.length > 0 ? (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626' }]}>
-              {bloqueios.length} Bloqueio{bloqueios.length > 1 ? 's' : ''} Detectado{bloqueios.length > 1 ? 's' : ''} no Seu Nome
-            </Text>
-            <Text style={{ fontSize: 9, color: '#7C3AED', fontStyle: 'italic', marginBottom: 10 }}>
-              Os números em vermelho nas pirâmides dos triângulos (páginas seguintes) indicam exatamente onde cada bloqueio está atuando no seu campo energético.
-            </Text>
-            <BloqueiosBlock bloqueios={bloqueios} showAntidoto={false} />
-          </View>
-        ) : (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: '#059669', borderBottomColor: '#059669' }]}>
-              Nenhum Bloqueio Detectado
-            </Text>
-            <View style={{ backgroundColor: '#ecfdf5', padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#34d399', marginTop: 8 }}>
-              <Text style={{ fontFamily: TITLE_FONT, color: '#065f46', fontSize: 13, marginBottom: 6 }}>
-                Fluxo Livre Confirmado
-              </Text>
-              <Text style={{ fontFamily: BODY_FONT, color: '#064e3b', fontSize: 10, lineHeight: 1.6 }}>
-                Os cálculos cabalísticos mapearam a totalidade do seu nome e confirmaram que a sua arquitetura vibratória atual está completamente livre de sequências numéricas travadas. Sem essas amarras para obstruir o campo, a sua energia flui de maneira cristalina pelas áreas de finanças, saúde e relacionamentos — refletindo um fluxo limpo rumo ao seu Destino.
+          {/* Destino */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8, backgroundColor: '#F5F3FF', borderRadius: 6, padding: 10 }}>
+            <View style={{ width: 32, alignItems: 'center', marginRight: 10 }}>
+              <Text style={{ fontFamily: TITLE_FONT, fontSize: 20, color: '#5b21b6', lineHeight: 1 }}>{analysis.numero_destino ?? '?'}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 9, fontFamily: BODY_FONT_BOLD, color: '#5b21b6', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.3 }}>Destino — A Estrada da Alma</Text>
+              <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>
+                Derivado da data de nascimento, é o único número que não muda — independente de como você assina. Representa a grande trilha escolhida antes desta encarnação: os temas recorrentes, os aprendizados que retornam e o fio condutor que atravessa todas as fases da vida. Quando o nome está em harmonia com o Destino, a jornada flui. Quando está em conflito, a resistência se manifesta como ciclos repetitivos.
               </Text>
             </View>
           </View>
-        )}
+
+          {/* Expressão */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8, backgroundColor: '#FFFBF0', borderRadius: 6, padding: 10 }}>
+            <View style={{ width: 32, alignItems: 'center', marginRight: 10 }}>
+              <Text style={{ fontFamily: TITLE_FONT, fontSize: 20, color: '#9A6B00', lineHeight: 1 }}>{analysis.numero_expressao ?? '?'}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 9, fontFamily: BODY_FONT_BOLD, color: '#9A6B00', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.3 }}>Expressão — O Dom Natural</Text>
+              <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>
+                Resultante da soma vibratória de todas as letras do nome de batismo, revela o potencial nato — aquilo que você veio equipado para fazer bem, naturalmente. Os talentos que surgem sem esforço, a forma como você se projeta e a qualidade que as pessoas percebem em você antes mesmo de falar. É o dom de fábrica do nome.
+              </Text>
+            </View>
+          </View>
+
+          {/* Motivação */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8, backgroundColor: '#F0F9FF', borderRadius: 6, padding: 10 }}>
+            <View style={{ width: 32, alignItems: 'center', marginRight: 10 }}>
+              <Text style={{ fontFamily: TITLE_FONT, fontSize: 20, color: '#0369a1', lineHeight: 1 }}>{analysis.numero_motivacao ?? '?'}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 9, fontFamily: BODY_FONT_BOLD, color: '#0369a1', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.3 }}>Motivação — A Alma do Nome</Text>
+              <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>
+                As vogais carregam o sopro da alma — e é por isso que a Motivação revela o motor mais profundo por trás das escolhas. Não o que você faz, mas o que te move para fazer. O desejo que existe antes da decisão consciente. Quando o nome cria conflito com a Motivação, há uma sensação crônica de viver para fora: fazendo, mas sem sentir que é para si.
+              </Text>
+            </View>
+          </View>
+
+          {/* Impressão */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8, backgroundColor: '#F0FDF4', borderRadius: 6, padding: 10 }}>
+            <View style={{ width: 32, alignItems: 'center', marginRight: 10 }}>
+              <Text style={{ fontFamily: TITLE_FONT, fontSize: 20, color: '#15803d', lineHeight: 1 }}>{analysis.numero_impressao ?? '?'}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 9, fontFamily: BODY_FONT_BOLD, color: '#15803d', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.3 }}>Impressão — A Máscara Social</Text>
+              <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>
+                As consoantes são o esqueleto visível do nome — a estrutura que o mundo percebe antes de qualquer palavra ser dita. A Impressão é a frequência que os outros captam antes de te conhecerem de verdade: ela molda reputações, primeiras impressões e expectativas. Um número de Impressão desfavorável pode fazer com que as pessoas leiam incorretamente quem você é — criando resistência onde deveria haver abertura.
+              </Text>
+            </View>
+          </View>
+
+          {/* Missão */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: '#FDF4FF', borderRadius: 6, padding: 10 }}>
+            <View style={{ width: 32, alignItems: 'center', marginRight: 10 }}>
+              <Text style={{ fontFamily: TITLE_FONT, fontSize: 20, color: '#7C3AED', lineHeight: 1 }}>{analysis.numero_missao ?? '?'}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 9, fontFamily: BODY_FONT_BOLD, color: '#7C3AED', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.3 }}>Missão — A Vocação de Vida</Text>
+              <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>
+                Calculada pelo primeiro nome, a Missão aponta o campo onde os seus dons encontram maior ressonância com o mundo — a área em que o exercício de quem você é naturalmente se converte em contribuição. Quando alinhada com a Expressão e o Destino, gera propósito inevitável. Quando bloqueada, gera dispersão: muito esforço, pouco significado.
+              </Text>
+            </View>
+          </View>
+        </View>
 
         <PDFFooter />
       </Page>
+
+      {/* ── BLOCO: OS 4 TRIÂNGULOS ─────────────────────────────────────────── */}
+      {(tVida || tPessoal || tSocial || tDestino) && (
+        <Page size="A4" style={styles.page}>
+          <PDFPageHeader subtitle={`${nomeParaExibir} — Os 4 Triângulos Numerológicos`} />
+
+          <View style={{ marginTop: 20, marginBottom: 14 }}>
+            <Text style={styles.hugeTitle}>O que os 4 Triângulos Dizem Sobre Você</Text>
+          </View>
+
+          <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 14 }}>
+            Na Numerologia Cabalística, cada letra do nome tem um valor vibracional preciso — e esses valores interagem entre si de formas que não são aleatórias. Para revelar como essa interação opera, o nome é analisado sob quatro perspectivas distintas, chamadas Pirâmides de Fluxo. Cada pirâmide usa um modificador diferente sobre as mesmas letras, revelando uma dimensão específica da sua jornada. O resultado é um mapa de quatro camadas que mostra exatamente onde a frequência do nome está fluindo — e onde está travada.
+          </Text>
+
+          {/* O Que São os Arcanos */}
+          <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 12, marginBottom: 10 }}>
+            <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: '#7C3AED', marginBottom: 6 }}>O Que São os Arcanos</Text>
+            <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65 }}>
+              A Numerologia Cabalística trabalha com 22 Arcanos — arquétipos de energia que representam forças universais. Em cada pirâmide, o número que emerge no vértice superior é o Arcano Regente: a força dominante que governa aquela dimensão da vida. Não é previsão nem misticismo — é a identificação matemática do padrão que já opera por trás dos eventos daquela área, queira você ou não.
+            </Text>
+          </View>
+
+          {/* O Que São os Bloqueios */}
+          <View style={{ borderRadius: 8, backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FCA5A5', padding: 12, marginBottom: 8 }}>
+            <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: '#DC2626', marginBottom: 6 }}>O Que São os Bloqueios Energéticos</Text>
+            <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65 }}>
+              Dentro de cada pirâmide, quando um mesmo número aparece três ou mais vezes consecutivas, forma-se um Bloqueio. Na prática: a frequência do nome está emitindo o mesmo padrão em loop naquela dimensão — como um curto-circuito que nunca se resolve. O bloqueio opera independente de esforço, terapia ou força de vontade. Ele é uma propriedade matemática do nome. Nas pirâmides abaixo, as células vermelhas indicam exatamente onde um bloqueio está ativo.
+            </Text>
+          </View>
+
+          {/* ─── TRIÂNGULO DA VIDA ───────────────────────────────────────────── */}
+          {tVida && (
+            <View break>
+              <Text style={[styles.sectionTitle, { color: '#C89000', borderBottomColor: '#C89000', fontSize: 13, marginBottom: 8 }]}>
+                O Triângulo da Vida
+              </Text>
+              <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
+                A estrutura mais fundamental do mapa. Calculado a partir do valor puro de cada letra — sem modificador externo — revela os padrões que atravessam toda a existência: temas que retornam em diferentes fases, independente das circunstâncias. Governa a saúde do corpo, a vitalidade e a relação com a prosperidade material. Bloqueios aqui criam ciclos crônicos de desgaste físico, instabilidade financeira e a sensação de que conquistas não se sustentam — algo sempre escapa, mesmo quando tudo parece ir bem.
+              </Text>
+              <TrianguloPiramideInline data={tVida} label="TRIÂNGULO DA VIDA" cellSize={triCellSize} letras={letrasNome} />
+              {tVida.arcanoRegente != null && (() => {
+                const arc = getArcano(tVida.arcanoRegente!);
+                return (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
+                      Arcano Regente da Vida — {arc.numero}: {arc.nome}
+                    </Text>
+                    <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                      <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
+                      </View>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Vibração Dominante</Text>
+                      <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>{arc.descricao}</Text>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Desafio a Integrar</Text>
+                      <Text style={{ fontSize: 9, color: '#5B21B6', lineHeight: 1.65, fontStyle: 'italic' }}>{arc.desafio}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+              {bloqueios.filter((b: any) => b.triangulos?.includes('vida')).length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626', fontSize: 11, marginBottom: 8 }]}>
+                    Bloqueios do Triângulo da Vida
+                  </Text>
+                  <BloqueiosBlock bloqueios={bloqueios.filter((b: any) => b.triangulos?.includes('vida'))} showAntidoto={false} />
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ─── TRIÂNGULO PESSOAL ───────────────────────────────────────────── */}
+          {tPessoal && (
+            <View break>
+              <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 13, marginBottom: 8 }]}>
+                O Triângulo Pessoal
+              </Text>
+              <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
+                Modificado pelo número do dia de nascimento, acessa a dimensão mais interna da vida: a forma como você processa emoções, responde à pressão e se relaciona com as pessoas mais próximas. É o padrão afetivo que opera por baixo da superfície — os mecanismos automáticos que aparecem em momentos de conflito, vulnerabilidade ou intimidade. Bloqueios aqui costumam se manifestar como relacionamentos que seguem o mesmo roteiro, reações que você não consegue controlar e dificuldade persistente de manter conexões profundas.
+              </Text>
+              <TrianguloPiramideInline data={tPessoal} label="TRIÂNGULO PESSOAL" cellSize={triCellSize} letras={letrasNome} />
+              {tPessoal.arcanoRegente != null && (() => {
+                const arc = getArcano(tPessoal.arcanoRegente!);
+                return (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
+                      Arcano Regente Pessoal — {arc.numero}: {arc.nome}
+                    </Text>
+                    <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                      <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
+                      </View>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Vibração Dominante</Text>
+                      <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>{arc.descricao}</Text>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Desafio a Integrar</Text>
+                      <Text style={{ fontSize: 9, color: '#5B21B6', lineHeight: 1.65, fontStyle: 'italic' }}>{arc.desafio}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+              {bloqueios.filter((b: any) => b.triangulos?.includes('pessoal')).length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626', fontSize: 11, marginBottom: 8 }]}>
+                    Bloqueios do Triângulo Pessoal
+                  </Text>
+                  <BloqueiosBlock bloqueios={bloqueios.filter((b: any) => b.triangulos?.includes('pessoal'))} showAntidoto={false} />
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ─── TRIÂNGULO SOCIAL ────────────────────────────────────────────── */}
+          {tSocial && (
+            <View break>
+              <Text style={[styles.sectionTitle, { color: '#059669', borderBottomColor: '#059669', fontSize: 13, marginBottom: 8 }]}>
+                O Triângulo Social
+              </Text>
+              <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
+                Modificado pelo número do mês de nascimento, revela como o campo externo responde ao seu nome — o magnetismo que ele gera e as oportunidades que atrai ou repele. Governa a visibilidade pública, o reconhecimento profissional e a facilidade com que as pessoas certas chegam até você. Bloqueios aqui são particularmente silenciosos: você se esforça, entrega resultado — mas o mundo não vê. O reconhecimento não chega. As portas abrem devagar, ou não abrem.
+              </Text>
+              <TrianguloPiramideInline data={tSocial} label="TRIÂNGULO SOCIAL" cellSize={triCellSize} letras={letrasNome} />
+              {tSocial.arcanoRegente != null && (() => {
+                const arc = getArcano(tSocial.arcanoRegente!);
+                return (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
+                      Arcano Regente Social — {arc.numero}: {arc.nome}
+                    </Text>
+                    <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                      <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
+                      </View>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Vibração Dominante</Text>
+                      <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>{arc.descricao}</Text>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Desafio a Integrar</Text>
+                      <Text style={{ fontSize: 9, color: '#5B21B6', lineHeight: 1.65, fontStyle: 'italic' }}>{arc.desafio}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+              {bloqueios.filter((b: any) => b.triangulos?.includes('social')).length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626', fontSize: 11, marginBottom: 8 }]}>
+                    Bloqueios do Triângulo Social
+                  </Text>
+                  <BloqueiosBlock bloqueios={bloqueios.filter((b: any) => b.triangulos?.includes('social'))} showAntidoto={false} />
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ─── TRIÂNGULO DO DESTINO ────────────────────────────────────────── */}
+          {tDestino && (
+            <View break>
+              <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706', fontSize: 13, marginBottom: 8 }]}>
+                O Triângulo do Destino
+              </Text>
+              <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
+                O mais revelador dos quatro. Combina o valor de cada letra com a soma do dia e mês de nascimento — integrando as dimensões pessoal e social em uma única estrutura. Mapeia os resultados que tendem a se materializar: a missão concreta, os frutos do esforço e o legado que a frequência do nome constrói com o tempo. Bloqueios aqui criam o padrão mais desgastante: plantar sem colher — ciclos em que o trabalho existe, o esforço existe, mas a prosperidade duradoura não se instala.
+              </Text>
+              <TrianguloPiramideInline data={tDestino} label="TRIÂNGULO DO DESTINO" cellSize={triCellSize} letras={letrasNome} />
+              {tDestino.arcanoRegente != null && (() => {
+                const arc = getArcano(tDestino.arcanoRegente!);
+                return (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
+                      Arcano Regente do Destino — {arc.numero}: {arc.nome}
+                    </Text>
+                    <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                      <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
+                      </View>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Vibração Dominante</Text>
+                      <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>{arc.descricao}</Text>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Desafio a Integrar</Text>
+                      <Text style={{ fontSize: 9, color: '#5B21B6', lineHeight: 1.65, fontStyle: 'italic' }}>{arc.desafio}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+              {bloqueios.filter((b: any) => b.triangulos?.includes('destino')).length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626', fontSize: 11, marginBottom: 8 }]}>
+                    Bloqueios do Triângulo do Destino
+                  </Text>
+                  <BloqueiosBlock bloqueios={bloqueios.filter((b: any) => b.triangulos?.includes('destino'))} showAntidoto={false} />
+                </View>
+              )}
+            </View>
+          )}
+
+          <PDFFooter />
+        </Page>
+      )}
 
       {/* ── PÁGINA 4/5: KARMA E TENDÊNCIAS ─────────────────────────────────── */}
       <Page size="A4" style={styles.page}>
         <PDFPageHeader subtitle={`${nomeParaExibir} — O Peso do Passado`} />
-        
+
         <View style={{ marginTop: 20, marginBottom: 8 }}>
           <Text style={styles.hugeTitle}>O Peso do Passado (Karma e Tendências)</Text>
         </View>
@@ -421,7 +643,9 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706', fontSize: 13 }]}>
             Débitos Kármicos
           </Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Padrões de encarnações anteriores que se repetem como traição, perda ou esforço redobrado — até a lição ser integrada.</Text>
+          <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>
+            Os Débitos Kármicos são padrões energéticos não resolvidos que atravessam encarnações — frequências que não foram integradas em vidas anteriores e que continuam ativas no campo vibracional do nome atual. Eles se manifestam como ciclos repetitivos de traição, perda inexplicável, esforço redobrado sem colheita proporcional ou bloqueios que surgem exatamente onde você mais quer prosperar. Não se trata de punição: é uma conta aberta que o campo energético continua cobrando, silenciosamente, até que a lição seja reconhecida e assimilada de forma consciente.
+          </Text>
           <DebitosBlock debitos={debitos} showSolution={false} />
         </View>
 
@@ -429,7 +653,9 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           <Text style={[styles.sectionTitle, { color: '#0369a1', borderBottomColor: '#0369a1', fontSize: 13 }]}>
             Lições Kármicas
           </Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Vibrações ausentes no nome que criam pontos cegos crônicos — áreas onde você se sente inapto independente do esforço.</Text>
+          <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>
+            As Lições Kármicas revelam os números completamente ausentes no seu nome de batismo — vibrações que nunca foram exercitadas ao longo de encarnações anteriores e que a alma ainda precisa desenvolver. Cada número ausente representa uma qualidade que precisa ser construída do zero nesta vida, sem o suporte da memória energética de vidas passadas. Diferente dos Débitos, as lições não geram dor diretamente — elas criam pontos cegos crônicos: áreas onde o esforço parece desproporcional ao resultado, onde você sente que lhe falta algo que os outros parecem dominar com naturalidade.
+          </Text>
           <LicoesBlock licoes={licoes} showSolution={false} />
         </View>
 
@@ -437,7 +663,9 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           <Text style={[styles.sectionTitle, { color: '#6d28d9', borderBottomColor: '#6d28d9', fontSize: 13 }]}>
             Tendências Ocultas
           </Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>Frequências repetidas em excesso no nome que criam comportamentos compulsivos — convertendo talento em sabotagem.</Text>
+          <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>
+            As Tendências Ocultas emergem quando um número aparece quatro vezes ou mais no seu nome de batismo — uma frequência tão intensa que começa a dominar o comportamento de forma automática e muitas vezes imperceptível. Em doses equilibradas, essa vibração seria um talento inato. Em excesso, ela se converte em compulsão: o padrão se repete independente da vontade, criando ciclos que sabotam exatamente as áreas onde você mais deseja prosperar. O que deveria ser força vira obstáculo — e a origem está na arquitetura do nome, não no caráter da pessoa.
+          </Text>
           <TendenciasBlock tendencias={tendencias} frequencias={frequencias} showSolution={false} />
         </View>
 
@@ -484,74 +712,20 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
         <PDFFooter />
       </Page>
 
-
-
-      {/* ── PÁGINAS: ANÁLISE IA COMPLETA ──────────────────────────────────── */}
-      {analiseCorpo && (
-        <Page size="A4" style={styles.page}>
-          <PDFPageHeader subtitle={`${nomeParaExibir} — Diagnóstico`} />
-
-          <View style={{ marginTop: 20, marginBottom: 8 }}>
-            <Text style={styles.hugeTitle}>Diagnóstico do Nome</Text>
-          </View>
-
-          <View style={styles.section}>
-            <RenderMarkdownChunks
-              text={analiseCorpo}
-              styles={styles}
-              GOLD={GOLD}
-              triangleMap={triangleMap}
-              triCellSize={triCellSize}
-              letrasNome={letrasNome}
-              pageBreaks={['Os 4 Triângulos', 'Triângulo Pessoal', 'Triângulo Social', 'Triângulo do Destino', 'Bloqueios e', 'Como Harmonizar']}
-              injections={{
-                'Tri\u00e2ngulo da Vida': (
-                  <View style={{ borderRadius: 8, backgroundColor: 'rgba(212,175,55,0.06)', borderWidth: 1, borderColor: 'rgba(212,175,55,0.25)', padding: 10, marginBottom: 10 }}>
-                    <Text style={{ fontSize: 9, color: GOLD, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>O QUE REVELA</Text>
-                    <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>Calculado a partir do valor puro de cada letra. Revela os padroes fundamentais de existencia - os temas que se repetem nas diferentes fases da vida, independentemente das circunstancias. Molda a relacao com o corpo, a vitalidade, o dinheiro e a resiliencia diante dos desafios. Bloqueios neste triangulo afetam saude e ciclos de prosperidade.</Text>
-                  </View>
-                ),
-                'Tri\u00e2ngulo Pessoal': (
-                  <View style={{ borderRadius: 8, backgroundColor: 'rgba(190,165,255,0.06)', borderWidth: 1, borderColor: 'rgba(190,165,255,0.25)', padding: 10, marginBottom: 10 }}>
-                    <Text style={{ fontSize: 9, color: '#7c3aed', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>O QUE REVELA</Text>
-                    <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>Calculado adicionando o numero do dia de nascimento a cada letra. Mapeia a dimensao intima e emocional - as reacoes internas, os mecanismos de defesa e os padroes afetivos que raramente sao visiveis ao mundo. Revela como voce processa as experiencias por dentro e os ciclos emocionais que se repetem nos relacionamentos mais proximos.</Text>
-                  </View>
-                ),
-                'Tri\u00e2ngulo Social': (
-                  <View style={{ borderRadius: 8, backgroundColor: 'rgba(16,185,129,0.06)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.25)', padding: 10, marginBottom: 10 }}>
-                    <Text style={{ fontSize: 9, color: '#059669', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>O QUE REVELA</Text>
-                    <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>Calculado adicionando o numero do mes de nascimento a cada letra. Revela como o mundo externo percebe e responde ao seu nome - o magnetismo pessoal, as oportunidades de networking e a reputacao. Governa a visibilidade, as vendas e as conexoes estrategicas. Bloqueios aqui sabotam a presenca publica e o reconhecimento.</Text>
-                  </View>
-                ),
-                'Tri\u00e2ngulo do Destino': (
-                  <View style={{ borderRadius: 8, backgroundColor: 'rgba(245,158,11,0.06)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)', padding: 10, marginBottom: 10 }}>
-                    <Text style={{ fontSize: 9, color: '#b45309', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>O QUE REVELA</Text>
-                    <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>Calculado adicionando a soma reduzida do dia e mes de nascimento a cada letra. Mapeia os resultados que tendem a se materializar ao longo da vida - a missao maior e os frutos que a frequencia do nome produz. Bloqueios aqui criam ciclos de esforco sem colheita - o trabalho nao se converte em resultado.</Text>
-                  </View>
-                ),
-              }}
-            />
-          </View>
-
-          <PDFFooter />
-        </Page>
-      )}
+      {/* ── DIAGNÓSTICO DO NOME removido do relatório gratuito ──────────── */}
 
       {/* ── PÁGINA: CONCLUSÃO (FUNDO ESCURO) ─────────────────────────────── */}
       {conclusaoTexto && conclusaoTexto.length > 50 && (
         <Page size="A4" style={styles.darkPage}>
           <PDFPageHeader subtitle={`${nomeParaExibir} — O Encerramento`} />
           <View style={{ marginTop: 24, marginBottom: 16 }}>
-             <Text style={styles.hugeTitle}>Conclusão Final</Text>
-             <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: GOLD, textAlign: 'center', letterSpacing: 1, marginBottom: 24 }}>
-               A Síntese do Seu Mapa
-             </Text>
+            <Text style={styles.hugeTitle}>O Diagnóstico É Claro</Text>
           </View>
           <View style={styles.section}>
             <RenderMarkdownChunks
-               text={conclusaoTexto}
-               styles={{...styles, bodyText: { ...styles.bodyText, color: '#e5e2e1' }}}
-               GOLD={GOLD}
+              text={conclusaoTexto.replace(/^#+\s*[^\n]*\n*/gm, '').trim()}
+              styles={{ ...styles, bodyText: { ...styles.bodyText, color: '#e5e2e1' } }}
+              GOLD={GOLD}
             />
           </View>
           <PDFFooter />
@@ -566,16 +740,16 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           <Text style={[styles.hugeTitle, {
             color: scoreNivel === 'excelente' ? GOLD
               : scoreNivel === 'aceitavel' ? '#F59E0B'
-              : bloqueios.length > 0 ? '#EF4444'
-              : GOLD
+                : bloqueios.length > 0 ? '#EF4444'
+                  : GOLD
           }]}>
             {scoreNivel === 'excelente'
               ? 'Sua Frequência Tem Base Sólida — Mas Há Refinamentos'
               : scoreNivel === 'aceitavel'
-              ? 'O Diagnóstico Revelou: Seu Nome Pode Trabalhar Mais Por Você'
-              : bloqueios.length > 0
-              ? 'O Diagnóstico É Claro — E o Nome Continua Emitindo'
-              : 'Sua Frequência Pode Ser Ainda Mais Poderosa'}
+                ? 'O Diagnóstico Revelou: Seu Nome Pode Trabalhar Mais Por Você'
+                : bloqueios.length > 0
+                  ? 'O Diagnóstico É Claro — E o Nome Continua Emitindo'
+                  : 'Sua Frequência Pode Ser Ainda Mais Poderosa'}
           </Text>
           {rawScore != null && rawScore > 0 && (
             <Text style={{ fontSize: 10, color: scoreNivel === 'excelente' ? '#10B981' : scoreNivel === 'aceitavel' ? '#F59E0B' : '#EF4444', textAlign: 'center', marginTop: 6 }}>
@@ -641,8 +815,8 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
             {scoreNivel === 'excelente'
               ? '"Uma frequência boa pode ser excelente. A diferença entre os dois está nos últimos padrões que o nome ainda carrega."'
               : scoreNivel === 'aceitavel'
-              ? '"Aceitável é o nível onde as pessoas param de procurar a causa dos resultados que faltam. O nome continua emitindo."'
-              : '"Conhecer os bloqueios sem harmonizá-los é como saber que a torneira está furada e continuar enchendo o balde."'}
+                ? '"Aceitável é o nível onde as pessoas param de procurar a causa dos resultados que faltam. O nome continua emitindo."'
+                : '"Conhecer os bloqueios sem harmonizá-los é como saber que a torneira está furada e continuar enchendo o balde."'}
           </Text>
         </View>
 
@@ -652,10 +826,10 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
             {scoreNivel === 'excelente'
               ? `A Harmonização do seu nome é R$ 98 — um único ajuste para transformar uma boa frequência em uma frequência magneticamente irresistível.`
               : scoreNivel === 'aceitavel'
-              ? `Quanto custa mais um ano com uma frequência que entrega 60% do que poderia? A Harmonização é R$ 98 — menos que um jantar, para destravar o que está sendo bloqueado silenciosamente.`
-              : bloqueios.length > 0
-              ? `Quanto custa mais um ano com o Bloqueio ${bloqueios[0]?.codigo ?? ''} repelindo seus resultados?\nA Harmonização do seu nome é R$ 98 — menos que um jantar, para uma frequência que muda o que está codificado no seu nome para sempre.`
-              : 'A Harmonização do seu nome é R$ 98 — um único investimento para recalibrar a frequência que você emite todos os dias da sua vida.'}
+                ? `Quanto custa mais um ano com uma frequência que entrega 60% do que poderia? A Harmonização é R$ 98 — menos que um jantar, para destravar o que está sendo bloqueado silenciosamente.`
+                : bloqueios.length > 0
+                  ? `Quanto custa mais um ano com o Bloqueio ${bloqueios[0]?.codigo ?? ''} repelindo seus resultados?\nA Harmonização do seu nome é R$ 98 — menos que um jantar, para uma frequência que muda o que está codificado no seu nome para sempre.`
+                  : 'A Harmonização do seu nome é R$ 98 — um único investimento para recalibrar a frequência que você emite todos os dias da sua vida.'}
           </Text>
         </View>
 
@@ -665,8 +839,8 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
             {scoreNivel === 'excelente'
               ? 'O diagnóstico está feito. O próximo nível espera por você.'
               : scoreNivel === 'aceitavel'
-              ? 'O diagnóstico está feito. Seu potencial completo espera por você.'
-              : 'O diagnóstico está feito. A transformação espera por você.'}
+                ? 'O diagnóstico está feito. Seu potencial completo espera por você.'
+                : 'O diagnóstico está feito. A transformação espera por você.'}
           </Text>
           <Text style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 18, textAlign: 'center' }}>
             Acesse o produto Nome Social para harmonizar sua frequência agora.

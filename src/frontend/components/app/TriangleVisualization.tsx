@@ -22,6 +22,14 @@ interface TrianguloData {
   sequenciasNegativas: string[];
 }
 
+interface ArcanoInfo {
+  numero: number;
+  nome: string;
+  palavraChave: string;
+  descricao: string;
+  desafio: string;
+}
+
 interface Props {
   vida: TrianguloData;
   pessoal: TrianguloData;
@@ -31,6 +39,8 @@ interface Props {
   nome: string;
   productType?: 'nome_social' | 'nome_bebe' | 'nome_empresa';
   isFreeAnalysis?: boolean;
+  arcanos?: Record<number, ArcanoInfo>;
+  descricaoDetalhada?: Record<string, string>;
 }
 
 const TIPO_LABEL: Record<string, { label: string; descricao: string; emoji: string }> = {
@@ -51,6 +61,31 @@ function getDescricao(tipo: string, productType?: string): string {
   if (productType === 'nome_empresa') return TIPO_LABEL_EMPRESA[tipo] ?? TIPO_LABEL[tipo]!.descricao;
   return TIPO_LABEL[tipo]!.descricao;
 }
+
+const ARCANO_RESUMO: Record<number, { vibracao: string; desafio: string }> = {
+  1:  { vibracao: 'Arquétipo do criador consciente: transforma intenção em resultado com magnetismo e liderança. Favorece autonomia, protagonismo e abertura de novos ciclos.', desafio: 'Evitar arrogância e impulsividade — confundir força de vontade com rigidez bloqueia o campo que está pronto para abrir.' },
+  2:  { vibracao: 'Guardiã dos mistérios interiores: opera no silêncio, na intuição profunda e na sabedoria subconsciente. Favorece reflexão, estudo e percepção do que os outros não enxergam.', desafio: 'Evitar passividade e segredos prejudiciais — a percepção acumulada perde sentido quando não é compartilhada.' },
+  3:  { vibracao: 'Governa criatividade, fertilidade e abundância — o que for plantado com cuidado tende a florescer. Favorece expressão genuína, projetos criativos e relacionamentos nutritivos.', desafio: 'Evitar dispersão de energia criativa e apego excessivo ao conforto — o ciclo completo inclui os momentos difíceis.' },
+  4:  { vibracao: 'Vibração da ordem, disciplina e autoridade fundamentada em mérito. Não produz resultados rápidos, mas cria bases que sustentam décadas.', desafio: 'Evitar rigidez e apego ao controle — a estabilidade construída pode se tornar uma prisão quando a flexibilidade é descartada.' },
+  5:  { vibracao: 'Ponte entre o material e o espiritual: governa ensinamento, propósito e transmissão de sabedoria. Favorece estudos aprofundados e o papel de mentor ou referência.', desafio: 'Evitar dogmatismo e dependência de aprovação — quando a sabedoria se fecha em si mesma, deixa de ser sabedoria.' },
+  6:  { vibracao: 'Governa as grandes escolhas e parcerias que definem trajetórias. Favorece relacionamentos significativos quando razão e emoção estão integradas.', desafio: 'Evitar indecisão e dependência afetiva — a incapacidade de honrar as próprias escolhas é o principal obstáculo desta vibração.' },
+  7:  { vibracao: 'Vitória conquistada pelo domínio das forças internas e direcionamento claro da vontade. Favorece superação de obstáculos e foco sob pressão.', desafio: 'Evitar arrogância pós-vitória e dispersão — sem direção clara, a mesma força que produz vitória pode produzir caos.' },
+  8:  { vibracao: 'Lei de causa e efeito: integridade e responsabilidade determinam os resultados com precisão. O campo aqui é altamente sensível à honestidade — não há atalhos, mas também não há injustiças duradouras.', desafio: 'Evitar julgamentos severos e inflexibilidade — a régua que mede os outros com mais rigor do que a si mesma desequilibra o campo.' },
+  9:  { vibracao: 'Sabedoria que vem da experiência vivida, da introspecção e da integração de ciclos encerrados. Favorece retiro, síntese do percorrido e preparação para um novo capítulo.', desafio: 'Evitar isolamento excessivo e arrogância espiritual — a sabedoria guardada apenas para si perde o sentido.' },
+  10: { vibracao: 'Governa os grandes ciclos de virada que redesenham o terreno da vida independentemente da vontade. Favorece adaptação estratégica — quem compreende os ciclos navega com elegância.', desafio: 'Evitar passividade diante das mudanças — a consciência de quem está na roda determina se o movimento é evolução ou repetição.' },
+  11: { vibracao: 'Poder que nasce do domínio amoroso dos próprios impulsos, não da dominação. Favorece autodomínio e influência pelo exemplo — Número Mestre que amplifica tanto talentos quanto desafios.', desafio: 'Evitar uso opressivo da força e negação da vulnerabilidade — negar a fragilidade produz rigidez, que quebra onde a flexibilidade resistiria.' },
+  12: { vibracao: 'Poder da pausa voluntária: suspensão necessária onde o melhor movimento é nenhum movimento. O que parece estagnação frequentemente é gestação de algo novo sob a superfície.', desafio: 'Evitar vitimismo e resistência às pausas necessárias — forçar o movimento quando o campo pede pausa apenas desgasta e atrasa.' },
+  13: { vibracao: 'Transformação radical e irreversível — não fim, mas encerramento de ciclos que libera energia criativa extraordinária. O que precisa se encerrar aqui abre espaço genuinamente novo.', desafio: 'Evitar apego ao passado e resistência ao inevitável — o apego ao que já encerrou adia o florescimento do que está nascendo.' },
+  14: { vibracao: 'Alquimia interior: combinação paciente de opostos para criar equilíbrio. Favorece processos de cura e ajuste fino — pequenas correções consistentes produzem transformações profundas.', desafio: 'Evitar extremos e impaciência — tentar acelerar o processo alquímico geralmente desfaz o que estava sendo construído.' },
+  15: { vibracao: 'Forças inconscientes que, reconhecidas e integradas, se convertem em potência genuína. Favorece liberação de dependências e transformação do que foi suprimido em força consciente.', desafio: 'Evitar escravidão a padrões não examinados — o que não é visto governa; o reconhecimento dissolve o que a negação amplifica.' },
+  16: { vibracao: 'Ruptura súbita de estruturas falsas que revela verdades encobertadas. O que desmorona aqui libera espaço para reconstrução com muito mais integridade.', desafio: 'Evitar reconstruir os mesmos padrões após a queda — usar os mesmos tijolos falsos em outro lugar desperdiça o que a ruptura ensinou.' },
+  17: { vibracao: 'Renovação, esperança fundamentada e generosidade sem cálculo após a tempestade. Favorece expressão autêntica e o potencial de ser referência de clareza para o entorno.', desafio: 'Evitar idealismo ingênuo — a esperança sem ação é fantasia; a Estrela pede que a fé se converta em movimento concreto.' },
+  18: { vibracao: 'Governa o inconsciente, os pressentimentos e a percepção além do racional. Favorece criatividade emergente do subconsciente — o desafio é distinguir intuição genuína de projeção.', desafio: 'Evitar ilusões e confusão entre intuição e medo — o autoengano é o principal inimigo; o antídoto é a disposição radical de ver o que é real.' },
+  19: { vibracao: 'Clareza, vitalidade e potencial de reconhecimento genuíno — uma das energias mais favoráveis do campo. Favorece realização, expansão pública e alegria de viver.', desafio: 'Evitar arrogância e dependência de reconhecimento externo — o Sol que não enxerga sombra está cego para metade da realidade.' },
+  20: { vibracao: 'Despertar para um chamado maior e revisão honesta da própria trajetória. Favorece novos começos e a disposição de responder ao que a vida está pedindo com coragem.', desafio: 'Evitar autojulgamento severo e resistência ao recomeço — o peso do próprio passado não perdoado bloqueia a convocação para o futuro.' },
+  21: { vibracao: 'Conclusão bem-sucedida de um ciclo e integração completa — uma das energias mais favoráveis do campo. Favorece reconhecimento de longo prazo e a sensação de estar no lugar certo.', desafio: 'Evitar estagnação após a conquista — a integração completa é o ponto de partida de uma jornada mais elevada, não o ponto final.' },
+  22: { vibracao: 'Potencial puro: o ponto zero onde tudo é possível e nada está determinado ainda. Número Mestre 22, favorece saltos de fé e novos começos — pede presença e direcionamento consciente.', desafio: 'Evitar falta de direção e desconsideração das consequências — potencial infinito sem intenção se dispersa em infinitas direções e chega a lugar nenhum.' },
+};
 
 const BLOQUEIO_SEQUENCIAS = ['111','222','333','444','555','666','777','888','999'];
 
@@ -190,52 +225,61 @@ function TrianguloSVG({ triangulo, nome }: { triangulo: TrianguloData; nome: str
 // ─────────────────────────────────────────────────────────────────────────────
 // Painel de informações abaixo do SVG
 // ─────────────────────────────────────────────────────────────────────────────
-function TrianguloInfo({ triangulo }: { triangulo: TrianguloData }) {
-  const { arcanoRegente, arcanosDoMinantes, sequenciasNegativas } = triangulo;
+function TrianguloInfo({
+  triangulo,
+  arcanos,
+  bloqueiosFiltrados,
+}: {
+  triangulo: TrianguloData;
+  arcanos?: Record<number, ArcanoInfo>;
+  bloqueiosFiltrados: Bloqueio[];
+}) {
+  const arcanoInfo = triangulo.arcanoRegente != null
+    ? (arcanos?.[triangulo.arcanoRegente] ?? null)
+    : null;
 
   return (
     <div className="space-y-4 mt-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Arcano Regente */}
-        <div className="bg-white/5 border border-purple-500/20 rounded-xl p-4">
+      {/* Arcano Regente — bloco expandido */}
+      {arcanoInfo ? (
+        <div className="rounded-xl bg-[#1a0533]/60 border border-purple-500/30 p-5">
+          <p className="text-[10px] text-purple-400 font-medium uppercase tracking-[0.15em] mb-3">
+            Arcano Regente — {arcanoInfo.numero}: {arcanoInfo.nome}
+          </p>
+          <div className="inline-block px-3 py-1 rounded-full bg-purple-900/50 border border-purple-500/20 mb-4">
+            <span className="text-sm font-medium text-purple-200">{arcanoInfo.palavraChave}</span>
+          </div>
+          <p className="text-[10px] text-purple-400 uppercase tracking-wider mb-1.5 font-medium">Vibração Dominante</p>
+          <p className="text-sm text-gray-300 leading-relaxed mb-4">
+            {ARCANO_RESUMO[arcanoInfo.numero]?.vibracao ?? arcanoInfo.descricao}
+          </p>
+          <div className="rounded-lg bg-purple-900/30 border border-purple-500/20 p-3">
+            <p className="text-[10px] text-purple-400 uppercase tracking-wider mb-1.5 font-medium">Desafio a Integrar</p>
+            <p className="text-sm text-purple-200 italic leading-relaxed">
+              {ARCANO_RESUMO[arcanoInfo.numero]?.desafio ?? arcanoInfo.desafio}
+            </p>
+          </div>
+        </div>
+      ) : triangulo.arcanoRegente != null ? (
+        <div className="rounded-xl bg-white/5 border border-purple-500/20 p-4">
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Arcano Regente</p>
-          <p className="text-3xl font-bold text-purple-300 font-mono">{arcanoRegente ?? '—'}</p>
+          <p className="font-cinzel text-2xl font-bold text-purple-300">{triangulo.arcanoRegente}</p>
         </div>
+      ) : null}
 
-        {/* Arcanos Dominantes */}
-        <div className="bg-white/5 border border-[#D4AF37]/20 rounded-xl p-4">
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Arcanos Dominantes</p>
-          <div className="flex flex-wrap gap-1">
-            {arcanosDoMinantes.length > 0
-              ? arcanosDoMinantes.slice(0, 10).map((a, i) => (
-                  <span key={i} className="px-2 py-0.5 rounded bg-[#D4AF37]/10 text-[#D4AF37] text-sm font-mono">
-                    {a}
-                  </span>
-                ))
-              : <span className="text-gray-500 text-sm">—</span>
-            }
-          </div>
-        </div>
-      </div>
-
-      {/* Sequências negativas */}
-      {sequenciasNegativas.length > 0 ? (
-        <div className="rounded-xl p-4 bg-red-500/10 border border-red-500/20">
-          <p className="text-xs text-red-400 uppercase tracking-wider mb-2">⚠ Sequências Negativas</p>
-          <div className="flex flex-wrap gap-2">
-            {sequenciasNegativas.map((s, i) => (
-              <span
-                key={i}
-                className="inline-block px-2 py-0.5 rounded text-xs font-mono font-bold bg-red-500/20 text-red-400 border border-red-500/30"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
+      {/* Bloqueios do triângulo selecionado */}
+      {bloqueiosFiltrados.length > 0 ? (
+        <div className="space-y-3">
+          <p className="text-xs text-red-400 font-medium uppercase tracking-[0.12em] px-1">
+            ⚠ {bloqueiosFiltrados.length} bloqueio{bloqueiosFiltrados.length > 1 ? 's' : ''} neste triângulo
+          </p>
+          {bloqueiosFiltrados.map((b, i) => (
+            <BloqueioCard key={i} bloqueio={b} />
+          ))}
         </div>
       ) : (
         <div className="rounded-xl p-4 bg-emerald-500/10 border border-emerald-500/20">
-          <p className="text-sm text-emerald-400">✓ Sem sequências negativas neste triângulo</p>
+          <p className="text-sm text-emerald-400">✓ Sem bloqueios neste triângulo</p>
         </div>
       )}
     </div>
@@ -284,12 +328,13 @@ function BloqueioCard({ bloqueio }: { bloqueio: Bloqueio }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Componente principal
 // ─────────────────────────────────────────────────────────────────────────────
-export default function TriangleVisualization({ vida, pessoal, social, destino, bloqueios, nome, productType, isFreeAnalysis }: Props) {
+export default function TriangleVisualization({ vida, pessoal, social, destino, bloqueios, nome, productType, isFreeAnalysis, arcanos, descricaoDetalhada }: Props) {
   const tabs = ['vida', 'pessoal', 'social', 'destino'] as const;
   const [aba, setAba] = useState<typeof tabs[number]>('vida');
 
   const triangulosMap = { vida, pessoal, social, destino };
   const triangulo = triangulosMap[aba];
+  const bloqueiosDaAba = bloqueios.filter(b => b.triangulos?.includes(aba));
 
   const NOME_COMPLETO: Record<string, string> = {
     pessoal: 'Triângulo Pessoal',
@@ -350,8 +395,10 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
       </div>
 
       {/* Descrição da aba */}
-      <div className="bg-white/5 border border-[#D4AF37]/10 rounded-xl p-4">
-        <p className="text-sm text-gray-400">{getDescricao(aba, productType)}</p>
+      <div className="rounded-xl bg-white/[0.03] p-5">
+        <p className="text-sm text-gray-400 leading-relaxed">
+          {descricaoDetalhada?.[aba] ?? getDescricao(aba, productType)}
+        </p>
       </div>
 
       {/* Conteúdo: locked ou normal */}
@@ -378,8 +425,8 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
             <TrianguloSVG triangulo={triangulo} nome={nome} />
           </div>
 
-          {/* Info: arcano + sequências */}
-          <TrianguloInfo triangulo={triangulo} />
+          {/* Arcano regente + bloqueios do triângulo selecionado */}
+          <TrianguloInfo triangulo={triangulo} arcanos={arcanos} bloqueiosFiltrados={bloqueiosDaAba} />
         </>
       )}
     </div>

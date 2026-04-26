@@ -346,7 +346,7 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: 
           ) : null}
           {b.triangulos && b.triangulos.length > 0 ? (
             <Text style={styles.bloqueioTriangulos}>
-              Presente em: {b.triangulos.join(', ')}
+              Ativo nos triângulos: {b.triangulos.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)).join(' · ')}
             </Text>
           ) : null}
           {!showAntidoto && (
