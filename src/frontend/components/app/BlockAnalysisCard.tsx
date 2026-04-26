@@ -49,12 +49,15 @@ export default function BlockAnalysisCard({ bloqueio, defaultOpen = false }: Blo
           )}
 
           {bloqueio.triangulos && bloqueio.triangulos.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {bloqueio.triangulos.map(t => (
-                <span key={t} className="px-2 py-0.5 rounded-full bg-white/5 text-gray-400 text-xs border border-white/10">
-                  {TRIANGULO_LABELS[t] ?? t}
-                </span>
-              ))}
+            <div className="space-y-1.5">
+              <p className="text-xs text-gray-500 uppercase tracking-wider">Aparece nos triângulos:</p>
+              <div className="flex flex-wrap gap-2">
+                {bloqueio.triangulos.map(t => (
+                  <span key={t} className="px-2 py-0.5 rounded-full bg-white/5 text-gray-400 text-xs border border-white/10">
+                    {TRIANGULO_LABELS[t] ?? t}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 

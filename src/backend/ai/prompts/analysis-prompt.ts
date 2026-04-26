@@ -140,6 +140,8 @@ Siga EXATAMENTE esta estrutura de seções, nesta ordem:
 
 ## ✨ 1. Perfil Energético — Quem Você É em Essência
 
+${isFreeAnalysis ? `Frame obrigatório: Destino ${cincoNumeros.destino} = A Estrada (imutável — calculado da data de nascimento, não muda com o nome). Expressão ${cincoNumeros.expressao} e Motivação ${cincoNumeros.motivacao} = O Veículo (como ${primeiroNome} caminha hoje — moldado pelo nome atual, pode ser harmonizado). Use essa distinção como espinha dorsal da seção.` : ''}
+
 Escreva uma visão panorâmica e reveladora da energia do nome completo de ${primeiroNome}. Conecte **Expressão ${cincoNumeros.expressao}**, **Destino ${cincoNumeros.destino}** e **Motivação ${cincoNumeros.motivacao}** em uma narrativa coesa de identidade:
 - O que a combinação única desses três números revela sobre a trajetória desta alma
 - Como esses números criam uma tensão criativa ou harmonia natural entre o que ${primeiroNome} é, o que deseja e para onde vai
@@ -148,10 +150,10 @@ Escreva uma visão panorâmica e reveladora da energia do nome completo de ${pri
 
 ---
 
-## 🔢 2. A Estrela de 5 Pontas — ${isFreeAnalysis ? 'O Conflito Central' : 'Anatomia do Nome'}
+## 🔢 2. Os 5 Números — ${isFreeAnalysis ? 'A Vibração do Nome Atual' : 'Anatomia do Nome'}
 
 ${isFreeAnalysis
-  ? `Identifique o principal CONFLITO entre dois dos números de ${primeiroNome}. Escolha o par mais dissonante entre os 5 números (Expressão ${cincoNumeros.expressao}, Destino ${cincoNumeros.destino}, Motivação ${cincoNumeros.motivacao}, Impressão ${cincoNumeros.impressao}, Missão ${cincoNumeros.missao}) — por exemplo: "Motivação ${cincoNumeros.motivacao} exige X, mas Missão ${cincoNumeros.missao} joga para o Y". Escreva 1 parágrafo cirúrgico (máx 120 palavras) explicando a guerra interna que essa dissonância cria — em quais situações concretas ela sabota os resultados, drena energia ou faz ${primeiroNome} se sentir dividido(a) sem entender por quê.`
+  ? `Identifique o principal CONFLITO entre dois dos números de ${primeiroNome}. Escolha o par mais dissonante entre os 5 números (Expressão ${cincoNumeros.expressao}, Destino ${cincoNumeros.destino}, Motivação ${cincoNumeros.motivacao}, Impressão ${cincoNumeros.impressao}, Missão ${cincoNumeros.missao}). Mencione que o Destino (${cincoNumeros.destino}) vem da data de nascimento — é o contexto imutável, a Estrada. O conflito é entre esse Destino e como o nome atual expressa esse potencial. Escreva 1 parágrafo cirúrgico (máx 120 palavras) explicando a guerra interna que essa dissonância cria — em quais situações concretas ela sabota os resultados, drena energia ou faz ${primeiroNome} se sentir dividido(a) sem entender por quê.`
   : `Para cada um dos 5 números, escreva uma análise aprofundada e específica para ${primeiroNome}. Exigimos no mínimo 3 parágrafos densos (5 a 6 linhas cada) por número:
 
 ### 2.1 Expressão ${cincoNumeros.expressao} — O Dom que Veio Manifestar
@@ -174,25 +176,20 @@ O que a soma de Destino + Expressão revela como vocação máxima. Este número
 
 ## 🔺 3. Os 4 Triângulos — Geometria da Alma
 
-ATENÇÃO: Abaixo deste título, você DEVE escrever EXATAMENTE estes 2 parágrafos introdutórios antes de começar a falar de cada triângulo:
-"Os Quatro Triângulos Numerológicos formam a anatomia vibratória e a estrutura geométrica do seu nome. Na Numerologia Cabalística, o nome funciona como um campo de força contínuo: cada vez que é pronunciado ou escrito, ele irradia uma frequência específica. Para compreender a real profundidade e as nuances dessa frequência, dividimos o estudo do nome em quatro "Pirâmides de Fluxo", onde cada camada mapeia um aspecto diferente da sua jornada."
-
-"A leitura desses triângulos funciona de forma orgânica e reveladora. Eles desdobram as influências desde a fundação física e vital, passando pelo universo íntimo e emocional, pela forma como o mundo externo lhe percebe, até culminar no propósito maior que o destino inevitably atrairá. A seguir, detalharemos cada uma dessas quatro dimensões essenciais."
-
-Após esses dois parágrafos obrigatórios, prossiga com a análise individual. ${isFreeAnalysis ? `Expanda APENAS o Triângulo da Vida com 2 parágrafos completos. Para os outros 3 triângulos, escreva APENAS o título e 1 frase de diagnóstico (ex: "Triângulo Pessoal: revela sua vida emocional íntima — análise completa disponível na harmonização").` : `Cada triângulo revela uma dimensão distinta da energia de ${primeiroNome}. Para cada um, escreva 2 parágrafos reveladores:`}
+Após o título da seção, prossiga diretamente com a análise individual de cada triângulo. ${isFreeAnalysis ? `Para cada um dos 4 triângulos, escreva 2 parágrafos diagnósticos (máx 120 palavras cada). Foque em REVELAR o que o Arcano Regente de cada triângulo indica e quais padrões ele cria na vida de ${primeiroNome} — SEM soluções ou antídotos, apenas o diagnóstico. Não mencione harmonização ou mudança de nome nesta seção.` : `Escreva um parágrafo introdutório de 2 frases sobre os 4 triângulos como estrutura geral, depois para cada triângulo escreva 2 parágrafos reveladores:`}
 
 ### Triângulo da Vida (Arcano **${todosTriangulos.vida.arcanoRegente ?? '—'}**)
-A vibração base que permeia toda a trajetória de vida. Padrões que se repetem em diferentes fases e contextos. O que o Arcano **${todosTriangulos.vida.arcanoRegente ?? '—'}** revela como tema arquetípico dominante desta encarnação.
+A vibração base que permeia toda a trajetória de vida. Padrões que se repetem em diferentes fases e contextos. O que o Arcano **${todosTriangulos.vida.arcanoRegente ?? '—'}** revela como tema central dominante desta encarnação.
 
 ${isFreeAnalysis
   ? `### Triângulo Pessoal (Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}**)
-Revela a vida emocional íntima e as reações internas de ${primeiroNome} — análise completa disponível na harmonização.
+Como ${primeiroNome} processa as experiências por dentro — as reações internas, os mecanismos de defesa e os padrões afetivos que raramente são visíveis. O que o Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}** revela sobre os ciclos emocionais e a vida íntima desta pessoa.
 
 ### Triângulo Social (Arcano **${todosTriangulos.social.arcanoRegente ?? '—'}**)
-Mapeia como o mundo percebe e responde a ${primeiroNome} — análise completa disponível na harmonização.
+Como o mundo externo percebe e responde a ${primeiroNome}. Que tipo de relações, oportunidades e obstáculos este triângulo atrai. O que o Arcano **${todosTriangulos.social.arcanoRegente ?? '—'}** diz sobre o magnetismo e o papel social que esta pessoa projeta.
 
 ### Triângulo do Destino (Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}**)
-Revela os resultados e frutos que a energia deste nome tende a produzir ao longo da vida — análise completa disponível na harmonização.`
+Os resultados que ${primeiroNome} tende a colher — o que a energia deste triângulo produz como frutos ao longo da vida. O Arcano **${todosTriangulos.destino.arcanoRegente ?? '—'}** como revelador dos padrões de missão e dos ciclos de amadurecimento.`
   : `### Triângulo Pessoal (Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}**)
 Como ${primeiroNome} se sente por dentro — o mundo emocional, as reações íntimas, o que nunca mostra. Como o Arcano **${todosTriangulos.pessoal.arcanoRegente ?? '—'}** molda a vida afetiva, o autocuidado e a relação com a vulnerabilidade.
 
@@ -277,7 +274,7 @@ O **Arcano ${arcanoRegente ?? '—'}** governa o triângulo central de ${primeir
 
 ---
 
-${arquetipo ? `## 🎭 6. O Arquétipo — A Identidade Mítica
+${(!isFreeAnalysis && arquetipo) ? `## 🎭 6. O Arquétipo — A Identidade Mítica
 
 O número de **Expressão ${cincoNumeros.expressao}** revela que ${primeiroNome} carrega o arquétipo do(a) **${arquetipo.nome}**.
 
@@ -286,26 +283,21 @@ Manifestações positivas: ${arquetipo.expressaoPositiva.join(' | ')}
 Sombra a integrar: ${arquetipo.expressaoSombra.join(' | ')}
 Figuras míticas de referência: ${arquetipo.figurasMiticas.join(', ')}
 
-${isFreeAnalysis
-  ? `ATENÇÃO: Escreva APENAS 2 parágrafos curtos (máx 120 palavras cada):
-- Parágrafo 1 (essência): 1-2 frases sobre o dom central do(a) **${arquetipo.nome}** — o que torna essa energia poderosa.
-- Parágrafo 2 (sombra ativa): 2-3 frases descrevendo como a sombra do(a) ${arquetipo.nome} opera na prática — como sabota resultados, relacionamentos ou autoestima. O usuário precisa se reconhecer na disfunção, não se sentir exaltado.`
-  : `ATENÇÃO OBRIGATÓRIA: Descreva este arquétipo com no mínimo 4 parágrafos profundos, filosóficos e ancorados no cotidiano, com 5 a 6 linhas cada parágrafo:
+ATENÇÃO OBRIGATÓRIA: Descreva este arquétipo com no mínimo 4 parágrafos profundos, filosóficos e ancorados no cotidiano, com 5 a 6 linhas cada parágrafo:
 - Parágrafo 1: Apresente o arquétipo do(a) **${arquetipo.nome}** como o "avatar principal" que ${primeiroNome} usa para navegar na terra. O que isso significa na visão macro da vida?
 - Parágrafo 2: Como a essência profunda deste arquétipo interage organicamente com os bloqueios, dívidas e padrões numéricos apontados ao longo deste relatório.
 - Parágrafo 3: A disfunção do arquétipo (sua sombra): como o(a) ${arquetipo.nome} perde poder e sabota a própria grandeza (usar as manifestações sombrias apontadas acima).
-- Parágrafo 4: O resgate do poder: o que ${primeiroNome} precisa fazer na vida prática, na profissão e no amor para viver a oitava superior e mais vitoriosa deste arquétipo mítico.`
-}
+- Parágrafo 4: O resgate do poder: o que ${primeiroNome} precisa fazer na vida prática, na profissão e no amor para viver a oitava superior e mais vitoriosa deste arquétipo mítico.
 
 ---
 
-` : ''}## 🔮 ${arquetipo ? '7' : '6'}. O Nome como Ferramenta de Poder Energético
+` : ''}## 🔮 ${isFreeAnalysis ? '6' : (arquetipo ? '7' : '6')}. O Nome como Ferramenta de Poder Energético
 
 ${isFreeAnalysis
   ? `O nome de ${primeiroNome} não é apenas uma identidade social — é um campo de frequência ativo que opera 24 horas por dia, 7 dias por semana. Escreva 3 parágrafos sobre:
 - Como a vibração atual do nome de nascimento organiza padrões específicos de atração (e repulsão) de forma contínua, mesmo quando ${primeiroNome} está dormindo, silencioso ou sozinho
 - Por que mudanças de comportamento, afirmações positivas e trabalho pessoal não conseguem neutralizar uma frequência que está sendo emitida pelo nome a cada momento — o campo vibracional do nome opera num nível mais profundo que a consciência
-- O que a harmonização do Nome Social representa na prática: não uma mudança superficial de identidade, mas a reprogramação da frequência emitida pelo campo do nome — eliminando os bloqueios dos triângulos, reequilibrando as ausências e excessos, e alinhando Expressão com Destino. Este é o trabalho que a análise do nome de nascimento torna visível e que o Nome Social resolve.`
+- Analogia do hardware e software: o nascimento define o hardware (Destino ${cincoNumeros.destino}) — isso não muda. O nome é o sistema operacional (SO): é possível fazer um upgrade do SO sem trocar o hardware. A harmonização não corrige quem ${primeiroNome} é — ela atualiza como ${primeiroNome} opera e se expressa no mundo, instalando as frequências que o Destino precisa para funcionar em máximo potencial. Não é uma correção do nome de nascimento: é um upgrade vibracional.`
   : isCurrentNameAnalysis
   ? `A vibração que o seu nome de batismo produz não é apenas simbólica — ela organiza padrões concretos de atração e resposta do ambiente. Escreva 3 parágrafos sobre:
 - O que essa vibração-base cria naturalmente quando ${primeiroNome} passa a usá-la com intenção consciente
@@ -331,7 +323,7 @@ ${isCurrentNameAnalysis ? '- **Prática Diária:** Como escrever o próprio nome
 
 ` : ''}---
 
-## 🌟 ${isFreeAnalysis ? (arquetipo ? '8' : '7') : (arquetipo ? '9' : '8')}. Síntese e Mensagem Final
+## 🌟 ${isFreeAnalysis ? '7' : (arquetipo ? '9' : '8')}. Síntese e Mensagem Final
 
 ${isFreeAnalysis
   ? `Escreva uma síntese final no estilo de laudo médico — 2 parágrafos curtos (máx 120 palavras cada):

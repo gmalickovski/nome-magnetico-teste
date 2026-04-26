@@ -203,11 +203,15 @@ export function TrianguloPiramideInline({
   label,
   cellSize,
   letras,
+  bloqueios,
+  triKey,
 }: {
   data: TrianguloData;
   label: string;
   cellSize: number;
   letras?: string[];
+  bloqueios?: BloqueioData[];
+  triKey?: string;
 }) {
   const bloqueioPositions = buildBloqueioPositions(data.linhas);
   const cellFontSize = Math.max(4, Math.floor(cellSize * 0.65));
@@ -282,39 +286,29 @@ export function TrianguloPiramideInline({
 
       {(() => {
         const arcanoInfo = data.arcanoRegente !== null ? (ARCANOS as any)[data.arcanoRegente] ?? null : null;
-        return arcanoInfo ? (
-          <View style={{ marginTop: 12, marginBottom: 12 }} wrap={false}>
-            <View style={{ borderWidth: 1, borderColor: '#f3f4f6', backgroundColor: '#F9FAFB', borderRadius: 8 }}>
-              <Text style={{ fontSize: 9, textAlign: 'center', color: '#6b7280', padding: 8, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
-                Arcano Regente: {data.arcanoRegente}
-              </Text>
-              <View style={{ borderLeftWidth: 4, borderLeftColor: '#8b5cf6', padding: 12, backgroundColor: '#faf5ff', borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
-                <View style={{ paddingBottom: 6 }}>
-                  <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#6d28d9' }}>
-                    Arcano {data.arcanoRegente} — {arcanoInfo.nome}: {arcanoInfo.palavraChave.toLowerCase()}
-                  </Text>
-                </View>
-                <Text style={{ fontFamily: 'Helvetica', fontSize: 10, lineHeight: 1.5, marginBottom: 0, color: '#4b5563' }}>
-                  {arcanoInfo.descricao.split('.')[0]}.
-                </Text>
-              </View>
-            </View>
+        if (!arcanoInfo) {
+          return data.arcanoRegente !== null ? (
+            <Text style={triStyles.arcano}>Arcano Regente: {data.arcanoRegente}</Text>
+          ) : null;
+        }
+        return (
+          <View style={{ marginTop: 10 }}>
+            <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#a78bfa', marginBottom: 3 }}>
+              Arcano Regente {data.arcanoRegente} — {arcanoInfo.nome}: {arcanoInfo.palavraChave}
+            </Text>
+            <Text style={{ fontSize: 9, fontFamily: 'Helvetica', color: '#6b7280', lineHeight: 1.5 }}>
+              {arcanoInfo.descricao}
+            </Text>
           </View>
-        ) : data.arcanoRegente !== null ? (
-          <Text style={triStyles.arcano}>Arcano Regente: {data.arcanoRegente}</Text>
+        );
+      })()}
+
+      {bloqueios && triKey && (() => {
+        const filtrados = bloqueios.filter(b => b.triangulos?.includes(triKey));
+        return filtrados.length > 0 ? (
+          <BloqueiosBlock bloqueios={filtrados} />
         ) : null;
       })()}
-      
-      {data.sequenciasNegativas.length > 0 ? (
-        <View style={{ marginTop: 12, borderWidth: 1, borderColor: '#fca5a5', backgroundColor: '#fef2f2', borderRadius: 8, padding: 10 }} wrap={false}>
-          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#b91c1c', textAlign: 'center', marginBottom: 4 }}>
-            ⚠ BLOQUEIO ENERGÉTICO DETECTADO
-          </Text>
-          <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#dc2626', textAlign: 'center', letterSpacing: 1 }}>
-            {data.sequenciasNegativas.join(' • ')}
-          </Text>
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -453,7 +447,7 @@ export function RenderMarkdownChunks({
       }
 
       let fontSize = level === 1 ? 20 : level === 2 ? 15 : level === 3 ? 12 : 10;
-      let fontColor = level >= 3 ? (level === 4 ? '#F59E0B' : '#a78bfa') : GOLD;
+      let fontColor = level >= 3 ? (level === 4 ? '#F59E0B' : '#6d28d9') : GOLD;
       let fontFam = 'Helvetica-Bold';
       let textTransform: any = 'none';
       let letterSpacing = level <= 2 ? 0.4 : 0;
@@ -515,6 +509,8 @@ export function RenderMarkdownChunks({
                 label={TRIANGLE_LABELS[triKey]}
                 cellSize={cellSize}
                 letras={letrasNome}
+                bloqueios={bloqueios}
+                triKey={triKey}
               />
             );
           }

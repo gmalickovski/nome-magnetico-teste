@@ -30,6 +30,7 @@ interface Props {
   bloqueios: Bloqueio[];
   nome: string;
   productType?: 'nome_social' | 'nome_bebe' | 'nome_empresa';
+  isFreeAnalysis?: boolean;
 }
 
 const TIPO_LABEL: Record<string, { label: string; descricao: string; emoji: string }> = {
@@ -283,12 +284,20 @@ function BloqueioCard({ bloqueio }: { bloqueio: Bloqueio }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Componente principal
 // ─────────────────────────────────────────────────────────────────────────────
-export default function TriangleVisualization({ vida, pessoal, social, destino, bloqueios, nome, productType }: Props) {
+export default function TriangleVisualization({ vida, pessoal, social, destino, bloqueios, nome, productType, isFreeAnalysis }: Props) {
   const tabs = ['vida', 'pessoal', 'social', 'destino'] as const;
   const [aba, setAba] = useState<typeof tabs[number]>('vida');
 
   const triangulosMap = { vida, pessoal, social, destino };
   const triangulo = triangulosMap[aba];
+
+  const NOME_COMPLETO: Record<string, string> = {
+    pessoal: 'Triângulo Pessoal',
+    social: 'Triângulo Social',
+    destino: 'Triângulo do Destino',
+  };
+
+  const isLocked = isFreeAnalysis && aba !== 'vida';
 
   return (
     <div className="space-y-6">
@@ -318,6 +327,7 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
           const info = TIPO_LABEL[t]!;
           const tri = triangulosMap[t];
           const temBloqueio = tri.sequenciasNegativas.length > 0;
+          const locked = isFreeAnalysis && t !== 'vida';
           return (
             <button
               key={t}
@@ -329,8 +339,11 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
                   : 'bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10'}
               `}
             >
-              <span>{info.emoji}</span>
+              <span>{locked ? '🔒' : info.emoji}</span>
               <span>{info.label}</span>
+              {temBloqueio && (
+                <span className="ml-1 w-1.5 h-1.5 rounded-full bg-red-500 inline-block shrink-0" title="Bloqueio detectado" />
+              )}
             </button>
           );
         })}
@@ -341,14 +354,34 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
         <p className="text-sm text-gray-400">{getDescricao(aba, productType)}</p>
       </div>
 
-      {/* SVG do triângulo */}
-      <div className="rounded-xl flex justify-center">
-        <TrianguloSVG triangulo={triangulo} nome={nome} />
-      </div>
+      {/* Conteúdo: locked ou normal */}
+      {isLocked ? (
+        <div className="rounded-2xl bg-white/3 border border-[#bea5ff]/20 py-12 px-6 flex flex-col items-center gap-4 text-center">
+          <span className="text-4xl">🔒</span>
+          <p className="text-gray-300 font-medium">
+            {NOME_COMPLETO[aba]} disponível na Harmonização Completa
+          </p>
+          <p className="text-gray-500 text-sm max-w-sm">
+            Este triângulo revela dimensões mais profundas da sua energia — leitura completa incluída no Nome Social.
+          </p>
+          <a
+            href="/nome-social"
+            className="mt-2 inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold px-6 py-2.5 rounded-full text-sm hover:bg-[#f2ca50] transition-all duration-300 hover:scale-105"
+          >
+            ✦ Ver Harmonização Completa
+          </a>
+        </div>
+      ) : (
+        <>
+          {/* SVG do triângulo */}
+          <div className="rounded-xl flex justify-center">
+            <TrianguloSVG triangulo={triangulo} nome={nome} />
+          </div>
 
-      {/* Info: arcano + sequências */}
-      <TrianguloInfo triangulo={triangulo} />
-
+          {/* Info: arcano + sequências */}
+          <TrianguloInfo triangulo={triangulo} />
+        </>
+      )}
     </div>
   );
 }

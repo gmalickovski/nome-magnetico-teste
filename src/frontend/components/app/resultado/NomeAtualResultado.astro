@@ -13,7 +13,6 @@
  *   7. Análise Completa da IA
  *   8. CTA Final — convite para o Nome Social
  */
-import ArquetipoCard from '../ArquetipoCard';
 import TriangleVisualization from '../TriangleVisualization';
 import KarmicLessons from '../KarmicLessons';
 import KarmicDebts from '../KarmicDebts';
@@ -58,7 +57,7 @@ const {
   analiseHtml,
 } = Astro.props;
 
-const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
+const destinoNum = cincoNumeros.find(n => n.label === 'Destino');
 
 // ── Score-based CTA logic ──────────────────────────────────────────────────
 const score = (analysis as any).score as number | null;
@@ -87,47 +86,73 @@ const scoreNivel: ScoreNivel =
 const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 0) || (licoesRaw && licoesRaw.length > 0);
 ---
 
-{/* ── SEÇÃO 1: A ESTRELA DE 5 PONTAS — EXPRESSÃO EM DESTAQUE ───────────── */}
+{/* ── SEÇÃO 1: O NÚMERO DE DESTINO ─────────────────────────────────────── */}
 <section class="pt-6 mb-12">
-  <div class="mb-3 px-1">
-    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">A Estrela de 5 Pontas</p>
-    <h2 class="font-cinzel text-2xl font-bold text-white">Os 5 Números do Seu Nome</h2>
-    <p class="text-sm text-gray-400 mt-1">Calculados com base no seu nome de nascimento e data de nascimento.</p>
+  <div class="mb-5 px-1">
+    <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#bea5ff]/70 mb-2">O Projeto de Fábrica</p>
+    <h2 class="font-cinzel text-2xl font-bold text-white">O Seu Número de Destino</h2>
+    <p class="text-sm text-gray-400 mt-1">Calculado a partir da sua data de nascimento — o único número verdadeiramente imutável.</p>
   </div>
 
-  {/* Expressão em destaque */}
-  <div class="flex justify-center mb-4">
-    <div class="rounded-2xl bg-[#D4AF37]/10 border-2 border-[#D4AF37] p-6 text-center flex flex-col items-center gap-1 w-56 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-yellow-500/10">
-      <span class="text-[#D4AF37]/50 text-2xl leading-none">✦</span>
-      <div class="font-cinzel text-6xl font-bold text-[#D4AF37] leading-none">{expressao ?? '?'}</div>
-      <div class="text-white text-sm font-semibold mt-1">Expressão</div>
-      <div class="text-[#c084fc] text-xs">O Dom</div>
+  {/* Card do Destino — destaque central */}
+  <div class="flex justify-center mb-8">
+    <div class="rounded-2xl bg-[#bea5ff]/8 border border-[#bea5ff]/30 p-8 text-center flex flex-col items-center gap-2 w-64 transition-all duration-700 hover:shadow-lg hover:shadow-purple-500/10">
+      <span class="text-[#bea5ff]/40 text-2xl leading-none">◈</span>
+      <div class="font-cinzel text-7xl font-bold text-[#bea5ff] leading-none">{destinoNum?.value ?? '?'}</div>
+      <div class="text-white text-sm font-semibold mt-2">Número de Destino</div>
+      <div class="text-[#bea5ff]/60 text-xs">A Estrada da Sua Alma</div>
     </div>
   </div>
 
-  {/* Outros 4 números */}
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-    {outrosNumeros.map(n => (
-      <div class="rounded-2xl bg-white/5 p-4 text-center flex flex-col items-center gap-1">
-        <span class="text-[#D4AF37]/60 text-lg leading-none">{n.icon}</span>
-        <div class="font-cinzel text-3xl font-bold text-[#D4AF37]">{n.value ?? '?'}</div>
-        <div class="text-white text-xs font-medium">{n.label}</div>
-        <div class="text-gray-600 text-[10px]">{n.sublabel}</div>
-      </div>
-    ))}
+  {/* Parágrafo 1 — sobre a imutabilidade do Destino */}
+  <div class="rounded-2xl bg-white/[0.03] p-6 md:p-8">
+    <h3 class="font-cinzel text-base font-bold text-[#bea5ff] mb-3">O Que Não Pode Ser Mudado — e o Que Pode</h3>
+    <p class="text-gray-300 text-sm leading-relaxed">
+      O seu Número de Destino é o seu projeto original — calculado a partir da data em que você nasceu, ele
+      representa a trilha que a sua alma escolheu antes mesmo de você receber um nome. Ele não pode ser
+      alterado por nenhuma prática, ritual ou mudança de nome, pois está gravado no tecido do tempo desde
+      o seu primeiro respiro. É a sua Estrada: não te define, mas te ilumina. Não importa o caminho que você
+      escolha — o Destino será sempre o horizonte para o qual a sua bússola interior aponta.
+    </p>
+  </div>
+
+  {/* 4 numbers do nome — cards menores lado a lado */}
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+    {(() => {
+      const nums4 = cincoNumeros.filter(n => n.label !== 'Destino');
+      const palettes = [
+        { color: '#9A6B00', border: 'rgba(154,107,0,0.55)',   bg: 'rgba(154,107,0,0.05)'   },
+        { color: '#6d28d9', border: 'rgba(109,40,217,0.55)',  bg: 'rgba(109,40,217,0.05)'  },
+        { color: '#0369a1', border: 'rgba(3,105,161,0.55)',   bg: 'rgba(3,105,161,0.05)'   },
+        { color: '#15803d', border: 'rgba(21,128,61,0.55)',   bg: 'rgba(21,128,61,0.05)'   },
+      ];
+      return nums4.map((num, i) => {
+        const p = palettes[i % palettes.length];
+        return (
+          <div
+            style={`border-radius:16px; border:1.5px solid ${p.border}; background:${p.bg}; padding:16px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:6px;`}
+          >
+            <span style={`font-size:10px; font-weight:700; color:${p.color}; text-transform:uppercase; letter-spacing:0.08em;`}>{num.label}</span>
+            <div style={`font-family:'Cinzel',serif; font-size:2.5rem; font-weight:700; color:${p.color}; line-height:1;`}>{num.value ?? '?'}</div>
+            <div style={`font-size:11px; color:${p.color}; opacity:0.8;`}>{num.sublabel}</div>
+          </div>
+        );
+      });
+    })()}
+  </div>
+
+  {/* Parágrafo 2 — sobre os 4 números mutáveis */}
+  <div class="rounded-2xl bg-white/[0.03] p-6 md:p-8 mt-5">
+    <h3 class="font-cinzel text-sm font-bold text-white/80 mb-3">Os Números do Nome — O Veículo</h3>
+    <p class="text-gray-300 text-sm leading-relaxed">
+      Os outros quatro números — Expressão, Motivação, Impressão e Missão — emergem das letras do seu
+      nome de batismo. Diferente do Destino, esses números respondem à vibração das letras que você usa.
+      Quando o arranjo do nome muda, esses campos se reorganizam — podendo criar ou desfazer bloqueios,
+      abrir ou fechar caminhos. Você não precisa mudar quem você é. Apenas o veículo através do qual a sua
+      essência se expressa no mundo.
+    </p>
   </div>
 </section>
-
-{/* ── SEÇÃO 2: ARQUÉTIPO ───────────────────────────────────────────────── */}
-{arquetipoData && (
-  <section class="mt-16 mb-12">
-    <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Identidade Mítica</p>
-      <h2 class="font-cinzel text-2xl font-bold text-white">Seu Arquétipo</h2>
-    </div>
-    <ArquetipoCard client:visible arquetipo={arquetipoData} mode="pessoa" />
-  </section>
-)}
 
 {/* ── SEÇÃO 3: OS 4 TRIÂNGULOS ────────────────────────────────────────── */}
 {hasTriangulos && (
@@ -145,6 +170,80 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
       destino={tDestino!}
       bloqueios={bloqueios as any}
     />
+
+    {/* Texto explicativo após os triângulos */}
+    <div class="mt-8 space-y-6">
+      <div class="rounded-2xl bg-white/[0.03] p-6 md:p-8">
+        <h3 class="font-cinzel text-lg font-bold text-[#D4AF37] mb-4">O Que São os 4 Triângulos Numerológicos</h3>
+        <p class="text-gray-300 text-sm leading-relaxed mb-4">
+          Na Numerologia Cabalística, o nome não é apenas um conjunto de letras — ele funciona como um campo de força
+          contínuo que emite uma frequência específica a cada vez que é pronunciado, escrito ou assinado. Para compreender
+          a real profundidade e as nuances dessa frequência, o estudo do nome é dividido em quatro estruturas geométricas
+          chamadas Pirâmides de Fluxo, cada uma revelando uma camada distinta da sua jornada. Juntas, elas formam a
+          anatomia vibratória completa do seu nome de batismo.
+        </p>
+        <p class="text-gray-300 text-sm leading-relaxed">
+          A leitura dessas pirâmides funciona de forma orgânica e progressiva. Cada triângulo mapeia um aspecto específico
+          da sua vida — desde a vitalidade e os padrões gerais de existência, passando pelo universo íntimo e emocional,
+          pela forma como o mundo externo lhe percebe e responde, até culminar no propósito maior que o seu Destino
+          inevitavelmente atrairá. Quando uma sequência de números se repete três ou mais vezes em qualquer triângulo,
+          ela forma um Bloqueio Energético — uma frequência de travamento que age silenciosamente sobre aquela dimensão
+          da sua vida, 24 horas por dia.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="rounded-2xl bg-[#D4AF37]/5 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">🔺</span>
+            <h4 class="font-cinzel text-sm font-bold text-[#D4AF37]">Triângulo da Vida</h4>
+          </div>
+          <p class="text-gray-400 text-xs leading-relaxed">
+            Calculado a partir do valor puro de cada letra do nome, sem modificadores externos. Revela os padrões
+            fundamentais de existência — os temas que se repetem nas diferentes fases da vida, independentemente das
+            circunstâncias. É a vibração base que permeia toda a trajetória de {primeiroNome}, moldando a relação com
+            o corpo, a vitalidade, o dinheiro e a resiliência diante dos desafios. Os bloqueios neste triângulo afetam
+            a saúde geral e os ciclos de prosperidade.
+          </p>
+        </div>
+        <div class="rounded-2xl bg-[#bea5ff]/5 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">💛</span>
+            <h4 class="font-cinzel text-sm font-bold text-[#bea5ff]">Triângulo Pessoal</h4>
+          </div>
+          <p class="text-gray-400 text-xs leading-relaxed">
+            Calculado adicionando ao valor de cada letra o número do dia de nascimento. Mapeia a dimensão íntima e
+            emocional — as reações internas, os mecanismos de defesa e os padrões afetivos que raramente são visíveis
+            para o mundo externo. Revela como {primeiroNome} processa as experiências por dentro, o que realmente move
+            suas escolhas e os ciclos emocionais que se repetem nos relacionamentos mais próximos.
+          </p>
+        </div>
+        <div class="rounded-2xl bg-emerald-500/5 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">🌐</span>
+            <h4 class="font-cinzel text-sm font-bold text-emerald-400">Triângulo Social</h4>
+          </div>
+          <p class="text-gray-400 text-xs leading-relaxed">
+            Calculado adicionando ao valor de cada letra o número do mês de nascimento. Revela como o mundo externo
+            percebe e responde a {primeiroNome} — a impressão que o nome irradia nas interações sociais, profissionais
+            e públicas. Governa o magnetismo pessoal, as oportunidades de networking e a reputação. É aqui que se
+            concentram os bloqueios que sabotam visibilidade, vendas e conexões estratégicas.
+          </p>
+        </div>
+        <div class="rounded-2xl bg-amber-500/5 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">⭐</span>
+            <h4 class="font-cinzel text-sm font-bold text-amber-400">Triângulo do Destino</h4>
+          </div>
+          <p class="text-gray-400 text-xs leading-relaxed">
+            Calculado adicionando ao valor de cada letra a soma já reduzida do dia e mês de nascimento. É o triângulo
+            mais revelador: mapeia os resultados que tendem a se materializar ao longo da vida, a missão maior e os
+            frutos que a frequência vibratória do nome produz. Quando há bloqueios aqui, eles se manifestam como ciclos
+            de esforço que raramente chegam à colheita — o trabalho não se converte em resultado.
+          </p>
+        </div>
+      </div>
+    </div>
   </section>
 )}
 
@@ -177,6 +276,13 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
         ? `${bloqueios.length} Bloqueio${bloqueios.length > 1 ? 's' : ''} Energético${bloqueios.length > 1 ? 's' : ''} Detectado${bloqueios.length > 1 ? 's' : ''}`
         : 'Energia Limpa — Sem Bloqueios'}
     </h2>
+    {bloqueios.length > 0 && hasTriangulos && (
+      <div class="mt-3 rounded-xl bg-[#bea5ff]/5 border border-[#bea5ff]/20 px-4 py-3">
+        <p class="text-xs text-[#c084fc] leading-relaxed">
+          Os números em vermelho na pirâmide do Triângulo da Vida acima indicam exatamente onde essa energia está vazando.
+        </p>
+      </div>
+    )}
   </div>
   {bloqueios.length > 0 ? (
     <div class="flex flex-col gap-4">
@@ -275,7 +381,7 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
         <div class="flex items-center gap-3 mb-4">
           <span class="text-2xl">✦</span>
           <h3 class="font-cinzel text-lg font-bold text-[#D4AF37]">Pontos de Otimização Identificados</h3>
-          {score !== null && <span class="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400">Score {score}%</span>}
+          {score !== null && <span class="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400">Saúde Vibracional: {score}%</span>}
         </div>
         <p class="text-gray-300 text-sm leading-relaxed mb-5">
           Mesmo com uma vibração acima da média, sua análise identificou elementos que ainda podem ser refinados —
@@ -319,7 +425,7 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
         <div class="flex items-center gap-3 mb-4">
           <span class="text-2xl">📊</span>
           <h3 class="font-cinzel text-lg font-bold text-amber-400">Pontos Que Ainda Limitam Seu Potencial</h3>
-          {score !== null && <span class="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-amber-500/15 text-amber-400">Score {score}%</span>}
+          {score !== null && <span class="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-amber-500/15 text-amber-400">Saúde Vibracional: {score}%</span>}
         </div>
         <p class="text-gray-300 text-sm leading-relaxed mb-5">
           Sua vibração está em nível aceitável — mas <strong class="text-amber-300">aceitável não é o máximo que seu nome pode entregar</strong>.

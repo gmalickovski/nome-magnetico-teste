@@ -144,7 +144,6 @@ export function PDFStandardIntro({ theme, productType, entityName, isFreeAnalysi
                 ['Bloqueios e Falhas', 'Onde a sua energia está sendo drenada — sequências repetidas que travam os resultados.'],
                 ['Lições Kármicas', 'Vibrações ausentes no nome que criam pontos cegos na vida.'],
                 ['Tendências Ocultas', 'Excessos que distorcem comportamentos e sabotam potencial.'],
-                ['Arquétipo', 'O papel mítico que este nome projeta no mundo — sua identidade de força e sombra.'],
               ].map(([title, desc], i) => (
                 <View key={i} style={{ flexDirection: 'row', marginBottom: 8 }}>
                   <Text style={{ fontSize: 11, color: boldColor, fontFamily: 'Helvetica-Bold', marginRight: 4 }}>•</Text>

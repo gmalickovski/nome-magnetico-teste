@@ -2,11 +2,14 @@
  * NomeAtualPDF — documento PDF da análise Gratuita (Nome Atual).
  *
  * Estrutura de páginas:
- *   1. Capa (gold/purple — estrela de 5 pontas)
- *   2. A Estrela de 5 Pontas: Expressão em destaque + 4 números + Bloqueios
- *   3. Karma: Débitos + Lições + Tendências Ocultas
- *   4+. Análise IA completa (triângulos + blocos kármicos injetados inline)
- *   5. CTA / Oferta para a Harmonização (Nome Social)
+ *   1. Capa
+ *   2. Guia de Leitura (intro)
+ *   3. Os Números — Destino (card central) + 4 números do nome lado a lado
+ *   4. Bloqueios Energéticos
+ *   5. Karma, Lições e Tendências Ocultas
+ *   6. Os 4 Triângulos (explicação — se disponíveis)
+ *   7+. Análise IA completa (triângulos + diagnóstico)
+ *   8. CTA / Oferta para a Harmonização (Nome Social)
  */
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
 import { THEMES, THEME_NOME_ATUAL } from './shared/PDFTheme';
@@ -21,65 +24,6 @@ import { BloqueiosBlock, DebitosBlock, LicoesBlock, TendenciasBlock } from './sh
 import { LOGO_FONT, TITLE_FONT, BODY_FONT, BODY_FONT_BOLD, loadLogoSrc, formatDate } from './shared/PDFFonts';
 import { formatAnalysisText } from '../../../utils/textFormatter';
 import type { ProductPDFProps } from './shared/PDFTypes';
-import { getArquetipo, type Arquetipo } from '../../../backend/numerology/archetypes';
-
-function ArquetipoCardPDF({ arquetipo }: { arquetipo: Arquetipo }) {
-  return (
-    <View style={{
-      borderWidth: 1, borderColor: '#D4AF37', borderRadius: 8, padding: 16, backgroundColor: '#FFFDF0', marginTop: 12
-    }} wrap={false}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-        <View style={{ 
-          width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(212, 175, 55, 0.1)',
-          borderWidth: 1, borderColor: '#D4AF37',
-          justifyContent: 'center', alignItems: 'center',
-          marginRight: 12
-        }}>
-          <Text style={{ fontSize: 18, fontFamily: TITLE_FONT, color: '#D4AF37' }}>{arquetipo.numero}</Text>
-        </View>
-        <View>
-          <Text style={{ fontSize: 9, color: '#D4AF37', textTransform: 'uppercase', marginBottom: 2 }}>
-            Sua Identidade Mítica
-          </Text>
-          <Text style={{ fontSize: 16, fontFamily: TITLE_FONT, color: '#D4AF37', fontWeight: 'bold' }}>
-            {arquetipo.nome}
-          </Text>
-        </View>
-      </View>
-
-      <View style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: 10, borderRadius: 6, marginBottom: 12 }}>
-        <Text style={{ fontSize: 10, fontFamily: TITLE_FONT, color: '#D4AF37', textAlign: 'center' }}>
-          "{arquetipo.essencia}"
-        </Text>
-      </View>
-
-      <Text style={{ fontSize: 10, fontFamily: BODY_FONT, color: '#4B5563', lineHeight: 1.6, marginBottom: 12 }}>
-        {arquetipo.descricao}
-      </Text>
-
-      <View style={{ marginBottom: 10 }}>
-        <Text style={{ fontSize: 10, color: '#10b981', fontFamily: BODY_FONT_BOLD, marginBottom: 4 }}>
-          LUZ (Expressão Positiva)
-        </Text>
-        {arquetipo.expressaoPositiva.map((item, i) => (
-          <Text key={i} style={{ fontSize: 9, fontFamily: BODY_FONT, color: '#4B5563', marginBottom: 2, marginLeft: 8 }}>
-            • {item}
-          </Text>
-        ))}
-      </View>
-      <View>
-        <Text style={{ fontSize: 10, color: '#FF6B6B', fontFamily: BODY_FONT_BOLD, marginBottom: 4 }}>
-          SOMBRA (Desafios)
-        </Text>
-        {arquetipo.expressaoSombra.map((item, i) => (
-          <Text key={i} style={{ fontSize: 9, fontFamily: BODY_FONT, color: '#4B5563', marginBottom: 2, marginLeft: 8 }}>
-            • {item}
-          </Text>
-        ))}
-      </View>
-    </View>
-  );
-}
 
 const theme = THEME_NOME_ATUAL;
 
@@ -300,7 +244,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
   const nums = [
     { label: 'Expressão', sublabel: 'O Dom', value: analysis.numero_expressao, icon: '✦' },
-    { label: 'Destino', sublabel: 'O Chamado', value: analysis.numero_destino, icon: '◈' },
+    { label: 'Destino', sublabel: 'A Estrada (imutável)', value: analysis.numero_destino, icon: '◈' },
     { label: 'Motivação', sublabel: 'A Alma', value: analysis.numero_motivacao, icon: '♡' },
     { label: 'Impressão', sublabel: 'As Consoantes', value: analysis.numero_impressao, icon: '◎' },
     { label: 'Missão', sublabel: 'A Vocação', value: analysis.numero_missao, icon: '◇' },
@@ -371,56 +315,92 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
       {/* Rankeamento removido do relatório atual */}
 
-      {/* ── PÁGINA 3: A ESTRELA DE 5 PONTAS + BLOQUEIOS ───────────────────── */}
+      {/* ── PÁGINA 3: OS NÚMEROS ─────────────────────────────────────────── */}
       <Page size="A4" style={styles.page}>
-        <PDFPageHeader subtitle={`${nomeParaExibir} — O Pentagrama Pessoal`} />
+        <PDFPageHeader subtitle={`${nomeParaExibir} — O Projeto de Fábrica`} />
 
-        <View style={{ marginTop: 20, marginBottom: 8 }}>
-          <Text style={styles.hugeTitle}>A Essência e o Personagem</Text>
+        <View style={{ marginTop: 20, marginBottom: 12 }}>
+          <Text style={styles.hugeTitle}>O Número de Destino</Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { fontSize: 13, color: '#8A661C', borderBottomColor: '#8A661C', borderBottomWidth: 0.5 }]}>O Pentagrama Pessoal</Text>
-          <PDFNumbersStar
-            nums={nums}
-            featuredLabel="Expressão"
-            primaryColor={theme.primaryColor}
-            accentColor={theme.accentColor}
-          />
-          <Text style={{ ...styles.bodyText, marginTop: 16 }}>
-            Cinco frequências regem sua identidade vibracional — cada uma amplificando ou sabotando as outras.
+        {/* Card do Destino centralizado */}
+        <View style={{ alignItems: 'center', marginBottom: 18 }}>
+          <View style={{ borderWidth: 2, borderColor: '#6d28d9', borderRadius: 12, padding: 20, backgroundColor: '#F5F3FF', alignItems: 'center', width: 180 }}>
+            <Text style={{ fontSize: 9, color: '#6d28d9', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{'◈  Número de Destino'}</Text>
+            <Text style={{ fontFamily: TITLE_FONT, fontSize: 52, color: '#5b21b6', lineHeight: 1 }}>{analysis.numero_destino ?? '?'}</Text>
+            <Text style={{ fontSize: 9, color: '#7c3aed', marginTop: 6 }}>A Estrada da Sua Alma</Text>
+          </View>
+        </View>
+
+        {/* Parágrafo 1 — sobre a imutabilidade do Destino */}
+        <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', padding: 14, marginBottom: 14 }}>
+          <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: '#5b21b6', marginBottom: 8 }}>O Que Não Pode Ser Mudado — e o Que Pode</Text>
+          <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65 }}>
+            O seu Número de Destino é o seu projeto original — calculado a partir da data em que você nasceu, ele representa a trilha que a sua alma escolheu antes mesmo de você receber um nome. Ele não pode ser alterado por nenhuma prática, ritual ou mudança de nome, pois está gravado no tecido do tempo desde o seu primeiro respiro. É a sua Estrada: não te define, mas te ilumina. Não importa o caminho que você escolha — o Destino será sempre o horizonte para o qual a sua bússola interior aponta.
           </Text>
         </View>
 
-        <View style={styles.section} wrap={false}>
-          <Text style={[styles.sectionTitle, { fontSize: 13, color: '#8A661C', borderBottomColor: '#8A661C', borderBottomWidth: 0.5 }]}>
-            O Arquétipo - Sua Identidade Mítica
-          </Text>
-          <Text style={{ ...styles.bodyText, marginBottom: 6 }}>
-            O número de Expressão revela o arquétipo que você interpreta na vida — com seus talentos e suas sombras ativas.
-          </Text>
-          <ArquetipoCardPDF arquetipo={getArquetipo(analysis.numero_expressao ?? 1)} />
+        {/* 4 numbers do nome — cards menores lado a lado */}
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
+          {nums.filter(n => n.label !== 'Destino').map((num, i) => {
+            // @react-pdf não suporta rgba() em borderColor — usar hex sólido
+            const palettes = [
+              { color: '#9A6B00', border: '#C89000', bg: '#FFFBF0' }, // Ouro — Expressão
+              { color: '#6d28d9', border: '#7C3AED', bg: '#F5F3FF' }, // Roxo — Motivação
+              { color: '#0369a1', border: '#0284C7', bg: '#F0F9FF' }, // Azul-teal — Impressão
+              { color: '#15803d', border: '#16A34A', bg: '#F0FDF4' }, // Verde — Missão
+            ];
+            const p = palettes[i % palettes.length];
+            return (
+              <View key={i} style={{ flex: 1, borderWidth: 1.5, borderColor: p.border, borderRadius: 8, padding: 10, alignItems: 'center', backgroundColor: p.bg }}>
+                <Text style={{ fontSize: 7, fontFamily: BODY_FONT_BOLD, color: p.color, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3 }}>{num.label}</Text>
+                <Text style={{ fontFamily: TITLE_FONT, fontSize: 28, color: p.color, lineHeight: 1 }}>{num.value ?? '?'}</Text>
+                <Text style={{ fontSize: 7, color: p.color, textAlign: 'center', marginTop: 4 }}>{num.sublabel}</Text>
+              </View>
+            );
+          })}
         </View>
 
-        {/* Bloqueios logo abaixo dos números */}
+        {/* Parágrafo 2 — sobre os 4 números mutáveis */}
+        <View style={{ borderRadius: 8, backgroundColor: 'rgba(212,175,55,0.06)', padding: 14 }}>
+          <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: '#8A5C00', marginBottom: 8 }}>Os Números do Nome — O Veículo</Text>
+          <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65 }}>
+            Os outros quatro números — Expressão, Motivação, Impressão e Missão — emergem das letras do seu nome de batismo. Diferente do Destino, esses números respondem à vibração das letras que você usa. Quando o arranjo do nome muda, esses campos se reorganizam — podendo criar ou desfazer bloqueios, abrir ou fechar caminhos. Você não precisa mudar quem você é. Apenas o veículo através do qual a sua essência se expressa no mundo.
+          </Text>
+        </View>
+
+        <PDFFooter />
+      </Page>
+
+      {/* ── PÁGINA 4: BLOQUEIOS ENERGÉTICOS ──────────────────────────────── */}
+      <Page size="A4" style={styles.page}>
+        <PDFPageHeader subtitle={`${nomeParaExibir} — Raio-X dos Bloqueios`} />
+
+        <View style={{ marginTop: 20, marginBottom: 12 }}>
+          <Text style={styles.hugeTitle}>Bloqueios Energéticos</Text>
+        </View>
+
         {bloqueios.length > 0 ? (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626' }]}>
-              Bloqueios Energéticos ({bloqueios.length})
+              {bloqueios.length} Bloqueio{bloqueios.length > 1 ? 's' : ''} Detectado{bloqueios.length > 1 ? 's' : ''} no Seu Nome
+            </Text>
+            <Text style={{ fontSize: 9, color: '#7C3AED', fontStyle: 'italic', marginBottom: 10 }}>
+              Os números em vermelho nas pirâmides dos triângulos (páginas seguintes) indicam exatamente onde cada bloqueio está atuando no seu campo energético.
             </Text>
             <BloqueiosBlock bloqueios={bloqueios} showAntidoto={false} />
           </View>
         ) : (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: '#059669', borderBottomColor: '#059669' }]}>
-              Bloqueios Energéticos (0)
+              Nenhum Bloqueio Detectado
             </Text>
             <View style={{ backgroundColor: '#ecfdf5', padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#34d399', marginTop: 8 }}>
               <Text style={{ fontFamily: TITLE_FONT, color: '#065f46', fontSize: 13, marginBottom: 6 }}>
-                Parabéns! Fluxo Livre Detectado
+                Fluxo Livre Confirmado
               </Text>
-              <Text style={{ fontFamily: BODY_FONT, color: '#064e3b', fontSize: 11, lineHeight: 1.5 }}>
-                Os cálculos cabalísticos mapearam a totalidade do seu nome e confirmaram que a sua arquitetura vibratória atual está completamente livre de sequências numéricas travadas (bloqueios). Sem as antigas amarras magnéticas para obstruir o seu campo, a sua energia flui de maneira cristalina pelas áreas de finanças, saúde e relacionamentos. O universo abraça e impulsiona o seu livre-arbítrio sem exigir pedágios mecânicos, refletindo um fluxo limpo rumo ao seu Destino.
+              <Text style={{ fontFamily: BODY_FONT, color: '#064e3b', fontSize: 10, lineHeight: 1.6 }}>
+                Os cálculos cabalísticos mapearam a totalidade do seu nome e confirmaram que a sua arquitetura vibratória atual está completamente livre de sequências numéricas travadas. Sem essas amarras para obstruir o campo, a sua energia flui de maneira cristalina pelas áreas de finanças, saúde e relacionamentos — refletindo um fluxo limpo rumo ao seu Destino.
               </Text>
             </View>
           </View>
@@ -506,7 +486,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
 
 
-      {/* ── PÁGINAS 6+: ANÁLISE IA COMPLETA COM INJEÇÕES DE QUEBRA E TEXTOS ─── */}
+      {/* ── PÁGINAS: ANÁLISE IA COMPLETA ──────────────────────────────────── */}
       {analiseCorpo && (
         <Page size="A4" style={styles.page}>
           <PDFPageHeader subtitle={`${nomeParaExibir} — Diagnóstico`} />
@@ -525,10 +505,30 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
               letrasNome={letrasNome}
               pageBreaks={['Os 4 Triângulos', 'Triângulo Pessoal', 'Triângulo Social', 'Triângulo do Destino', 'Bloqueios e', 'Como Harmonizar']}
               injections={{
-                'Triângulo da Vida': <Text style={styles.bodyText}>Alicerces da sua vitalidade, resiliência e potencial financeiro.</Text>,
-                'Triângulo Pessoal': <Text style={{ ...styles.bodyText, color: GRAY, fontStyle: 'italic' }}>Este triângulo revela sua vida íntima e emocional — leitura disponível na Harmonização Completa.</Text>,
-                'Triângulo Social': <Text style={{ ...styles.bodyText, color: GRAY, fontStyle: 'italic' }}>Este triângulo mapeia seu magnetismo social e networking — leitura disponível na Harmonização Completa.</Text>,
-                'Triângulo do Destino': <Text style={{ ...styles.bodyText, color: GRAY, fontStyle: 'italic' }}>Este triângulo revela sua missão e convergência final — leitura disponível na Harmonização Completa.</Text>,
+                'Tri\u00e2ngulo da Vida': (
+                  <View style={{ borderRadius: 8, backgroundColor: 'rgba(212,175,55,0.06)', borderWidth: 1, borderColor: 'rgba(212,175,55,0.25)', padding: 10, marginBottom: 10 }}>
+                    <Text style={{ fontSize: 9, color: GOLD, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>O QUE REVELA</Text>
+                    <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>Calculado a partir do valor puro de cada letra. Revela os padroes fundamentais de existencia - os temas que se repetem nas diferentes fases da vida, independentemente das circunstancias. Molda a relacao com o corpo, a vitalidade, o dinheiro e a resiliencia diante dos desafios. Bloqueios neste triangulo afetam saude e ciclos de prosperidade.</Text>
+                  </View>
+                ),
+                'Tri\u00e2ngulo Pessoal': (
+                  <View style={{ borderRadius: 8, backgroundColor: 'rgba(190,165,255,0.06)', borderWidth: 1, borderColor: 'rgba(190,165,255,0.25)', padding: 10, marginBottom: 10 }}>
+                    <Text style={{ fontSize: 9, color: '#7c3aed', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>O QUE REVELA</Text>
+                    <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>Calculado adicionando o numero do dia de nascimento a cada letra. Mapeia a dimensao intima e emocional - as reacoes internas, os mecanismos de defesa e os padroes afetivos que raramente sao visiveis ao mundo. Revela como voce processa as experiencias por dentro e os ciclos emocionais que se repetem nos relacionamentos mais proximos.</Text>
+                  </View>
+                ),
+                'Tri\u00e2ngulo Social': (
+                  <View style={{ borderRadius: 8, backgroundColor: 'rgba(16,185,129,0.06)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.25)', padding: 10, marginBottom: 10 }}>
+                    <Text style={{ fontSize: 9, color: '#059669', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>O QUE REVELA</Text>
+                    <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>Calculado adicionando o numero do mes de nascimento a cada letra. Revela como o mundo externo percebe e responde ao seu nome - o magnetismo pessoal, as oportunidades de networking e a reputacao. Governa a visibilidade, as vendas e as conexoes estrategicas. Bloqueios aqui sabotam a presenca publica e o reconhecimento.</Text>
+                  </View>
+                ),
+                'Tri\u00e2ngulo do Destino': (
+                  <View style={{ borderRadius: 8, backgroundColor: 'rgba(245,158,11,0.06)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)', padding: 10, marginBottom: 10 }}>
+                    <Text style={{ fontSize: 9, color: '#b45309', fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>O QUE REVELA</Text>
+                    <Text style={{ fontSize: 9, color: GRAY, lineHeight: 1.6 }}>Calculado adicionando a soma reduzida do dia e mes de nascimento a cada letra. Mapeia os resultados que tendem a se materializar ao longo da vida - a missao maior e os frutos que a frequencia do nome produz. Bloqueios aqui criam ciclos de esforco sem colheita - o trabalho nao se converte em resultado.</Text>
+                  </View>
+                ),
               }}
             />
           </View>
@@ -579,7 +579,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
           </Text>
           {rawScore != null && rawScore > 0 && (
             <Text style={{ fontSize: 10, color: scoreNivel === 'excelente' ? '#10B981' : scoreNivel === 'aceitavel' ? '#F59E0B' : '#EF4444', textAlign: 'center', marginTop: 6 }}>
-              Score do nome atual: {rawScore}/100
+              Saúde Vibracional Atual: {rawScore}/100
             </Text>
           )}
         </View>
