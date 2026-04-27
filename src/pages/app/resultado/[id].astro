@@ -161,11 +161,11 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
               </svg>
             </div>
             <div class="flex-1 min-w-0">
-              <p id="loading-stage-title" style="font-size:14px;font-weight:700;color:#e5e2e1;margin:0;line-height:1.4">
-                Lendo suas informações…
+              <p style="font-size:14px;font-weight:700;color:#e5e2e1;margin:0;line-height:1.4">
+                Analisando seus dados…
               </p>
-              <p id="loading-stage-subtitle" style="font-size:12px;color:#6b7280;margin:4px 0 0;line-height:1.5">
-                Verificando nome completo e data de nascimento
+              <p style="font-size:12px;color:#6b7280;margin:4px 0 0;line-height:1.5">
+                Isso pode levar alguns minutos — a página atualiza automaticamente
               </p>
             </div>
           </div>
@@ -201,38 +201,20 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
 
             sessionStorage.setItem(key, String(count + 1));
             const baseSec = count * 5;
-
-            const stages = [
-              { max: 20,       title: 'Lendo suas informações…',                    sub: 'Verificando nome completo e data de nascimento' },
-              { max: 45,       title: 'Calculando seus números…',                   sub: 'Expressão, Destino, Motivação, Missão e Personalidade' },
-              { max: 85,       title: 'Mapeando os triângulos numerológicos…',      sub: 'Identificando padrões e sequências energéticas' },
-              { max: 150,      title: 'Cruzando e aprofundando os dados…',          sub: 'Cada detalhe impacta a precisão da sua análise' },
-              { max: 240,      title: 'Elaborando seus insights personalizados…',   sub: 'Este passo exige atenção e cuidado especiais' },
-              { max: 360,      title: 'Sua análise está quase pronta…',             sub: 'Finalizando os últimos cálculos' },
-              { max: Infinity, title: 'Última etapa em andamento…',                 sub: 'Aguarde mais um momento' },
-            ];
-
-            const titleEl = document.getElementById('loading-stage-title');
-            const subEl   = document.getElementById('loading-stage-subtitle');
-            const ctrEl   = document.getElementById('poll-counter-text');
+            const ctrEl = document.getElementById('poll-counter-text');
 
             function fmt(sec) {
               const m = Math.floor(sec / 60);
               return sec >= 60 ? m + 'min ' + (sec % 60) + 's' : sec + 's';
             }
 
-            function update(localSec) {
-              const total = baseSec + localSec;
-              const stage = stages.find(s => total < s.max) || stages[stages.length - 1];
-              if (titleEl) titleEl.textContent = stage.title;
-              if (subEl)   subEl.textContent   = stage.sub;
-              if (ctrEl)   ctrEl.textContent   = '(' + fmt(total) + ')';
-            }
-
             let localSec = 0;
-            update(localSec);
+            if (ctrEl) ctrEl.textContent = '(' + fmt(baseSec) + ')';
 
-            const liveInterval = setInterval(() => { localSec++; update(localSec); }, 1000);
+            const liveInterval = setInterval(() => {
+              localSec++;
+              if (ctrEl) ctrEl.textContent = '(' + fmt(baseSec + localSec) + ')';
+            }, 1000);
 
             setTimeout(() => {
               clearInterval(liveInterval);
