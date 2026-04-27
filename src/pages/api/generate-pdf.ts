@@ -95,6 +95,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store',
     },
   });
 };

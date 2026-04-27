@@ -91,7 +91,7 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
     setFeedbackError(false);
 
     try {
-      const res = await fetch(`/api/generate-pdf?id=${analysisId}`);
+      const res = await fetch(`/api/generate-pdf?id=${analysisId}&t=${Date.now()}`);
       if (!res.ok) throw new Error('pdf_error');
 
       const blob = await res.blob();
