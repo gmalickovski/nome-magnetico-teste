@@ -42,7 +42,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
   }
 
   const productType = analysis.product_type ?? 'nome_social';
-  const isFree = (analysis as any).is_free === true;
+  const isGratuita = productType === 'analise_gratuita' || (analysis as any).is_free === true;
   let filename: string;
 
   if (productType === 'nome_bebe') {
@@ -54,12 +54,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const freqData = (analysis as any).frequencias_numeros as any;
     const nomeEmpresa = freqData?.melhorNome?.nomeEmpresa ?? analysis.nome_completo;
     filename = `analise-nome-empresa-${toSlug(nomeEmpresa)}-nome-magnetico.pdf`;
+  } else if (isGratuita) {
+    filename = `analise-gratuita-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
   } else {
-    if (isFree) {
-      filename = `analise-gratuita-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
-    } else {
-      filename = `analise-nome-social-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
-    }
+    filename = `analise-nome-social-${toSlug(analysis.nome_completo)}-nome-magnetico.pdf`;
   }
 
   const PDFComponent =
@@ -67,7 +65,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
       ? NomeBebePDF
       : productType === 'nome_empresa'
         ? NomeEmpresaPDF
-        : isFree
+        : isGratuita
           ? NomeAtualPDF
           : NomeSocialPDF;
 

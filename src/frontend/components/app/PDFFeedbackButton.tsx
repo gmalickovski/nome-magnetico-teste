@@ -94,12 +94,15 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
       const res = await fetch(`/api/generate-pdf?id=${analysisId}&t=${Date.now()}`);
       if (!res.ok) throw new Error('pdf_error');
 
+      const disposition = res.headers.get('Content-Disposition') ?? '';
+      const filenameMatch = disposition.match(/filename="([^"]+)"/);
+      const filename = filenameMatch?.[1] ?? `analise-${productType}-nome-magnetico.pdf`;
+
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
       a.href     = url;
-      const label = productType === 'analise-gratuita' ? 'analise-gratuita' : productType;
-      a.download = `analise-${label}-nome-magnetico.pdf`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

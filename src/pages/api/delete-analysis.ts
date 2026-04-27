@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../backend/db/supabase';
+import { getProfile } from '../../backend/db/users';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
@@ -22,12 +23,36 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 
+  // Busca a análise antes de deletar para checar permissão
+  const { data: analysis } = await supabase
+    .from('analyses')
+    .select('id, user_id, product_type, is_free')
+    .eq('id', body.id)
+    .eq('user_id', user.id)
+    .single();
+
+  if (!analysis) {
+    return new Response(JSON.stringify({ error: 'Análise não encontrada' }), {
+      status: 404, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Análise gratuita: apenas admins podem excluir
+  const isGratuita = analysis.product_type === 'analise_gratuita' || analysis.is_free === true;
+  if (isGratuita) {
+    const profile = await getProfile(user.id);
+    if (profile?.role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'Análise gratuita não pode ser excluída.' }), {
+        status: 403, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
   const { error } = await supabase
-    
     .from('analyses')
     .delete()
     .eq('id', body.id)
-    .eq('user_id', user.id); // garante que só exclui análise própria
+    .eq('user_id', user.id);
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {

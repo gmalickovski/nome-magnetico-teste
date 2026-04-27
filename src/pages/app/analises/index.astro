@@ -15,11 +15,13 @@ const isAdmin = profile?.role === 'admin';
 const analyses = await getUserAnalyses(user.id);
 
 const productIcon: Record<string, string> = {
+  analise_gratuita: '✦',
   nome_social: '✨',
   nome_bebe: '👶',
   nome_empresa: '🏢',
 };
 const productLabel: Record<string, string> = {
+  analise_gratuita: 'Nome Atual',
   nome_social: 'Nome Social',
   nome_bebe: 'Nome de Bebê',
   nome_empresa: 'Nome Empresarial',

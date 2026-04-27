@@ -48,7 +48,8 @@ jobs:
             npm install --omit=dev
             npm install dotenv
 
-            # Reload sem downtime — reinicia instâncias uma a uma (rolling restart).
+            # Restart completo — reinicia todos os workers de uma vez (1-2s downtime).
+            # Garante que TODOS os workers carregam o novo código.
             # Fallback para start se o processo ainda não existir (primeiro deploy).
-            pm2 reload ecosystem.config.cjs --update-env 2>/dev/null || pm2 start ecosystem.config.cjs
+            pm2 restart ecosystem.config.cjs --update-env 2>/dev/null || pm2 start ecosystem.config.cjs
             pm2 save

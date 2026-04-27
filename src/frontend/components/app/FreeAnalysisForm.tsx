@@ -37,11 +37,10 @@ export default function FreeAnalysisForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          product_type: 'nome_social',
+          product_type: 'analise_gratuita',
           nome_completo: nome.trim(),
           data_nascimento: data,
           nome_ja_escolhido: true,
-          is_free: true,
         }),
       });
 

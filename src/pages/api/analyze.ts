@@ -15,11 +15,12 @@ import { analisarNomesEmpresa } from '../../backend/numerology/products/nome-emp
 import { verificarDisponibilidadeNomes } from '../../backend/utils/availability';
 import { analisarNomesSocial } from '../../backend/numerology/products/nome-social';
 import type { ProductType } from '../../backend/payments/stripe';
+import type { AnalysisProductType } from '../../backend/db/analyses';
 
 const schema = z.object({
   nome_completo: z.string().min(2).max(150),
   data_nascimento: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/),
-  product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']).default('nome_social'),
+  product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa', 'analise_gratuita']).default('nome_social'),
   // campos específicos nome_bebe
   sobrenome_familia: z.string().min(1).max(100).optional(),
   nomes_candidatos: z.array(z.string().min(2)).optional(),
@@ -99,8 +100,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const gender = profile?.gender || 'Neutro';
   const isAdmin = profile?.role === 'admin';
 
+  const isGratuita = product_type === 'analise_gratuita' || is_free === true;
+
   // Verificar acesso
-  if (is_free && !isAdmin) {
+  if (isGratuita && !isAdmin) {
     // Análise gratuita: verificar se já foi utilizada (admin isento para fins de teste)
     const jaUsou = await hasUsedFreeAnalysis(user.id);
     if (jaUsou) {
@@ -108,7 +111,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         status: 403, headers: { 'Content-Type': 'application/json' },
       });
     }
-  } else if (!is_free) {
+  } else if (!isGratuita) {
     // Análise paga: verificar subscription
     const hasAccess = await hasActiveSubscription(user.id, product_type as ProductType);
     if (!hasAccess && !isAdmin) {
@@ -121,10 +124,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   // Criar análise no banco
   const analysis = await createAnalysis({
     userId: user.id,
-    productType: product_type as ProductType,
+    productType: product_type as AnalysisProductType,
     nomeCompleto: nome_completo,
     dataNascimento: data_nascimento,
-    isFree: is_free ?? false,
+    isFree: isGratuita,
   });
 
   // Processar em background (não bloqueia a resposta)
@@ -384,8 +387,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
             tendenciasOcultas,
             debitosCarmicos,
             gender,
-            isCurrentNameAnalysis: !!nome_ja_escolhido || is_free === true,
-            isFreeAnalysis: is_free === true,
+            isCurrentNameAnalysis: !!nome_ja_escolhido || isGratuita,
+            isFreeAnalysis: isGratuita,
           },
           user.id,
           analysis.id

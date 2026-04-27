@@ -1,12 +1,14 @@
 import { supabase } from './supabase';
 import type { ProductType } from '../payments/stripe';
 
+export type AnalysisProductType = ProductType | 'analise_gratuita';
+
 export type AnalysisStatus = 'pending' | 'processing' | 'complete' | 'error';
 
 export interface Analysis {
   id: string;
   user_id: string;
-  product_type: ProductType;
+  product_type: AnalysisProductType;
   nome_completo: string;
   data_nascimento: string;
   numero_expressao: number | null;
@@ -65,7 +67,7 @@ export async function hasUsedFreeAnalysis(userId: string): Promise<boolean> {
     .from('analyses')
     .select('status, created_at')
     .eq('user_id', userId)
-    .eq('is_free', true);
+    .or('is_free.eq.true,product_type.eq.analise_gratuita');
 
   if (!data || data.length === 0) return false;
 
@@ -84,7 +86,7 @@ export async function hasUsedFreeAnalysis(userId: string): Promise<boolean> {
 
 export async function createAnalysis(params: {
   userId: string;
-  productType: ProductType;
+  productType: AnalysisProductType;
   nomeCompleto: string;
   dataNascimento: string;
   isFree?: boolean;
