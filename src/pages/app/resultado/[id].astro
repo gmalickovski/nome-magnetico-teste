@@ -149,16 +149,35 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
     {/* ── PROCESSANDO ─────────────────────────────────────────────── */}
     {isProcessing && (
       <>
-        <div id="processing-state" class="rounded-2xl bg-white/5 p-12 text-center">
-          <div class="inline-block w-12 h-12 border-4 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin mb-6"></div>
-          <h3 class="font-cinzel text-xl font-bold text-white mb-2">Analisando seu nome...</h3>
-          <p class="text-gray-400">A IA está calculando sua análise completa. Isso pode levar de 1 a 7 minutos.</p>
-          <p id="poll-counter-text" class="text-gray-600 text-sm mt-4">Esta página atualiza automaticamente.</p>
+        <style>{`@keyframes ldg-spin { to { transform: rotate(360deg); } }`}</style>
+
+        <div id="processing-state" class="rounded-2xl bg-white/[0.04] p-7 sm:p-9" style="border: 1px solid rgba(212,175,55,0.12)">
+          {/* Layout icon + texto — mesmo padrão do modal de download do PDF */}
+          <div class="flex items-center gap-5 mb-4">
+            <div class="flex-shrink-0 w-11 h-11 flex items-center justify-center">
+              <svg style="width:44px;height:44px;color:#D4AF37;animation:ldg-spin 1s linear infinite" fill="none" viewBox="0 0 24 24">
+                <circle style="opacity:0.18" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                <path style="opacity:0.85" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p id="loading-stage-title" style="font-size:14px;font-weight:700;color:#e5e2e1;margin:0;line-height:1.4">
+                Lendo suas informações…
+              </p>
+              <p id="loading-stage-subtitle" style="font-size:12px;color:#6b7280;margin:4px 0 0;line-height:1.5">
+                Verificando nome completo e data de nascimento
+              </p>
+            </div>
+          </div>
+          <p style="font-size:11px;color:#374151;margin:0;padding-left:60px">
+            Verificando em instantes… <span id="poll-counter-text" style="color:#4b5563">(0s)</span>
+          </p>
         </div>
+
         <div id="timeout-state" class="hidden rounded-2xl bg-amber-500/10 border border-amber-500/20 p-8 text-center">
           <div class="text-3xl mb-4">⏱</div>
           <h3 class="font-cinzel text-xl font-bold text-amber-400 mb-2">A análise está demorando mais que o esperado</h3>
-          <p class="text-gray-400 mb-6">O processamento pode estar lento devido a instabilidades da Inteligência Artificial. Aguarde mais alguns minutos e recarregue a página, ou relate o problema caso persista.</p>
+          <p class="text-gray-400 mb-6">O processamento pode estar lento no momento. Aguarde mais alguns minutos e recarregue a página, ou relate o problema caso persista.</p>
           <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
             <button onclick="window.location.reload()" class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-medium px-6 py-2.5 rounded-full hover:bg-amber-400 transition-all">
               Verificar agora
@@ -166,14 +185,14 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
             <a href="/suporte" target="_blank" class="text-amber-400 hover:text-amber-300 text-sm underline underline-offset-4">Relatar atraso no Suporte</a>
           </div>
         </div>
+
         <script define:vars={{ analysisId: id }}>
           (function () {
-            const MAX_POLLS = 84; // 7 minutos (84 × 5s) — cobre fallback OpenAI que pode demorar 5-6 min
+            const MAX_POLLS = 84; // 7 minutos (84 × 5s)
             const key = 'poll_' + analysisId;
             const count = parseInt(sessionStorage.getItem(key) || '0', 10);
 
             if (count >= MAX_POLLS) {
-              // Parou de fazer polling — mostra mensagem de timeout
               sessionStorage.removeItem(key);
               document.getElementById('processing-state')?.classList.add('hidden');
               document.getElementById('timeout-state')?.classList.remove('hidden');
@@ -181,13 +200,43 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
             }
 
             sessionStorage.setItem(key, String(count + 1));
-            const elapsedSec = (count + 1) * 5;
-            const elapsedMin = Math.floor(elapsedSec / 60);
-            const elapsedLabel = elapsedSec >= 60 ? `${elapsedMin}min ${elapsedSec % 60}s` : `${elapsedSec}s`;
-            const counterText = document.getElementById('poll-counter-text');
-            if (counterText) counterText.textContent = `Verificando em instantes... (${elapsedLabel})`;
+            const baseSec = count * 5;
+
+            const stages = [
+              { max: 20,       title: 'Lendo suas informações…',                    sub: 'Verificando nome completo e data de nascimento' },
+              { max: 45,       title: 'Calculando seus números…',                   sub: 'Expressão, Destino, Motivação, Missão e Personalidade' },
+              { max: 85,       title: 'Mapeando os triângulos numerológicos…',      sub: 'Identificando padrões e sequências energéticas' },
+              { max: 150,      title: 'Cruzando e aprofundando os dados…',          sub: 'Cada detalhe impacta a precisão da sua análise' },
+              { max: 240,      title: 'Elaborando seus insights personalizados…',   sub: 'Este passo exige atenção e cuidado especiais' },
+              { max: 360,      title: 'Sua análise está quase pronta…',             sub: 'Finalizando os últimos cálculos' },
+              { max: Infinity, title: 'Última etapa em andamento…',                 sub: 'Aguarde mais um momento' },
+            ];
+
+            const titleEl = document.getElementById('loading-stage-title');
+            const subEl   = document.getElementById('loading-stage-subtitle');
+            const ctrEl   = document.getElementById('poll-counter-text');
+
+            function fmt(sec) {
+              const m = Math.floor(sec / 60);
+              return sec >= 60 ? m + 'min ' + (sec % 60) + 's' : sec + 's';
+            }
+
+            function update(localSec) {
+              const total = baseSec + localSec;
+              const stage = stages.find(s => total < s.max) || stages[stages.length - 1];
+              if (titleEl) titleEl.textContent = stage.title;
+              if (subEl)   subEl.textContent   = stage.sub;
+              if (ctrEl)   ctrEl.textContent   = '(' + fmt(total) + ')';
+            }
+
+            let localSec = 0;
+            update(localSec);
+
+            const liveInterval = setInterval(() => { localSec++; update(localSec); }, 1000);
+
             setTimeout(() => {
-              sessionStorage.setItem(key, String(count + 1)); // garantir antes do reload
+              clearInterval(liveInterval);
+              sessionStorage.setItem(key, String(count + 1));
               window.location.reload();
             }, 5000);
           })();
