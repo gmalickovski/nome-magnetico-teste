@@ -23,7 +23,7 @@ const CONFIG: Record<Compat, CompatConfig> = {
   },
   complementar: {
     label: '◈ Vibração Complementar',
-    className: 'bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30',
+    className: 'bg-sky-500/15 text-sky-400 border border-sky-500/30',
     title: 'Vibração Complementar',
     description:
       'A soma de Expressão e Destino resulta em 9, 11 ou 22 — números de maestria. Nome e missão se amplificam mutuamente.',
@@ -46,7 +46,7 @@ const CONFIG: Record<Compat, CompatConfig> = {
 
 const LEGEND_ITEMS: { className: string; text: string }[] = [
   { className: 'text-emerald-400', text: '✦ Ressonância Total — mesma vibração final' },
-  { className: 'text-[#D4AF37]',   text: '◈ Vibração Complementar — somam 9, 11 ou 22' },
+  { className: 'text-sky-400',      text: '◈ Vibração Complementar — somam 9, 11 ou 22' },
   { className: 'text-amber-400',   text: '◎ Vibração Neutra — diferença de 1' },
   { className: 'text-red-400',     text: '⚠ Tensão Vibracional — frequências díspares' },
 ];

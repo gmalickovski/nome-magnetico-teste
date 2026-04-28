@@ -160,12 +160,31 @@ Cada bloqueio tem: `codigo`, `titulo`, `descricao`, `aspectoSaude`, `triangulos[
 - Funções: `detectarLicoesCarmicas(nome)`, `detectarTendenciasOcultas(nome)`, `mapearFrequencias(nome)`
 - Módulo: `src/backend/numerology/karmic.ts`
 
-### Harmonização de Nomes
-Compatibilidade Expressão × Destino:
-- `total`: mesma vibração após redução
-- `complementar`: somam 9, 11 ou 22
-- `aceitavel`: diferença de 1
-- `incompativel`: demais casos
+### Harmonização de Nomes — Score e Compatibilidade
+
+O sistema usa **score 0–100** (calculado em `harmonization.ts`) e **4 tipos de compatibilidade** Expressão × Destino.
+Esses critérios são compartilhados pelos 3 produtos: `nome_social`, `nome_bebe` e `nome_empresa`.
+
+#### Faixas de Score
+| Faixa | Tier | Cor UI |
+|-------|------|--------|
+| 90–100 | Excelente | `emerald-500` |
+| 70–89 | Bom | `emerald-500` |
+| 40–69 | Aceitável | `amber-500` |
+| 20–39 | Não Recomendado | `red-400` |
+| 0–19 | Crítico | `red-600` |
+
+#### 4 Tipos de Compatibilidade
+| Código | Label UI | Cor | Critério |
+|--------|----------|-----|----------|
+| `total` | ✦ Ressonância Total | `emerald-400` (verde) | Expressão reduzida = Destino — vibrações idênticas |
+| `complementar` | ◈ Vibração Complementar | `sky-400` (azul) | Expressão + Destino = 9, 11 ou 22 (números de maestria) |
+| `aceitavel` | ◎ Vibração Neutra | `amber-400` (âmbar) | Diferença de 1 unidade entre Expressão e Destino |
+| `incompativel` | ⚠ Tensão Vibracional | `red-400` (vermelho) | Demais casos — frequências díspares |
+
+- Componente UI: `CompatibilityBadge` em `src/frontend/components/app/CompatibilityBadge.tsx`
+- Aceita prop `showTooltip` para exibir legenda completa inline (sem botão aninhado, CSS-only)
+- **NUNCA** usar a palavra "incompatível" no copy voltado ao cliente — usar "Tensão Vibracional"
 - Critérios da assinatura: legibilidade, inclinação levemente ascendente, sem traços cortantes, estética equilibrada
 - **SEM radiestesia/pêndulo** — apenas critérios objetivos formais
 - Módulo: `src/backend/numerology/harmonization.ts`
@@ -325,6 +344,7 @@ O n8n recebe o evento via webhook e processa o envio. Webhooks configurados:
 - `SignatureEvaluation` — critérios objetivos da assinatura (sem radiestesia)
 - `BabyNameForm` — formulário completo para produto nome_bebe
 - `CompanyNameForm` — formulário completo para produto nome_empresa
+- `CompatibilityBadge` — badge de compatibilidade Expressão × Destino com tooltip CSS; props: `compatibilidade`, `size`, `showTooltip`
 
 ---
 
