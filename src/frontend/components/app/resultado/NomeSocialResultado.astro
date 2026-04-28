@@ -17,6 +17,7 @@ import KarmicLessons from '../KarmicLessons';
 import KarmicDebts from '../KarmicDebts';
 import HiddenTendencies from '../HiddenTendencies';
 import ScoreDisplay from '../ScoreDisplay';
+import CompatibilityBadge from '../CompatibilityBadge';
 import { ARCANOS } from '../../../../backend/numerology/arcanos';
 
 interface Props {
@@ -61,6 +62,9 @@ const {
 } = Astro.props;
 
 const outrosNumeros = cincoNumeros.filter(n => n.label !== 'Expressão');
+
+const nossasSugestoes = ((rankingSocial?.nomesCandidatos ?? []) as any[]).filter((c: any) => c.origemSugerida === 'ia');
+const suasSugestoes   = ((rankingSocial?.nomesCandidatos ?? []) as any[]).filter((c: any) => c.origemSugerida === 'usuario');
 
 // Monta lookup de arcanos para os 4 triângulos (usado pelo TriangleVisualization)
 const arcanoIds = [tVida?.arcanoRegente, tPessoal?.arcanoRegente, tSocial?.arcanoRegente, tDestino?.arcanoRegente]
@@ -120,17 +124,12 @@ const arcanosMap = Object.fromEntries(arcanoIds.map(id => [id, ARCANOS[id]])) as
         <span>Impressão: <span class="text-gray-300 font-medium">{rankingSocial.melhorNome.impressao}</span></span>
       </div>
       <div class="flex flex-col items-center gap-2">
-        <span class={`px-3 py-1 rounded-full text-xs font-semibold ${
-          rankingSocial.melhorNome.compatibilidade === 'total'       ? 'bg-emerald-500/20 text-emerald-400' :
-          rankingSocial.melhorNome.compatibilidade === 'complementar' ? 'bg-blue-500/20 text-blue-400'    :
-          rankingSocial.melhorNome.compatibilidade === 'aceitavel'    ? 'bg-amber-500/20 text-amber-400'  :
-                                                                        'bg-red-500/20 text-red-400'
-        }`}>
-          {rankingSocial.melhorNome.compatibilidade === 'total'        ? '✦ Total'        :
-           rankingSocial.melhorNome.compatibilidade === 'complementar' ? '◈ Complementar' :
-           rankingSocial.melhorNome.compatibilidade === 'aceitavel'    ? '◎ Aceitável'   :
-                                                                         '⚠ Incompatível'}
-        </span>
+        <CompatibilityBadge
+          client:load
+          compatibilidade={rankingSocial.melhorNome.compatibilidade}
+          size="md"
+          showTooltip={true}
+        />
         {rankingSocial.melhorNome.temBloqueio ? (
           <span class="text-xs text-red-400">⚠ {rankingSocial.melhorNome.bloqueios?.length} bloqueio(s) detectado(s)</span>
         ) : (
@@ -144,16 +143,16 @@ const arcanosMap = Object.fromEntries(arcanoIds.map(id => [id, ARCANOS[id]])) as
   </section>
 )}
 
-{/* ── SEÇÃO 1c: TOP 3 ALTERNATIVAS CLICÁVEIS (novo fluxo) ──────────────── */}
-{rankingSocial?.top3?.length > 0 && (
+{/* ── SEÇÃO 1c: NOSSAS SUGESTÕES (geradas pelo sistema, sempre ≥3) ────── */}
+{rankingSocial && nossasSugestoes.length > 0 && (
   <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Alternativas de Alta Vibração</p>
-      <h2 class="font-cinzel text-2xl font-bold text-white">3 Outras Excelentes Opções</h2>
-      <p class="text-sm text-gray-400 mt-1">Clique em qualquer opção para gerar o relatório completo daquele nome.</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Selecionadas para Você</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Nossas Sugestões</h2>
+      <p class="text-sm text-gray-400 mt-1">Criadas especialmente para o seu perfil numerológico. Clique para gerar o relatório completo.</p>
     </div>
     <div class="grid md:grid-cols-3 gap-4">
-      {(rankingSocial.top3 as any[]).map((c: any) => (
+      {nossasSugestoes.map((c: any) => (
         <button
           type="button"
           class="analisar-nome-card w-full text-left rounded-2xl bg-white/5 p-5 flex flex-col gap-3 hover:bg-white/10 hover:scale-[1.02] transition-all duration-200 cursor-pointer relative group focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
@@ -161,22 +160,14 @@ const arcanosMap = Object.fromEntries(arcanoIds.map(id => [id, ARCANOS[id]])) as
           data-nome-nasc={rankingSocial.nomeNascimento}
           data-data-nasc={rankingSocial.dataNascimento}
         >
-          {c.origemSugerida === 'ia' && (
-            <span class="text-[10px] text-[#c084fc] font-bold uppercase tracking-wider">Sugestão Numerológica</span>
-          )}
           <div class="font-cinzel text-xl font-bold text-white group-hover:text-[#D4AF37] transition-colors">{c.nomeCompleto}</div>
           <ScoreDisplay client:load score={c.score} size="sm" />
-          <span class={`px-3 py-1 rounded-full text-xs font-semibold w-fit ${
-            c.compatibilidade === 'total'        ? 'bg-emerald-500/20 text-emerald-400' :
-            c.compatibilidade === 'complementar' ? 'bg-blue-500/20 text-blue-400'      :
-            c.compatibilidade === 'aceitavel'    ? 'bg-amber-500/20 text-amber-400'    :
-                                                   'bg-red-500/20 text-red-400'
-          }`}>
-            {c.compatibilidade === 'total'        ? '✦ Total'        :
-             c.compatibilidade === 'complementar' ? '◈ Complementar' :
-             c.compatibilidade === 'aceitavel'    ? '◎ Aceitável'    :
-                                                    '⚠ Incompatível'}
-          </span>
+          <CompatibilityBadge
+            client:load
+            compatibilidade={c.compatibilidade}
+            size="sm"
+            showTooltip={true}
+          />
           <div class="flex flex-wrap gap-3 text-xs text-gray-500">
             <span>Expr: <span class="text-gray-300">{c.expressao}</span></span>
             <span>Mot: <span class="text-gray-300">{c.motivacao}</span></span>
@@ -199,47 +190,43 @@ const arcanosMap = Object.fromEntries(arcanoIds.map(id => [id, ARCANOS[id]])) as
   </section>
 )}
 
-{/* ── SEÇÃO 1d: RANKING COMPLETO CLICÁVEL (novo fluxo) ─────────────────── */}
-{rankingSocial?.nomesCandidatos?.length > 4 && (
+{/* ── SEÇÃO 1d: SUAS SUGESTÕES (somente se o usuário preencheu o campo) ── */}
+{rankingSocial && suasSugestoes.length > 0 && (
   <section class="mt-16 mb-12">
     <div class="mb-3 px-1">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Tabela Comparativa</p>
-      <h2 class="font-cinzel text-2xl font-bold text-white">Ranking Completo dos Candidatos</h2>
-      <p class="text-sm text-gray-400 mt-1">Clique em qualquer nome para gerar o relatório completo.</p>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/70 mb-2">Seus Candidatos</p>
+      <h2 class="font-cinzel text-2xl font-bold text-white">Suas Sugestões</h2>
+      <p class="text-sm text-gray-400 mt-1">Nomes que você indicou, analisados numerologicamente. Clique para gerar o relatório completo.</p>
     </div>
-    <div class="space-y-3">
-      {(rankingSocial.nomesCandidatos as any[]).map((c: any, idx: number) => (
+    <div class="grid md:grid-cols-3 gap-4">
+      {suasSugestoes.map((c: any) => (
         <button
           type="button"
-          class={`analisar-nome-card w-full text-left rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:opacity-80 transition-all cursor-pointer relative ${idx === 0 ? 'bg-[#D4AF37]/5 border border-[#D4AF37]/20' : 'bg-white/5'}`}
+          class="analisar-nome-card w-full text-left rounded-2xl bg-white/5 p-5 flex flex-col gap-3 hover:bg-white/10 hover:scale-[1.02] transition-all duration-200 cursor-pointer relative group focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
           data-nome={c.nomeCompleto}
           data-nome-nasc={rankingSocial.nomeNascimento}
           data-data-nasc={rankingSocial.dataNascimento}
         >
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="font-cinzel font-bold text-white text-sm">{c.nomeCompleto}</span>
-              {c.origemSugerida === 'ia' && (
-                <span class="text-[9px] text-[#c084fc] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-[#c084fc]/10 rounded">IA</span>
-              )}
-            </div>
-            {Array.isArray(c.justificativa) && (
-              <p class="text-xs text-gray-600">{(c.justificativa as string[])[0]}</p>
-            )}
+          <div class="font-cinzel text-xl font-bold text-white group-hover:text-[#D4AF37] transition-colors">{c.nomeCompleto}</div>
+          <ScoreDisplay client:load score={c.score} size="sm" />
+          <CompatibilityBadge
+            client:load
+            compatibilidade={c.compatibilidade}
+            size="sm"
+            showTooltip={true}
+          />
+          <div class="flex flex-wrap gap-3 text-xs text-gray-500">
+            <span>Expr: <span class="text-gray-300">{c.expressao}</span></span>
+            <span>Mot: <span class="text-gray-300">{c.motivacao}</span></span>
+            <span>Imp: <span class="text-gray-300">{c.impressao}</span></span>
           </div>
-          <div class="shrink-0 w-36">
-            <ScoreDisplay client:load score={c.score} size="sm" />
-          </div>
-          <span class={`shrink-0 px-2 py-1 rounded-full text-xs font-semibold ${
-            c.compatibilidade === 'total'        ? 'bg-emerald-500/20 text-emerald-400' :
-            c.compatibilidade === 'complementar' ? 'bg-blue-500/20 text-blue-400'      :
-            c.compatibilidade === 'aceitavel'    ? 'bg-amber-500/20 text-amber-400'    :
-                                                   'bg-red-500/20 text-red-400'
-          }`}>
-            {c.compatibilidade === 'total'        ? '✦ Total'        :
-             c.compatibilidade === 'complementar' ? '◈ Complementar' :
-             c.compatibilidade === 'aceitavel'    ? '◎ Aceitável'    :
-                                                    '⚠ Incomp.'}
+          {c.temBloqueio ? (
+            <span class="text-xs text-red-400">⚠ {c.bloqueios?.length} bloqueio(s)</span>
+          ) : (
+            <span class="text-xs text-emerald-400">✓ Sem bloqueios</span>
+          )}
+          <span class="text-xs text-[#D4AF37]/60 group-hover:text-[#D4AF37] transition-colors mt-1">
+            Gerar relatório completo →
           </span>
           <div class="card-loading hidden absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center">
             <span class="w-6 h-6 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin"></span>
