@@ -14,7 +14,7 @@ const LIGHT_GRAY = PDF_COLORS.lightGray;
 const styles = StyleSheet.create({
   sectionBlock: {
     marginTop: 6,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   sectionLabel: {
     fontSize: 8,
@@ -331,7 +331,7 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: 
   return (
     <View style={styles.sectionBlock}>
       {bloqueios.map((b, i) => (
-        <View key={i} style={styles.bloqueioRow} wrap={false}>
+        <View key={i} style={[styles.bloqueioRow, i === bloqueios.length - 1 && { marginBottom: 0 }]} wrap={false}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <Text style={[styles.bloqueioTitle, { marginBottom: 0 }]}>{b.codigo} — {b.titulo}</Text>
             {!showAntidoto && (

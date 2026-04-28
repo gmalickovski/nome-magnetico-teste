@@ -96,5 +96,8 @@ export function formatAnalysisText(text: string | null | undefined): string {
   //     Evita que o PDF e alguns parsers rendam os asteriscos de forma literal em subtítulos.
   f = f.replace(/^(#{1,6}\s+.*)$/gm, (match) => match.replace(/\*\*/g, ''));
 
+  // 12. Remover título redundante inserido pela IA
+  f = f.replace(/^#*\s*Relatório de Identidade Numerológica\s*\n?/gmi, '');
+
   return f.trim();
 }

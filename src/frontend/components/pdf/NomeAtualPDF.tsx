@@ -469,8 +469,8 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
           {/* ─── TRIÂNGULO DA VIDA ───────────────────────────────────────────── */}
           {tVida && (
-            <View break>
-              <Text style={[styles.sectionTitle, { color: '#C89000', borderBottomColor: '#C89000', fontSize: 13, marginBottom: 8 }]}>
+            <View>
+              <Text style={[styles.sectionTitle, { color: '#C89000', borderBottomColor: '#C89000', fontSize: 13, marginBottom: 8, marginTop: 24 }]}>
                 O Triângulo da Vida
               </Text>
               <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
@@ -484,7 +484,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
                     <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
                       Arcano Regente da Vida — {arc.numero}: {arc.nome}
                     </Text>
-                    <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                    <View wrap={false} style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
                       <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
                         <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
                       </View>
@@ -509,8 +509,8 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
           {/* ─── TRIÂNGULO PESSOAL ───────────────────────────────────────────── */}
           {tPessoal && (
-            <View break>
-              <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 13, marginBottom: 8 }]}>
+            <View>
+              <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 13, marginBottom: 8, marginTop: 24 }]}>
                 O Triângulo Pessoal
               </Text>
               <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
@@ -524,7 +524,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
                     <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
                       Arcano Regente Pessoal — {arc.numero}: {arc.nome}
                     </Text>
-                    <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                    <View wrap={false} style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
                       <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
                         <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
                       </View>
@@ -549,8 +549,8 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
           {/* ─── TRIÂNGULO SOCIAL ────────────────────────────────────────────── */}
           {tSocial && (
-            <View break>
-              <Text style={[styles.sectionTitle, { color: '#059669', borderBottomColor: '#059669', fontSize: 13, marginBottom: 8 }]}>
+            <View>
+              <Text style={[styles.sectionTitle, { color: '#059669', borderBottomColor: '#059669', fontSize: 13, marginBottom: 8, marginTop: 24 }]}>
                 O Triângulo Social
               </Text>
               <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
@@ -564,7 +564,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
                     <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
                       Arcano Regente Social — {arc.numero}: {arc.nome}
                     </Text>
-                    <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                    <View wrap={false} style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
                       <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
                         <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
                       </View>
@@ -589,8 +589,8 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
 
           {/* ─── TRIÂNGULO DO DESTINO ────────────────────────────────────────── */}
           {tDestino && (
-            <View break>
-              <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706', fontSize: 13, marginBottom: 8 }]}>
+            <View>
+              <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706', fontSize: 13, marginBottom: 8, marginTop: 24 }]}>
                 O Triângulo do Destino
               </Text>
               <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
@@ -604,7 +604,7 @@ export function NomeAtualPDF({ analysis, magneticNames, userName }: ProductPDFPr
                     <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
                       Arcano Regente do Destino — {arc.numero}: {arc.nome}
                     </Text>
-                    <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                    <View wrap={false} style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
                       <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
                         <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
                       </View>

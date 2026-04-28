@@ -23,6 +23,7 @@ import { LOGO_FONT, TITLE_FONT, BODY_FONT, BODY_FONT_BOLD, loadLogoSrc, formatDa
 import { formatAnalysisText } from '../../../utils/textFormatter';
 import type { ProductPDFProps } from './shared/PDFTypes';
 import { getArquetipo, type Arquetipo } from '../../../backend/numerology/archetypes';
+import { getArcano } from '../../../backend/numerology/arcanos';
 
 function ArquetipoCardPDF({ arquetipo }: { arquetipo: Arquetipo }) {
   return (
@@ -475,6 +476,199 @@ export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFP
 
         <PDFFooter />
       </Page>
+
+      {/* ── BLOCO: OS 4 TRIÂNGULOS ─────────────────────────────────────────── */}
+      {(tVida || tPessoal || tSocial || tDestino) && (
+        <Page size="A4" style={styles.page}>
+          <PDFPageHeader subtitle={`${nomeParaExibir} — Os 4 Triângulos Numerológicos`} />
+
+          <View style={{ marginTop: 20, marginBottom: 14 }}>
+            <Text style={styles.hugeTitle}>O que os 4 Triângulos Dizem Sobre Você</Text>
+          </View>
+
+          <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 14 }}>
+            Na Numerologia Cabalística, cada letra do nome tem um valor vibracional preciso — e esses valores interagem entre si de formas que não são aleatórias. Para revelar como essa interação opera, o nome é analisado sob quatro perspectivas distintas, chamadas Pirâmides de Fluxo. Cada pirâmide usa um modificador diferente sobre as mesmas letras, revelando uma dimensão específica da sua jornada. O resultado é um mapa de quatro camadas que mostra exatamente onde a frequência do nome está fluindo — e onde está travada.
+          </Text>
+
+          {/* O Que São os Arcanos */}
+          <View style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 12, marginBottom: 10 }}>
+            <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: '#7C3AED', marginBottom: 6 }}>O Que São os Arcanos</Text>
+            <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65 }}>
+              A Numerologia Cabalística trabalha com 22 Arcanos — arquétipos de energia que representam forças universais. Em cada pirâmide, o número que emerge no vértice superior é o Arcano Regente: a força dominante que governa aquela dimensão da vida. Não é previsão nem misticismo — é a identificação matemática do padrão que já opera por trás dos eventos daquela área, queira você ou não.
+            </Text>
+          </View>
+
+          {/* O Que São os Bloqueios */}
+          <View style={{ borderRadius: 8, backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FCA5A5', padding: 12, marginBottom: 8 }}>
+            <Text style={{ fontFamily: TITLE_FONT, fontSize: 11, color: '#DC2626', marginBottom: 6 }}>O Que São os Bloqueios Energéticos</Text>
+            <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65 }}>
+              Dentro de cada pirâmide, quando um mesmo número aparece três ou mais vezes consecutivas, forma-se um Bloqueio. Na prática: a frequência do nome está emitindo o mesmo padrão em loop naquela dimensão — como um curto-circuito que nunca se resolve. O bloqueio opera independente de esforço, terapia ou força de vontade. Ele é uma propriedade matemática do nome. Nas pirâmides abaixo, as células vermelhas indicam exatamente onde um bloqueio está ativo.
+            </Text>
+          </View>
+
+          {/* ─── TRIÂNGULO DA VIDA ───────────────────────────────────────────── */}
+          {tVida && (
+            <View>
+              <Text style={[styles.sectionTitle, { color: '#C89000', borderBottomColor: '#C89000', fontSize: 13, marginBottom: 8, marginTop: 24 }]}>
+                O Triângulo da Vida
+              </Text>
+              <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
+                A estrutura mais fundamental do mapa. Calculado a partir do valor puro de cada letra — sem modificador externo — revela os padrões que atravessam toda a existência: temas que retornam em diferentes fases, independente das circunstâncias. Governa a saúde do corpo, a vitalidade e a relação com a prosperidade material. Bloqueios aqui criam ciclos crônicos de desgaste físico, instabilidade financeira e a sensação de que conquistas não se sustentam — algo sempre escapa, mesmo quando tudo parece ir bem.
+              </Text>
+              <TrianguloPiramideInline data={tVida} label="TRIÂNGULO DA VIDA" cellSize={triCellSize} letras={letrasNome} />
+              {tVida.arcanoRegente != null && (() => {
+                const arc = getArcano(tVida.arcanoRegente!);
+                return (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
+                      Arcano Regente da Vida — {arc.numero}: {arc.nome}
+                    </Text>
+                    <View wrap={false} style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                      <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
+                      </View>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Vibração Dominante</Text>
+                      <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>{arc.descricao}</Text>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Desafio a Integrar</Text>
+                      <Text style={{ fontSize: 9, color: '#5B21B6', lineHeight: 1.65, fontStyle: 'italic' }}>{arc.desafio}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+              {bloqueios.filter((b: any) => b.triangulos?.includes('vida')).length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626', fontSize: 11, marginBottom: 8 }]}>
+                    Bloqueios do Triângulo da Vida
+                  </Text>
+                  <BloqueiosBlock bloqueios={bloqueios.filter((b: any) => b.triangulos?.includes('vida'))} showAntidoto={false} />
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ─── TRIÂNGULO PESSOAL ───────────────────────────────────────────── */}
+          {tPessoal && (
+            <View>
+              <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 13, marginBottom: 8, marginTop: 24 }]}>
+                O Triângulo Pessoal
+              </Text>
+              <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
+                Modificado pelo número do dia de nascimento, acessa a dimensão mais interna da vida: a forma como você processa emoções, responde à pressão e se relaciona com as pessoas mais próximas. É o padrão afetivo que opera por baixo da superfície — os mecanismos automáticos que aparecem em momentos de conflito, vulnerabilidade ou intimidade. Bloqueios aqui costumam se manifestar como relacionamentos que seguem o mesmo roteiro, reações que você não consegue controlar e dificuldade persistente de manter conexões profundas.
+              </Text>
+              <TrianguloPiramideInline data={tPessoal} label="TRIÂNGULO PESSOAL" cellSize={triCellSize} letras={letrasNome} />
+              {tPessoal.arcanoRegente != null && (() => {
+                const arc = getArcano(tPessoal.arcanoRegente!);
+                return (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
+                      Arcano Regente Pessoal — {arc.numero}: {arc.nome}
+                    </Text>
+                    <View wrap={false} style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                      <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
+                      </View>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Vibração Dominante</Text>
+                      <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>{arc.descricao}</Text>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Desafio a Integrar</Text>
+                      <Text style={{ fontSize: 9, color: '#5B21B6', lineHeight: 1.65, fontStyle: 'italic' }}>{arc.desafio}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+              {bloqueios.filter((b: any) => b.triangulos?.includes('pessoal')).length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626', fontSize: 11, marginBottom: 8 }]}>
+                    Bloqueios do Triângulo Pessoal
+                  </Text>
+                  <BloqueiosBlock bloqueios={bloqueios.filter((b: any) => b.triangulos?.includes('pessoal'))} showAntidoto={false} />
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ─── TRIÂNGULO SOCIAL ────────────────────────────────────────────── */}
+          {tSocial && (
+            <View>
+              <Text style={[styles.sectionTitle, { color: '#059669', borderBottomColor: '#059669', fontSize: 13, marginBottom: 8, marginTop: 24 }]}>
+                O Triângulo Social
+              </Text>
+              <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
+                Modificado pelo número do mês de nascimento, revela como o campo externo responde ao seu nome — o magnetismo que ele gera e as oportunidades que atrai ou repele. Governa a visibilidade pública, o reconhecimento profissional e a facilidade com que as pessoas certas chegam até você. Bloqueios aqui são particularmente silenciosos: você se esforça, entrega resultado — mas o mundo não vê. O reconhecimento não chega. As portas abrem devagar, ou não abrem.
+              </Text>
+              <TrianguloPiramideInline data={tSocial} label="TRIÂNGULO SOCIAL" cellSize={triCellSize} letras={letrasNome} />
+              {tSocial.arcanoRegente != null && (() => {
+                const arc = getArcano(tSocial.arcanoRegente!);
+                return (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
+                      Arcano Regente Social — {arc.numero}: {arc.nome}
+                    </Text>
+                    <View wrap={false} style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                      <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
+                      </View>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Vibração Dominante</Text>
+                      <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>{arc.descricao}</Text>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Desafio a Integrar</Text>
+                      <Text style={{ fontSize: 9, color: '#5B21B6', lineHeight: 1.65, fontStyle: 'italic' }}>{arc.desafio}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+              {bloqueios.filter((b: any) => b.triangulos?.includes('social')).length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626', fontSize: 11, marginBottom: 8 }]}>
+                    Bloqueios do Triângulo Social
+                  </Text>
+                  <BloqueiosBlock bloqueios={bloqueios.filter((b: any) => b.triangulos?.includes('social'))} showAntidoto={false} />
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ─── TRIÂNGULO DO DESTINO ────────────────────────────────────────── */}
+          {tDestino && (
+            <View>
+              <Text style={[styles.sectionTitle, { color: '#D97706', borderBottomColor: '#D97706', fontSize: 13, marginBottom: 8, marginTop: 24 }]}>
+                O Triângulo do Destino
+              </Text>
+              <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.65, marginBottom: 10 }}>
+                O mais revelador dos quatro. Combina o valor de cada letra com a soma do dia e mês de nascimento — integrando as dimensões pessoal e social em uma única estrutura. Mapeia os resultados que tendem a se materializar: a missão concreta, os frutos do esforço e o legado que a frequência do nome constrói com o tempo. Bloqueios aqui criam o padrão mais desgastante: plantar sem colher — ciclos em que o trabalho existe, o esforço existe, mas a prosperidade duradoura não se instala.
+              </Text>
+              <TrianguloPiramideInline data={tDestino} label="TRIÂNGULO DO DESTINO" cellSize={triCellSize} letras={letrasNome} />
+              {tDestino.arcanoRegente != null && (() => {
+                const arc = getArcano(tDestino.arcanoRegente!);
+                return (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={[styles.sectionTitle, { color: '#7C3AED', borderBottomColor: '#7C3AED', fontSize: 11, marginBottom: 8 }]}>
+                      Arcano Regente do Destino — {arc.numero}: {arc.nome}
+                    </Text>
+                    <View wrap={false} style={{ borderRadius: 8, backgroundColor: '#F5F3FF', borderWidth: 1, borderColor: '#7C3AED', padding: 14 }}>
+                      <View style={{ backgroundColor: '#EDE9FE', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 10, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 11, color: '#4C1D95', fontFamily: BODY_FONT_BOLD, textAlign: 'center' }}>{arc.palavraChave}</Text>
+                      </View>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Vibração Dominante</Text>
+                      <Text style={{ fontSize: 10, color: GRAY, lineHeight: 1.7, marginBottom: 10 }}>{arc.descricao}</Text>
+                      <Text style={{ fontSize: 8, color: '#7C3AED', fontFamily: BODY_FONT_BOLD, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Desafio a Integrar</Text>
+                      <Text style={{ fontSize: 9, color: '#5B21B6', lineHeight: 1.65, fontStyle: 'italic' }}>{arc.desafio}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+              {bloqueios.filter((b: any) => b.triangulos?.includes('destino')).length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={[styles.sectionTitle, { color: '#DC2626', borderBottomColor: '#DC2626', fontSize: 11, marginBottom: 8 }]}>
+                    Bloqueios do Triângulo do Destino
+                  </Text>
+                  <BloqueiosBlock bloqueios={bloqueios.filter((b: any) => b.triangulos?.includes('destino'))} showAntidoto={false} />
+                </View>
+              )}
+            </View>
+          )}
+
+          <PDFFooter />
+        </Page>
+      )}
 
       {/* ── PÁGINA 4/5: KARMA E TENDÊNCIAS ─────────────────────────────────── */}
       <Page size="A4" style={styles.page}>
