@@ -7,6 +7,8 @@ export interface Subscription {
   product_type: ProductType;
   stripe_session_id: string | null;
   stripe_payment_intent_id: string | null;
+  payment_provider: 'stripe' | 'asaas';
+  asaas_payment_id: string | null;
   amount_paid: number | null;
   currency: string;
   starts_at: string;
@@ -86,18 +88,22 @@ export async function createSubscription(params: {
   productType: ProductType;
   stripeSessionId: string;
   stripePaymentIntentId?: string;
+  paymentProvider?: 'stripe' | 'asaas';
+  asaasPaymentId?: string;
   amountPaid?: number;
   currency?: string;
 }): Promise<Subscription> {
   const { data, error } = await supabase
-    
+
     .from('subscriptions')
     .insert({
       user_id: params.userId,
       product_type: params.productType,
       stripe_session_id: params.stripeSessionId,
-      stripe_payment_intent_id: params.stripePaymentIntentId,
-      amount_paid: params.amountPaid,
+      stripe_payment_intent_id: params.stripePaymentIntentId ?? null,
+      payment_provider: params.paymentProvider ?? 'stripe',
+      asaas_payment_id: params.asaasPaymentId ?? null,
+      amount_paid: params.amountPaid ?? null,
       currency: params.currency ?? 'brl',
       starts_at: new Date().toISOString(),
       ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),

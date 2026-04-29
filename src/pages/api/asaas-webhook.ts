@@ -64,6 +64,8 @@ export const POST: APIRoute = async ({ request }) => {
       userId,
       productType: productType as ProductType,
       stripeSessionId: `asaas_${payment.id}`,
+      paymentProvider: 'asaas',
+      asaasPaymentId: payment.id,
       amountPaid: Math.round(payment.value * 100),
       currency: 'brl',
     });
