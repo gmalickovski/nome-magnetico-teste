@@ -113,8 +113,11 @@ export function avaliarNome(
   const debitosCarmicos = calcularDebitosCarmicos(dataNascimento, destino, motivacao, expressao);
 
   const debitosFixosCount = debitosCarmicos.filter(d => d.fixo).length;
+  const totalOcorrencias = bloqueios.reduce((sum, b) => sum + b.totalOcorrencias, 0);
+  const ocorrenciasExtras = totalOcorrencias - bloqueios.length;
   const score = calcularScore({
     bloqueios: bloqueios.length,
+    ocorrenciasExtras,
     licoesCarmicas: licoesCarmicas.length,
     tendenciasOcultas: tendenciasOcultas.length,
     debitosCarmicos: debitosCarmicos.length,
@@ -132,7 +135,10 @@ export function avaliarNome(
       `✗ ${bloqueios.length} bloqueio(s) detectado(s): ${bloqueios.map(b => b.codigo).join(', ')}`
     );
     for (const b of bloqueios) {
-      justificativa.push(`  • ${b.titulo} → aparece em: ${b.triangulos.join(', ')}`);
+      const detTriangulos = Object.entries(b.repeticoesPortriangulo)
+        .map(([t, c]) => (c > 1 ? `${t}(${c}×)` : t))
+        .join(', ');
+      justificativa.push(`  • ${b.titulo} → aparece em: ${detTriangulos}`);
     }
   }
 

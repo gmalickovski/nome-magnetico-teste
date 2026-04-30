@@ -42,11 +42,21 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
   const bloqueiosTexto =
     bloqueios.length > 0
       ? bloqueios
-          .map(b =>
-            `- **${b.titulo}** (${b.codigo}) — aparece em: ${b.triangulos.join(', ')}\n` +
-            `  ${b.descricao}\n` +
-            `  *Aspecto saúde:* ${b.aspectoSaude}`
-          )
+          .map(b => {
+            const detTriangulos = b.repeticoesPortriangulo
+              ? Object.entries(b.repeticoesPortriangulo)
+                  .map(([t, c]) => (c > 1 ? `${t}(${c}×)` : t))
+                  .join(', ')
+              : b.triangulos.join(', ');
+            const ocorrStr = (b.totalOcorrencias ?? 1) > 1
+              ? ` — ${b.totalOcorrencias} ocorrências totais`
+              : '';
+            return (
+              `- **${b.titulo}** (${b.codigo})${ocorrStr} — aparece em: ${detTriangulos}\n` +
+              `  ${b.descricao}\n` +
+              `  *Aspecto saúde:* ${b.aspectoSaude}`
+            );
+          })
           .join('\n')
       : 'Nenhum bloqueio detectado em nenhum dos 4 triângulos.';
 

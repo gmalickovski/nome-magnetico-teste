@@ -12,6 +12,8 @@ interface Bloqueio {
   descricao: string;
   aspectoSaude: string;
   triangulos: string[];
+  repeticoesPortriangulo?: Partial<Record<string, number>>;
+  totalOcorrencias?: number;
 }
 
 interface TrianguloData {
@@ -100,12 +102,13 @@ function buildBloqueioPositions(linhas: number[][]): Set<string> {
     for (let i = 0; i <= linha.length - 3; i++) {
       const tripla = `${linha[i]}${linha[i + 1]}${linha[i + 2]}`;
       if (BLOQUEIO_SEQUENCIAS.includes(tripla)) {
-        // Destacar todas as ocorrências consecutivas do mesmo dígito
+        // Destacar apenas as 3 primeiras células do bloqueio (ex.: "3333" → só 3 células)
+        for (let k = i; k < i + 3; k++) positions.add(`${r},${k}`);
+        // Avançar além dos dígitos extras sem marcá-los
         const digit = String(linha[i]);
-        let end = i + 3;
-        while (end < linha.length && String(linha[end]) === digit) end++;
-        for (let k = i; k < end; k++) positions.add(`${r},${k}`);
-        i = end - 1; // Pula os já processados
+        let skip = i + 3;
+        while (skip < linha.length && String(linha[skip]) === digit) skip++;
+        i = skip - 1;
       }
     }
   }
@@ -229,10 +232,12 @@ function TrianguloInfo({
   triangulo,
   arcanos,
   bloqueiosFiltrados,
+  abaAtiva,
 }: {
   triangulo: TrianguloData;
   arcanos?: Record<number, ArcanoInfo>;
   bloqueiosFiltrados: Bloqueio[];
+  abaAtiva: string;
 }) {
   const arcanoInfo = triangulo.arcanoRegente != null
     ? (arcanos?.[triangulo.arcanoRegente] ?? null)
@@ -270,11 +275,25 @@ function TrianguloInfo({
       {/* Bloqueios do triângulo selecionado */}
       {bloqueiosFiltrados.length > 0 ? (
         <div className="space-y-3">
-          <p className="text-xs text-red-400 font-medium uppercase tracking-[0.12em] px-1">
-            ⚠ {bloqueiosFiltrados.length} bloqueio{bloqueiosFiltrados.length > 1 ? 's' : ''} neste triângulo
-          </p>
+          {(() => {
+            const totalOcorr = bloqueiosFiltrados.reduce(
+              (sum, b) => sum + (b.repeticoesPortriangulo?.[abaAtiva] ?? 1),
+              0
+            );
+            const temRepetidos = totalOcorr > bloqueiosFiltrados.length;
+            return (
+              <p className="text-xs text-red-400 font-medium uppercase tracking-[0.12em] px-1">
+                ⚠ {bloqueiosFiltrados.length} bloqueio{bloqueiosFiltrados.length > 1 ? 's' : ''} neste triângulo
+                {temRepetidos && (
+                  <span className="ml-1 normal-case text-red-300 font-normal">
+                    ({totalOcorr} ocorrências)
+                  </span>
+                )}
+              </p>
+            );
+          })()}
           {bloqueiosFiltrados.map((b, i) => (
-            <BloqueioCard key={i} bloqueio={b} />
+            <BloqueioCard key={i} bloqueio={b} contagemNaAba={b.repeticoesPortriangulo?.[abaAtiva] ?? 1} />
           ))}
         </div>
       ) : (
@@ -289,7 +308,7 @@ function TrianguloInfo({
 // ─────────────────────────────────────────────────────────────────────────────
 // Card de bloqueio expandível
 // ─────────────────────────────────────────────────────────────────────────────
-function BloqueioCard({ bloqueio }: { bloqueio: Bloqueio }) {
+function BloqueioCard({ bloqueio, contagemNaAba }: { bloqueio: Bloqueio; contagemNaAba: number }) {
   const [expandido, setExpandido] = useState(false);
 
   return (
@@ -299,14 +318,22 @@ function BloqueioCard({ bloqueio }: { bloqueio: Bloqueio }) {
         onClick={() => setExpandido(!expandido)}
       >
         <div>
-          <span className="font-mono text-red-400 text-sm font-bold mr-2">{bloqueio.codigo}</span>
+          <span className="font-mono text-red-400 text-sm font-bold mr-1">{bloqueio.codigo}</span>
+          {contagemNaAba > 1 && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500/25 text-red-300 border border-red-500/40 mr-2 align-middle">
+              {contagemNaAba}×
+            </span>
+          )}
           <span className="text-gray-200 font-medium">{bloqueio.titulo}</span>
           <div className="flex flex-wrap gap-1 mt-1">
-            {bloqueio.triangulos.map((t, i) => (
-              <span key={i} className="text-xs px-2 py-0.5 rounded bg-white/5 text-gray-400">
-                {TIPO_LABEL[t]?.label ?? t}
-              </span>
-            ))}
+            {bloqueio.triangulos.map((t, i) => {
+              const count = bloqueio.repeticoesPortriangulo?.[t] ?? 1;
+              return (
+                <span key={i} className="text-xs px-2 py-0.5 rounded bg-white/5 text-gray-400">
+                  {TIPO_LABEL[t]?.label ?? t}{count > 1 ? ` (${count}×)` : ''}
+                </span>
+              );
+            })}
           </div>
         </div>
         <span className="text-[#D4AF37] shrink-0">{expandido ? '▲' : '▼'}</span>
@@ -426,7 +453,7 @@ export default function TriangleVisualization({ vida, pessoal, social, destino, 
           </div>
 
           {/* Arcano regente + bloqueios do triângulo selecionado */}
-          <TrianguloInfo triangulo={triangulo} arcanos={arcanos} bloqueiosFiltrados={bloqueiosDaAba} />
+          <TrianguloInfo triangulo={triangulo} arcanos={arcanos} bloqueiosFiltrados={bloqueiosDaAba} abaAtiva={aba} />
         </>
       )}
     </div>

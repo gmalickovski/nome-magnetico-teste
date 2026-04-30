@@ -293,6 +293,8 @@ export interface BloqueioData {
   descricao: string;
   aspectoSaude?: string;
   triangulos?: string[];
+  repeticoesPortriangulo?: Partial<Record<string, number>>;
+  totalOcorrencias?: number;
 }
 
 export interface DebitoData {
@@ -334,6 +336,11 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: 
         <View key={i} style={[styles.bloqueioRow, i === bloqueios.length - 1 && { marginBottom: 0 }]} wrap={false}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <Text style={[styles.bloqueioTitle, { marginBottom: 0 }]}>{b.codigo} — {b.titulo}</Text>
+            {(b.totalOcorrencias ?? 1) > 1 && (
+              <View style={[styles.bloqueioAtivoBadge, { marginLeft: 6 }]}>
+                <Text style={styles.bloqueioAtivoBadgeText}>{b.totalOcorrencias}×</Text>
+              </View>
+            )}
             {!showAntidoto && (
               <View style={styles.bloqueioAtivoBadge}>
                 <Text style={styles.bloqueioAtivoBadgeText}>ATIVO 24H</Text>
@@ -346,7 +353,11 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: 
           ) : null}
           {b.triangulos && b.triangulos.length > 0 ? (
             <Text style={styles.bloqueioTriangulos}>
-              Ativo nos triângulos: {b.triangulos.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)).join(' · ')}
+              Ativo nos triângulos: {b.triangulos.map((t: string) => {
+                const count = b.repeticoesPortriangulo?.[t] ?? 1;
+                const label = t.charAt(0).toUpperCase() + t.slice(1);
+                return count > 1 ? `${label} (${count}×)` : label;
+              }).join(' · ')}
             </Text>
           ) : null}
           {!showAntidoto && (

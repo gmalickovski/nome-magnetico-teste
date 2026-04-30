@@ -28,6 +28,8 @@ export interface Triangulo {
   arcanoRegente: number | null;
   arcanosDoMinantes: number[];
   sequenciasNegativas: string[];
+  /** Quantidade de vezes que cada código de bloqueio aparece neste triângulo (em linhas distintas). */
+  contagemSequencias: Record<string, number>;
 }
 
 export interface TodosTriangulos {
@@ -43,6 +45,10 @@ export interface Bloqueio {
   descricao: string;
   aspectoSaude: string;
   triangulos: Array<'vida' | 'pessoal' | 'social' | 'destino'>;
+  /** Número de ocorrências deste bloqueio em cada triângulo. */
+  repeticoesPortriangulo: Partial<Record<'vida' | 'pessoal' | 'social' | 'destino', number>>;
+  /** Soma total de ocorrências em todos os triângulos. */
+  totalOcorrencias: number;
 }
 
 // ================================================================
@@ -147,12 +153,17 @@ function construirTriangulo(
     linhaAtual = proxima;
   }
 
-  // Detectar sequências negativas em todas as linhas
-  const sequenciasSet = new Set<string>();
+  // Contar sequências negativas em todas as linhas (mesmo código em linhas diferentes = +1)
+  const sequenciasContagem = new Map<string, number>();
   for (const linha of linhas) {
     const s = linha.join('');
     const matches = s.match(/(\d)\1{2,}/g) ?? [];
-    matches.forEach(m => sequenciasSet.add(m));
+    matches.forEach(m => {
+      const codigo = m.charAt(0).repeat(3);
+      if (BLOQUEIOS_MAP[codigo]) {
+        sequenciasContagem.set(codigo, (sequenciasContagem.get(codigo) ?? 0) + 1);
+      }
+    });
   }
 
   return {
@@ -160,7 +171,8 @@ function construirTriangulo(
     linhas,
     arcanoRegente: linhaAtual[0] ?? null,
     arcanosDoMinantes: [...new Set(arcanosDoMinantes)],
-    sequenciasNegativas: Array.from(sequenciasSet),
+    sequenciasNegativas: Array.from(sequenciasContagem.keys()),
+    contagemSequencias: Object.fromEntries(sequenciasContagem),
   };
 }
 
@@ -266,26 +278,30 @@ export function calcularTodosTriangulos(
 
 /**
  * Detecta todos os bloqueios presentes em um ou mais triângulos.
- * Consolida bloqueios duplicados informando em quais triângulos aparecem.
+ * Consolida bloqueios por código, registrando em quais triângulos aparecem
+ * e quantas vezes cada um ocorre por triângulo.
  */
 export function detectarBloqueios(
   triangulos: Partial<TodosTriangulos>
 ): Bloqueio[] {
-  // Mapear codigo → { bloqueio, triangulos[] }
   const mapa = new Map<string, Bloqueio>();
 
   for (const [tipoKey, triangulo] of Object.entries(triangulos)) {
     const tipo = tipoKey as Triangulo['tipo'];
     if (!triangulo) continue;
 
-    for (const seq of triangulo.sequenciasNegativas) {
-      // Normalizar para 3 dígitos (111, 222, etc.) — pegar os primeiros 3 dígitos repetidos
-      const codigo = seq.charAt(0).repeat(3);
+    // Usar contagemSequencias para obter contagens reais por triângulo
+    const contagem = triangulo.contagemSequencias ?? {};
+
+    for (const [codigo, count] of Object.entries(contagem)) {
       const dados = BLOQUEIOS_MAP[codigo];
       if (!dados) continue;
 
       if (mapa.has(codigo)) {
-        mapa.get(codigo)!.triangulos.push(tipo);
+        const b = mapa.get(codigo)!;
+        b.triangulos.push(tipo);
+        b.repeticoesPortriangulo[tipo] = count;
+        b.totalOcorrencias += count;
       } else {
         mapa.set(codigo, {
           codigo,
@@ -293,6 +309,8 @@ export function detectarBloqueios(
           descricao: dados.descricao,
           aspectoSaude: dados.aspectoSaude,
           triangulos: [tipo],
+          repeticoesPortriangulo: { [tipo]: count },
+          totalOcorrencias: count,
         });
       }
     }

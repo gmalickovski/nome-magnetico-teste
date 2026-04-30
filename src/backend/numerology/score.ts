@@ -3,7 +3,8 @@
  *
  * Fórmula determinística:
  *   score = 100
- *     - (bloqueios            × 15)
+ *     - (bloqueios            × 15)   ← por código único de bloqueio
+ *     - (ocorrenciasExtras    × 3)    ← repetições do mesmo bloqueio além da 1ª ocorrência
  *     - (debitosCarmicos      × 12)   ← TODOS os débitos penalizam (fixos + variáveis)
  *     - (tendenciasOcultas    × 2)
  *     - (licoesCarmicas       × 1)
@@ -25,6 +26,12 @@ export interface ScoreParams {
   debitosCarmicos: number;
   /** Débitos que vêm APENAS de dia de nascimento e/ou Destino (imutáveis). Usado para calcular o scoreTeto. */
   debitosCarmicoFixos?: number;
+  /**
+   * Ocorrências extras além da primeira por código único.
+   * Ex.: bloqueio 444 aparece 2× no Destino + 1× na Vida → totalOcorrencias=3, bloqueios=1, ocorrenciasExtras=2.
+   * Cada ocorrência extra desconta -3 (menor que a primeira aparição, que desconta -15).
+   */
+  ocorrenciasExtras?: number;
   compatibilidade: 'total' | 'complementar' | 'aceitavel' | 'incompativel';
   /** Usado apenas no produto nome_empresa (destino da empresa). */
   compatibilidadeSecundaria?: 'total' | 'complementar' | 'aceitavel' | 'incompativel';
@@ -41,6 +48,7 @@ export function calcularScore(p: ScoreParams): number {
   let score = 100;
 
   score -= p.bloqueios * 15;
+  score -= (p.ocorrenciasExtras ?? 0) * 3; // repetições do mesmo bloqueio no mesmo triângulo
   score -= p.debitosCarmicos * 12; // todos os débitos penalizam (fixos + variáveis)
   score -= p.tendenciasOcultas * 2;
   score -= p.licoesCarmicas * 1;

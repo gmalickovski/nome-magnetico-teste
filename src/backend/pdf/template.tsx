@@ -143,7 +143,13 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
     footerText: { ...pdfStyles.footerText, color: textSecondary },
   });
 
-  const bloqueios = (analysis.bloqueios ?? []) as Array<{ titulo: string; descricao: string; codigo: string }>;
+  const bloqueios = (analysis.bloqueios ?? []) as Array<{
+    titulo: string;
+    descricao: string;
+    codigo: string;
+    repeticoesPortriangulo?: Partial<Record<string, number>>;
+    totalOcorrencias?: number;
+  }>;
   const licoesRaw = (analysis as any).licoes_carmicas as Array<{ numero: number; titulo: string; descricao: string }> | null;
   const tendenciasRaw = (analysis as any).tendencias_ocultas as Array<{ numero: number; titulo: string; descricao: string; frequencia: number }> | null;
   const debitosRaw = (analysis as any).debitos_carmicos as Array<{ numero: number; titulo: string; descricao: string }> | null;
@@ -249,14 +255,24 @@ export function PDFTemplate({ analysis, magneticNames, theme = 'dark' }: PDFTemp
             <Text style={{ ...styles.sectionTitle, color: COLORS.error }}>
               Bloqueios Detectados ({bloqueios.length})
             </Text>
-            {bloqueios.map(b => (
-              <View key={b.codigo} style={styles.blockageCard}>
-                <Text style={{ fontSize: 11, color: COLORS.error, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
-                  {b.titulo}
-                </Text>
-                <Text style={{ ...styles.body, fontSize: 10 }}>{b.descricao}</Text>
-              </View>
-            ))}
+            {bloqueios.map(b => {
+              const repeticoes = b.repeticoesPortriangulo
+                ? Object.entries(b.repeticoesPortriangulo).filter(([, c]) => (c ?? 0) > 1)
+                : [];
+              return (
+                <View key={b.codigo} style={styles.blockageCard}>
+                  <Text style={{ fontSize: 11, color: COLORS.error, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>
+                    {b.titulo}{(b.totalOcorrencias ?? 1) > 1 ? ` — ${b.totalOcorrencias} ocorrências` : ''}
+                  </Text>
+                  {repeticoes.length > 0 && (
+                    <Text style={{ fontSize: 9, color: COLORS.error, marginBottom: 4 }}>
+                      Repetido: {repeticoes.map(([t, c]) => `${t} (${c}×)`).join(', ')}
+                    </Text>
+                  )}
+                  <Text style={{ ...styles.body, fontSize: 10 }}>{b.descricao}</Text>
+                </View>
+              );
+            })}
           </>
         )}
         <View style={styles.footer}>
