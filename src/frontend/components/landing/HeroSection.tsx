@@ -5,31 +5,26 @@ export function HeroSection() {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{
-        background: 'radial-gradient(ellipse 90% 70% at 50% 35%, #1c1609 0%, #111111 55%, #0e0e0e 100%)',
-      }}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#111111]"
       aria-label="Seção principal — Nome Magnético"
     >
-      {/* Background decorativo */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        {/* Glow dourado superior */}
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[400px] h-[300px] md:w-[700px] md:h-[400px] bg-[#D4AF37]/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/4 rounded-full blur-3xl" />
-        {/* Vinheta nas bordas para profundidade */}
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 120% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%)' }} />
+      {/* Background decorativo unificado (Estilo Auth - responsivo: sutil no mobile, intenso no desktop) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1400] via-[#111111] to-[#0d0d1a]"></div>
+        <div className="absolute top-1/3 left-[20%] -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[800px] md:h-[800px] bg-[#D4AF37]/8 md:bg-[#D4AF37]/15 rounded-full blur-[100px] md:blur-[150px]"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-purple-500/5 md:bg-purple-500/10 rounded-full blur-[80px] md:blur-[120px]"></div>
+        <div className="absolute top-1/2 right-[20%] translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-[#D4AF37]/5 md:bg-[#D4AF37]/10 rounded-full blur-[80px] md:blur-[120px]"></div>
+        <div className="absolute bottom-0 right-0 w-[200px] h-[200px] md:w-[400px] md:h-[400px] bg-purple-500/5 md:bg-purple-500/10 rounded-full blur-[60px] md:blur-[100px]"></div>
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-24 pb-16">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-32 pb-16 md:pt-40">
         {/* Super Headline — keyword SEO + gancho emocional */}
-        <p className="text-[#D4AF37] text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-4">
+        <p className="text-[#D4AF37] text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-8">
           Branding Pessoal com Fundamento Vibracional
         </p>
 
         {/* H1 Headline principal */}
-        <h1 className="font-cinzel text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+        <h1 className="font-cinzel text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-8 leading-tight">
           O Seu Nome É Um Ímã.{' '}
           <br />
           <span
@@ -45,7 +40,7 @@ export function HeroSection() {
         </h1>
 
         {/* Subheadline — conciso */}
-        <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+        <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
           Cada letra do seu nome carrega uma frequência matemática. Quando essas frequências colidem, surgem bloqueios invisíveis na carreira, nos relacionamentos e na prosperidade. O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> revela esses bloqueios e encontra a variação do seu nome que alinha sua Expressão ao seu Destino.
         </p>
 

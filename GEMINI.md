@@ -197,7 +197,7 @@ Pagamento único por ciclo de 30 dias (não recorrente)
 
 ### Tabelas principais
 - `profiles` — perfis (role, nome, email)
-- `subscriptions` — acesso (stripe_session_id, starts_at, ends_at, is_active computed); campo `metadata JSONB` para produtos específicos
+- `subscriptions` — acesso (stripe_session_id, asaas_payment_id, payment_provider, starts_at, ends_at, is_active computed); campo `metadata JSONB` para produtos específicos
 - `analyses` — análises completas (status: pending/processing/complete/error); campos expandidos: `triangulo_vida`, `triangulo_pessoal`, `triangulo_social`, `triangulo_destino`, `licoes_carmicas`, `tendencias_ocultas`, `frequencias_numeros`, `nome_harmonizado`, `expressao_harmonizada`
 - `magnetic_names` — nomes sugeridos com scores
 - `baby_name_inputs` — dados específicos do produto nome_bebe (sobrenome_familia, data_nascimento_bebe, nomes_candidatos[])
@@ -210,6 +210,8 @@ Pagamento único por ciclo de 30 dias (não recorrente)
 ### Migrations aplicadas
 - `001_nome_magnetico.sql` — schema base completo (schema public no Supabase Cloud)
 - `002_expand_analyses.sql` — expansão para 4 triângulos, lições kármics, tendências ocultas, produtos nome_bebe e nome_empresa
+- `020_test_users.sql` — campos `is_test` + `test_ends_at` na tabela `profiles`, tabela `trial_redemptions` para rastreabilidade do HQ
+- `024_payment_provider.sql` — colunas `payment_provider` (stripe/asaas) e `asaas_payment_id` na tabela `subscriptions`
 
 ---
 
@@ -254,11 +256,14 @@ O n8n recebe o evento via webhook e processa o envio. Webhooks configurados:
 - `SignatureEvaluation` — critérios objetivos da assinatura (sem radiestesia)
 - `BabyNameForm` — formulário completo para produto nome_bebe
 - `CompanyNameForm` — formulário completo para produto nome_empresa
+- `CompatibilityBadge` — badge de compatibilidade Expressão × Destino com tooltip CSS; props: `compatibilidade`, `size`, `showTooltip`
 
 ---
 
-## MCP Stripe — Configuração / Testes Locais
+## Pagamentos (Stripe & Asaas)
 
+- O sistema suporta múltiplos provedores (`payment_provider` na tabela `subscriptions`).
+- Webhook do Asaas em: `src/pages/api/asaas-webhook.ts`
 - O MCP Stripe atua diretamente conectando-se ao seu ambiente local
 - **SEMPRE** usar a chave da conta **Nome Magnético** (não Sincro): `STRIPE_SECRET_KEY` do arquivo `.env` do projeto
 - Chave test: `sk_test_51TDUrBL...` (conta `TDUrBL66SzSlet1`)
@@ -282,3 +287,4 @@ O n8n recebe o evento via webhook e processa o envio. Webhooks configurados:
 11. **NUNCA** mencionar radiestesia, pêndulo ou técnicas radiestésicas — o projeto usa APENAS critérios formais objetivos
 12. Análise SEMPRE usa os 4 triângulos (não só o Triângulo da Vida) — importar `calcularTodosTriangulos` de `triangle.ts`
 13. Para implementar qualquer funcionalidade referente ao projeto, SEMPRE validar os requisitos com o documento `PLANO-REVISAO.md`.
+14. **DOCUMENTAÇÃO OBRIGATÓRIA**: Todo novo processo, componente reutilizável ou decisão de arquitetura deve ser documentada na pasta `docs/` seguindo a estrutura exata: `architecture/`, `sops/`, `snippets/` ou `devops/`. Nunca crie arquivos `.md` soltos na raiz do `docs/`.

@@ -28,6 +28,12 @@ Our palette is rooted in the contrast between the eternal dark (`#131313`) and t
 
 * **Tertiary (Mystical Depth):** The transition to `#d7c6ff` and `#bea5ff` (Roxo Místico) provides a spiritual layer. Use this for interactive secondary elements or background glows that suggest intuition and depth.
 
+* **Semantic / Compatibility Colors:** Used strictly for scores, status, and numerological compatibility.
+  * *Ressonância Total (Excellent):* `emerald-500` / `emerald-400`
+  * *Vibração Complementar (Good/Mastery):* `sky-500` / `sky-400`
+  * *Vibração Neutra (Acceptable):* `amber-500` / `amber-400`
+  * *Tensão Vibracional (Warning/Critical):* `red-400` / `red-600`
+
 * **The "No-Line" Rule:** Under no circumstances are 1px solid borders to be used for sectioning. Boundaries must be defined solely through background color shifts. For example, a `surface-container-low` section sitting on a `surface` background provides all the separation needed.
 
 * **Surface Hierarchy & Nesting:** Treat the UI as stacked sheets of obsidian. An inner card (`surface-container-highest`) should sit inside a section (`surface-container-low`), creating depth without a single structural line.
