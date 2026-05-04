@@ -27,18 +27,7 @@ const productLabel: Record<string, string> = {
   nome_empresa: 'Nome Empresarial',
 };
 
-// Pre-resolver classes de status para evitar template literals no map
-function statusClass(status: string) {
-  if (status === 'complete') return 'text-[10px] sm:text-xs px-2 py-0.5 rounded font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 flex-shrink-0 whitespace-nowrap uppercase tracking-wider';
-  if (status === 'error')    return 'text-[10px] sm:text-xs px-2 py-0.5 rounded font-medium bg-red-500/20 text-red-400 border border-red-500/20 flex-shrink-0 whitespace-nowrap uppercase tracking-wider';
-  return 'text-[10px] sm:text-xs px-2 py-0.5 rounded font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 flex-shrink-0 whitespace-nowrap uppercase tracking-wider';
-}
-function statusLabel(status: string) {
-  if (status === 'complete')   return 'Completa';
-  if (status === 'error')      return 'Erro';
-  if (status === 'processing') return 'Processando';
-  return 'Pendente';
-}
+// Removido statusClass e statusLabel conforme solicitado pelo usuário
 
 const analysesWithMeta = analyses.map(a => {
   const freqData = (a as any).frequencias_numeros as any;
@@ -78,8 +67,6 @@ const analysesWithMeta = analyses.map(a => {
     icon: productIcon[a.product_type ?? 'nome_social'] ?? '✨',
     productName: productLabel[a.product_type ?? 'nome_social'] ?? 'Análise',
     dateFormatted: new Date(a.created_at).toLocaleDateString('pt-BR'),
-    statusCls: statusClass(a.status),
-    statusLbl: statusLabel(a.status),
   };
 });
 
@@ -168,7 +155,7 @@ const hasMultipleProducts = uniqueProducts.length > 1;
                         Grátis
                       </span>
                     )}
-                    <span class={analysis.statusCls}>{analysis.statusLbl}</span>
+                    {/* Tag de status removida */}
                   </div>
                 </div>
 

@@ -106,3 +106,27 @@ export function extrairLetras(nome: string): string[] {
 export function extrairPrimeiroNome(nome: string): string {
   return nome.trim().split(/\s+/)[0] ?? nome;
 }
+
+/**
+ * Calcula a idade com base na data de nascimento (DD/MM/AAAA)
+ */
+export function calcularIdade(dataNascimento: string): number {
+  if (!dataNascimento) return 0;
+  const partes = dataNascimento.split('/');
+  if (partes.length !== 3) return 0;
+  
+  const [dia, mes, ano] = partes.map(Number);
+  if (isNaN(dia) || isNaN(mes) || isNaN(ano)) return 0;
+
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - ano;
+  
+  const mesAtual = hoje.getMonth() + 1;
+  const diaAtual = hoje.getDate();
+  
+  if (mesAtual < mes || (mesAtual === mes && diaAtual < dia)) {
+    idade--;
+  }
+  
+  return idade;
+}

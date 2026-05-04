@@ -285,6 +285,20 @@ const CUSTO_INERCIA_MAP: Record<string, string> = {
   '999': 'O bloqueio 999 perpetua ciclos de perda e sacrifício: relações que terminam em abandono, projetos que chegam ao fim prematuramente, e uma dificuldade crônica de fechar capítulos com paz. O fim sempre chega antes da hora.',
 };
 
+// ── Textos Expandidos (Apenas para Nome Social) ───────────────────────────────
+
+const BLOQUEIOS_EXPANDIDOS: Record<string, string> = {
+  '111': 'Limitação profunda da força de vontade, perda de coragem e inatividade crônica. A presença deste bloqueio gera uma forte tendência à dependência de terceiros e cria bloqueios sistêmicos ao tentar iniciar projetos, defender ideias próprias ou afirmar a sua individualidade autêntica. O grande antídoto kármico para transcender essa energia é desenvolver ativamente a coragem, fortalecer a autonomia pessoal e recuperar a confiança absoluta no próprio potencial de liderança inato.',
+  '222': 'Timidez extrema, indecisão constante e uma perigosa tendência a ser subjugado e apagado pelos outros. Este bloqueio manifesta dificuldades severas em manter parcerias, sociedades e relacionamentos saudáveis, muitas vezes resultando em drástica perda de autoestima e anulação da própria vontade. O antídoto fundamental é cultivar a diplomacia, a paciência e estabelecer limites claros para manter o equilíbrio inegociável entre o que você oferece e o que você recebe.',
+  '333': 'Dificuldade profunda no diálogo e barreiras persistentes ao tentar se comunicar com clareza. Este bloqueio gera a constante sensação de ser incompreendido e uma forte dificuldade em se impor e expressar seus sentimentos verdadeiros nas relações pessoais e profissionais. Para transcender esse obstáculo, o antídoto exige focar na expressão criativa, treinar a comunicação autêntica e transparente, e sustentar o otimismo mesmo diante das barreiras sociais.',
+  '444': 'Bloqueio severo na realização profissional e financeira. Indica uma forte tendência a não receber o reconhecimento merecido pelo seu esforço, além de dificuldade crônica em manter estabilidade. Pode gerar excesso de rigidez, pessimismo ou, pelo contrário, extrema desorganização. O antídoto para destravar este fluxo exige o cultivo diário da disciplina, estabelecimento de métodos claros de ação, e uma resiliência inabalável para construir bases sólidas.',
+  '555': 'Dificuldade crônica em aceitar e lidar com mudanças, acompanhada de instabilidade contínua. Este bloqueio provoca insatisfação constante, agitação interna e uma perigosa atração pela rebeldia ou vícios como válvula de escape. A liberdade pessoal frequentemente se torna uma fonte de caos em vez de paz. O antídoto principal é aprender a aceitar o fluxo natural da vida, desenvolver flexibilidade mental, adaptar-se sem resistência e usar a liberdade com profunda responsabilidade.',
+  '666': 'Conflitos persistentes e instabilidade na vida familiar e afetiva. Este bloqueio gera decepções frequentes nos relacionamentos íntimos, ciúmes, possessividade e uma tendência ao isolamento emocional. Muitas vezes, você atrai parceiros incompatíveis ou se sente sobrecarregado por responsabilidades domésticas. O antídoto essencial é desenvolver o amor-próprio antes de buscar afeto externo, aprender a perdoar e cultivar a compreensão de que as relações devem ser fontes de equilíbrio, não de peso.',
+  '777': 'Desconexão dolorosa do plano espiritual e do propósito maior de vida. Este bloqueio gera desânimo, melancolia, confusão mental frequente, medos infundados e uma sensação de vazio interno que o sucesso material não preenche. A energia fica dispersa e a mente nebulosa. O antídoto fundamental para esta vibração é a interiorização diária, o estudo profundo de temas existenciais, a meditação e o desenvolvimento ativo da sua intuição e sabedoria oculta.',
+  '888': 'Bloqueio crítico no fluxo da abundância financeira e na relação com o mundo material. Manifesta-se através de perdas financeiras súbitas, dificuldades extremas em acumular ou reter riquezas, e um constante sentimento de estagnação na carreira. Pode indicar ambição desmedida ou total aversão ao poder. O antídoto central requer a harmonização da sua relação com o dinheiro, compreendendo-o como energia de troca justa, agindo com máxima ética, justiça e reequilibrando a balança entre a matéria e o espírito.',
+  '999': 'Prolongamento exaustivo de ciclos que já deveriam ter se encerrado. Este bloqueio cria forte apego ao passado, ressentimentos duradouros e dificuldades crônicas em perdoar e soltar o que não serve mais. Pode gerar desilusões frequentes, perdas emocionais e uma sensação de sacrifício contínuo pelos outros. O antídoto kármico definitivo é o desenvolvimento da compaixão universal, a prática ativa do desapego, o perdão incondicional (a si mesmo e aos outros) e a aceitação pacífica das conclusões.'
+};
+
 // ── Interfaces de dados ───────────────────────────────────────────────────────
 
 export interface BloqueioData {
@@ -320,7 +334,7 @@ export interface TendenciaData {
 // ── Componentes de bloco ──────────────────────────────────────────────────────
 
 /** Cards de Bloqueios Energéticos */
-export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: BloqueioData[]; showAntidoto?: boolean }) {
+export function BloqueiosBlock({ bloqueios, showAntidoto = true, hideSaude = false, hideTriangulos = false, isNomeSocial = false }: { bloqueios: BloqueioData[]; showAntidoto?: boolean; hideSaude?: boolean; hideTriangulos?: boolean; isNomeSocial?: boolean }) {
   if (bloqueios.length === 0) {
     return (
       <View style={styles.debitoNoneBox}>
@@ -332,10 +346,14 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: 
   }
   return (
     <View style={styles.sectionBlock}>
-      {bloqueios.map((b, i) => (
-        <View key={i} style={[styles.bloqueioRow, i === bloqueios.length - 1 && { marginBottom: 0 }]} wrap={false}>
+      {bloqueios.map((b, i) => {
+        const displayTitle = isNomeSocial ? b.titulo.replace(new RegExp(`\\s*\\(${b.codigo}\\)\\s*`), '') : b.titulo;
+        const displayDesc = (isNomeSocial && BLOQUEIOS_EXPANDIDOS[b.codigo]) ? BLOQUEIOS_EXPANDIDOS[b.codigo] : b.descricao;
+        
+        return (
+        <View key={i} style={[styles.bloqueioRow, ...(i === bloqueios.length - 1 ? [{ marginBottom: 0 }] : [])]} wrap={false}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-            <Text style={[styles.bloqueioTitle, { marginBottom: 0 }]}>{b.codigo} — {b.titulo}</Text>
+            <Text style={[styles.bloqueioTitle, { marginBottom: 0 }, ...(isNomeSocial ? [{ fontSize: 11 }] : [])]}>{b.codigo} — {displayTitle}</Text>
             {(b.totalOcorrencias ?? 1) > 1 && (
               <View style={[styles.bloqueioAtivoBadge, { marginLeft: 6 }]}>
                 <Text style={styles.bloqueioAtivoBadgeText}>{b.totalOcorrencias}×</Text>
@@ -347,12 +365,12 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: 
               </View>
             )}
           </View>
-          <Text style={styles.bloqueioDesc}>{b.descricao}</Text>
-          {b.aspectoSaude ? (
-            <Text style={styles.bloqueioSaude}>Aspecto de saúde: {b.aspectoSaude}</Text>
+          <Text style={[styles.bloqueioDesc, ...(isNomeSocial ? [{ fontSize: 10 }] : [])]}>{displayDesc}</Text>
+          {(!hideSaude && b.aspectoSaude) ? (
+            <Text style={[styles.bloqueioSaude, ...(isNomeSocial ? [{ fontSize: 9 }] : [])]}>Aspecto de saúde: {b.aspectoSaude}</Text>
           ) : null}
-          {b.triangulos && b.triangulos.length > 0 ? (
-            <Text style={styles.bloqueioTriangulos}>
+          {(!hideTriangulos && b.triangulos && b.triangulos.length > 0) ? (
+            <Text style={[styles.bloqueioTriangulos, ...(isNomeSocial ? [{ fontSize: 9 }] : [])]}>
               Ativo nos triângulos: {b.triangulos.map((t: string) => {
                 const count = b.repeticoesPortriangulo?.[t] ?? 1;
                 const label = t.charAt(0).toUpperCase() + t.slice(1);
@@ -372,7 +390,8 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true }: { bloqueios: 
             </View>
           )}
         </View>
-      ))}
+        );
+      })}
     </View>
   );
 }

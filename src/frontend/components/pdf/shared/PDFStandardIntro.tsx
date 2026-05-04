@@ -139,11 +139,12 @@ export function PDFStandardIntro({ theme, productType, entityName, isFreeAnalysi
           {isFreeAnalysis ? (
             <View style={{ marginBottom: 14 }}>
               {[
-                ['5 Números Principais', 'Os pilares da sua identidade vibracional.'],
-                ['Pirâmides de Fluxo', 'O mapa do seu dia a dia — como sua energia se organiza no mundo real.'],
-                ['Bloqueios e Falhas', 'Onde a sua energia está sendo drenada — sequências repetidas que travam os resultados.'],
-                ['Lições Kármicas', 'Vibrações ausentes no nome que criam pontos cegos na vida.'],
-                ['Tendências Ocultas', 'Excessos que distorcem comportamentos e sabotam potencial.'],
+                ['5 Números Principais', 'Os pilares da sua identidade vibracional: Expressão, Destino, Motivação, Missão e Impressão.'],
+                ['4 Triângulos Numerológicos', 'O mapa completo — Vida, Pessoal, Social e Destino — cada um revelando uma dimensão diferente da sua jornada.'],
+                ['Bloqueios Energéticos', 'Sequências repetidas nos triângulos que travam resultados (-15 pts cada no score).'],
+                ['Débitos Kármicos', 'Padrões gravados na sua data de nascimento que exigem integração nesta vida (-12 pts cada).'],
+                ['Lições Kármicas', 'Vibrações ausentes no nome — qualidades a desenvolver (-1 pt cada).'],
+                ['Tendências Ocultas', 'Números que aparecem 4+ vezes — excessos que distorcem comportamentos (-2 pts cada).'],
               ].map(([title, desc], i) => (
                 <View key={i} style={{ flexDirection: 'row', marginBottom: 8 }}>
                   <Text style={{ fontSize: 11, color: boldColor, fontFamily: 'Helvetica-Bold', marginRight: 4 }}>•</Text>
@@ -155,21 +156,21 @@ export function PDFStandardIntro({ theme, productType, entityName, isFreeAnalysi
             </View>
           ) : (
             <Text style={[styles.bodyText, { color: textColor }]}>
-              As informações apresentadas a seguir não são adivinhações. Usamos cálculos lógicos e estritos. Primeiro, o nosso sistema cruza as letras e descobre os <Text style={[styles.bold, { color: boldColor }]}>5 Números Principais</Text>, que são os pilares da sua análise. Depois, montamos uma pirâmide chamada <Text style={[styles.bold, { color: boldColor }]}>Os 4 Triângulos Numerológicos</Text>, que mostram o mapa de como as coisas realmente vão funcionar no seu dia a dia.
+              As informações apresentadas a seguir não são adivinhações. Usamos cálculos lógicos e estritos. Primeiro, o nosso sistema cruza as letras e descobre os <Text style={[styles.bold, { color: boldColor }]}>5 Números Principais</Text> (Expressão, Destino, Motivação, Missão e Impressão), que são os pilares da sua análise. Depois, montamos <Text style={[styles.bold, { color: boldColor }]}>4 Triângulos Numerológicos</Text> — Vida, Pessoal, Social e Destino — que mostram o mapa completo de como as coisas funcionam em cada dimensão da sua vida.
               {'\n\n'}
-              Também procuramos falhas perigosas que queremos evitar a todo custo: analisamos os <Text style={[styles.bold, { color: boldColor }]}>Bloqueios</Text> (sequências repetidas de números que paralisam a vida), verificamos as <Text style={[styles.bold, { color: boldColor }]}>Lições Kármicas</Text> (energias e aprendizados que estão faltando) e detectamos as <Text style={[styles.bold, { color: boldColor }]}>Tendências Ocultas</Text> (exageros de energia que fazem mal). Finalmente, tudo isso é envolvido em um grande perfil psicológico mundial (o <Text style={[styles.bold, { color: boldColor }]}>Arquétipo</Text>), para revelar qual papel este nome tem perante a sociedade.
+              Também verificamos os <Text style={[styles.bold, { color: boldColor }]}>Bloqueios Energéticos</Text> (sequências repetidas que paralisam a vida), os <Text style={[styles.bold, { color: boldColor }]}>Débitos Kármicos</Text> (padrões fixos da data de nascimento), as <Text style={[styles.bold, { color: boldColor }]}>Lições Kármicas</Text> (vibrações ausentes que criam pontos cegos) e as <Text style={[styles.bold, { color: boldColor }]}>Tendências Ocultas</Text> (excessos que distorcem comportamentos). Por fim, avaliamos a <Text style={[styles.bold, { color: boldColor }]}>Compatibilidade Vibracional</Text> entre o Número de Expressão e o Número de Destino — que pode ser Ressonância Total, Vibração Complementar, Vibração Neutra ou Tensão Vibracional.
             </Text>
           )}
 
           <Text style={[styles.subHead, { color: textColor }]}>
-            O Peso dos Dados Imutáveis e a Nota de 0 a 100
+            A Nota de 0 a 100 e os Dados Imutáveis
           </Text>
           <Text style={[styles.bodyText, { color: textColor }]}>
-            Preste bastante atenção: o nosso sistema de nota final (o Score) é exigente e rigoroso. O grande motivo de não darmos "notas máximas" a todo momento é que lidamos com as âncoras da vida: os <Text style={[styles.bold, { color: boldColor }]}>Dados Imutáveis</Text>. Nós nunca poderemos mudar o seu dia ou data de nascimento (ou a data de criação da empresa). 
+            O Score é calculado a partir de descontos objetivos: cada Bloqueio Energético retira 15 pontos, cada Débito Kármico retira 12 pontos, cada Tendência Oculta retira 2 pontos e cada Lição Kármica retira 1 ponto. A <Text style={[styles.bold, { color: boldColor }]}>Compatibilidade Vibracional</Text> também impacta: Tensão Vibracional desconta 15 pontos adicionais, enquanto Ressonância Total e Vibração Complementar não geram desconto.
             {'\n\n'}
-            As nossas datas de nascença carregam Débitos Kármicos fixos e geram parte inalterável dos nossos 5 Números Principais (como o número do Destino). A nossa inteligência precisa criar uma geometria de nome perfeita <Text style={[styles.italic]}>contornando e respeitando</Text> essas datas que já estão gravadas na sua história. Como a busca é por um nome que case perfeitamente com um dado estático, ao mesmo tempo em que anula falhas e bloqueios, <Text style={[styles.bold, { color: boldColor }]}>tirar um "100 de 100" é um evento muito raro</Text>.
+            O grande motivo de raramente atingirmos 100 pontos são os <Text style={[styles.bold, { color: boldColor }]}>Dados Imutáveis</Text>: a data de nascimento jamais pode ser alterada. Ela gera o número de Destino e os Débitos Kármicos — ambos fixos. A análise precisa criar uma geometria de nome <Text style={[styles.italic]}>contornando e respeitando</Text> esses dados gravados na história de vida.
             {'\n\n'}
-            Portanto, retire dos ombros a busca pela perfeição matemática dos 100 pontos. Uma pontuação final <Text style={[styles.bold, { color: boldColor }]}>acima de 75 pontos</Text> prova que o nome se adaptou brilhantemente ao seu destino e trará extrema confiança e segurança. Quando você encontrar um nome com <Text style={[styles.bold, { color: boldColor }]}>mais de 85 pontos</Text>, comemore: você tem em mãos um verdadeiro "ímã de prosperidade", perfeitamente costurado para transformar seu esforço em pura fluidez.
+            Retire dos ombros a busca pelos 100 pontos. Um score <Text style={[styles.bold, { color: boldColor }]}>acima de 70</Text> já classifica o nome como Bom — alinhamento sólido com o destino. Acima de <Text style={[styles.bold, { color: boldColor }]}>80 pontos</Text> você encontrou um "Nome de Ouro": máximo alinhamento com mínima descaracterização. Acima de <Text style={[styles.bold, { color: boldColor }]}>90 pontos</Text>, um evento raro — comemore.
           </Text>
         </View>
 

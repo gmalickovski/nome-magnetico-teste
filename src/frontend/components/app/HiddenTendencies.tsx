@@ -102,10 +102,16 @@ export default function HiddenTendencies({ tendencias, frequencias, nomeCompleto
 
       {/* Tendências */}
       {tendencias.length === 0 ? (
-        <div className="glass rounded-xl p-5 text-center">
-          <p className="text-sm text-gray-400">
-            {primeiroNome} não possui tendências ocultas — nenhum número se repete excessivamente no nome.
-          </p>
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+            ✓
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-emerald-300 mb-1">Campo Vibracional Equilibrado</p>
+            <p className="text-sm text-emerald-200/70 leading-relaxed">
+              {primeiroNome} não possui tendências ocultas — nenhum número se repete excessivamente no nome. As frequências estão bem distribuídas, sem padrões de excesso que criem ciclos compulsivos.
+            </p>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

@@ -16,12 +16,21 @@ interface Bloqueio {
   totalOcorrencias?: number;
 }
 
+interface ArcanoAtualInfo {
+  numero: number | null;
+  periodo: string;
+  idadeInicio: number;
+  idadeFim: number;
+}
+
 interface TrianguloData {
   tipo: string;
   linhas: number[][];
   arcanoRegente: number | null;
   arcanosDoMinantes: number[];
   sequenciasNegativas: string[];
+  arcanosDePassagem?: number[];
+  arcanoAtual?: ArcanoAtualInfo | null;
 }
 
 interface ArcanoInfo {
@@ -88,6 +97,13 @@ const ARCANO_RESUMO: Record<number, { vibracao: string; desafio: string }> = {
   21: { vibracao: 'Conclusão bem-sucedida de um ciclo e integração completa — uma das energias mais favoráveis do campo. Favorece reconhecimento de longo prazo e a sensação de estar no lugar certo.', desafio: 'Evitar estagnação após a conquista — a integração completa é o ponto de partida de uma jornada mais elevada, não o ponto final.' },
   22: { vibracao: 'Potencial puro: o ponto zero onde tudo é possível e nada está determinado ainda. Número Mestre 22, favorece saltos de fé e novos começos — pede presença e direcionamento consciente.', desafio: 'Evitar falta de direção e desconsideração das consequências — potencial infinito sem intenção se dispersa em infinitas direções e chega a lugar nenhum.' },
 };
+
+function reduceToArcano(n: number): number {
+  if (!n || n <= 0) return 22;
+  let v = n;
+  while (v > 22) v = String(v).split('').reduce((a, d) => a + parseInt(d), 0);
+  return v || 22;
+}
 
 const BLOQUEIO_SEQUENCIAS = ['111','222','333','444','555','666','777','888','999'];
 
@@ -271,6 +287,59 @@ function TrianguloInfo({
           <p className="font-cinzel text-2xl font-bold text-purple-300">{triangulo.arcanoRegente}</p>
         </div>
       ) : null}
+
+      {/* Arcano de Trânsito + Sequência de Passagem */}
+      {triangulo.arcanoAtual?.numero != null && (
+        <div className="rounded-xl bg-[#0d0d1a]/70 border border-purple-500/20 p-4">
+          <p className="text-[10px] text-purple-400 font-medium uppercase tracking-[0.15em] mb-3">
+            Arcano de Trânsito
+          </p>
+          <div className="flex items-start gap-3 mb-3">
+            <span className="w-10 h-10 rounded-full bg-purple-900/60 border border-purple-400/40 flex items-center justify-center font-bold text-purple-200 text-sm shrink-0">
+              {reduceToArcano(triangulo.arcanoAtual.numero)}
+            </span>
+            <div>
+              <p className="text-sm text-gray-200 font-medium leading-snug">
+                Arcano {reduceToArcano(triangulo.arcanoAtual.numero)} — {ARCANO_RESUMO[reduceToArcano(triangulo.arcanoAtual.numero)]?.vibracao.split('.')[0] ?? ''}
+              </p>
+              <p className="text-xs text-purple-400/70 mt-0.5">
+                {triangulo.arcanoAtual.periodo} · Idade {triangulo.arcanoAtual.idadeInicio}–{triangulo.arcanoAtual.idadeFim}
+              </p>
+            </div>
+          </div>
+
+          {triangulo.arcanosDePassagem && triangulo.arcanosDePassagem.length > 0 && (
+            <>
+              <p className="text-[10px] text-purple-400 uppercase tracking-wider mb-2 mt-1">
+                Sequência de Passagem · ~{(90 / triangulo.arcanosDePassagem.length).toFixed(1)} anos por ciclo
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {triangulo.arcanosDePassagem.map((raw, idx) => {
+                  const reduced = reduceToArcano(raw);
+                  const isAtual = reduced === reduceToArcano(triangulo.arcanoAtual!.numero!);
+                  return (
+                    <span
+                      key={idx}
+                      title={`Arcano ${reduced}`}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
+                        isAtual
+                          ? 'bg-purple-500 text-white'
+                          : 'bg-purple-900/30 text-purple-300 border border-purple-500/25'
+                      }`}
+                    >
+                      {reduced}
+                    </span>
+                  );
+                })}
+              </div>
+              <p className="text-[9px] text-gray-500 flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-purple-500 shrink-0" />
+                Arcano de trânsito atual
+              </p>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Bloqueios do triângulo selecionado */}
       {bloqueiosFiltrados.length > 0 ? (

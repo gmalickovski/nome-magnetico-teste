@@ -14,6 +14,9 @@ import { buildCompanyAnalysisPrompt, type CompanyPromptParams } from './prompts/
 import { buildSocialAnalysisPrompt, type SocialPromptParams } from './prompts/social-prompt';
 import { getModel, type AITask } from './config/models';
 import { getArquetipo } from '../numerology/archetypes';
+import { calcularTodosTriangulos, detectarBloqueios } from '../numerology/triangle';
+import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../numerology/karmic';
+import { calcularCincoNumeros } from '../numerology/numbers';
 
 // ================================================================
 // HELPER INTERNO
@@ -224,9 +227,57 @@ export async function generateSocialAnalysis(
   analysisId: string | null
 ): Promise<string> {
   const expressaoMelhorNome = params.resultado.melhorNome?.expressao ?? params.resultado.destino;
+  const nomeNasc   = params.resultado.nomeNascimento;
+  const dataRaw    = params.resultado.dataNascimento;
+  const melhorNome = params.resultado.melhorNome;
+
+  const todosTriangulos   = calcularTodosTriangulos(nomeNasc, dataRaw);
+  const cincoNasc         = calcularCincoNumeros(nomeNasc, dataRaw);
+  const bloqueiosNascList = detectarBloqueios(todosTriangulos);
+  const licoesNascList    = detectarLicoesCarmicas(nomeNasc);
+  const tendenciasNascList = detectarTendenciasOcultas(nomeNasc);
+  const debitosNascList   = calcularDebitosCarmicos(dataRaw, cincoNasc.destino, cincoNasc.motivacao, cincoNasc.expressao);
+
+  let comparacaoHarmonizacao: SocialPromptParams['comparacaoHarmonizacao'];
+  if (melhorNome) {
+    const cincoSocial          = calcularCincoNumeros(melhorNome.nomeCompleto, dataRaw);
+    const licoesSocialList     = detectarLicoesCarmicas(melhorNome.nomeCompleto);
+    const tendenciasSocialList = detectarTendenciasOcultas(melhorNome.nomeCompleto);
+    const debitosSocialList    = calcularDebitosCarmicos(dataRaw, cincoSocial.destino, cincoSocial.motivacao, cincoSocial.expressao);
+    const bloqueiosSocialList  = melhorNome.bloqueios;
+
+    comparacaoHarmonizacao = {
+      expressaoNasc: cincoNasc.expressao,  expressaoSocial: cincoSocial.expressao,
+      motivacaoNasc: cincoNasc.motivacao,  motivacaoSocial: cincoSocial.motivacao,
+      impressaoNasc: cincoNasc.impressao,  impressaoSocial: cincoSocial.impressao,
+      missaoNasc:    cincoNasc.missao,     missaoSocial:    cincoSocial.missao,
+      bloqueiosAntes:  bloqueiosNascList.length,
+      bloqueiosDepois: bloqueiosSocialList.length,
+      bloqueiosEliminados: bloqueiosNascList
+        .filter(b => !bloqueiosSocialList.some(bh => bh.codigo === b.codigo))
+        .map(b => b.titulo ?? b.codigo),
+      licoesAntes:      licoesNascList.length,
+      licoesDepois:     licoesSocialList.length,
+      licoesEliminadas: licoesNascList.filter(l => !licoesSocialList.some(ls => ls.numero === l.numero)).map(l => l.numero),
+      licoesNovas:      licoesSocialList.filter(l => !licoesNascList.some(ln => ln.numero === l.numero)).map(l => l.numero),
+      tendenciasAntes:       tendenciasNascList.length,
+      tendenciasDepois:      tendenciasSocialList.length,
+      tendenciasNeutralizadas: tendenciasNascList.filter(t => !tendenciasSocialList.some(ts => ts.numero === t.numero)).map(t => t.numero),
+      tendenciasNovas:         tendenciasSocialList.filter(t => !tendenciasNascList.some(tn => tn.numero === t.numero)).map(t => t.numero),
+      debitosAntes:    debitosNascList.length,
+      debitosDepois:   debitosSocialList.length,
+      debitosAliviados: debitosNascList
+        .filter(d => !d.fixo && !debitosSocialList.some(ds => ds.numero === d.numero))
+        .map(d => d.numero),
+      debitosFixos: debitosNascList.filter(d => d.fixo).map(d => d.numero),
+    };
+  }
+
   const paramsWithArquetipo = {
     ...params,
     arquetipo: getArquetipo(expressaoMelhorNome),
+    arcanoAtual: todosTriangulos.vida.arcanoAtual,
+    comparacaoHarmonizacao,
   };
   return runWithGuard(() => buildSocialAnalysisPrompt(paramsWithArquetipo), 'analysis', userId, analysisId);
 }

@@ -112,6 +112,7 @@ export function buildAnalysisPrompt(params: AnalysisPromptParams): string {
 | Impressão (consoantes) | ${cincoNumeros.impressao} |
 | Missão (Destino + Expressão) | ${cincoNumeros.missao} |
 | Arcano Regente (Triângulo da Vida) | ${arcanoRegente ?? '—'} |
+${todosTriangulos.vida.arcanoAtual?.numero ? `| Arcano de Trânsito Atual | ${todosTriangulos.vida.arcanoAtual.numero} (período de ${todosTriangulos.vida.arcanoAtual.periodo}) |` : ''}
 
 ## Arcanos Regentes dos 4 Triângulos
 
@@ -281,6 +282,7 @@ O **Arcano ${arcanoRegente ?? '—'}** governa o triângulo central de ${primeir
 - Parágrafo 2: A luz e sombra imediata: quais portas esse mestre abre misteriosamente e quais armadilhas mentais ele constantemente testa nas fases da vida.
 - Parágrafo 3: O apelo magnético do arcano para o momento atual: como essa influência atrai pessoas e cenários compatíveis com essa frequência AGORA.
 - Parágrafo 4: A estratégia de maestria: qual comportamento exato o universo recompensa sob a égide desse arcano regente (o convite concreto do que desenvolver ou liberar).
+${todosTriangulos.vida.arcanoAtual?.numero ? `- Parágrafo 5 (O Trânsito Atual): O **Arcano de Trânsito Atual** para a idade da pessoa é o **Arcano ${todosTriangulos.vida.arcanoAtual.numero}**. Cruze esse momento de vida (que dura até o ano de encerramento do ciclo) com o regente principal, oferecendo um insight preditivo de curto prazo.` : ''}
 
 ---
 

@@ -23,7 +23,6 @@ interface Props {
   onSuccess?: (analysisId: string) => void;
 }
 
-const ESTILOS = ['Clássico', 'Moderno', 'Espiritual', 'Internacional', 'Simples'];
 
 const CONTEXTOS = [
   { value: 'profissional', label: '💼 Profissional' },
@@ -206,25 +205,6 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Estilo do nome</label>
-              <div className="flex flex-wrap gap-2">
-                {ESTILOS.map(estilo => (
-                  <button
-                    key={estilo}
-                    type="button"
-                    onClick={() => set('estilo_preferido', form.estilo_preferido === estilo ? '' : estilo)}
-                    className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
-                      form.estilo_preferido === estilo
-                        ? 'bg-gold text-black font-medium'
-                        : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10'
-                    }`}
-                  >
-                    {estilo}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* ── SEÇÃO 3: Vibrações Desejadas ── */}

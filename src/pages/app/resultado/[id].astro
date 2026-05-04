@@ -243,7 +243,8 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
     {!isProcessing && !isError && (
       <>
 
-        {/* ── SEÇÃO 1: HEADER / CERTIFICADO ───────────────────────── */}
+        {/* ── SEÇÃO 1: HEADER / CERTIFICADO (oculto para nome_social) ── */}
+        {!isNomeSocial && (
         <section class="rounded-2xl bg-white/5 p-6 md:p-8 mb-6">
           <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div class="flex-1 min-w-0">
@@ -296,6 +297,7 @@ const cinco_numeros_empresa = isNomeEmpresa && rankingEmpresa?.melhorNome ? [
             </div>
           )}
         </section>
+        )}
 
         {/* ══════════════════════════════════════════════════
             NOME ATUAL (análise gratuita) — ESTRUTURA SEPARADA

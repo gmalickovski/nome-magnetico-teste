@@ -10,6 +10,21 @@ export interface SocialPromptParams {
   estiloPreferido?: string;
   genero?: string;
   arquetipo?: Arquetipo;
+  arcanoAtual?: { numero: number | null, periodo: string, idadeInicio: number, idadeFim: number };
+  comparacaoHarmonizacao?: {
+    expressaoNasc: number; expressaoSocial: number;
+    motivacaoNasc: number; motivacaoSocial: number;
+    impressaoNasc: number; impressaoSocial: number;
+    missaoNasc: number;    missaoSocial: number;
+    bloqueiosAntes: number; bloqueiosDepois: number;
+    bloqueiosEliminados: string[];
+    licoesAntes: number; licoesDepois: number;
+    licoesEliminadas: number[]; licoesNovas: number[];
+    tendenciasAntes: number; tendenciasDepois: number;
+    tendenciasNeutralizadas: number[]; tendenciasNovas: number[];
+    debitosAntes: number; debitosDepois: number;
+    debitosAliviados: number[]; debitosFixos: number[];
+  };
 }
 
 export function buildSocialAnalysisPrompt(params: SocialPromptParams): string {
@@ -22,6 +37,8 @@ export function buildSocialAnalysisPrompt(params: SocialPromptParams): string {
     estiloPreferido,
     genero,
     arquetipo,
+    arcanoAtual,
+    comparacaoHarmonizacao: comp,
   } = params;
 
   const { dataNascimento, destino, nomesCandidatos, melhorNome, top3 } = resultado;
@@ -61,6 +78,7 @@ ${objetivoApresentacao ? `**Como deseja se apresentar ao mundo:** ${objetivoApre
 ${vibracoesDesejadas ? `**Vibrações/características que deseja atrair:** ${vibracoesDesejadas}` : ''}
 ${contextoUso ? `**Contexto principal de uso do nome:** ${contextoUso}` : ''}
 ${estiloPreferido ? `**Estilo preferido:** ${estiloPreferido}` : ''}
+${arcanoAtual?.numero ? `**Arcano de Trânsito Atual (Momento de Vida):** Arcano ${arcanoAtual.numero} (período de ${arcanoAtual.periodo})` : ''}
 
 ## Nome Mais Indicado Numericamente
 
@@ -82,6 +100,53 @@ Você é um numerólogo cabalístico especializado em identidade vibracional e N
 
 Escreva pelo menos 2–3 parágrafos por seção principal. Evite generalidades — cada afirmação deve ser ancorada nos números concretos desta pessoa.
 
+${arcanoAtual?.numero ? `DICA PARA A IA: Ao formular o texto, cruze o Arcano de Trânsito Atual com o Nome Social sugerido. Use o momento cronológico como argumento de urgência e ancoragem. Exemplo de abordagem: "Como você está sob a influência do Arcano ${arcanoAtual.numero} até o ano x, o uso da vibração de [Nome] trará a estrutura exata necessária para suportar e aproveitar essa fase..."` : ''}
+
+${comp ? `## Dados Comparativos da Harmonização (use para as introduções)
+
+5 NÚMEROS FUNDAMENTAIS (Destino ${destino} é imutável):
+- Expressão: ${comp.expressaoNasc} → ${comp.expressaoSocial}${comp.expressaoNasc !== comp.expressaoSocial ? ' (ALTERADO)' : ' (sem alteração)'}
+- Motivação: ${comp.motivacaoNasc} → ${comp.motivacaoSocial}${comp.motivacaoNasc !== comp.motivacaoSocial ? ' (ALTERADO)' : ' (sem alteração)'}
+- Impressão: ${comp.impressaoNasc} → ${comp.impressaoSocial}${comp.impressaoNasc !== comp.impressaoSocial ? ' (ALTERADO)' : ' (sem alteração)'}
+- Missão: ${comp.missaoNasc} → ${comp.missaoSocial}${comp.missaoNasc !== comp.missaoSocial ? ' (ALTERADO)' : ' (sem alteração)'}
+
+BLOQUEIOS: ${comp.bloqueiosAntes} → ${comp.bloqueiosDepois} (ideal = menos) | Eliminados: [${comp.bloqueiosEliminados.join(', ') || 'nenhum'}]
+LIÇÕES KÁRMICAS: ${comp.licoesAntes} → ${comp.licoesDepois} (ideal = menos) | Superadas: [${comp.licoesEliminadas.join(', ') || 'nenhuma'}] | Novas: [${comp.licoesNovas.join(', ') || 'nenhuma'}]
+TENDÊNCIAS OCULTAS: ${comp.tendenciasAntes} → ${comp.tendenciasDepois} (ideal = menos) | Neutralizadas: [${comp.tendenciasNeutralizadas.join(', ') || 'nenhuma'}] | Novas: [${comp.tendenciasNovas.join(', ') || 'nenhuma'}]
+DÉBITOS KÁRMICOS: ${comp.debitosAntes} → ${comp.debitosDepois} (ideal = menos) | Aliviados: [${comp.debitosAliviados.join(', ') || 'nenhum'}] | Fixos (imutáveis): [${comp.debitosFixos.join(', ') || 'nenhum'}]
+
+---
+
+**TEXTO DE ABERTURA OBRIGATÓRIO — escreva EXATAMENTE ANTES das seções ##:**
+
+Escreva 6 parágrafos curtos (2–3 frases cada, SEM formatação markdown — não use **negrito** nem outros marcadores) com os tags identificadores abaixo. Os tags são extraídos programaticamente — devem ser exatos, sem alteração.
+
+[INTRO_NUMEROS]
+Analise a transformação dos 5 números fundamentais. Cite quais mudaram (ou se nenhum mudou) e o impacto energético geral. Destino permanece imutável.
+[/INTRO_NUMEROS]
+
+[INTRO_BLOQUEIOS]
+Analise os bloqueios energéticos: se diminuíram (melhora), aumentaram (alerta) ou se mantiveram iguais. Deixe claro que diminuir bloqueios é sempre mais favorável.
+[/INTRO_BLOQUEIOS]
+
+[INTRO_DEBITOS]
+Analise os débitos kármicos: quais foram aliviados pela harmonização e quais permanecem fixos (originam-se na data de nascimento, imutáveis). Se não há débitos, escreva uma frase positiva sobre isso.
+[/INTRO_DEBITOS]
+
+[INTRO_LICOES]
+Analise as lições kármicas: se foram superadas (números antes ausentes agora presentes no nome), mantidas ou se novas surgiram. Deixe claro que reduzir lições é sempre favorável.
+[/INTRO_LICOES]
+
+[INTRO_TENDENCIAS]
+Analise as tendências ocultas (excessos vibracionais): se foram neutralizadas, mantidas ou se novas surgiram. Deixe claro que reduzir excessos é sempre favorável.
+[/INTRO_TENDENCIAS]
+
+[INTRO_ARCANOS]
+Analise os Arcanos dos 4 triângulos: quais Arcanos Regentes e de Trânsito foram alterados pela harmonização e o que essa mudança representa em termos de força universal que governa cada dimensão da vida.
+[/INTRO_ARCANOS]
+
+---
+` : ''}
 Siga EXATAMENTE esta estrutura:
 
 ---

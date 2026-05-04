@@ -272,7 +272,7 @@ function TrianguloPiramideInline({ data, label, cellSize, letras }: { data: Tria
       <Text style={triStyles.cardLabel}>{label}</Text>
       
       {letras && letras.length === data.linhas[0].length && (
-        <View style={triStyles.row}>
+        <View wrap={false} style={triStyles.row}>
           {letras.map((char, ni) => (
             <View key={`letra-${ni}`} style={{ width: cellSize, margin: 0.5, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 2 }}>
               <Text style={{ fontSize: letterFontSize, fontFamily: 'Helvetica-Bold', color: '#4B5563' }}>{char}</Text>
@@ -282,7 +282,7 @@ function TrianguloPiramideInline({ data, label, cellSize, letras }: { data: Tria
       )}
 
       {data.linhas.map((linha, li) => (
-        <View key={li} style={triStyles.row}>
+        <View key={li} wrap={false} style={triStyles.row}>
           {linha.map((num, ni) => {
             const isBloqueio = bloqueioPositions.has(`${li}:${ni}`);
             const isFirstRow = li === 0;

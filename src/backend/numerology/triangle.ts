@@ -16,7 +16,7 @@
  * - Sequências Negativas: 3 ou mais dígitos iguais consecutivos em qualquer linha.
  */
 
-import { calcularValor, reduzirNumero } from './core';
+import { calcularValor, reduzirNumero, calcularIdade } from './core';
 
 // ================================================================
 // TIPOS
@@ -30,6 +30,15 @@ export interface Triangulo {
   sequenciasNegativas: string[];
   /** Quantidade de vezes que cada código de bloqueio aparece neste triângulo (em linhas distintas). */
   contagemSequencias: Record<string, number>;
+  /** Sequência cronológica completa sem remover duplicatas (Arcanos de Passagem) */
+  arcanosDePassagem: number[];
+  /** Arcano de Trânsito atual (baseado na idade) */
+  arcanoAtual?: {
+    numero: number | null;
+    periodo: string;
+    idadeInicio: number;
+    idadeFim: number;
+  };
 }
 
 export interface TodosTriangulos {
@@ -128,18 +137,62 @@ export const BLOQUEIOS_MAP: Record<
 // ================================================================
 
 /**
+ * Calcula o Arcano de Trânsito atual baseado na idade e na sequência de arcanos de passagem.
+ */
+function calcularArcanoAtual(idade: number, dataNascimento: string, sequenciaCompletaArcanos: number[]) {
+  if (!dataNascimento) return undefined;
+  const partes = dataNascimento.split('/');
+  if (partes.length !== 3) return undefined;
+
+  const [diaNasc, mesNasc, anoNasc] = partes.map(Number);
+  if (isNaN(diaNasc) || isNaN(mesNasc) || isNaN(anoNasc)) return undefined;
+
+  const numArcanos = sequenciaCompletaArcanos.length;
+  if (numArcanos === 0) return undefined;
+
+  const duracaoCicloArcano = 90 / numArcanos;
+  
+  let indiceArcano = Math.floor(idade / duracaoCicloArcano);
+  if (indiceArcano >= numArcanos) {
+    indiceArcano = numArcanos - 1; // Fica no último arcano para idades além de 90
+  }
+  if (indiceArcano < 0) {
+    indiceArcano = 0; // Previne idades negativas (ex: empresas não nascidas)
+  }
+  
+  const numeroArcano = sequenciaCompletaArcanos[indiceArcano] || null;
+
+  const idadeInicioCiclo = indiceArcano * duracaoCicloArcano;
+  const idadeFimCiclo = idadeInicioCiclo + duracaoCicloArcano;
+
+  const dataInicioCiclo = new Date(anoNasc + Math.floor(idadeInicioCiclo), mesNasc - 1, diaNasc);
+  const dataFimCiclo = new Date(anoNasc + Math.floor(idadeFimCiclo), mesNasc - 1, diaNasc);
+
+  const formatarData = (d: Date) => `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+  const periodo = `${formatarData(dataInicioCiclo)} a ${formatarData(dataFimCiclo)}`;
+
+  return { 
+    numero: numeroArcano, 
+    periodo, 
+    idadeInicio: Math.round(idadeInicioCiclo), 
+    idadeFim: Math.round(idadeFimCiclo) 
+  };
+}
+
+/**
  * Constrói um triângulo a partir de uma linha base já calculada.
  */
 function construirTriangulo(
   tipo: Triangulo['tipo'],
-  linhaBase: number[]
+  linhaBase: number[],
+  dataNascimento?: string
 ): Triangulo {
   const linhas: number[][] = [linhaBase];
 
   // Arcanos dominantes: concatenação dos pares da linha base
-  const arcanosDoMinantes: number[] = [];
+  const arcanosDePassagem: number[] = [];
   for (let k = 0; k < linhaBase.length - 1; k++) {
-    arcanosDoMinantes.push(parseInt(`${linhaBase[k]}${linhaBase[k + 1]}`));
+    arcanosDePassagem.push(parseInt(`${linhaBase[k]}${linhaBase[k + 1]}`));
   }
 
   // Construir triângulo reduzindo pares
@@ -166,22 +219,30 @@ function construirTriangulo(
     });
   }
 
+  let arcanoAtual = undefined;
+  if (dataNascimento) {
+    const idade = calcularIdade(dataNascimento);
+    arcanoAtual = calcularArcanoAtual(idade, dataNascimento, arcanosDePassagem);
+  }
+
   return {
     tipo,
     linhas,
     arcanoRegente: linhaAtual[0] ?? null,
-    arcanosDoMinantes: [...new Set(arcanosDoMinantes)],
+    arcanosDoMinantes: [...new Set(arcanosDePassagem)],
     sequenciasNegativas: Array.from(sequenciasContagem.keys()),
     contagemSequencias: Object.fromEntries(sequenciasContagem),
+    arcanosDePassagem,
+    arcanoAtual,
   };
 }
 
 // ----------------------------------------------------------------
 // 1. Triângulo da Vida (Básico) — só o valor de cada letra (sem pré-redução)
 // ----------------------------------------------------------------
-export function calcularTrianguloVida(nome: string): Triangulo {
+export function calcularTrianguloVida(nome: string, dataNascimento?: string): Triangulo {
   const nomeLimpo = nome.replace(/\s+/g, '').toUpperCase();
-  if (!nomeLimpo) return construirTriangulo('vida', []);
+  if (!nomeLimpo) return construirTriangulo('vida', [], dataNascimento);
 
   // Usa calcularValor direto (sem reduzir), igual ao formula.js e n8n
   // Filtra letras sem valor (espaços remanescentes, pontuação)
@@ -189,7 +250,7 @@ export function calcularTrianguloVida(nome: string): Triangulo {
     .split('')
     .map(l => calcularValor(l))
     .filter(v => v > 0);
-  return construirTriangulo('vida', linhaBase);
+  return construirTriangulo('vida', linhaBase, dataNascimento);
 }
 
 // ----------------------------------------------------------------
@@ -197,7 +258,7 @@ export function calcularTrianguloVida(nome: string): Triangulo {
 // ----------------------------------------------------------------
 export function calcularTrianguloPessoal(nome: string, dataNascimento: string): Triangulo {
   const nomeLimpo = nome.replace(/\s+/g, '').toUpperCase();
-  if (!nomeLimpo) return construirTriangulo('pessoal', []);
+  if (!nomeLimpo) return construirTriangulo('pessoal', [], dataNascimento);
 
   // Extrair dia da data DD/MM/AAAA
   const partes = dataNascimento.replace(/\D/g, '');
@@ -210,7 +271,7 @@ export function calcularTrianguloPessoal(nome: string, dataNascimento: string): 
     .filter(v => v > 0)
     .map(v => reduzirNumero(v + diaReduzido, false));
 
-  return construirTriangulo('pessoal', linhaBase);
+  return construirTriangulo('pessoal', linhaBase, dataNascimento);
 }
 
 // ----------------------------------------------------------------
@@ -218,7 +279,7 @@ export function calcularTrianguloPessoal(nome: string, dataNascimento: string): 
 // ----------------------------------------------------------------
 export function calcularTrianguloSocial(nome: string, dataNascimento: string): Triangulo {
   const nomeLimpo = nome.replace(/\s+/g, '').toUpperCase();
-  if (!nomeLimpo) return construirTriangulo('social', []);
+  if (!nomeLimpo) return construirTriangulo('social', [], dataNascimento);
 
   const partes = dataNascimento.replace(/\D/g, '');
   const mes = parseInt(partes.slice(2, 4));
@@ -230,7 +291,7 @@ export function calcularTrianguloSocial(nome: string, dataNascimento: string): T
     .filter(v => v > 0)
     .map(v => reduzirNumero(v + mesReduzido, false));
 
-  return construirTriangulo('social', linhaBase);
+  return construirTriangulo('social', linhaBase, dataNascimento);
 }
 
 // ----------------------------------------------------------------
@@ -238,7 +299,7 @@ export function calcularTrianguloSocial(nome: string, dataNascimento: string): T
 // ----------------------------------------------------------------
 export function calcularTrianguloDestino(nome: string, dataNascimento: string): Triangulo {
   const nomeLimpo = nome.replace(/\s+/g, '').toUpperCase();
-  if (!nomeLimpo) return construirTriangulo('destino', []);
+  if (!nomeLimpo) return construirTriangulo('destino', [], dataNascimento);
 
   const partes = dataNascimento.replace(/\D/g, '');
   const dia = parseInt(partes.slice(0, 2));
@@ -254,7 +315,7 @@ export function calcularTrianguloDestino(nome: string, dataNascimento: string): 
     .filter(v => v > 0)
     .map(v => reduzirNumero(v + modificador, false));
 
-  return construirTriangulo('destino', linhaBase);
+  return construirTriangulo('destino', linhaBase, dataNascimento);
 }
 
 // ----------------------------------------------------------------
@@ -265,7 +326,7 @@ export function calcularTodosTriangulos(
   dataNascimento: string
 ): TodosTriangulos {
   return {
-    vida: calcularTrianguloVida(nome),
+    vida: calcularTrianguloVida(nome, dataNascimento),
     pessoal: calcularTrianguloPessoal(nome, dataNascimento),
     social: calcularTrianguloSocial(nome, dataNascimento),
     destino: calcularTrianguloDestino(nome, dataNascimento),
