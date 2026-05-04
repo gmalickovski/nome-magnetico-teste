@@ -745,62 +745,6 @@ const dimSublabels: Record<TipKey, string> = {
   </section>
 )}
 
-{/* ── SEÇÃO CONCLUSÃO: resumo + CTA download ──────────────────────────────── */}
-{analysis.status === 'complete' && (
-  <section class="mt-16 mb-12">
-    <div class="rounded-2xl p-8 text-center" style="background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.18);">
-      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/60 mb-3">Resumo da Harmonização</p>
-      <h2 class="font-cinzel text-xl font-bold text-white mb-4">Este é um resumo da sua análise</h2>
-      <p class="text-gray-400 text-sm leading-relaxed max-w-xl mx-auto mb-8">
-        O que você viu aqui é um panorama da sua harmonização vibracional. O relatório completo em PDF contém a análise profunda dos seus 4 triângulos cabalísticos, lições kármicas, tendências ocultas, arcanos regentes e de trânsito, guia de ativação de 30 dias e folha de treino de assinatura — tudo para que você tenha o mapa completo da sua jornada.
-      </p>
-      <button
-        id="conclusao-pdf-btn"
-        type="button"
-        class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-semibold px-8 py-3.5 rounded-full hover:bg-[#f2ca50] active:scale-95 transition-all duration-200 text-sm"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-        </svg>
-        Baixar Análise Completa
-      </button>
-      <p class="text-xs text-gray-600 mt-4">PDF gerado em instantes · sem custo adicional</p>
-    </div>
-  </section>
-)}
-
-<script define:vars={{ analysisIdForConclusion: analysis.id, productTypeForConclusion: analysis.product_type }}>
-  (function () {
-    const btn = document.getElementById('conclusao-pdf-btn');
-    if (!btn) return;
-    btn.addEventListener('click', async function () {
-      btn.disabled = true;
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg> Gerando PDF…';
-      try {
-        const res = await fetch('/api/generate-pdf?id=' + analysisIdForConclusion + '&t=' + Date.now());
-        if (!res.ok) throw new Error('error');
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const disp = res.headers.get('Content-Disposition') ?? '';
-        const match = disp.match(/filename="([^"]+)"/);
-        a.download = match?.[1] ?? ('analise-' + productTypeForConclusion + '-nome-magnetico.pdf');
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch {
-        alert('Erro ao gerar o PDF. Tente pelo botão no topo da página.');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalHTML;
-      }
-    });
-  })();
-</script>
-
 {/* ── SCRIPT: handler dos cards clicáveis de nome social ──────────────────── */}
 {rankingSocial && (
   <script>
