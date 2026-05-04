@@ -4,7 +4,6 @@ import { createUserClient } from '../backend/db/supabase';
 import { hasUsedFreeAnalysis } from '../backend/db/analyses';
 import AvatarMenu from '../frontend/components/app/AvatarMenu';
 import MobileNavBar from '../frontend/components/app/MobileNavBar.astro';
-import ClientMessagePopup from '../frontend/components/app/ClientMessagePopup';
 
 export interface Props {
   title: string;
@@ -160,8 +159,6 @@ const showChatwoot = pathname.startsWith('/app/suporte');
     <main class="max-w-6xl mx-auto px-4 py-8 pb-24 md:pb-8">
       <slot />
     </main>
-
-    <ClientMessagePopup client:load />
 
   </div>
 

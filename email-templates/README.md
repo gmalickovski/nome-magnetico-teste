@@ -1,11 +1,11 @@
 # Email Templates — Nome Magnético
 
-Templates HTML para emails transacionais. O envio atual deve usar Amazon SES.
+Templates HTML para emails transacionais enviados via n8n + Resend.
 
 ## Arquitetura
 
 ```
-Código (notify.ts) → n8n webhook → n8n workflow → Amazon SES → usuário
+Código (notify.ts) → n8n webhook → n8n workflow → Resend → usuário
 ```
 
 - **Webhook transacional**: `N8N_WEBHOOK_TRANSACIONAL` — todos os eventos exceto `support.*`
@@ -42,7 +42,7 @@ Código (notify.ts) → n8n webhook → n8n workflow → Amazon SES → usuário
 2. **Switch node** — roteia por `{{ $json.event }}`
 3. Para cada rota: **Set node** para extrair campos do `payload`, depois **Send Email node** (Resend) com o HTML do template
 
-### Substituição de variáveis no node de email
+### Substituição de variáveis no Resend node
 
 No campo "Email Body (HTML)", cole o conteúdo do template e use expressões n8n:
 
