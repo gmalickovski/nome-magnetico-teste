@@ -16,6 +16,7 @@ import { verificarDisponibilidadeNomes } from '../../backend/utils/availability'
 import { analisarNomesSocial } from '../../backend/numerology/products/nome-social';
 import type { ProductType } from '../../backend/payments/stripe';
 import type { AnalysisProductType } from '../../backend/db/analyses';
+import { notify } from '../../backend/notifications/notify';
 
 const schema = z.object({
   nome_completo: z.string().min(2).max(150),
@@ -93,7 +94,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { data: profile } = await supabase
     
     .from('profiles')
-    .select('gender, role')
+    .select('gender, role, email, nome')
     .eq('id', user.id)
     .single();
 
@@ -136,6 +137,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       await updateAnalysis(analysis.id, { status: 'processing' });
 
       let analiseTexto: string;
+      let marketingStats = {
+        score: null as number | null,
+        bloqueios: 0,
+        licoesCarmicas: 0,
+        tendenciasOcultas: 0,
+        debitosCarmicos: 0,
+      };
 
       if (product_type === 'nome_empresa') {
         // ── Produto: Nome da Empresa ──
@@ -275,6 +283,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
         );
 
         const melhor = resultado.melhorNome;
+        marketingStats = {
+          score: melhor?.score ?? null,
+          bloqueios: melhor?.bloqueios?.length ?? 0,
+          licoesCarmicas: melhor?.licoesCarmicas?.length ?? 0,
+          tendenciasOcultas: melhor?.tendenciasOcultas?.length ?? 0,
+          debitosCarmicos: melhor?.debitosCarmicos?.length ?? 0,
+        };
         const todosTriangulosSocial = melhor
           ? calcularTodosTriangulos(melhor.nomeCompleto, data_nascimento)
           : null;
@@ -355,6 +370,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
           debitosCarmicoFixos: debitosCarmicos.filter(d => d.fixo).length,
           compatibilidade,
         });
+        marketingStats = {
+          score,
+          bloqueios: bloqueios.length,
+          licoesCarmicas: licoesCarmicas.length,
+          tendenciasOcultas: tendenciasOcultas.length,
+          debitosCarmicos: debitosCarmicos.length,
+        };
 
         await updateAnalysis(analysis.id, {
           numero_expressao: cincoNumeros.expressao,
@@ -401,6 +423,29 @@ export const POST: APIRoute = async ({ request, locals }) => {
         status: 'complete',
         completed_at: new Date().toISOString(),
       });
+
+      if (isGratuita) {
+        const appUrl = process.env.APP_URL ?? 'https://nomemagnetico.com.br';
+        const firstName = (profile?.nome || nome_completo || user.email || 'Cliente').split(' ')[0];
+        await notify('marketing.free_analysis_completed', {
+          email: profile?.email ?? user.email,
+          firstName,
+          userId: user.id,
+          analysisId: analysis.id,
+          analysisUrl: `${appUrl}/app/resultado/${analysis.id}`,
+          productType: 'nome_social',
+          productName: 'Nome Social',
+          offerUrl: `${appUrl}/nome-social`,
+          checkoutUrl: `${appUrl}/auth/cadastro?produto=nome_social`,
+          score: marketingStats.score,
+          nomeCompleto: nome_completo,
+          bloqueios: marketingStats.bloqueios,
+          licoesCarmicas: marketingStats.licoesCarmicas,
+          tendenciasOcultas: marketingStats.tendenciasOcultas,
+          debitosCarmicos: marketingStats.debitosCarmicos,
+          source: 'free_analysis_completed',
+        });
+      }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);
       const isQuota = errMsg.includes('QUOTA_EXCEEDED');

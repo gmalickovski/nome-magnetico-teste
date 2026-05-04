@@ -3,13 +3,15 @@
  * NUNCA enviar email diretamente — sempre via este módulo.
  *
  * Roteamento:
- *   todos os eventos → N8N_WEBHOOK_TRANSACIONAL
+ *   marketing.* → N8N_WEBHOOK_MARKETING
+ *   demais eventos → N8N_WEBHOOK_TRANSACIONAL
  */
 
 type NotificationEvent =
   | 'user.welcome'
   | 'user.password_reset'
   | 'user.analysis_complete'
+  | 'marketing.free_analysis_completed'
   | 'payment.confirmed'
   | 'payment.failed'
   | 'subscription.expiring_soon'
@@ -63,10 +65,14 @@ export async function notify(
   event: NotificationEvent,
   payload: NotificationPayload
 ): Promise<void> {
-  const webhookUrl = process.env.N8N_WEBHOOK_TRANSACIONAL;
+  const isMarketing = event.startsWith('marketing.');
+  const webhookUrl = isMarketing
+    ? process.env.N8N_WEBHOOK_MARKETING
+    : process.env.N8N_WEBHOOK_TRANSACIONAL;
 
   if (!webhookUrl) {
-    console.warn('[notify] N8N_WEBHOOK_TRANSACIONAL não configurado — notificação ignorada');
+    const envName = isMarketing ? 'N8N_WEBHOOK_MARKETING' : 'N8N_WEBHOOK_TRANSACIONAL';
+    console.warn(`[notify] ${envName} não configurado — notificação ignorada`);
     return;
   }
 

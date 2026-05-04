@@ -22,11 +22,33 @@ interface CouponResult {
   stripePromoCodeId?: string;
 }
 
-const PRODUCT_NAMES: Record<ProductType, string> = {
-  nome_social:  'Nome Social',
-  nome_bebe:    'Nome de Bebê',
-  nome_empresa: 'Nome Empresarial',
+const PRODUCT_META: Record<ProductType, { name: string; eyebrow: string; icon: string; summary: string }> = {
+  nome_social: {
+    name: 'Nome Social',
+    eyebrow: 'Dossiê pessoal',
+    icon: 'NS',
+    summary: 'Ranking de nomes, score 0-100, arcanos e PDF premium.',
+  },
+  nome_bebe: {
+    name: 'Nome de Bebê',
+    eyebrow: 'Nome do bebê',
+    icon: 'NB',
+    summary: 'Ranking de candidatos com compatibilidade e mapa numerológico.',
+  },
+  nome_empresa: {
+    name: 'Nome Empresarial',
+    eyebrow: 'Branding vibracional',
+    icon: 'NE',
+    summary: 'Análise do nome da marca com score, riscos ocultos e posicionamento.',
+  },
 };
+
+function splitPrice(formatted: string) {
+  const clean = formatted.trim();
+  const match = clean.match(/^(R\$)\s*([0-9.]+)(?:,([0-9]{2}))?$/);
+  if (!match) return { currency: '', amount: clean, cents: '' };
+  return { currency: match[1], amount: match[2], cents: `,${match[3] ?? '00'}` };
+}
 
 interface Props {
   productType: ProductType;
@@ -167,13 +189,14 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   }
 
   const canClose = step !== 'card-loading' && step !== 'pix-loading' && step !== 'pix-success';
-  const productLabel = PRODUCT_NAMES[productType];
+  const productMeta = PRODUCT_META[productType];
 
   // Preço exibido: usa desconto do cupom se válido, senão preço original
   const displayPrice = couponResult
     ? couponResult.discountedFormatted
     : priceInfo.formatted;
   const originalPrice = couponResult ? couponResult.originalFormatted : null;
+  const priceParts = splitPrice(displayPrice);
 
   const hours   = Math.floor(secondsLeft / 3600);
   const minutes = Math.floor((secondsLeft % 3600) / 60);
@@ -185,30 +208,44 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-4"
       style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
       onClick={(e) => { if (e.target === e.currentTarget && canClose) onClose(); }}
     >
       <div
-        className="w-full max-w-md rounded-2xl overflow-hidden"
+        className="w-full max-w-[33rem] rounded-t-[1.75rem] sm:rounded-2xl overflow-hidden"
         style={{
           background: 'rgba(15,15,15,0.98)',
           border: '1px solid rgba(212,175,55,0.20)',
           boxShadow: '0 32px 80px rgba(0,0,0,0.8)',
         }}
       >
+        <div className="sm:hidden flex justify-center pt-3 pb-1">
+          <div className="h-1 w-10 rounded-full bg-white/15" />
+        </div>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/6">
-          <div>
-            <p className="text-[10px] text-gray-600 uppercase tracking-widest">Nome Magnético</p>
-            <p className="font-cinzel text-sm font-bold text-[#e5e2e1] mt-0.5">{productLabel}</p>
+        <div className="flex items-start justify-between gap-4 px-5 py-5 sm:px-6 sm:py-6 border-b border-white/6">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#D4AF37]/12 text-[#D4AF37] font-cinzel text-sm font-bold shadow-[inset_0_0_0_1px_rgba(212,175,55,0.22)]">
+              {productMeta.icon}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest">{productMeta.eyebrow}</p>
+              <p className="font-cinzel text-lg font-bold text-[#e5e2e1] mt-0.5 leading-tight">{productMeta.name}</p>
+              <p className="text-[11px] text-gray-500 mt-1 leading-snug max-w-[18rem]">{productMeta.summary}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
+          <div className="flex items-start gap-3">
+            <div className="text-right pt-0.5">
               {originalPrice && (
-                <p className="text-xs text-gray-600 line-through">{originalPrice}</p>
+                <p className="text-xs text-gray-600 line-through mb-0.5">{originalPrice}</p>
               )}
-              <span className="font-cinzel text-lg font-bold text-[#D4AF37]">{displayPrice}</span>
+              <div className="flex items-start justify-end gap-1 text-[#D4AF37]">
+                {priceParts.currency && <span className="font-cinzel text-sm font-bold leading-none pt-1.5">{priceParts.currency}</span>}
+                <span className="font-cinzel text-4xl sm:text-5xl font-bold leading-none">{priceParts.amount}</span>
+                {priceParts.cents && <span className="font-cinzel text-sm font-bold leading-none pt-1.5">{priceParts.cents}</span>}
+              </div>
+              <p className="text-[10px] text-gray-600 mt-1">pagamento único</p>
             </div>
             {canClose && (
               <button
@@ -224,7 +261,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
           </div>
         </div>
 
-        <div className="px-5 py-6">
+        <div className="px-5 py-6 sm:px-6">
 
           {/* ── Step: method ── */}
           {step === 'method' && (
@@ -242,16 +279,19 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               {/* Cartão */}
               <button
                 onClick={handleCard}
-                className="w-full group flex items-center gap-4 bg-[#D4AF37] hover:bg-[#f2ca50] text-[#131313] rounded-2xl px-5 py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-yellow-500/20"
+                className="w-full group flex items-center gap-4 bg-[#D4AF37] hover:bg-[#f2ca50] text-[#131313] rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-yellow-500/20"
               >
-                <div className="w-10 h-10 rounded-xl bg-black/15 flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-black/15 flex items-center justify-center flex-shrink-0">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
                 </div>
                 <div className="text-left flex-1">
-                  <p className="font-bold text-sm">Cartão de Crédito</p>
-                  <p className="text-[11px] opacity-70 mt-0.5">Visa, Mastercard, Elo, Amex</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-bold text-base">Cartão de Crédito</p>
+                    <span className="hidden sm:inline-flex rounded-full bg-black/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider opacity-70">Stripe</span>
+                  </div>
+                  <p className="text-xs opacity-70 mt-1">Visa, Mastercard, Elo e Amex</p>
                 </div>
                 <svg className="w-4 h-4 opacity-60 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -262,9 +302,9 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               {/* Logo PIX: Por Banco Central do Brasil (BACEN) — CC BY 3.0 https://www.bcb.gov.br/ */}
               <button
                 onClick={handlePix}
-                className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-5 py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
               >
-                <div className="w-10 h-10 rounded-xl bg-white/8 flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-white/8 flex items-center justify-center flex-shrink-0">
                   <img
                     src="/Logo_-_pix_powered_by_Banco_Central_(Brazil,_2020).png"
                     alt="PIX"
@@ -272,8 +312,11 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                   />
                 </div>
                 <div className="text-left flex-1">
-                  <p className="font-bold text-sm text-[#e5e2e1]">PIX</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">Aprovação instantânea · ~1 min</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-bold text-base text-[#e5e2e1]">PIX</p>
+                    <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300/80">instantâneo</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">QR Code e copia e cola · confirmação em ~1 min</p>
                 </div>
                 <svg className="w-4 h-4 text-gray-600 group-hover:text-[#D4AF37] group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -329,6 +372,12 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                     )}
                   </div>
                 )}
+              </div>
+
+              <div className="rounded-2xl bg-white/[0.03] px-4 py-3 text-center">
+                <p className="text-[11px] leading-relaxed text-gray-500">
+                  Compra segura, pagamento único e liberação imediata do produto na sua área do cliente.
+                </p>
               </div>
 
               {/* Rodapé segurança */}

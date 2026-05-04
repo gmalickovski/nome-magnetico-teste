@@ -204,6 +204,52 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
   </section>
 )}
 
+<section
+  id="nome-social-upsell-contextual"
+  class="mt-10 mb-12 rounded-2xl bg-[#D4AF37]/[0.06] p-6 md:p-8"
+  data-upsell-view="resultado_gratis_contextual"
+>
+  <div class="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+    <div>
+      <p class="font-cinzel text-xs uppercase tracking-[0.15em] text-[#D4AF37]/75 mb-2">Próximo Passo</p>
+      <h2 class="font-cinzel text-xl md:text-2xl font-bold text-[#e5e2e1] mb-3">
+        Agora que você viu o diagnóstico, veja quais nomes melhoram esse mapa.
+      </h2>
+      <p class="text-gray-400 text-sm leading-relaxed">
+        O <strong class="text-[#D4AF37]">Nome Social</strong> compara variações do seu nome, calcula score 0-100,
+        analisa <strong class="text-[#e5e2e1]">Bloqueios</strong>, <strong class="text-[#e5e2e1]">Lições Kármicas</strong>,
+        <strong class="text-[#e5e2e1]"> Tendências Ocultas</strong>, <strong class="text-[#e5e2e1]">Arcanos</strong>
+        e gera um PDF completo com ranking e recomendação prática.
+      </p>
+    </div>
+    <a
+      href="/nome-social"
+      data-umami-event="cta_resultado_gratis_upsell_contextual"
+      class="inline-flex items-center justify-center rounded-full bg-[#D4AF37] px-7 py-3 text-sm font-bold text-[#131313] transition-all duration-300 hover:bg-[#f2ca50] hover:scale-[1.02] active:scale-[0.98]"
+    >
+      Ver Nome Social Completo
+    </a>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const section = document.querySelector('[data-upsell-view="resultado_gratis_contextual"]');
+    if (!section || !('IntersectionObserver' in window)) return;
+    let fired = false;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting || fired) return;
+        fired = true;
+        observer.disconnect();
+        const umami = (window as unknown as { umami?: { track: (event: string, data?: unknown) => void } }).umami;
+        umami?.track('upsell_view', { produto: 'nome_social', origem: 'resultado_gratis_contextual' });
+      });
+    }, { threshold: 0.45 });
+    observer.observe(section);
+  })();
+</script>
+
 
 {/* ── SEÇÃO 6: DÉBITOS KÁRMICOS ───────────────────────────────────────── */}
 {debitosRaw !== null && (
