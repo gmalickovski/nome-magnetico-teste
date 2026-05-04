@@ -7,6 +7,7 @@ import {
 } from '../../backend/db/subscriptions';
 import { getProfile } from '../../backend/db/users';
 import { notify } from '../../backend/notifications/notify';
+import { recordHqAccessCouponUse } from '../../backend/payments/prices';
 import type { ProductType } from '../../backend/payments/stripe';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -27,7 +28,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   // Tipo base para sessões de checkout
   type CheckoutSession = {
-    metadata?: { user_id?: string; product_type?: string };
+    metadata?: { user_id?: string; product_type?: string; coupon_code?: string };
     id: string;
     payment_intent?: string | { id: string } | null;
     amount_total?: number | null;
@@ -62,6 +63,12 @@ export const POST: APIRoute = async ({ request }) => {
       amountPaid: session.amount_total ?? undefined,
       currency: session.currency ?? 'brl',
     });
+    await recordHqAccessCouponUse({
+      couponCode: session.metadata?.coupon_code,
+      userId,
+      userEmail: session.customer_email,
+      productType,
+    }).catch((err) => console.error('[stripe-webhook] Falha ao registrar cupom no HQ:', err));
 
     const n8nUrl = process.env.N8N_WEBHOOK_TRANSACIONAL;
     if (n8nUrl) {

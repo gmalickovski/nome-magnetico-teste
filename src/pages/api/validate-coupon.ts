@@ -1,6 +1,10 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { getHqPricesAndPromo } from '../../backend/payments/prices';
+import {
+  getHqPricesAndPromo,
+  promotionAppliesToProduct,
+  validateHqAccessCoupon,
+} from '../../backend/payments/prices';
 import { stripe } from '../../backend/payments/stripe';
 
 const schema = z.object({
@@ -18,7 +22,12 @@ function formatBRL(cents: number) {
   return `R$ ${(cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const user = locals.user;
+  if (!user) {
+    return json({ valid: false, error: 'Faça login para validar o cupom' }, 401);
+  }
+
   let body: unknown;
   try { body = await request.json(); } catch {
     return json({ valid: false, error: 'Body inválido' }, 400);
@@ -36,9 +45,39 @@ export const POST: APIRoute = async ({ request }) => {
     const { prices, promotion } = await getHqPricesAndPromo();
     const originalCents = prices[product_type]?.cents ?? FALLBACK_CENTS[product_type] ?? 9800;
 
+    try {
+      const hqCoupon = await validateHqAccessCoupon({
+        couponCode: code,
+        productType: product_type,
+        userId: user.id,
+        userEmail: user.email,
+        originalCents,
+      });
+
+      if (hqCoupon) {
+        if (!hqCoupon.valid && hqCoupon.error !== 'Cupom inválido ou expirado') {
+          return json({ valid: false, error: hqCoupon.error ?? 'Cupom inválido ou expirado' });
+        }
+        if (hqCoupon.discountedCents !== undefined) {
+          return json({
+            valid: true,
+            originalCents,
+            discountedCents: hqCoupon.discountedCents,
+            originalFormatted: formatBRL(originalCents),
+            discountedFormatted: formatBRL(hqCoupon.discountedCents),
+            discountLabel: hqCoupon.discountLabel ?? 'Desconto aplicado',
+            promotionName: hqCoupon.description ?? hqCoupon.code ?? 'Cupom do Nome Magnético',
+            stripePromoCodeId: hqCoupon.stripePromoCodeId ?? undefined,
+          });
+        }
+      }
+    } catch {
+      // HQ indisponível: mantém fallback de promoção pública/Stripe abaixo.
+    }
+
     // Verifica se cupom bate com a promoção ativa no HQ
     if (promotion && promotion.stripePromoCode?.toUpperCase() === code) {
-      const appliesToThis = !promotion.productType || promotion.productType === product_type;
+      const appliesToThis = promotionAppliesToProduct(promotion, product_type);
       if (!appliesToThis) {
         return json({ valid: false, error: 'Cupom não se aplica a este produto' });
       }
@@ -70,6 +109,12 @@ export const POST: APIRoute = async ({ request }) => {
       if (promos.data.length > 0) {
         const promo = promos.data[0];
         const coupon = promo.coupon;
+        const appliesToProducts = coupon.applies_to?.products ?? [];
+        const productId = prices[product_type]?.productId;
+        if (appliesToProducts.length > 0 && (!productId || !appliesToProducts.includes(productId))) {
+          return json({ valid: false, error: 'Cupom não se aplica a este produto' });
+        }
+
         let discountedCents: number;
         let discountLabel: string;
 

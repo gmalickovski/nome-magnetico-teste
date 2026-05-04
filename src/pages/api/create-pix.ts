@@ -2,7 +2,11 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { supabase } from '../../backend/db/supabase';
 import { createPixCharge } from '../../backend/payments/asaas';
-import { getHqPricesAndPromo } from '../../backend/payments/prices';
+import {
+  getHqPricesAndPromo,
+  promotionAppliesToProduct,
+  validateHqAccessCoupon,
+} from '../../backend/payments/prices';
 import type { ProductType } from '../../backend/payments/stripe';
 
 const schema = z.object({
@@ -90,11 +94,36 @@ export const POST: APIRoute = async ({ request, locals }) => {
         value = priceInfo.cents / 100;
       }
 
+      const cleanCoupon = coupon_code?.trim();
+      let couponHandled = false;
+      if (cleanCoupon) {
+        const hqCoupon = await validateHqAccessCoupon({
+          couponCode: cleanCoupon,
+          productType: product_type,
+          userId: user.id,
+          userEmail: user.email,
+          originalCents: Math.round(value * 100),
+        });
+
+        if (hqCoupon) {
+          if (!hqCoupon.valid && hqCoupon.error !== 'Cupom inválido ou expirado') {
+            return new Response(
+              JSON.stringify({ error: hqCoupon.error ?? 'Cupom inválido ou expirado' }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+          }
+          if (hqCoupon.discountedCents !== undefined) {
+            value = parseFloat((hqCoupon.discountedCents / 100).toFixed(2));
+            couponHandled = true;
+          }
+        }
+      }
+
       // Aplica desconto se cupom ou promoção ativa for válida
-      if (promotion) {
-        const appliesToThis = !promotion.productType || promotion.productType === product_type;
-        const couponMatch = coupon_code &&
-          promotion.stripePromoCode?.toLowerCase() === coupon_code.toLowerCase();
+      if (promotion && !couponHandled) {
+        const appliesToThis = promotionAppliesToProduct(promotion, product_type);
+        const couponMatch = cleanCoupon &&
+          promotion.stripePromoCode?.toLowerCase() === cleanCoupon.toLowerCase();
         const autoPromo = !coupon_code; // promoção automática sem cupom
 
         if (appliesToThis && (couponMatch || autoPromo)) {
@@ -103,7 +132,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
           } else {
             value = parseFloat((value - promotion.discountValue).toFixed(2));
           }
+          couponHandled = true;
         }
+      }
+
+      if (cleanCoupon && !couponHandled) {
+        return new Response(
+          JSON.stringify({ error: 'Cupom inválido ou expirado' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
       }
     } catch {
       // HQ indisponível — usa fallback sem desconto
@@ -114,6 +151,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       productType: product_type,
       value,
       description: PRODUCT_DESCRIPTIONS[product_type as ProductType],
+      couponCode: coupon_code?.trim(),
     });
 
     return new Response(

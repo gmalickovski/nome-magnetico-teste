@@ -2,7 +2,11 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { createCheckoutSession, stripe, type ProductType } from '../../backend/payments/stripe';
 import { supabase } from '../../backend/db/supabase';
-import { getHqPricesAndPromo } from '../../backend/payments/prices';
+import {
+  getHqPricesAndPromo,
+  promotionAppliesToProduct,
+  validateHqAccessCoupon,
+} from '../../backend/payments/prices';
 
 const schema = z.object({
   product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']),
@@ -82,8 +86,31 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
       const priceInfo = prices[product_type];
       unitAmount = priceInfo?.cents ?? 0;
 
-      if (promotion?.stripeCouponId) {
-        const appliesToThis = !promotion.productType || promotion.productType === product_type;
+      if (couponCode) {
+        const hqCoupon = await validateHqAccessCoupon({
+          couponCode,
+          productType: product_type,
+          userId: user.id,
+          userEmail: user.email,
+          originalCents: unitAmount,
+        });
+
+        if (hqCoupon?.valid) {
+          if (hqCoupon.stripePromoCodeId) {
+            promotionCodeId = hqCoupon.stripePromoCodeId;
+          } else if (hqCoupon.stripeCouponId) {
+            couponId = hqCoupon.stripeCouponId;
+          }
+        } else if (hqCoupon && hqCoupon.error !== 'Cupom inválido ou expirado') {
+          return new Response(
+            JSON.stringify({ error: hqCoupon.error ?? 'Cupom inválido ou expirado' }),
+            { status: 400, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+
+      if (!couponCode && promotion?.stripeCouponId) {
+        const appliesToThis = promotionAppliesToProduct(promotion, product_type);
         if (appliesToThis) couponId = promotion.stripeCouponId;
       }
     } catch {
@@ -93,13 +120,27 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     }
 
     // ── Código de promoção manual (só usado se não há cupom sazonal ativo)
-    if (!couponId && couponCode) {
+    if (!couponId && !promotionCodeId && couponCode) {
       try {
         const promos = await stripe.promotionCodes.list({ code: couponCode, active: true, limit: 1 });
-        if (promos.data.length > 0) promotionCodeId = promos.data[0].id;
+        if (promos.data.length > 0) {
+          const promo = promos.data[0];
+          const appliesToProducts = promo.coupon.applies_to?.products ?? [];
+          const productId = process.env[`STRIPE_PRODUCT_${product_type.toUpperCase()}`];
+          if (appliesToProducts.length === 0 || (productId && appliesToProducts.includes(productId))) {
+            promotionCodeId = promo.id;
+          }
+        }
       } catch {
         // Falha silenciosa ao resolver código manual
       }
+    }
+
+    if (couponCode && !couponId && !promotionCodeId) {
+      return new Response(
+        JSON.stringify({ error: 'Cupom inválido ou expirado' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const session = await createCheckoutSession({
@@ -111,6 +152,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
       cancelUrl: `${baseUrl}/comprar?checkout=cancel`,
       couponId,
       promotionCodeId,
+      couponCode: couponCode?.trim(),
     });
 
     return new Response(

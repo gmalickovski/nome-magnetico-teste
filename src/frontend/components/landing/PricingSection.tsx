@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { track } from '../../lib/analytics';
-import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
+import { promotionAppliesToProduct, type PriceInfo, type ActivePromotion } from '../../../backend/payments/prices';
 
 export interface StripePrices {
   nome_social: string;
@@ -83,7 +83,7 @@ interface PricingSectionProps {
 }
 
 function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInfo; promotion?: ActivePromotion | null; productId: string }) {
-  const appliesToThis = !promotion?.productType || promotion.productType === productId;
+  const appliesToThis = promotionAppliesToProduct(promotion, productId as 'nome_social' | 'nome_bebe' | 'nome_empresa');
   const showDiscount = promotion && appliesToThis && priceInfo.hasDiscount && priceInfo.discountedFormatted;
 
   if (showDiscount) {

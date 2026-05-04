@@ -3,6 +3,7 @@ import { verifyWebhookToken } from '../../backend/payments/asaas';
 import { createSubscription } from '../../backend/db/subscriptions';
 import { getProfile } from '../../backend/db/users';
 import { notify } from '../../backend/notifications/notify';
+import { recordHqAccessCouponUse } from '../../backend/payments/prices';
 import type { ProductType } from '../../backend/payments/stripe';
 
 const PRODUCT_NAMES: Record<string, string> = {
@@ -43,11 +44,12 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response('OK', { status: 200 });
   }
 
-  // Formato: "nomemagnetico:userId:productType"
+  // Formato: "nomemagnetico:userId:productType:couponCode"
   const parts = payment.externalReference.split(':');
-  const [saasPrefix, userId, productType] = parts.length === 3
+  const [saasPrefix, userId, productType, rawCouponCode] = parts.length >= 3
     ? parts
-    : [null, parts[0], parts[1]]; // compatibilidade com formato legado
+    : [null, parts[0], parts[1], null]; // compatibilidade com formato legado
+  const couponCode = rawCouponCode ? decodeURIComponent(rawCouponCode) : null;
 
   if (!userId || !productType) {
     console.error('[asaas-webhook] externalReference inválido:', payment.externalReference);
@@ -69,6 +71,11 @@ export const POST: APIRoute = async ({ request }) => {
       amountPaid: Math.round(payment.value * 100),
       currency: 'brl',
     });
+    await recordHqAccessCouponUse({
+      couponCode,
+      userId,
+      productType: productType as ProductType,
+    }).catch((err) => console.error('[asaas-webhook] Falha ao registrar cupom no HQ:', err));
   } catch (err: unknown) {
     // Idempotência: unique constraint violation → pagamento já processado
     if (

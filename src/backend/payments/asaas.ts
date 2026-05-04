@@ -58,6 +58,7 @@ export async function createPixCharge(params: {
   productType: string;
   value: number;
   description: string;
+  couponCode?: string | null;
 }): Promise<PixChargeResult> {
   const customerId = await getOrCreateUmbrellaCustomer();
 
@@ -72,7 +73,12 @@ export async function createPixCharge(params: {
       value: params.value,
       dueDate,
       description: params.description,
-      externalReference: `nomemagnetico:${params.userId}:${params.productType}`,
+      externalReference: [
+        'nomemagnetico',
+        params.userId,
+        params.productType,
+        params.couponCode ? encodeURIComponent(params.couponCode) : '',
+      ].join(':'),
     }),
   });
 

@@ -22,11 +22,37 @@ interface CouponResult {
   stripePromoCodeId?: string;
 }
 
-const PRODUCT_NAMES: Record<ProductType, string> = {
-  nome_social:  'Nome Social',
-  nome_bebe:    'Nome de Bebê',
-  nome_empresa: 'Nome Empresarial',
+const PRODUCT_META: Record<ProductType, { name: string; eyebrow: string; icon: string; summary: string }> = {
+  nome_social: {
+    name: 'Nome Social',
+    eyebrow: 'Dossiê pessoal',
+    icon: 'NM',
+    summary: 'Análise completa com ranking, score 0–100, arcanos e PDF premium.',
+  },
+  nome_bebe: {
+    name: 'Nome de Bebê',
+    eyebrow: 'Nome do bebê',
+    icon: 'NB',
+    summary: 'Ranking de nomes candidatos com compatibilidade e mapa numerológico.',
+  },
+  nome_empresa: {
+    name: 'Nome Empresarial',
+    eyebrow: 'Branding vibracional',
+    icon: 'NE',
+    summary: 'Análise do nome da marca com score, riscos ocultos e posicionamento.',
+  },
 };
+
+function splitPrice(formatted: string) {
+  const clean = formatted.trim();
+  const match = clean.match(/^(R\$)\s*([0-9.]+)(?:,([0-9]{2}))?$/);
+  if (!match) return { currency: '', amount: clean, cents: '' };
+  return {
+    currency: match[1],
+    amount: match[2],
+    cents: `,${match[3] ?? '00'}`,
+  };
+}
 
 interface Props {
   productType: ProductType;
@@ -52,6 +78,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
   const pollRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const couponValidationRef = useRef(0);
 
   // Promoção automática do HQ (sem digitar cupom)
   useEffect(() => {
@@ -91,9 +118,25 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [step, pixData, productType]);
 
-  async function validateCoupon() {
+  useEffect(() => {
     const code = couponCode.trim();
-    if (!code) return;
+    if (!showCoupon || !code) {
+      setCouponResult(null);
+      setCouponError('');
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      validateCoupon(code);
+    }, 650);
+
+    return () => clearTimeout(timer);
+  }, [couponCode, showCoupon, productType]);
+
+  async function validateCoupon(codeOverride?: string): Promise<boolean> {
+    const code = (codeOverride ?? couponCode).trim();
+    if (!code) return false;
+    const validationId = ++couponValidationRef.current;
     setCouponLoading(true);
     setCouponError('');
     setCouponResult(null);
@@ -104,19 +147,29 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
         body: JSON.stringify({ coupon_code: code, product_type: productType }),
       });
       const data = await res.json() as CouponResult | { valid: false; error: string };
+      if (validationId !== couponValidationRef.current) return false;
       if (data.valid) {
         setCouponResult(data as CouponResult);
+        return true;
       } else {
         setCouponError((data as { valid: false; error: string }).error);
+        return false;
       }
     } catch {
+      if (validationId !== couponValidationRef.current) return false;
       setCouponError('Erro ao validar cupom. Tente novamente.');
+      return false;
     } finally {
-      setCouponLoading(false);
+      if (validationId === couponValidationRef.current) setCouponLoading(false);
     }
   }
 
   async function handlePix() {
+    if (couponCode.trim() && !couponResult) {
+      const valid = await validateCoupon();
+      if (!valid) return;
+    }
+
     setStep('pix-loading');
     setPixError('');
     try {
@@ -153,6 +206,15 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   }
 
   function handleCard() {
+    if (couponCode.trim() && !couponResult) {
+      validateCoupon().then((valid) => {
+        if (!valid) return;
+        setStep('card-loading');
+        onTriggerCard(productType, couponCode.trim());
+      });
+      return;
+    }
+
     setStep('card-loading');
     const effectiveCoupon = couponCode.trim() || undefined;
     onTriggerCard(productType, effectiveCoupon);
@@ -167,13 +229,14 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   }
 
   const canClose = step !== 'card-loading' && step !== 'pix-loading' && step !== 'pix-success';
-  const productLabel = PRODUCT_NAMES[productType];
+  const productMeta = PRODUCT_META[productType];
 
-  // Preço exibido: usa desconto do cupom se válido, senão preço original
+  // Preço exibido: usa desconto do cupom se válido, senão preço original.
   const displayPrice = couponResult
     ? couponResult.discountedFormatted
     : priceInfo.formatted;
   const originalPrice = couponResult ? couponResult.originalFormatted : null;
+  const priceParts = splitPrice(displayPrice);
 
   const hours   = Math.floor(secondsLeft / 3600);
   const minutes = Math.floor((secondsLeft % 3600) / 60);
@@ -185,100 +248,136 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+      className="fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-4"
+      style={{ background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
       onClick={(e) => { if (e.target === e.currentTarget && canClose) onClose(); }}
     >
       <div
-        className="w-full max-w-md rounded-2xl overflow-hidden"
+        className="w-full max-w-[33rem] overflow-hidden rounded-t-[1.75rem] sm:rounded-2xl"
         style={{
-          background: 'rgba(15,15,15,0.98)',
-          border: '1px solid rgba(212,175,55,0.20)',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.8)',
+          background: 'linear-gradient(180deg, rgba(18,18,18,0.99) 0%, rgba(13,13,13,0.99) 100%)',
+          border: '1px solid rgba(212,175,55,0.22)',
+          boxShadow: '0 -20px 70px rgba(0,0,0,0.85), 0 34px 90px rgba(0,0,0,0.85)',
         }}
       >
+        <div className="h-1.5 w-12 rounded-full bg-white/15 mx-auto mt-3 sm:hidden" />
+
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/6">
-          <div>
-            <p className="text-[10px] text-gray-600 uppercase tracking-widest">Nome Magnético</p>
-            <p className="font-cinzel text-sm font-bold text-[#e5e2e1] mt-0.5">{productLabel}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              {originalPrice && (
-                <p className="text-xs text-gray-600 line-through">{originalPrice}</p>
-              )}
-              <span className="font-cinzel text-lg font-bold text-[#D4AF37]">{displayPrice}</span>
+        <div className="px-5 pb-5 pt-4 sm:px-6 sm:pt-6 border-b border-white/8">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#D4AF37]/12 text-[#D4AF37] ring-1 ring-[#D4AF37]/25 shadow-[0_0_28px_rgba(212,175,55,0.12)]">
+                <span className="font-cinzel text-xl font-bold leading-none">{productMeta.icon}</span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] text-[#D4AF37]/60 uppercase tracking-[0.22em]">{productMeta.eyebrow}</p>
+                <p className="font-cinzel text-lg font-bold text-[#e5e2e1] mt-1 leading-tight">{productMeta.name}</p>
+                <p className="mt-1.5 max-w-[17rem] text-xs leading-relaxed text-gray-500 sm:max-w-xs">{productMeta.summary}</p>
+              </div>
             </div>
-            {canClose && (
-              <button
-                onClick={onClose}
-                className="text-gray-500 hover:text-gray-300 transition-colors w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/5"
-                aria-label="Fechar"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
+
+            <div className="flex shrink-0 items-start gap-2">
+              <div className="text-right">
+                {originalPrice && (
+                  <p className="mb-0.5 text-xs text-gray-600 line-through">{originalPrice}</p>
+                )}
+                <div className="font-cinzel text-[#D4AF37] leading-none whitespace-nowrap" aria-label={`Preço ${displayPrice}`}>
+                  <span className="align-[0.45em] text-sm font-bold tracking-wide sm:text-base">{priceParts.currency}</span>
+                  <span className="mx-1 text-4xl font-bold tracking-normal sm:text-5xl">{priceParts.amount}</span>
+                  <span className="align-[0.75em] text-sm font-bold sm:text-base">{priceParts.cents}</span>
+                </div>
+                <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-600">pagamento único</p>
+              </div>
+              {canClose && (
+                <button
+                  onClick={onClose}
+                  className="-mr-1 -mt-1 text-gray-500 hover:text-gray-300 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5"
+                  aria-label="Fechar"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="px-5 py-6">
+        <div className="px-5 py-5 sm:px-6 sm:py-6">
 
-          {/* ── Step: method ── */}
+          {/* -- Step: method -- */}
           {step === 'method' && (
             <div className="space-y-4">
-              <p className="text-xs text-gray-500 uppercase tracking-widest text-center mb-5">
-                Como prefere pagar?
-              </p>
+              <div className="text-center">
+                <p className="text-[11px] text-gray-500 uppercase tracking-[0.22em]">
+                  Escolha a forma de pagamento
+                </p>
+                <p className="mt-2 text-xs text-gray-600">Acesso liberado automaticamente após a confirmação.</p>
+              </div>
 
               {pixError && (
-                <div className="mb-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2.5 text-red-400 text-xs text-center">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2.5 text-red-400 text-xs text-center">
                   {pixError}
                 </div>
               )}
 
-              {/* Cartão */}
-              <button
-                onClick={handleCard}
-                className="w-full group flex items-center gap-4 bg-[#D4AF37] hover:bg-[#f2ca50] text-[#131313] rounded-2xl px-5 py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-yellow-500/20"
-              >
-                <div className="w-10 h-10 rounded-xl bg-black/15 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              <div className="grid gap-3">
+                <button
+                  onClick={handleCard}
+                  className="w-full group flex items-center gap-4 bg-[#D4AF37] hover:bg-[#f2ca50] text-[#131313] rounded-2xl px-4 py-4 sm:px-5 sm:py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-[0_18px_42px_rgba(212,175,55,0.24)]"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-black/15 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-base leading-tight">Cartão de Crédito</p>
+                      <span className="hidden sm:inline-flex rounded-full bg-black/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">Stripe</span>
+                    </div>
+                    <p className="text-xs opacity-75 mt-1">Visa, Mastercard, Elo e Amex</p>
+                  </div>
+                  <svg className="w-5 h-5 opacity-60 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                </div>
-                <div className="text-left flex-1">
-                  <p className="font-bold text-sm">Cartão de Crédito</p>
-                  <p className="text-[11px] opacity-70 mt-0.5">Visa, Mastercard, Elo, Amex</p>
-                </div>
-                <svg className="w-4 h-4 opacity-60 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+                </button>
 
-              {/* PIX */}
-              {/* Logo PIX: Por Banco Central do Brasil (BACEN) — CC BY 3.0 https://www.bcb.gov.br/ */}
-              <button
-                onClick={handlePix}
-                className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-5 py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-              >
-                <div className="w-10 h-10 rounded-xl bg-white/8 flex items-center justify-center flex-shrink-0">
-                  <img
-                    src="/Logo_-_pix_powered_by_Banco_Central_(Brazil,_2020).png"
-                    alt="PIX"
-                    className="w-7 h-7 object-contain"
-                  />
+                {/* Logo PIX: Por Banco Central do Brasil (BACEN) - CC BY 3.0 https://www.bcb.gov.br/ */}
+                <button
+                  onClick={handlePix}
+                  className="w-full group flex items-center gap-4 bg-white/[0.035] hover:bg-white/[0.065] border border-white/10 hover:border-[#D4AF37]/45 rounded-2xl px-4 py-4 sm:px-5 sm:py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.06] flex items-center justify-center flex-shrink-0 ring-1 ring-white/5">
+                    <img
+                      src="/Logo_-_pix_powered_by_Banco_Central_(Brazil,_2020).png"
+                      alt="PIX"
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-base leading-tight text-[#e5e2e1]">PIX</p>
+                      <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-300">instantâneo</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">QR Code e copia e cola · confirmação em ~1 min</p>
+                  </div>
+                  <svg className="w-5 h-5 text-gray-600 group-hover:text-[#D4AF37] group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="rounded-2xl bg-white/[0.025] border border-white/8 px-4 py-3">
+                <div className="flex items-start gap-3">
+                  <svg className="mt-0.5 h-4 w-4 shrink-0 text-[#D4AF37]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-xs leading-relaxed text-gray-500">
+                    Compra segura, pagamento único e liberação imediata do produto na sua área do cliente.
+                  </p>
                 </div>
-                <div className="text-left flex-1">
-                  <p className="font-bold text-sm text-[#e5e2e1]">PIX</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">Aprovação instantânea · ~1 min</p>
-                </div>
-                <svg className="w-4 h-4 text-gray-600 group-hover:text-[#D4AF37] group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+              </div>
 
               {/* Cupom promocional */}
               <div className="space-y-2">
@@ -286,7 +385,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                   <div className="text-center">
                     <button
                       onClick={() => setShowCoupon(true)}
-                      className="text-gray-600 hover:text-gray-400 text-[11px] underline underline-offset-2 transition-colors"
+                      className="text-gray-600 hover:text-gray-400 text-xs underline underline-offset-4 transition-colors"
                     >
                       Tenho um código promocional
                     </button>
@@ -304,7 +403,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                         }}
                         onKeyDown={e => e.key === 'Enter' && validateCoupon()}
                         placeholder="Digite o código"
-                        className="flex-1 bg-white/4 border border-white/10 rounded-xl px-3 py-2 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/40 transition-colors"
+                        className="flex-1 bg-white/4 border border-white/10 rounded-xl px-3 py-2.5 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/40 transition-colors"
                         autoFocus
                       />
                       <button
@@ -312,7 +411,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                         disabled={couponLoading || !couponCode.trim()}
                         className="bg-white/8 hover:bg-white/12 border border-white/10 text-gray-300 text-xs font-semibold px-3 py-2 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                       >
-                        {couponLoading ? '...' : 'Aplicar'}
+                        {couponLoading ? 'Validando' : 'Aplicar'}
                       </button>
                     </div>
                     {couponResult && (
@@ -321,7 +420,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         <span className="text-green-400 text-xs font-semibold">{couponResult.discountLabel}</span>
-                        <span className="text-gray-400 text-xs">— {couponResult.promotionName}</span>
+                        <span className="text-gray-400 text-xs">- {couponResult.promotionName}</span>
                       </div>
                     )}
                     {couponError && (
@@ -334,13 +433,13 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               {/* Rodapé segurança */}
               <div className="flex flex-col items-center gap-2.5 pt-1">
                 <div className="flex items-center justify-center gap-1.5">
-                  <svg className="w-3 h-3 text-gray-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-3.5 h-3.5 text-gray-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   <span className="text-gray-700 text-[11px]">Pagamento 100% seguro e criptografado</span>
                 </div>
                 {/* Logos dos meios de pagamento aceitos */}
-                {/* PIX: Por Banco Central do Brasil (BACEN) — CC BY 3.0 https://www.bcb.gov.br/ */}
+                {/* PIX: Por Banco Central do Brasil (BACEN) - CC BY 3.0 https://www.bcb.gov.br/ */}
                 <div className="flex items-center justify-center gap-3 flex-wrap">
                   <span className="text-[11px] font-extrabold tracking-tight" style={{ color: '#635BFF' }}>stripe</span>
                   <span className="text-[10px] font-black tracking-widest text-white/35">VISA</span>

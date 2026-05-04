@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
+import { promotionAppliesToProduct, type PriceInfo, type ActivePromotion } from '../../../backend/payments/prices';
 import { track } from '../../lib/analytics';
 import { CheckoutModal } from './CheckoutModal';
 
@@ -83,7 +83,7 @@ const FALLBACK_PRICES: Record<string, PriceInfo> = {
 };
 
 function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInfo; promotion?: ActivePromotion | null; productId: string }) {
-  const appliesToThis = !promotion?.productType || promotion.productType === productId;
+  const appliesToThis = promotionAppliesToProduct(promotion, productId as ProductType);
   const showDiscount = promotion && appliesToThis && priceInfo.hasDiscount && priceInfo.discountedFormatted;
 
   if (showDiscount) {
@@ -130,7 +130,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     setLoading(type);
     setErrorMsg('');
     try {
-      const appliesToThis = !promotion?.productType || promotion.productType === type;
+      const appliesToThis = promotionAppliesToProduct(promotion, type);
       const effectiveCoupon = couponCode || (promotion && appliesToThis ? promotion.stripePromoCode : null) || undefined;
 
       const priceInfo = prices[type] ?? FALLBACK_PRICES[type];

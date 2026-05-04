@@ -35,6 +35,21 @@ export interface ActivePromotion {
   stripePromoCode: string | null;
 }
 
+export interface HqCouponValidation {
+  valid: boolean;
+  error?: string;
+  code?: string;
+  description?: string | null;
+  productTypes?: string[];
+  stripeCouponId?: string | null;
+  stripePromoCodeId?: string | null;
+  discountPercent?: number | null;
+  discountAmountBrl?: number | null;
+  originalCents?: number;
+  discountedCents?: number;
+  discountLabel?: string;
+}
+
 export interface HqPricesResponse {
   prices: Record<string, PriceInfo>;
   promotion: ActivePromotion | null;
@@ -50,6 +65,83 @@ const PRICE_IDS: Record<ProductType, string> = {
 function formatBRL(unitAmount: number | null): string {
   if (unitAmount == null) return '';
   return `R$ ${(unitAmount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+export function promotionProductTypes(promotion?: ActivePromotion | null): ProductType[] {
+  return String(promotion?.productType ?? '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item): item is ProductType =>
+      item === 'nome_social' || item === 'nome_bebe' || item === 'nome_empresa'
+    );
+}
+
+export function promotionAppliesToProduct(promotion: ActivePromotion | null | undefined, productType: ProductType): boolean {
+  const products = promotionProductTypes(promotion);
+  return products.length === 0 || products.includes(productType);
+}
+
+export async function validateHqAccessCoupon(params: {
+  couponCode: string;
+  productType: ProductType;
+  userId?: string | null;
+  userEmail?: string | null;
+  originalCents?: number | null;
+  saasId?: string;
+}): Promise<HqCouponValidation | null> {
+  const hqUrl = process.env.HQ_API_URL;
+  if (!hqUrl) return null;
+
+  const res = await fetch(`${hqUrl}/access-codes/validate-coupon`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(5000),
+    body: JSON.stringify({
+      saasId: params.saasId ?? 'nome-magnetico',
+      couponCode: params.couponCode,
+      productType: params.productType,
+      userId: params.userId,
+      userEmail: params.userEmail,
+      originalCents: params.originalCents,
+    }),
+  });
+
+  return await res.json() as HqCouponValidation;
+}
+
+export async function recordHqAccessCouponUse(params: {
+  couponCode?: string | null;
+  productType: ProductType;
+  userId: string;
+  userEmail?: string | null;
+  saasId?: string;
+}): Promise<void> {
+  const hqUrl = process.env.HQ_API_URL;
+  const couponCode = params.couponCode?.trim();
+  if (!hqUrl || !couponCode) return;
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (process.env.HQ_INTERNAL_TOKEN) {
+    headers['x-hq-internal-token'] = process.env.HQ_INTERNAL_TOKEN;
+  }
+
+  const res = await fetch(`${hqUrl}/access-codes/redeem-coupon`, {
+    method: 'POST',
+    headers,
+    signal: AbortSignal.timeout(5000),
+    body: JSON.stringify({
+      saasId: params.saasId ?? 'nome-magnetico',
+      couponCode,
+      productType: params.productType,
+      userId: params.userId,
+      userEmail: params.userEmail,
+    }),
+  });
+
+  if (!res.ok && res.status !== 400 && res.status !== 404 && res.status !== 409) {
+    const text = await res.text();
+    throw new Error(`Falha ao registrar uso do cupom no HQ: ${text}`);
+  }
 }
 
 /** Busca preços + promoção ativa via HQ (preferido) ou Stripe (fallback) */

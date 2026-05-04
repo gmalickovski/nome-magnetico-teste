@@ -42,6 +42,8 @@ export interface CreateCheckoutParams {
   couponId?: string;
   /** Código de promoção manual do usuário (promotion_code ID do Stripe) */
   promotionCodeId?: string;
+  /** Código digitado para registrar uso no HQ após o pagamento. */
+  couponCode?: string;
 }
 
 /**
@@ -84,6 +86,7 @@ export async function createCheckoutSession(
       user_id: params.userId,
       product_type: params.productType,
       access_duration_days: '30',
+      coupon_code: params.couponCode ?? '',
     },
     custom_text: PRODUCT_CUSTOM_TEXT[params.productType],
     success_url: params.successUrl,
@@ -99,6 +102,7 @@ export async function createCheckoutSession(
       metadata: {
         user_id: params.userId,
         product_type: params.productType,
+        coupon_code: params.couponCode ?? '',
       },
     },
   });
