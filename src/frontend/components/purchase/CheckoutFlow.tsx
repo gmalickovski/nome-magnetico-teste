@@ -12,6 +12,7 @@ interface Props {
   paymentLinks: Record<ProductType, string>;
   hqPrices?: Record<string, PriceInfo>;
   promotion?: ActivePromotion | null;
+  autoOpenCheckout?: boolean;
 }
 
 const ALL_PRODUCTS: ProductType[] = ['nome_social', 'nome_bebe', 'nome_empresa'];
@@ -116,13 +117,15 @@ function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInf
   );
 }
 
-export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, hqPrices, promotion }: Props) {
+export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, hqPrices, promotion, autoOpenCheckout = false }: Props) {
   const [showAll, setShowAll]   = useState(productType === null);
   const [loading, setLoading]   = useState<ProductType | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   // Produto selecionado para abrir o pré-checkout modal
-  const [modalProduct, setModalProduct] = useState<ProductType | null>(null);
+  const [modalProduct, setModalProduct] = useState<ProductType | null>(
+    autoOpenCheckout && isLoggedIn && !isOwned && productType ? productType : null
+  );
 
   const prices = hqPrices ?? FALLBACK_PRICES;
 
@@ -275,17 +278,21 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
         </ul>
 
         {showPayButton ? (
-          <button
-            onClick={() => setModalProduct(type)}
-            disabled={isLoadingThis}
-            className={`w-full font-bold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
+          <a
+            href={`/comprar?produto=${type}&checkout=1`}
+            aria-disabled={isLoadingThis}
+            onClick={(event) => {
+              event.preventDefault();
+              if (!isLoadingThis) setModalProduct(type);
+            }}
+            className={`block text-center w-full font-bold py-3.5 rounded-xl transition-all duration-300 ${
               isHighlighted
                 ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
                 : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/70'
-            }`}
+            } ${isLoadingThis ? 'pointer-events-none opacity-60 cursor-not-allowed' : ''}`}
           >
             {isLoadingThis ? 'Aguarde...' : p.cta}
-          </button>
+          </a>
         ) : (
           <a
             href={paymentLinks[type]}
