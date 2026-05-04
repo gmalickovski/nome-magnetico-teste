@@ -20,6 +20,10 @@ type NotificationEvent =
   | 'admin.new_payment'
   | 'payment.refunded';
 
+type MarketingEvent =
+  | 'marketing.free_analysis_completed'
+  | 'marketing.payment_confirmed';
+
 interface NotificationPayload {
   email?: string;
   firstName?: string;
@@ -37,7 +41,26 @@ interface NotificationPayload {
   [key: string]: unknown;
 }
 
-async function sendToWebhook(url: string, event: NotificationEvent, payload: NotificationPayload): Promise<void> {
+interface MarketingPayload {
+  email: string;
+  firstName: string;
+  userId: string;
+  analysisId: string;
+  analysisUrl: string;
+  productType: string;
+  productName: string;
+  offerUrl: string;
+  checkoutUrl: string;
+  score: number | null;
+  nomeCompleto: string;
+  bloqueios: number;
+  licoesCarmicas: number;
+  tendenciasOcultas: number;
+  debitosCarmicos: number;
+  source: string;
+}
+
+async function sendToWebhook(url: string, event: NotificationEvent | MarketingEvent, payload: NotificationPayload | MarketingPayload): Promise<void> {
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -58,8 +81,7 @@ async function sendToWebhook(url: string, event: NotificationEvent, payload: Not
 }
 
 /**
- * Envia um evento de notificação para o n8n.
- * O n8n processa e aciona o Resend para envio do email.
+ * Envia um evento transacional para o n8n (emails de sistema).
  */
 export async function notify(
   event: NotificationEvent,
@@ -73,6 +95,25 @@ export async function notify(
   if (!webhookUrl) {
     const envName = isMarketing ? 'N8N_WEBHOOK_MARKETING' : 'N8N_WEBHOOK_TRANSACIONAL';
     console.warn(`[notify] ${envName} não configurado — notificação ignorada`);
+    return;
+  }
+
+  await sendToWebhook(webhookUrl, event, payload);
+}
+
+/**
+ * Envia um evento de marketing para o n8n.
+ * O n8n normaliza os dados e cria/atualiza o subscriber no MailerLite,
+ * que cuida das automações, templates e métricas de email marketing.
+ */
+export async function notifyMarketing(
+  event: MarketingEvent,
+  payload: MarketingPayload
+): Promise<void> {
+  const webhookUrl = process.env.N8N_WEBHOOK_MARKETING;
+
+  if (!webhookUrl) {
+    console.warn('[notifyMarketing] N8N_WEBHOOK_MARKETING não configurado — evento ignorado');
     return;
   }
 
