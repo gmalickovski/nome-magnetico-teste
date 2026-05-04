@@ -84,14 +84,18 @@ export default function ClientMessagePopup() {
   if (loading || !message) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+    >
       <button
         className="absolute inset-0 bg-black/70 backdrop-blur-md"
         aria-label="Fechar aviso"
         onClick={dismiss}
       />
 
-      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-[#111111] shadow-2xl shadow-black/60">
+      <div className="relative flex max-h-[min(86vh,640px)] w-[min(100%,22rem)] flex-col overflow-hidden rounded-3xl bg-[#111111] shadow-2xl shadow-black/60 sm:w-full sm:max-w-lg">
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#D4AF37]/12 to-transparent pointer-events-none" />
 
         <button
@@ -104,23 +108,23 @@ export default function ClientMessagePopup() {
           </svg>
         </button>
 
-        <div className="relative p-8">
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
-            <span className="text-2xl">!</span>
+        <div className="relative flex min-h-0 flex-col p-5 sm:p-8">
+          <div className="mb-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37] sm:mb-5 sm:h-14 sm:w-14">
+            <span className="text-xl sm:text-2xl">!</span>
           </div>
 
-          <h2 className="font-cinzel text-2xl font-bold text-white mb-4">
+          <h2 className="mb-3 shrink-0 font-cinzel text-xl font-bold leading-tight text-white sm:mb-4 sm:text-2xl">
             {message.title}
           </h2>
 
           <div
-            className="space-y-4 text-sm leading-relaxed text-gray-300"
+            className="client-message-popup-body min-h-0 flex-1 space-y-4 overflow-y-auto pr-1 text-sm leading-relaxed text-gray-300"
             dangerouslySetInnerHTML={{ __html: markdownToHtml(message.bodyMarkdown) }}
           />
 
           <button
             onClick={dismiss}
-            className="mt-7 w-full rounded-2xl bg-[#D4AF37] px-5 py-3 text-sm font-bold text-[#1A1A1A] transition-all duration-300 hover:bg-[#f2ca50] hover:scale-[1.01] active:scale-[0.99]"
+            className="mt-5 w-full shrink-0 rounded-2xl bg-[#D4AF37] px-5 py-3 text-sm font-bold text-[#1A1A1A] transition-all duration-300 hover:bg-[#f2ca50] hover:scale-[1.01] active:scale-[0.99] sm:mt-7"
           >
             Entendi
           </button>
