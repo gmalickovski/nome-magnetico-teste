@@ -5,13 +5,13 @@ const products = [
     id: 'nome_social',
     icon: '✨',
     name: 'Nome Social',
-    tagline: 'A Jornada de Transformação Pessoal',
-    description: 'Para adultos que sentem que algo no nome não ressoa com quem realmente são — ou com o que querem atrair na vida e na carreira.',
+    tagline: 'Dossiê completo da sua frequência pessoal',
+    description: 'Para adultos que querem entender o nome de nascimento, comparar variações de nome social e escolher a assinatura com maior fluidez, compatibilidade e ausência de bloqueios.',
     benefits: [
-      'Identificação de Bloqueios Energéticos e Tendências Ocultas.',
-      'Revelação do seu Arquétipo Junguiano.',
-      'Top 3 sugestões de nomes magnéticos e harmonizados.',
-      'Guia prático de 30 dias para implementar sua nova assinatura.'
+      'Ranking numerológico dos candidatos com score 0–100.',
+      '5 números principais, 4 triângulos e arcanos por dimensão.',
+      'Bloqueios, débitos, lições kármicas e tendências ocultas.',
+      'Nome recomendado e sugestões harmonizadas prontas para testar.'
     ],
     highlight: true,
   },

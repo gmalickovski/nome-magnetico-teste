@@ -16,9 +16,43 @@ export function formatAnalysisText(text: string | null | undefined): string {
 
   let f = text.trim().replace(/\r/g, '');
 
-  // 0a. Remover negrito de qualquer coisa que NÃO seja termo técnico de numerologia ou número isolado.
+  // 0. Remover CTAs de download inseridos no corpo da análise pela IA.
+  // O download oficial é controlado pela UI do resultado, não pelo texto gerado.
+  f = f
+    .replace(/<a\b[^>]*>\s*(?:[^<]*?)Baixar\s+Análise\s+Completa(?:[^<]*?)<\/a>/gi, '')
+    .replace(/<button\b[^>]*>[\s\S]*?Baixar\s+Análise\s+Completa[\s\S]*?<\/button>/gi, '')
+    .replace(/!\[[^\]]*download[^\]]*\]\([^)]+\)/gi, '')
+    .replace(/\[[^\]]*Baixar\s+Análise\s+Completa[^\]]*\]\([^)]+\)/gi, '')
+    .replace(/^\s*(?:[-*•]\s*)?(?:⬇\s*)?Baixar\s+Análise\s+Completa\s*$/gmi, '')
+    .replace(/^\s*PDF\s+gerado\s+em\s+instantes.*$/gmi, '');
+
+  // 0a. Padronizar termos numerológicos em Title Case antes de aplicar negrito.
+  const canonicalTerms: Array<[RegExp, string]> = [
+    [/\bd[ée]bitos?\s+k[áa]rmicos?\b/gi, 'Débitos Kármicos'],
+    [/\bli[çc][õo]es?\s+k[áa]rmicas?\b/gi, 'Lições Kármicas'],
+    [/\btend[êe]ncias?\s+ocultas?\b/gi, 'Tendências Ocultas'],
+    [/\bexpress[ãa]o\s+numerol[óo]gica\b/gi, 'Expressão Numerológica'],
+    [/\bexpress[ãa]o\b/gi, 'Expressão'],
+    [/\bimpress[ãa]o\b/gi, 'Impressão'],
+    [/\bmotiva[çc][ãa]o\b/gi, 'Motivação'],
+    [/\bmiss[ãa]o\b/gi, 'Missão'],
+    [/\bdestino\b/gi, 'Destino'],
+    [/\barcanos?\s+de\s+tr[âa]nsito\b/gi, 'Arcanos de Trânsito'],
+    [/\barcanos?\s+regentes?\b/gi, 'Arcanos Regentes'],
+    [/\barcanos?\b/gi, 'Arcanos'],
+    [/\btri[âa]ngulos?\s+cabal[íi]sticos?\b/gi, 'Triângulos Cabalísticos'],
+    [/\btri[âa]ngulos?\s+numerol[óo]gicos?\b/gi, 'Triângulos Numerológicos'],
+    [/\bbloqueios?\s+energ[ée]ticos?\b/gi, 'Bloqueios Energéticos'],
+    [/\bcompatibilidade\s+vibracional\b/gi, 'Compatibilidade Vibracional'],
+  ];
+
+  canonicalTerms.forEach(([pattern, replacement]) => {
+    f = f.replace(pattern, replacement);
+  });
+
+  // 0b. Remover negrito de qualquer coisa que NÃO seja termo técnico de numerologia ou número isolado.
   //    Estratégia: preservar apenas bold em palavras/números permitidos; strip em tudo o mais.
-  const ALLOWED_BOLD = /\*\*(Expressão|Destino|Motivação|Missão|Impressão|Alma|Arcano Regente|Arcano|Bloqueio|Triângulo|Karma|Kármico|Kármica|Kármicas|[0-9]{1,2}(?:\/[0-9]{1,2})?|Triângulo da Vida|Triângulo Pessoal|Triângulo do Destino|Triângulo Social|Débitos? Kármicos?|Tendências? Ocultas?|Lições? Kármicas?)\*\*/gi;
+  const ALLOWED_BOLD = /\*\*(Expressão Numerológica|Expressão|Destino|Motivação|Missão|Impressão|Alma|Arcano Regente|Arcanos Regentes|Arcanos de Trânsito|Arcano|Arcanos|Bloqueio|Bloqueios Energéticos|Triângulo|Triângulos Cabalísticos|Triângulos Numerológicos|Karma|Kármico|Kármica|Kármicas|[0-9]{1,2}(?:\/[0-9]{1,2})?|Triângulo da Vida|Triângulo Pessoal|Triângulo do Destino|Triângulo Social|Débitos? Kármicos?|Tendências? Ocultas?|Lições? Kármicas?|Compatibilidade Vibracional)\*\*/gi;
 
   const PLACEHOLDER = '\x00BOLD\x00';
   const preserved: string[] = [];
@@ -31,11 +65,13 @@ export function formatAnalysisText(text: string | null | undefined): string {
   // Restaurar os permitidos
   f = f.replace(new RegExp(`${PLACEHOLDER}(\\d+)${PLACEHOLDER}`, 'g'), (_, i) => preserved[Number(i)]);
 
-  // 0b. Forçar negrito em termos-chave (e seus respectivos números adjacentes) se não estiverem.
+  // 0c. Forçar negrito em termos-chave (e seus respectivos números adjacentes) se não estiverem.
   const autoBoldTerms = [
     'Triângulo da Vida', 'Triângulo Pessoal', 'Triângulo do Destino', 'Triângulo Social',
+    'Triângulos Cabalísticos', 'Triângulos Numerológicos',
     'Débitos? Kármicos?', 'Tendências? Ocultas?', 'Lições? Kármicas?',
-    'Motivação', 'Missão', 'Impressão', 'Expressão', 'Destino', 'Arcano Regente', 'Arcano', 'Bloqueios?'
+    'Expressão Numerológica', 'Motivação', 'Missão', 'Impressão', 'Expressão', 'Destino',
+    'Arcanos de Trânsito', 'Arcanos Regentes', 'Arcano Regente', 'Arcanos?', 'Bloqueios? Energéticos?', 'Compatibilidade Vibracional'
   ];
   
   autoBoldTerms.forEach(term => {

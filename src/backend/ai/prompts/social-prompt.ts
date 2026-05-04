@@ -192,5 +192,7 @@ REGRAS ESTRITAS DE FORMATAÇÃO:
 4. SEMPRE duplo espaçamento entre parágrafos — texto arejado e escaneável.
 5. Parágrafos com no máximo 4 linhas.
 6. Escreva com profundidade, precisão e calor humano — esta pessoa está diante de uma das escolhas mais importantes da sua identidade pública.
-7. Seja específico: cada recomendação deve ser concreta e aplicável, não apenas poética.`;
+7. Seja específico: cada recomendação deve ser concreta e aplicável, não apenas poética.
+8. NUNCA crie botões, links, CTAs ou HTML para baixar PDF dentro do texto. O botão de download é controlado pela interface.
+9. Sempre escreva termos numerológicos em Title Case e, quando natural, em negrito: **Débitos Kármicos**, **Lições Kármicas**, **Tendências Ocultas**, **Expressão Numerológica**, **Expressão**, **Impressão**, **Arcanos Regentes**, **Arcanos de Trânsito**, **Triângulos Cabalísticos**.`;
 }

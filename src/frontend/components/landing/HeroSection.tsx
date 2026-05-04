@@ -41,7 +41,7 @@ export function HeroSection() {
 
         {/* Subheadline — conciso */}
         <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
-          Cada letra do seu nome carrega uma frequência matemática. Quando essas frequências colidem, surgem bloqueios invisíveis na carreira, nos relacionamentos e na prosperidade. O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> revela esses bloqueios e encontra a variação do seu nome que alinha sua Expressão ao seu Destino.
+          Cada letra do seu nome carrega uma frequência matemática. O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> transforma seu nome de nascimento em um dossiê completo: ranking de candidatos, score 0–100, 5 números principais, 4 triângulos cabalísticos, arcanos, bloqueios e sugestões harmonizadas para assinar com mais fluidez.
         </p>
 
         {/* CTA Principal */}
@@ -67,11 +67,11 @@ export function HeroSection() {
           className="flex flex-wrap items-center justify-center gap-4 text-xs text-[#D4AF37]/80 uppercase tracking-wider font-semibold mb-10"
           aria-label="Diferenciais do produto"
         >
-          <span>✓ Mapa Numerológico Completo</span>
+          <span>✓ Ranking de Nomes com Score</span>
           <span className="hidden sm:inline" aria-hidden="true">•</span>
           <span>✓ 4 Triângulos Cabalísticos</span>
           <span className="hidden sm:inline" aria-hidden="true">•</span>
-          <span>✓ Método Cabalístico com Precisão Analítica</span>
+          <span>✓ Bloqueios, Arcanos e Lições Kármicas</span>
           <span className="hidden sm:inline" aria-hidden="true">•</span>
           <span>✓ Relatório em PDF para Download</span>
         </div>

@@ -34,9 +34,9 @@ const PLANS: Plan[] = [
     emoji: '✦',
     period: 'pagamento único',
     highlights: [
-      '4 triângulos cabalísticos + bloqueios',
-      'Lições kármicas e tendências ocultas',
-      '3 variações do nome harmonizadas',
+      'Ranking de nomes com score 0–100',
+      '5 números, 4 triângulos, arcanos e bloqueios',
+      'Nome recomendado + sugestões harmonizadas',
     ],
     cta: 'Quero Meu Nome Social',
     href: '/nome-social',

@@ -33,7 +33,7 @@ const schemaProduct = {
   '@context': 'https://schema.org',
   '@type': 'Product',
   name: 'Nome Social — Análise Numerológica Cabalística',
-  description: 'Análise completa do seu nome de nascimento com mapa de 4 triângulos cabalísticos, 5 números fundamentais, detecção de bloqueios energéticos e sugestões de nome harmonizado.',
+  description: 'Dossiê completo de Nome Social com ranking de candidatos, score 0–100, 5 números fundamentais, 4 triângulos cabalísticos, arcanos, bloqueios, débitos, lições kármicas, tendências ocultas e sugestões harmonizadas.',
   url: 'https://nomemagnetico.com.br/nome-social',
   brand: { '@type': 'Brand', name: 'Nome Magnético' },
   offers: {
@@ -48,7 +48,7 @@ const schemaProduct = {
 
 <LandingLayout
   title="Análise de Nome Social — Numerologia Cabalística | Nome Magnético"
-  description="Descubra se seu nome social tem bloqueios energéticos que sabotam carreira e relacionamentos. Mapa numerológico com 4 triângulos, 5 números e sugestões de nome harmonizado."
+  description="Compare seu nome de nascimento e variações de nome social em um dossiê cabalístico completo: ranking, score 0–100, 5 números, 4 triângulos, arcanos, bloqueios e sugestões harmonizadas."
   keywords="numerologia do nome social, bloqueio energético no nome, mudar nome numerologia, nome sem bloqueios energéticos, como meu nome afeta minha vida, análise vibracional nome, nome magnético numerologia, numerologia cabalística nome"
   showChatwoot={true}
 >
@@ -74,14 +74,14 @@ const schemaProduct = {
         </div>
 
         <h1 class="font-cinzel text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-          Seu Nome Social Está<br/>
+          Seu Nome Social Pode Ser<br/>
           <span style="background: linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            Sabotando Sua Vida?
+            Sua Assinatura de Ouro
           </span>
         </h1>
 
         <p class="text-[#e5e2e1]/70 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          Na numerologia cabalística, cada letra do seu nome carrega uma frequência matemática. Quando essas frequências colidem, surgem <strong class="text-[#e5e2e1]">bloqueios energéticos invisíveis</strong> que sabotam sua carreira, seus relacionamentos e sua prosperidade — sem que você perceba.
+          A análise de Nome Social compara seu nome de nascimento com variações possíveis e mostra, em um dossiê completo, qual assinatura tem mais fluidez para o seu destino: ranking dos candidatos, score 0–100, 5 números, 4 triângulos, arcanos, bloqueios e sugestões harmonizadas.
         </p>
 
         <a
@@ -96,7 +96,7 @@ const schemaProduct = {
           <p class="text-gray-600 text-sm">Pagamento único · {getPrice('nome_social').formatted} · Acesso imediato</p>
           <div class="flex items-center gap-2">
             <span class="text-[#D4AF37] text-xs">✦</span>
-            <p class="text-gray-600 text-sm">2.400+ análises realizadas</p>
+            <p class="text-gray-600 text-sm">PDF completo com ranking e recomendação</p>
           </div>
         </div>
       </div>
@@ -233,10 +233,10 @@ const schemaProduct = {
         </div>
         <div class="grid md:grid-cols-4 gap-6">
           {[
-            { n: '01', t: 'Mapeamento', d: 'Convertemos cada letra do seu nome em seu valor cabalístico usando a tabela hebraica.' },
-            { n: '02', t: 'Triângulos', d: 'Calculamos os 4 triângulos (Vida, Pessoal, Social e Destino) para revelar todas as dimensões do seu nome.' },
-            { n: '03', t: 'Bloqueios', d: 'Identificamos sequências repetidas que indicam bloqueios e lições kármicas não resolvidas.' },
-            { n: '04', t: 'Harmonização', d: 'A IA sugere 3 variações do seu nome que removem os bloqueios e alinham Expressão ao Destino.' },
+            { n: '01', t: 'Essência original', d: 'Lemos seu nome de nascimento e sua data para revelar Destino, Expressão, Motivação, Missão e Impressão.' },
+            { n: '02', t: 'Geometria completa', d: 'Calculamos os 4 triângulos — Vida, Pessoal, Social e Destino — com bloqueios e arcanos por dimensão.' },
+            { n: '03', t: 'Ranking de nomes', d: 'Comparamos candidatos e sugestões em uma lista ordenada por score, compatibilidade e ausência de bloqueios.' },
+            { n: '04', t: 'Nome recomendado', d: 'Você recebe a opção de maior fluidez e variações harmonizadas para testar na assinatura e no uso social.' },
           ].map(s => (
             <div class="text-center transition-all duration-700 ease-out hover:-translate-y-1 group cursor-default">
               <div class="font-cinzel text-4xl font-bold text-[#D4AF37]/30 mb-3 group-hover:text-[#D4AF37]/60 transition-colors duration-700">{s.n}</div>
@@ -248,24 +248,24 @@ const schemaProduct = {
       </div>
     </section>
 
-    {/* ── O QUE VOCÊ RECEBE ── */}
+    {/* ── O QUE VOCÊ ACESSA ── */}
     <section class="py-16 bg-[#111111] animate-on-scroll">
       <div class="max-w-5xl mx-auto px-4">
         <div class="text-center mb-12">
-          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Entregável</p>
-          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Que Você Recebe</h2>
-          <p class="text-gray-500 text-sm max-w-xl mx-auto">Tudo em um único relatório PDF premium, gerado por IA e personalizado para o seu nome.</p>
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Incluído na Análise</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Dossiê Completo do Seu Nome Social</h2>
+          <p class="text-gray-500 text-sm max-w-xl mx-auto">Você acessa um relatório completo gerado pelo sistema, com leitura do nome de nascimento, comparação de candidatos e recomendação da assinatura mais fluida.</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { icon: '⬠', titulo: 'Pentágono dos 5 Números', desc: 'Expressão, Destino, Motivação, Missão e Personalidade com interpretação profunda.' },
-            { icon: '△', titulo: '4 Triângulos Cabalísticos', desc: 'Vida, Pessoal, Social e Destino — as 4 dimensões do seu nome analisadas.' },
-            { icon: '⚠', titulo: 'Raio-X de Bloqueios', desc: 'Todos os bloqueios detectados com aspecto de saúde relacionado a cada padrão.' },
-            { icon: '☯', titulo: 'Lições Kármicas', desc: 'Números ausentes revelam qualidades a desenvolver nesta encarnação.' },
-            { icon: '◈', titulo: 'Arquétipo Junguiano', desc: 'Seu perfil psíquico inato revelado pelo padrão numérico do seu nome.' },
-            { icon: '✦', titulo: '3 Variações Harmonizadas', desc: 'Cada opção com score 0–100 de compatibilidade entre Expressão e Destino.' },
-            { icon: '✍', titulo: 'Guia da Nova Assinatura', desc: 'Plano de 30 dias para implementar a nova assinatura magnética no dia a dia.' },
-            { icon: '⬇', titulo: 'PDF Premium para Download', desc: 'Relatório visual completo da sua análise numerológica — salvo e acessível a qualquer momento.' },
+            { icon: '◎', titulo: 'Ranking dos Candidatos', desc: 'Todos os nomes avaliados do maior para o menor potencial de fluidez, com recomendação principal.' },
+            { icon: '◇', titulo: 'Score 0–100', desc: 'Pontuação objetiva por bloqueios, débitos, tendências, lições kármicas e compatibilidade vibracional.' },
+            { icon: '⬠', titulo: '5 Números Principais', desc: 'Expressão, Destino, Motivação, Missão e Impressão com leitura aplicada ao seu caso.' },
+            { icon: '△', titulo: '4 Triângulos Cabalísticos', desc: 'Vida, Pessoal, Social e Destino — as quatro dimensões do fluxo do seu nome.' },
+            { icon: '✦', titulo: 'Arcanos do Nome', desc: 'Arcano regente, sequência de passagem e arcano de trânsito para cada triângulo.' },
+            { icon: '⚠', titulo: 'Bloqueios e Débitos', desc: 'Sequências repetidas, débitos kármicos e impactos simbólicos mapeados com clareza.' },
+            { icon: '☯', titulo: 'Lições e Tendências', desc: 'Vibrações ausentes e excessos ocultos que revelam pontos cegos e padrões de comportamento.' },
+            { icon: '⬇', titulo: 'PDF Premium', desc: 'Relatório completo para baixar, consultar e comparar suas opções sempre que precisar.' },
           ].map(c => (
             <div class="bg-white/3 rounded-2xl p-5 transition-all duration-700 ease-out hover:bg-white/6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:-translate-y-1 group cursor-default">
               <div class="text-[#D4AF37] text-2xl mb-3 group-hover:text-[#f2ca50] transition-colors duration-700">{c.icon}</div>
