@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../../backend/db/supabase';
 import { z } from 'zod';
+import { isDisposableEmail } from '../../../backend/security/disposableEmail';
 
 const schema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
@@ -36,12 +37,19 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const { nome, email, password, produto } = parsed.data;
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (isDisposableEmail(normalizedEmail)) {
+    return json({
+      error: 'Use um email permanente para criar sua conta e receber seu acesso.',
+    }, 400);
+  }
 
   // Pré-check: email já existe? (service role bypassa RLS — pega confirmados, pendentes e admins)
   const { data: existingProfile } = await supabase
     .from('profiles')
     .select('id')
-    .eq('email', email)
+    .eq('email', normalizedEmail)
     .maybeSingle();
 
   if (existingProfile) {
@@ -70,7 +78,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     const result = await supabaseAnon.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
         data: { nome },

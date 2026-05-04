@@ -24,6 +24,7 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
   const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const fabRef       = useRef<HTMLButtonElement | null>(null);
   const restoreTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const upsellViewed = useRef(false);
 
   // Garante que o portal só monta no client (SSR safe)
   useEffect(() => { setMounted(true); }, []);
@@ -69,6 +70,12 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
     }
     return () => { document.body.style.overflow = ''; };
   }, [modalOpen]);
+
+  useEffect(() => {
+    if (!isFree || status !== 'done' || upsellViewed.current) return;
+    upsellViewed.current = true;
+    track('upsell_view', { produto: 'nome_social', origem: 'pdf_download_modal' });
+  }, [isFree, status]);
 
   function closeModal() {
     setModalOpen(false);
@@ -234,6 +241,48 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
         {/* ── Divider ── */}
         {status !== 'error' && (
           <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.15), transparent)' }} />
+        )}
+
+        {isFree && status === 'done' && (
+          <div
+            style={{
+              borderRadius: '14px',
+              padding: '16px',
+              background: 'linear-gradient(135deg, rgba(212,175,55,0.10), rgba(190,165,255,0.08))',
+              outline: '1px solid rgba(212,175,55,0.22)',
+            }}
+          >
+            <p style={{ fontSize: '11px', fontWeight: 700, color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 6px' }}>
+              Próximo passo
+            </p>
+            <p style={{ fontSize: '14px', fontWeight: 700, color: '#e5e2e1', margin: '0 0 6px', lineHeight: 1.35 }}>
+              Seu diagnóstico mostrou o mapa. O Nome Social mostra a solução.
+            </p>
+            <p style={{ fontSize: '12px', color: '#9ca3af', margin: '0 0 12px', lineHeight: 1.5 }}>
+              Veja quais variações do seu nome reduzem bloqueios, melhoram o score e geram um PDF completo com ranking, arcanos e guia de ativação.
+            </p>
+            <a
+              href="/nome-social"
+              onClick={() => track('cta_pdf_download_upsell_nome_social', { produto: 'nome_social', origem: 'pdf_download_modal' })}
+              style={{
+                display: 'inline-flex',
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '999px',
+                background: '#D4AF37',
+                color: '#131313',
+                padding: '11px 14px',
+                fontSize: '12px',
+                fontWeight: 800,
+                textDecoration: 'none',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+              }}
+            >
+              Fazer Minha Análise Completa
+            </a>
+          </div>
         )}
 
         {/* ── Formulário de feedback ── */}

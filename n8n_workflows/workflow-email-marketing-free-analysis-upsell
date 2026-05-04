@@ -1,0 +1,88 @@
+{
+  "name": "Nome Magnetico - Email Marketing: Analise Gratuita -> Nome Social",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nm-email-marketing",
+        "options": {}
+      },
+      "id": "webhook-events-nm",
+      "name": "Webhook Transacional",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-760, 240],
+      "webhookId": "nm-email-marketing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "operation": "equals",
+              "value2": "marketing.free_analysis_completed"
+            }
+          ]
+        }
+      },
+      "id": "if-evento-marketing",
+      "name": "Evento Marketing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [-520, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\nconst payload = body.payload || {};\n\nconst firstName = payload.firstName || 'Cliente';\nconst score = payload.score ?? '-';\nconst checkoutUrl = payload.checkoutUrl || 'https://nomemagnetico.com.br/nome-social';\nconst analysisUrl = payload.analysisUrl || 'https://nomemagnetico.com.br/app/analises';\n\n// Opcional: preencha estes campos via Set node ou HTTP Request ao HQ antes deste Code node.\nconst couponCode = payload.couponCode || '';\nconst discountLabel = payload.discountLabel || '';\nconst discountBlock = couponCode\n  ? `<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:rgba(16,185,129,0.08);border-radius:14px;margin:0 0 22px;\"><tr><td style=\"padding:16px 18px;text-align:center;\"><p style=\"margin:0 0 6px;color:#10b981;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;\">Condicao especial ativa</p><p style=\"margin:0;color:#e5e2e1;font-size:15px;\">Use o cupom <strong style=\"color:#f2ca50;\">${couponCode}</strong>${discountLabel ? ` para ${discountLabel}` : ''}</p></td></tr></table>`\n  : '';\n\nlet html = `COLE_AQUI_O_CONTEUDO_DE_email-templates/free-analysis-upsell.html`;\nhtml = html\n  .replaceAll('{{firstName}}', firstName)\n  .replaceAll('{{analysisUrl}}', analysisUrl)\n  .replaceAll('{{checkoutUrl}}', checkoutUrl)\n  .replaceAll('{{score}}', String(score))\n  .replaceAll('{{bloqueios}}', String(payload.bloqueios ?? 0))\n  .replaceAll('{{licoesCarmicas}}', String(payload.licoesCarmicas ?? 0))\n  .replaceAll('{{tendenciasOcultas}}', String(payload.tendenciasOcultas ?? 0))\n  .replaceAll('{{debitosCarmicos}}', String(payload.debitosCarmicos ?? 0))\n  .replaceAll('{{discountBlock}}', discountBlock);\n\nreturn [{\n  json: {\n    toEmail: payload.email,\n    subject: `${firstName}, sua analise gratuita revelou o proximo passo`,\n    html,\n    payload\n  }\n}];"
+      },
+      "id": "code-montar-email",
+      "name": "Montar Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-260, 160]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contato@nomemagnetico.com.br",
+        "toEmail": "={{ $json.toEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "email-upsell",
+      "name": "Enviar Email Nome Social",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [0, 160],
+      "credentials": {
+        "smtp": {
+          "id": "",
+          "name": "Amazon SES - Nome Magnetico"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Transacional": {
+      "main": [[{ "node": "Evento Marketing?", "type": "main", "index": 0 }]]
+    },
+    "Evento Marketing?": {
+      "main": [
+        [{ "node": "Montar Email", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Montar Email": {
+      "main": [[{ "node": "Enviar Email Nome Social", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "",
+  "tags": []
+}

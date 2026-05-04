@@ -32,6 +32,9 @@ Código (notify.ts) → n8n webhook → n8n workflow → Amazon SES → usuário
 | `subscription-expiring.html` | `subscription.expiring_soon` | `{{firstName}}`, `{{daysLeft}}`, `{{renewUrl}}` |
 | `subscription-expired.html` | `subscription.expired` | `{{firstName}}`, `{{renewUrl}}` |
 | `analysis-complete.html` | `user.analysis_complete` | `{{firstName}}`, `{{analysisUrl}}` |
+| `marketing-free-analysis-upsell-01.html` | `marketing.free_analysis_completed` | `{{firstName}}`, `{{nomeCompleto}}`, `{{analysisUrl}}`, `{{checkoutUrl}}`, `{{score}}`, `{{bloqueios}}`, `{{licoesCarmicas}}`, `{{tendenciasOcultas}}`, `{{debitosCarmicos}}`, `{{couponBlock}}`, `{{unsubscribeUrl}}` |
+| `marketing-free-analysis-upsell-02.html` | `marketing.free_analysis_reminder_24h` | `{{firstName}}`, `{{analysisUrl}}`, `{{checkoutUrl}}`, `{{couponBlock}}`, `{{unsubscribeUrl}}` |
+| `marketing-free-analysis-upsell-03-coupon.html` | `marketing.free_analysis_coupon_72h` | `{{firstName}}`, `{{checkoutUrl}}`, `{{couponCode}}`, `{{discountLabel}}`, `{{couponExpiresAt}}`, `{{unsubscribeUrl}}` |
 | `support-confirmation.html` | `support.ticket_created` | `{{nome}}`, `{{assunto}}` |
 
 ## Como usar no n8n
@@ -64,6 +67,9 @@ Substitua cada `{{placeholder}}` pela expressão correspondente.
 | `subscription.expiring_soon` (1d) | Último dia — renove seu acesso hoje! |
 | `subscription.expired` | Seu acesso expirou — renove agora |
 | `user.analysis_complete` | Sua análise numerológica está pronta 🌟 |
+| `marketing.free_analysis_completed` | {{firstName}}, sua análise gratuita revelou o próximo passo |
+| `marketing.free_analysis_reminder_24h` | {{firstName}}, seu nome pode ter uma versão mais fluida |
+| `marketing.free_analysis_coupon_72h` | {{firstName}}, seu cupom para o Nome Social está ativo |
 | `support.ticket_created` | Recebemos sua mensagem 📬 |
 
 ### Diferenciação 7d vs 1d em subscription.expiring_soon
