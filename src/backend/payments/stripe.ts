@@ -56,9 +56,9 @@ export async function createCheckoutSession(
     throw new Error(`Product ID não configurado para o produto: ${params.productType}`);
   }
 
-  // ── Desconto: coupon sazonal (HQ) > código manual > allow_promotion_codes
-  // Stripe proíbe usar discounts[] e allow_promotion_codes simultaneamente.
-  let discountOptions: Record<string, unknown> = { allow_promotion_codes: true };
+  // ── Desconto: coupon sazonal (HQ) > código manual no modal.
+  // O campo nativo de cupom do Stripe fica oculto para evitar duplicidade no checkout.
+  let discountOptions: Record<string, unknown> = {};
 
   if (params.couponId) {
     discountOptions = { discounts: [{ coupon: params.couponId }] };

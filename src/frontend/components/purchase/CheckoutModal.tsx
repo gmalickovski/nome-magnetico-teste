@@ -26,19 +26,19 @@ const PRODUCT_META: Record<ProductType, { name: string; eyebrow: string; icon: s
   nome_social: {
     name: 'Nome Social',
     eyebrow: 'Dossiê pessoal',
-    icon: 'NS',
+    icon: '✨',
     summary: 'Ranking de nomes, score 0-100, arcanos e PDF premium.',
   },
   nome_bebe: {
     name: 'Nome de Bebê',
     eyebrow: 'Nome do bebê',
-    icon: 'NB',
+    icon: '👶',
     summary: 'Ranking de candidatos com compatibilidade e mapa numerológico.',
   },
   nome_empresa: {
     name: 'Nome Empresarial',
     eyebrow: 'Branding vibracional',
-    icon: 'NE',
+    icon: '🏢',
     summary: 'Análise do nome da marca com score, riscos ocultos e posicionamento.',
   },
 };
@@ -67,7 +67,6 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
   // Cupom
   const [couponCode, setCouponCode]       = useState('');
-  const [showCoupon, setShowCoupon]       = useState(false);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponResult, setCouponResult]   = useState<CouponResult | null>(null);
   const [couponError, setCouponError]     = useState('');
@@ -113,9 +112,9 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [step, pixData, productType]);
 
-  async function validateCoupon() {
+  async function validateCoupon(): Promise<boolean> {
     const code = couponCode.trim();
-    if (!code) return;
+    if (!code) return true;
     setCouponLoading(true);
     setCouponError('');
     setCouponResult(null);
@@ -128,17 +127,24 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
       const data = await res.json() as CouponResult | { valid: false; error: string };
       if (data.valid) {
         setCouponResult(data as CouponResult);
+        return true;
       } else {
         setCouponError((data as { valid: false; error: string }).error);
+        return false;
       }
     } catch {
       setCouponError('Erro ao validar cupom. Tente novamente.');
+      return false;
     } finally {
       setCouponLoading(false);
     }
   }
 
   async function handlePix() {
+    if (couponCode.trim() && !couponResult) {
+      const valid = await validateCoupon();
+      if (!valid) return;
+    }
     setStep('pix-loading');
     setPixError('');
     try {
@@ -174,7 +180,11 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
     }
   }
 
-  function handleCard() {
+  async function handleCard() {
+    if (couponCode.trim() && !couponResult) {
+      const valid = await validateCoupon();
+      if (!valid) return;
+    }
     setStep('card-loading');
     const effectiveCoupon = couponCode.trim() || undefined;
     onTriggerCard(productType, effectiveCoupon);
@@ -226,7 +236,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
         {/* Header */}
         <div className="flex items-start justify-between gap-4 px-5 py-5 sm:px-6 sm:py-6 border-b border-white/6">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#D4AF37]/12 text-[#D4AF37] font-cinzel text-sm font-bold shadow-[inset_0_0_0_1px_rgba(212,175,55,0.22)]">
+            <div className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/[0.03] text-2xl shadow-[inset_0_0_0_1px_rgba(212,175,55,0.22)]">
               {productMeta.icon}
             </div>
             <div className="min-w-0">
@@ -304,16 +314,16 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                 onClick={handlePix}
                 className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
               >
-                <div className="w-12 h-12 rounded-2xl bg-white/8 flex items-center justify-center flex-shrink-0">
+                <div className="w-16 h-12 rounded-2xl bg-white/8 flex items-center justify-center flex-shrink-0">
                   <img
                     src="/Logo_-_pix_powered_by_Banco_Central_(Brazil,_2020).png"
                     alt="PIX"
-                    className="w-7 h-7 object-contain"
+                    className="h-7 w-auto object-contain"
                   />
                 </div>
                 <div className="text-left flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-bold text-base text-[#e5e2e1]">PIX</p>
+                    <p className="font-bold text-base text-[#e5e2e1]">Aprovação instantânea</p>
                     <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300/80">instantâneo</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">QR Code e copia e cola · confirmação em ~1 min</p>
@@ -324,53 +334,50 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               </button>
 
               {/* Cupom promocional */}
-              <div className="space-y-2">
-                {!showCoupon ? (
-                  <div className="text-center">
-                    <button
-                      onClick={() => setShowCoupon(true)}
-                      className="text-gray-600 hover:text-gray-400 text-[11px] underline underline-offset-2 transition-colors"
-                    >
-                      Tenho um código promocional
-                    </button>
+              <div className="rounded-2xl bg-white/[0.035] p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#D4AF37]/85">Cupom promocional</p>
+                    <p className="mt-1 text-[11px] leading-snug text-gray-500">Digite o código antes de escolher a forma de pagamento.</p>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={couponCode}
-                        onChange={e => {
-                          setCouponCode(e.target.value.toUpperCase());
-                          setCouponResult(null);
-                          setCouponError('');
-                        }}
-                        onKeyDown={e => e.key === 'Enter' && validateCoupon()}
-                        placeholder="Digite o código"
-                        className="flex-1 bg-white/4 border border-white/10 rounded-xl px-3 py-2 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/40 transition-colors"
-                        autoFocus
-                      />
-                      <button
-                        onClick={validateCoupon}
-                        disabled={couponLoading || !couponCode.trim()}
-                        className="bg-white/8 hover:bg-white/12 border border-white/10 text-gray-300 text-xs font-semibold px-3 py-2 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        {couponLoading ? '...' : 'Aplicar'}
-                      </button>
-                    </div>
-                    {couponResult && (
-                      <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2">
-                        <svg className="w-3.5 h-3.5 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="text-green-400 text-xs font-semibold">{couponResult.discountLabel}</span>
-                        <span className="text-gray-400 text-xs">— {couponResult.promotionName}</span>
-                      </div>
-                    )}
-                    {couponError && (
-                      <p className="text-red-400 text-xs text-center">{couponError}</p>
-                    )}
+                  {couponResult && (
+                    <span className="shrink-0 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+                      aplicado
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={e => {
+                      setCouponCode(e.target.value.toUpperCase());
+                      setCouponResult(null);
+                      setCouponError('');
+                    }}
+                    onKeyDown={e => e.key === 'Enter' && validateCoupon()}
+                    placeholder="CUPOM"
+                    className="min-w-0 flex-1 rounded-xl bg-[#0c0c0c] px-4 py-3 text-sm font-mono font-semibold uppercase tracking-wider text-[#e5e2e1] placeholder-gray-700 outline-none shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)] transition-all focus:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.55)]"
+                  />
+                  <button
+                    onClick={() => void validateCoupon()}
+                    disabled={couponLoading || !couponCode.trim()}
+                    className="shrink-0 rounded-xl bg-white/8 px-4 py-3 text-xs font-bold text-gray-300 transition-all hover:bg-white/12 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {couponLoading ? '...' : 'Aplicar'}
+                  </button>
+                </div>
+                {couponResult && (
+                  <div className="mt-3 flex items-center gap-2 rounded-xl bg-green-500/10 px-3 py-2">
+                    <svg className="h-3.5 w-3.5 shrink-0 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-xs font-semibold text-green-400">{couponResult.discountLabel}</span>
+                    <span className="text-xs text-gray-400">— {couponResult.promotionName}</span>
                   </div>
+                )}
+                {couponError && (
+                  <p className="mt-2 text-center text-xs text-red-400">{couponError}</p>
                 )}
               </div>
 
