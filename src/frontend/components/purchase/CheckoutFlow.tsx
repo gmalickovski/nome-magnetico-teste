@@ -169,26 +169,40 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
   }
 
   function StickyHeader() {
+    const mobileToggleLabel = showAll ? 'Plano' : 'Produtos';
+
     return (
-      <header className="sticky top-0 z-50 border-b border-[#D4AF37]/20 bg-[#111111]/95 backdrop-blur-sm py-4 px-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <a href="/" className="font-cinzel text-xl font-bold text-[#D4AF37] tracking-wider shrink-0">
-            Nome Magnético
+      <header className="sticky top-0 z-40 border-b border-[#D4AF37]/20 bg-[#111111]/95 px-4 py-4 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto flex items-center justify-between relative">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) window.history.back();
+              else window.location.href = '/app';
+            }}
+            className="md:hidden text-[#D4AF37] hover:text-[#f2ca50] transition-colors"
+            aria-label="Voltar"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          </button>
+          <a href={isLoggedIn ? '/app' : '/'} className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 hover:opacity-80 transition-opacity">
+            <img src="/logo-nm-header.svg" alt="Nome Magnético" className="h-9 sm:h-10 md:h-11 w-auto" />
           </a>
           {isLoggedIn ? (
-            <div className="flex items-center gap-2 sm:gap-4">
+            <>
+            <div className="md:hidden w-6" aria-hidden="true" />
+            <div className="hidden md:flex items-center gap-4">
               <a
                 href="/app"
                 className="group flex items-center gap-2 text-sm transition-colors text-gray-400 hover:text-[#D4AF37] relative pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300 after:w-0 hover:after:w-full"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                <span className="hidden sm:inline">Voltar para Meus Produtos</span>
-                <span className="sm:hidden">Meus Produtos</span>
+                <span>Voltar para Meus Produtos</span>
               </a>
               {!showAll && productType && (
                 <button
                   onClick={() => setShowAll(true)}
-                  className="bg-[#D4AF37] text-[#1A1A1A] font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-yellow-300 transition-all shadow-lg shadow-yellow-500/20 text-sm"
+                  className="bg-[#D4AF37] text-[#1A1A1A] font-bold px-4 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow-lg shadow-yellow-500/20 text-sm"
                 >
                   Ver todos os produtos
                 </button>
@@ -196,12 +210,34 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
               {showAll && productType && (
                 <button
                   onClick={() => setShowAll(false)}
-                  className="bg-[#D4AF37] text-[#1A1A1A] font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-yellow-300 transition-all shadow-lg shadow-yellow-500/20 text-sm"
+                  className="bg-[#D4AF37] text-[#1A1A1A] font-bold px-4 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow-lg shadow-yellow-500/20 text-sm"
                 >
                   Voltar
                 </button>
               )}
             </div>
+            {productType && (
+              <nav className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[#D4AF37]/20 bg-[#111111]/95 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-2xl shadow-black/60 backdrop-blur-xl">
+                <div className="flex items-center justify-around">
+                  <a
+                    href="/app"
+                    className="flex min-w-24 flex-col items-center p-2 text-gray-500 transition-colors hover:text-[#D4AF37]"
+                  >
+                    <svg className="mb-1 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                    <span className="text-[10px] font-medium tracking-wide">Produtos</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setShowAll(!showAll)}
+                    className="flex min-w-24 flex-col items-center p-2 text-[#D4AF37] transition-colors"
+                  >
+                    <svg className="mb-1 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={showAll ? 'M5 12h14M12 5l7 7-7 7' : 'M3 7h18M3 12h18M3 17h18'} /></svg>
+                    <span className="text-[10px] font-medium tracking-wide">{mobileToggleLabel}</span>
+                  </button>
+                </div>
+              </nav>
+            )}
+            </>
           ) : (
             <a
               href={`/auth/login?redirect=/comprar${productType ? `?produto=${productType}` : ''}`}
@@ -362,7 +398,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
       <>
         <div className="min-h-screen bg-[#111111]">
           <StickyHeader />
-          <div className="pt-10 pb-20 px-4">
+          <div className="pt-10 pb-28 md:pb-20 px-4">
             <div className="max-w-6xl mx-auto">
               <PageHeader singular={false} />
               {errorMsg && (
@@ -397,7 +433,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     <>
       <div className="min-h-screen bg-[#111111]">
         <StickyHeader />
-        <div className="pt-10 pb-20 px-4">
+        <div className="pt-10 pb-28 md:pb-20 px-4">
           <div className="max-w-md mx-auto">
             <PageHeader singular={true} />
             {errorMsg && (

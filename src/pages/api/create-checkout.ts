@@ -5,6 +5,7 @@ import { supabase } from '../../backend/db/supabase';
 import {
   getHqPricesAndPromo,
   promotionAppliesToProduct,
+  resolveHqCouponDiscount,
   validateHqAccessCoupon,
 } from '../../backend/payments/prices';
 
@@ -80,6 +81,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     let unitAmount: number;
     let couponId: string | undefined;
     let promotionCodeId: string | undefined;
+    let couponHandled = false;
 
     try {
       const { prices, promotion } = await getHqPricesAndPromo();
@@ -98,8 +100,16 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
         if (hqCoupon?.valid) {
           if (hqCoupon.stripePromoCodeId) {
             promotionCodeId = hqCoupon.stripePromoCodeId;
+            couponHandled = true;
           } else if (hqCoupon.stripeCouponId) {
             couponId = hqCoupon.stripeCouponId;
+            couponHandled = true;
+          } else {
+            const discountedCents = resolveHqCouponDiscount(hqCoupon, unitAmount);
+            if (discountedCents !== null) {
+              unitAmount = discountedCents;
+              couponHandled = true;
+            }
           }
         } else if (hqCoupon && hqCoupon.error !== 'Cupom inválido ou expirado') {
           return new Response(
@@ -120,7 +130,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     }
 
     // ── Código de promoção manual (só usado se não há cupom sazonal ativo)
-    if (!couponId && !promotionCodeId && couponCode) {
+    if (!couponHandled && !couponId && !promotionCodeId && couponCode) {
       try {
         const promos = await stripe.promotionCodes.list({ code: couponCode, active: true, limit: 1 });
         if (promos.data.length > 0) {
@@ -129,6 +139,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
           const productId = process.env[`STRIPE_PRODUCT_${product_type.toUpperCase()}`];
           if (appliesToProducts.length === 0 || (productId && appliesToProducts.includes(productId))) {
             promotionCodeId = promo.id;
+            couponHandled = true;
           }
         }
       } catch {
@@ -136,7 +147,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
       }
     }
 
-    if (couponCode && !couponId && !promotionCodeId) {
+    if (couponCode && !couponHandled && !couponId && !promotionCodeId) {
       return new Response(
         JSON.stringify({ error: 'Cupom inválido ou expirado' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   getHqPricesAndPromo,
   promotionAppliesToProduct,
+  resolveHqCouponDiscount,
   validateHqAccessCoupon,
 } from '../../backend/payments/prices';
 import { stripe } from '../../backend/payments/stripe';
@@ -58,14 +59,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
         if (!hqCoupon.valid && hqCoupon.error !== 'Cupom inválido ou expirado') {
           return json({ valid: false, error: hqCoupon.error ?? 'Cupom inválido ou expirado' });
         }
-        if (hqCoupon.discountedCents !== undefined) {
+        const discountedCents = resolveHqCouponDiscount(hqCoupon, originalCents);
+        if (discountedCents !== null) {
+          const discountLabel =
+            hqCoupon.discountLabel ??
+            (typeof hqCoupon.discountPercent === 'number'
+              ? `${hqCoupon.discountPercent}% OFF`
+              : typeof hqCoupon.discountAmountBrl === 'number'
+                ? `-${formatBRL(Math.round(hqCoupon.discountAmountBrl * 100))}`
+                : 'Desconto aplicado');
           return json({
             valid: true,
             originalCents,
-            discountedCents: hqCoupon.discountedCents,
+            discountedCents,
             originalFormatted: formatBRL(originalCents),
-            discountedFormatted: formatBRL(hqCoupon.discountedCents),
-            discountLabel: hqCoupon.discountLabel ?? 'Desconto aplicado',
+            discountedFormatted: formatBRL(discountedCents),
+            discountLabel,
             promotionName: hqCoupon.description ?? hqCoupon.code ?? 'Cupom do Nome Magnético',
             stripePromoCodeId: hqCoupon.stripePromoCodeId ?? undefined,
           });

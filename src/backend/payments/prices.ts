@@ -55,6 +55,23 @@ export interface HqPricesResponse {
   promotion: ActivePromotion | null;
 }
 
+export function resolveHqCouponDiscount(
+  coupon: HqCouponValidation | null | undefined,
+  originalCents: number
+): number | null {
+  if (!coupon?.valid) return null;
+  if (typeof coupon.discountedCents === 'number') {
+    return Math.max(0, Math.round(coupon.discountedCents));
+  }
+  if (typeof coupon.discountPercent === 'number' && coupon.discountPercent > 0) {
+    return Math.max(0, Math.round(originalCents * (1 - coupon.discountPercent / 100)));
+  }
+  if (typeof coupon.discountAmountBrl === 'number' && coupon.discountAmountBrl > 0) {
+    return Math.max(0, Math.round(originalCents - coupon.discountAmountBrl * 100));
+  }
+  return null;
+}
+
 // Fallback — IDs de preço individuais caso HQ esteja offline
 const PRICE_IDS: Record<ProductType, string> = {
   nome_social:  process.env.STRIPE_PRICE_NOME_SOCIAL  ?? '',

@@ -5,6 +5,7 @@ import { createPixCharge } from '../../backend/payments/asaas';
 import {
   getHqPricesAndPromo,
   promotionAppliesToProduct,
+  resolveHqCouponDiscount,
   validateHqAccessCoupon,
 } from '../../backend/payments/prices';
 import type { ProductType } from '../../backend/payments/stripe';
@@ -112,8 +113,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
               { status: 400, headers: { 'Content-Type': 'application/json' } }
             );
           }
-          if (hqCoupon.discountedCents !== undefined) {
-            value = parseFloat((hqCoupon.discountedCents / 100).toFixed(2));
+          const discountedCents = resolveHqCouponDiscount(hqCoupon, Math.round(value * 100));
+          if (discountedCents !== null) {
+            value = parseFloat((discountedCents / 100).toFixed(2));
             couponHandled = true;
           }
         }

@@ -121,21 +121,6 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [step, pixData, productType]);
 
-  useEffect(() => {
-    const code = couponCode.trim();
-    if (!code) {
-      setCouponResult(null);
-      setCouponError('');
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      void validateCoupon(code);
-    }, 650);
-
-    return () => clearTimeout(timer);
-  }, [couponCode, productType]);
-
   async function validateCoupon(codeOverride?: string): Promise<boolean> {
     const code = (codeOverride ?? couponCode).trim();
     if (!code) return true;
@@ -245,23 +230,34 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-[70] flex items-stretch justify-center p-0 md:items-center md:p-4"
       style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
       onClick={(e) => { if (e.target === e.currentTarget && canClose) onClose(); }}
     >
       <div
-        className="w-full max-w-[33rem] rounded-t-[1.75rem] sm:rounded-2xl overflow-hidden"
+        className="flex h-full w-full max-w-[33rem] flex-col overflow-hidden md:h-auto md:max-h-[92vh] md:rounded-2xl"
         style={{
           background: 'rgba(15,15,15,0.98)',
           border: '1px solid rgba(212,175,55,0.20)',
           boxShadow: '0 32px 80px rgba(0,0,0,0.8)',
         }}
       >
-        <div className="sm:hidden flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-white/15" />
+        <div className="md:hidden flex items-center justify-between px-5 py-3 border-b border-white/6">
+          <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#D4AF37]">Checkout</span>
+          {canClose && (
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-200 transition-colors w-9 h-9 flex items-center justify-center rounded-full bg-white/5"
+              aria-label="Fechar checkout"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 px-5 py-5 sm:px-6 sm:py-6 border-b border-white/6">
+        <div className="flex items-start justify-between gap-4 px-5 py-5 md:px-6 md:py-6 border-b border-white/6">
           <div className="flex min-w-0 items-start gap-3">
             <div className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/[0.03] text-2xl shadow-[inset_0_0_0_1px_rgba(212,175,55,0.22)]">
               {productMeta.icon}
@@ -279,7 +275,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               )}
               <div className="flex items-start justify-end gap-1 text-[#D4AF37]">
                 {priceParts.currency && <span className="font-cinzel text-sm font-bold leading-none pt-1.5">{priceParts.currency}</span>}
-                <span className="font-cinzel text-4xl sm:text-5xl font-bold leading-none">{priceParts.amount}</span>
+                <span className="font-cinzel text-4xl md:text-5xl font-bold leading-none">{priceParts.amount}</span>
                 {priceParts.cents && <span className="font-cinzel text-sm font-bold leading-none pt-1.5">{priceParts.cents}</span>}
               </div>
               <p className="text-[10px] text-gray-600 mt-1">pagamento único</p>
@@ -287,7 +283,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
             {canClose && (
               <button
                 onClick={onClose}
-                className="text-gray-500 hover:text-gray-300 transition-colors w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/5"
+                className="hidden md:flex text-gray-500 hover:text-gray-300 transition-colors w-7 h-7 items-center justify-center rounded-full hover:bg-white/5"
                 aria-label="Fechar"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -298,7 +294,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
           </div>
         </div>
 
-        <div className="px-5 py-6 sm:px-6">
+        <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-6">
 
           {/* ── Step: method ── */}
           {step === 'method' && (
@@ -378,18 +374,25 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                     type="text"
                     value={couponCode}
                     onChange={e => {
-                      setCouponCode(e.target.value.toUpperCase());
+                      couponValidationRef.current += 1;
+                      setCouponCode(e.target.value.trimStart().toUpperCase());
                       setCouponResult(null);
                       setCouponError('');
                     }}
-                    onKeyDown={e => e.key === 'Enter' && validateCoupon()}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void validateCoupon();
+                      }
+                    }}
                     placeholder="CUPOM"
                     className="min-w-0 flex-1 rounded-xl bg-[#0c0c0c] px-4 py-3 text-sm font-mono font-semibold uppercase tracking-wider text-[#e5e2e1] placeholder-gray-700 outline-none shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)] transition-all focus:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.55)]"
                   />
                   <button
+                    type="button"
                     onClick={() => void validateCoupon()}
                     disabled={couponLoading || !couponCode.trim()}
-                    className="shrink-0 rounded-xl bg-white/8 px-4 py-3 text-xs font-bold text-gray-300 transition-all hover:bg-white/12 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="shrink-0 rounded-xl bg-[#D4AF37] px-4 py-3 text-xs font-bold text-[#131313] transition-all hover:bg-[#f2ca50] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {couponLoading ? 'Validando' : 'Aplicar'}
                   </button>
@@ -401,6 +404,17 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                     </svg>
                     <span className="text-xs font-semibold text-green-400">{couponResult.discountLabel}</span>
                     <span className="text-xs text-gray-400">— {couponResult.promotionName}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCouponCode('');
+                        setCouponResult(null);
+                        setCouponError('');
+                      }}
+                      className="ml-auto text-[10px] font-bold uppercase tracking-wider text-green-300/70 hover:text-green-200"
+                    >
+                      Remover
+                    </button>
                   </div>
                 )}
                 {couponError && (
