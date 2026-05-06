@@ -323,7 +323,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
           )}
         </div>
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 px-5 py-5 md:px-6 md:py-6 border-b border-white/[0.07] lg:min-h-[34rem] lg:flex-col lg:justify-between lg:border-b-0 lg:border-r lg:border-[#2a2414]/80 lg:p-8 xl:p-10">
+        <div className="flex items-start justify-between gap-3 px-5 py-4 md:gap-4 md:px-6 md:py-6 border-b border-white/[0.07] lg:min-h-[34rem] lg:flex-col lg:justify-between lg:border-b-0 lg:border-r lg:border-[#2a2414]/80 lg:p-8 xl:p-10">
           <div className="flex min-w-0 items-start gap-3 lg:flex-col lg:gap-5">
             <div className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/[0.03] text-2xl shadow-[inset_0_0_0_1px_rgba(212,175,55,0.22)] lg:h-16 lg:w-16 lg:text-3xl">
               {productMeta.icon}
@@ -368,11 +368,11 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-visible px-5 py-6 sm:px-6 md:overflow-y-auto lg:overflow-visible lg:px-8 lg:py-8 xl:px-10">
+        <div className="min-h-0 flex-1 overflow-visible px-5 pb-[calc(env(safe-area-inset-bottom)+3.75rem)] pt-5 sm:px-6 md:overflow-y-auto md:py-6 lg:overflow-visible lg:px-8 lg:py-8 xl:px-10">
 
           {/* ── Step: method ── */}
           {step === 'method' && (
-            <div className="space-y-4 lg:space-y-5">
+            <div className="space-y-3.5 lg:space-y-5">
               <div className="hidden items-center justify-between gap-4 pr-14 lg:flex">
                 <button
                   type="button"
@@ -385,7 +385,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                   Checkout seguro
                 </span>
               </div>
-              <p className="text-xs text-gray-500 uppercase tracking-widest text-center mb-5 lg:text-left">
+              <p className="mb-4 text-center text-xs uppercase tracking-widest text-gray-500 lg:text-left">
                 Como prefere pagar?
               </p>
 
@@ -398,9 +398,9 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               {/* Cartão */}
               <button
                 onClick={handleCard}
-                className="w-full group flex items-center gap-4 bg-[#D4AF37] hover:bg-[#f2ca50] text-[#131313] rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-yellow-500/20 lg:px-6 lg:py-6"
+                className="w-full group flex items-center gap-4 bg-[#D4AF37] hover:bg-[#f2ca50] text-[#131313] rounded-2xl px-4 py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-yellow-500/20 sm:px-5 sm:py-5 lg:px-6 lg:py-6"
               >
-                <div className="w-12 h-12 rounded-2xl bg-black/15 flex items-center justify-center flex-shrink-0">
+                <div className="w-11 h-11 rounded-2xl bg-black/15 flex items-center justify-center flex-shrink-0 sm:h-12 sm:w-12">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
@@ -421,9 +421,9 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               {/* Logo PIX: Por Banco Central do Brasil (BACEN) — CC BY 3.0 https://www.bcb.gov.br/ */}
               <button
                 onClick={handlePix}
-                className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] lg:px-6 lg:py-6"
+                className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-4 py-4 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] sm:px-5 sm:py-5 lg:px-6 lg:py-6"
               >
-                <div className="w-16 h-12 rounded-2xl bg-white/8 flex items-center justify-center flex-shrink-0">
+                <div className="w-14 h-11 rounded-2xl bg-white/8 flex items-center justify-center flex-shrink-0 sm:h-12 sm:w-16">
                   <img
                     src="/Logo_-_pix_powered_by_Banco_Central_(Brazil,_2020).png"
                     alt="PIX"
@@ -443,7 +443,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               </button>
 
               {/* Cupom promocional */}
-              <div className="rounded-2xl bg-white/[0.035] p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] lg:p-5">
+              <div className="rounded-2xl bg-white/[0.035] p-3.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] sm:p-4 lg:p-5">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#D4AF37]/85">Cupom promocional</p>
@@ -515,7 +515,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               </div>
 
               {/* Rodapé segurança */}
-              <div className="flex flex-col items-center gap-2.5 pt-1">
+              <div className="flex flex-col items-center gap-2.5 pb-2 pt-1">
                 <div className="flex items-center justify-center gap-1.5">
                   <svg className="w-3 h-3 text-gray-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
