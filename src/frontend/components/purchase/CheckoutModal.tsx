@@ -64,7 +64,7 @@ interface Props {
   priceInfo: PriceInfo;
   promotion?: ActivePromotion | null;
   onClose: () => void;
-  onTriggerCard: (type: ProductType, couponCode?: string) => void;
+  onTriggerCard: (type: ProductType, couponCode?: string, stripePromoCodeId?: string) => void;
 }
 
 export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTriggerCard }: Props) {
@@ -121,9 +121,9 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [step, pixData, productType]);
 
-  async function validateCoupon(codeOverride?: string): Promise<boolean> {
+  async function validateCoupon(codeOverride?: string): Promise<{ valid: boolean; data: CouponResult | null }> {
     const code = (codeOverride ?? couponCode).trim();
-    if (!code) return true;
+    if (!code) return { valid: true, data: null };
     const validationId = ++couponValidationRef.current;
     setCouponLoading(true);
     setCouponError('');
@@ -135,18 +135,19 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
         body: JSON.stringify({ coupon_code: code, product_type: productType }),
       });
       const data = await res.json() as CouponResult | { valid: false; error: string };
-      if (validationId !== couponValidationRef.current) return false;
+      if (validationId !== couponValidationRef.current) return { valid: false, data: null };
       if (data.valid) {
-        setCouponResult(data as CouponResult);
-        return true;
+        const result = data as CouponResult;
+        setCouponResult(result);
+        return { valid: true, data: result };
       } else {
         setCouponError((data as { valid: false; error: string }).error);
-        return false;
+        return { valid: false, data: null };
       }
     } catch {
-      if (validationId !== couponValidationRef.current) return false;
+      if (validationId !== couponValidationRef.current) return { valid: false, data: null };
       setCouponError('Erro ao validar cupom. Tente novamente.');
-      return false;
+      return { valid: false, data: null };
     } finally {
       if (validationId === couponValidationRef.current) setCouponLoading(false);
     }
@@ -154,7 +155,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
   async function handlePix() {
     if (couponCode.trim() && !couponResult) {
-      const valid = await validateCoupon();
+      const { valid } = await validateCoupon();
       if (!valid) return;
     }
     setStep('pix-loading');
@@ -193,13 +194,15 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   }
 
   async function handleCard() {
+    let appliedResult: CouponResult | null = couponResult;
     if (couponCode.trim() && !couponResult) {
-      const valid = await validateCoupon();
+      const { valid, data } = await validateCoupon();
       if (!valid) return;
+      appliedResult = data;
     }
     setStep('card-loading');
     const effectiveCoupon = couponCode.trim() || undefined;
-    onTriggerCard(productType, effectiveCoupon);
+    onTriggerCard(productType, effectiveCoupon, appliedResult?.stripePromoCodeId);
   }
 
   function copyPix() {

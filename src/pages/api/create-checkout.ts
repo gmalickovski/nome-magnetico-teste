@@ -12,6 +12,7 @@ import {
 const schema = z.object({
   product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']),
   couponCode: z.string().optional(),
+  stripePromoCodeId: z.string().optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals, url }) => {
@@ -43,7 +44,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     );
   }
 
-  const { product_type, couponCode } = parsed.data;
+  const { product_type, couponCode, stripePromoCodeId: directPromoCodeId } = parsed.data;
   const baseUrl = process.env.APP_URL || url.origin;
 
   // Verificar se é admin ou usuário teste → bypass do Stripe
@@ -82,13 +83,17 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     let couponId: string | undefined;
     let promotionCodeId: string | undefined;
     let couponHandled = false;
+    const PRICE_FALLBACK: Record<string, number> = { nome_social: 9800, nome_bebe: 8000, nome_empresa: 12500 };
 
     try {
       const { prices, promotion } = await getHqPricesAndPromo();
       const priceInfo = prices[product_type];
-      unitAmount = priceInfo?.cents ?? 0;
+      unitAmount = priceInfo?.cents ?? PRICE_FALLBACK[product_type] ?? 9800;
 
-      if (couponCode) {
+      if (directPromoCodeId) {
+        promotionCodeId = directPromoCodeId;
+        couponHandled = true;
+      } else if (couponCode) {
         const hqCoupon = await validateHqAccessCoupon({
           couponCode,
           productType: product_type,
@@ -119,14 +124,17 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
         }
       }
 
-      if (!couponCode && promotion?.stripeCouponId) {
+      if (!couponCode && !directPromoCodeId && promotion?.stripeCouponId) {
         const appliesToThis = promotionAppliesToProduct(promotion, product_type);
         if (appliesToThis) couponId = promotion.stripeCouponId;
       }
     } catch {
       // HQ indisponível — fallback para preços hardcoded
-      const FALLBACK: Record<string, number> = { nome_social: 9800, nome_bebe: 8000, nome_empresa: 12500 };
-      unitAmount = FALLBACK[product_type] ?? 9800;
+      unitAmount = PRICE_FALLBACK[product_type] ?? 9800;
+      if (directPromoCodeId) {
+        promotionCodeId = directPromoCodeId;
+        couponHandled = true;
+      }
     }
 
     // ── Código de promoção manual (só usado se não há cupom sazonal ativo)
@@ -170,8 +178,32 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
       JSON.stringify({ url: session.url }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (err) {
-    console.error('[create-checkout] Erro:', err);
+  } catch (err: unknown) {
+    const stripeErr = err as { statusCode?: number; code?: string; type?: string; message?: string; param?: string };
+    console.error('[create-checkout] Erro:', {
+      statusCode: stripeErr.statusCode,
+      type: stripeErr.type,
+      code: stripeErr.code,
+      param: stripeErr.param,
+      message: stripeErr.message,
+    });
+
+    if (stripeErr.statusCode === 400) {
+      const couponCodes = ['coupon_not_applicable', 'promotion_code_minimum_amount_not_met', 'resource_missing'];
+      const isCouponError =
+        couponCodes.includes(stripeErr.code ?? '') ||
+        stripeErr.param === 'discounts' ||
+        stripeErr.param === 'coupon' ||
+        stripeErr.param === 'promotion_code';
+
+      if (isCouponError) {
+        return new Response(
+          JSON.stringify({ error: 'Cupom inválido ou incompatível com este produto. Tente outro código.' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     return new Response(
       JSON.stringify({ error: 'Erro ao criar sessão de pagamento' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

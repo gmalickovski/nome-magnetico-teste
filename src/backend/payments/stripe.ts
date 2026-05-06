@@ -68,6 +68,10 @@ export async function createCheckoutSession(
     discountOptions = { discounts: [{ promotion_code: params.promotionCodeId }] };
   }
 
+  if (!params.unitAmount || params.unitAmount <= 0) {
+    throw new Error(`unit_amount inválido para ${params.productType}: ${params.unitAmount}`);
+  }
+
   return stripe.checkout.sessions.create({
     mode: 'payment',
     payment_method_types: ['card'],
@@ -93,11 +97,6 @@ export async function createCheckoutSession(
     cancel_url: params.cancelUrl,
     locale: 'pt-BR',
     ...discountOptions,
-    payment_method_options: {
-      pix: {
-        expires_after_seconds: 3600, // QR Code expira em 1 hora
-      },
-    },
     payment_intent_data: {
       metadata: {
         user_id: params.userId,

@@ -129,7 +129,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
 
   const prices = hqPrices ?? FALLBACK_PRICES;
 
-  async function triggerCheckout(type: ProductType, couponCode?: string) {
+  async function triggerCheckout(type: ProductType, couponCode?: string, stripePromoCodeId?: string) {
     setLoading(type);
     setErrorMsg('');
     try {
@@ -149,6 +149,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
         body: JSON.stringify({
           product_type: type,
           couponCode: effectiveCoupon ?? undefined,
+          stripePromoCodeId: stripePromoCodeId ?? undefined,
         }),
       });
       const data = await res.json();

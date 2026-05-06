@@ -1,5 +1,5 @@
 ---
-import LandingLayout from '../layouts/LandingLayout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import { CheckoutFlow } from '../frontend/components/purchase/CheckoutFlow';
 import { hasActiveSubscription } from '../backend/db/subscriptions';
 import { createUserClient } from '../backend/db/supabase';
@@ -74,7 +74,7 @@ const schemaBreadcrumb = {
 };
 ---
 
-<LandingLayout
+<BaseLayout
   title="Planos de Análise Numerológica — Nome Magnético"
   description="Escolha sua análise de numerologia cabalística: Nome Social, Nome para Bebê ou Nome Empresarial. Pagamento único, acesso imediato por 30 dias, PDF para download e garantia de 7 dias."
   keywords="comprar numerologia cabalística, planos numerologia, preço mapa numerológico, análise nome cabalística preço, numerologia nome completo comprar, mapa numerológico online, análise bloqueios energéticos nome"
@@ -90,4 +90,4 @@ const schemaBreadcrumb = {
     promotion={promotion}
     autoOpenCheckout={autoOpenCheckout}
   />
-</LandingLayout>
+</BaseLayout>
