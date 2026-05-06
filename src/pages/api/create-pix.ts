@@ -27,6 +27,10 @@ const PRODUCT_DESCRIPTIONS: Record<ProductType, string> = {
   nome_empresa: 'Nome Magnético — Nome Empresarial',
 };
 
+function formatBRL(cents: number) {
+  return `R$ ${(cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   const accessToken = locals.accessToken;
@@ -87,6 +91,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     // ── Busca preço canônico do HQ e verifica cupom
     let value = FALLBACK_PRICES[product_type as ProductType];
+    let originalCents = Math.round(value * 100);
+    let finalCents = originalCents;
+    const cleanCoupon = coupon_code?.trim();
 
     try {
       const { prices, promotion } = await getHqPricesAndPromo();
@@ -94,8 +101,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       if (priceInfo?.cents) {
         value = priceInfo.cents / 100;
       }
+      originalCents = Math.round(value * 100);
+      finalCents = originalCents;
 
-      const cleanCoupon = coupon_code?.trim();
       let couponHandled = false;
       if (cleanCoupon) {
         const hqCoupon = await validateHqAccessCoupon({
@@ -103,7 +111,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           productType: product_type,
           userId: user.id,
           userEmail: user.email,
-          originalCents: Math.round(value * 100),
+          originalCents,
         });
 
         if (hqCoupon) {
@@ -113,9 +121,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
               { status: 400, headers: { 'Content-Type': 'application/json' } }
             );
           }
-          const discountedCents = resolveHqCouponDiscount(hqCoupon, Math.round(value * 100));
+          const discountedCents = resolveHqCouponDiscount(hqCoupon, originalCents);
           if (discountedCents !== null) {
-            value = parseFloat((discountedCents / 100).toFixed(2));
+            finalCents = discountedCents;
+            value = finalCents / 100;
             couponHandled = true;
           }
         }
@@ -130,10 +139,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
         if (appliesToThis && (couponMatch || autoPromo)) {
           if (promotion.discountType === 'percent') {
-            value = parseFloat((value * (1 - promotion.discountValue / 100)).toFixed(2));
+            finalCents = Math.round(originalCents * (1 - promotion.discountValue / 100));
           } else {
-            value = parseFloat((value - promotion.discountValue).toFixed(2));
+            finalCents = Math.max(0, originalCents - Math.round(promotion.discountValue * 100));
           }
+          value = finalCents / 100;
           couponHandled = true;
         }
       }
@@ -144,8 +154,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
           { status: 400, headers: { 'Content-Type': 'application/json' } }
         );
       }
-    } catch {
-      // HQ indisponível — usa fallback sem desconto
+    } catch (err) {
+      if (cleanCoupon) {
+        console.error('[create-pix] Erro ao validar cupom no HQ:', err);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao validar cupom para PIX. Tente novamente.' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      // HQ indisponível — usa fallback sem desconto apenas quando não há cupom
+      finalCents = Math.round(value * 100);
     }
 
     const result = await createPixCharge({
@@ -162,6 +180,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
         pixCopiaECola: result.pixCopiaECola,
         qrCodeImage:   result.qrCodeImage,
         expiresAt:     result.expirationDate,
+        originalCents,
+        finalCents,
+        originalFormatted: formatBRL(originalCents),
+        finalFormatted:    formatBRL(finalCents),
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );

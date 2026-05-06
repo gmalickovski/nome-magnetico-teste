@@ -9,6 +9,10 @@ interface PixData {
   pixCopiaECola: string;
   qrCodeImage: string;
   expiresAt: string;
+  originalCents?: number;
+  finalCents?: number;
+  originalFormatted?: string;
+  finalFormatted?: string;
 }
 
 interface CouponResult {
@@ -173,6 +177,8 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
         bypass?: boolean; redirectUrl?: string;
         chargeId?: string; pixCopiaECola?: string;
         qrCodeImage?: string; expiresAt?: string;
+        originalCents?: number; finalCents?: number;
+        originalFormatted?: string; finalFormatted?: string;
         error?: string;
       };
       if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar PIX');
@@ -185,6 +191,10 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
         pixCopiaECola: data.pixCopiaECola!,
         qrCodeImage:   data.qrCodeImage!,
         expiresAt:     data.expiresAt!,
+        originalCents:  data.originalCents,
+        finalCents:     data.finalCents,
+        originalFormatted: data.originalFormatted,
+        finalFormatted:    data.finalFormatted,
       });
       setStep('pix-qr');
     } catch (err) {
@@ -215,10 +225,17 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   const productMeta = PRODUCT_META[productType];
 
   // Preço exibido: usa desconto do cupom se válido, senão preço original
-  const displayPrice = couponResult
+  const pixHasDiscount =
+    step === 'pix-qr' &&
+    pixData?.finalCents != null &&
+    pixData?.originalCents != null &&
+    pixData.finalCents < pixData.originalCents;
+  const displayPrice = pixData?.finalFormatted ?? (couponResult
     ? couponResult.discountedFormatted
-    : priceInfo.formatted;
-  const originalPrice = couponResult ? couponResult.originalFormatted : null;
+    : priceInfo.formatted);
+  const originalPrice = pixHasDiscount
+    ? pixData?.originalFormatted
+    : couponResult ? couponResult.originalFormatted : null;
   const priceParts = splitPrice(displayPrice);
 
   const hours   = Math.floor(secondsLeft / 3600);
