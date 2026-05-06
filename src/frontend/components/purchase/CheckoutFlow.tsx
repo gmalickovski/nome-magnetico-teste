@@ -1,9 +1,18 @@
 import { useState } from 'react';
-import { promotionAppliesToProduct, type PriceInfo, type ActivePromotion } from '../../../backend/payments/prices';
+import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
 import { track } from '../../lib/analytics';
 import { CheckoutModal } from './CheckoutModal';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
+
+function promotionAppliesToProduct(promotion: ActivePromotion | null | undefined, productType: ProductType): boolean {
+  const products = String(promotion?.productType ?? '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return products.length === 0 || products.includes(productType);
+}
 
 interface Props {
   productType: ProductType | null;
@@ -129,7 +138,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
 
   const prices = hqPrices ?? FALLBACK_PRICES;
 
-  async function triggerCheckout(type: ProductType, couponCode?: string, stripePromoCodeId?: string) {
+  async function triggerCheckout(type: ProductType, couponCode?: string) {
     setLoading(type);
     setErrorMsg('');
     try {
@@ -149,7 +158,6 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
         body: JSON.stringify({
           product_type: type,
           couponCode: effectiveCoupon ?? undefined,
-          stripePromoCodeId: stripePromoCodeId ?? undefined,
         }),
       });
       const data = await res.json();

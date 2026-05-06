@@ -12,7 +12,6 @@ import {
 const schema = z.object({
   product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']),
   couponCode: z.string().optional(),
-  stripePromoCodeId: z.string().optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals, url }) => {
@@ -44,7 +43,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     );
   }
 
-  const { product_type, couponCode, stripePromoCodeId: directPromoCodeId } = parsed.data;
+  const { product_type, couponCode } = parsed.data;
   const baseUrl = process.env.APP_URL || url.origin;
 
   // Verificar se é admin ou usuário teste → bypass do Stripe
@@ -90,10 +89,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
       const priceInfo = prices[product_type];
       unitAmount = priceInfo?.cents ?? PRICE_FALLBACK[product_type] ?? 9800;
 
-      if (directPromoCodeId) {
-        promotionCodeId = directPromoCodeId;
-        couponHandled = true;
-      } else if (couponCode) {
+      if (couponCode) {
         const hqCoupon = await validateHqAccessCoupon({
           couponCode,
           productType: product_type,
@@ -103,18 +99,16 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
         });
 
         if (hqCoupon?.valid) {
-          if (hqCoupon.stripePromoCodeId) {
+          const discountedCents = resolveHqCouponDiscount(hqCoupon, unitAmount);
+          if (discountedCents !== null) {
+            unitAmount = discountedCents;
+            couponHandled = true;
+          } else if (hqCoupon.stripePromoCodeId) {
             promotionCodeId = hqCoupon.stripePromoCodeId;
             couponHandled = true;
           } else if (hqCoupon.stripeCouponId) {
             couponId = hqCoupon.stripeCouponId;
             couponHandled = true;
-          } else {
-            const discountedCents = resolveHqCouponDiscount(hqCoupon, unitAmount);
-            if (discountedCents !== null) {
-              unitAmount = discountedCents;
-              couponHandled = true;
-            }
           }
         } else if (hqCoupon && hqCoupon.error !== 'Cupom inválido ou expirado') {
           return new Response(
@@ -124,17 +118,13 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
         }
       }
 
-      if (!couponCode && !directPromoCodeId && promotion?.stripeCouponId) {
+      if (!couponCode && promotion?.stripeCouponId) {
         const appliesToThis = promotionAppliesToProduct(promotion, product_type);
         if (appliesToThis) couponId = promotion.stripeCouponId;
       }
     } catch {
       // HQ indisponível — fallback para preços hardcoded
       unitAmount = PRICE_FALLBACK[product_type] ?? 9800;
-      if (directPromoCodeId) {
-        promotionCodeId = directPromoCodeId;
-        couponHandled = true;
-      }
     }
 
     // ── Código de promoção manual (só usado se não há cupom sazonal ativo)

@@ -64,7 +64,7 @@ interface Props {
   priceInfo: PriceInfo;
   promotion?: ActivePromotion | null;
   onClose: () => void;
-  onTriggerCard: (type: ProductType, couponCode?: string, stripePromoCodeId?: string) => void;
+  onTriggerCard: (type: ProductType, couponCode?: string) => void;
 }
 
 export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTriggerCard }: Props) {
@@ -194,15 +194,13 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   }
 
   async function handleCard() {
-    let appliedResult: CouponResult | null = couponResult;
     if (couponCode.trim() && !couponResult) {
-      const { valid, data } = await validateCoupon();
+      const { valid } = await validateCoupon();
       if (!valid) return;
-      appliedResult = data;
     }
     setStep('card-loading');
     const effectiveCoupon = couponCode.trim() || undefined;
-    onTriggerCard(productType, effectiveCoupon, appliedResult?.stripePromoCodeId);
+    onTriggerCard(productType, effectiveCoupon);
   }
 
   function copyPix() {
