@@ -178,10 +178,8 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
   }
 
   function StickyHeader() {
-    const mobileToggleLabel = showAll ? 'Plano' : 'Produtos';
-
     return (
-      <header className="sticky top-0 z-40 border-b border-[#D4AF37]/20 bg-[#111111]/95 px-4 py-4 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-[#D4AF37]/20 bg-[#111111]/95 px-4 py-4 backdrop-blur-sm md:fixed md:inset-x-0 md:top-0">
         <div className="max-w-6xl mx-auto flex items-center justify-between relative">
           <button
             type="button"
@@ -225,27 +223,6 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
                 </button>
               )}
             </div>
-            {productType && (
-              <nav className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[#D4AF37]/20 bg-[#111111]/95 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-2xl shadow-black/60 backdrop-blur-xl">
-                <div className="flex items-center justify-around">
-                  <a
-                    href="/app"
-                    className="flex min-w-24 flex-col items-center p-2 text-gray-500 transition-colors hover:text-[#D4AF37]"
-                  >
-                    <svg className="mb-1 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                    <span className="text-[10px] font-medium tracking-wide">Produtos</span>
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => setShowAll(!showAll)}
-                    className="flex min-w-24 flex-col items-center p-2 text-[#D4AF37] transition-colors"
-                  >
-                    <svg className="mb-1 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={showAll ? 'M5 12h14M12 5l7 7-7 7' : 'M3 7h18M3 12h18M3 17h18'} /></svg>
-                    <span className="text-[10px] font-medium tracking-wide">{mobileToggleLabel}</span>
-                  </button>
-                </div>
-              </nav>
-            )}
             </>
           ) : (
             <a
@@ -288,7 +265,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     const isHighlighted = forceHighlight || p.popular;
 
     return (
-      <div className={`relative rounded-2xl p-8 flex flex-col transition-all duration-300 ${
+      <div className={`relative rounded-2xl p-6 sm:p-8 flex flex-col transition-all duration-300 ${
         isHighlighted
           ? 'bg-white/5 border-2 border-[#D4AF37]/50 shadow-xl shadow-yellow-500/10'
           : 'bg-white/3 border border-white/10 hover:border-[#D4AF37]/30 hover:bg-white/5'
@@ -391,7 +368,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     return (
       <div className="min-h-screen bg-[#111111]">
         <StickyHeader />
-        <div className="pt-10 pb-20 px-4">
+        <div className="pt-10 pb-20 px-4 md:pt-28">
           <div className="max-w-md mx-auto">
             <PageHeader singular={true} />
             <ProductCard type={type} showPayButton={false} forceHighlight={true} />
@@ -407,7 +384,7 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
       <>
         <div className="min-h-screen bg-[#111111]">
           <StickyHeader />
-          <div className="pt-10 pb-28 md:pb-20 px-4">
+          <div className="pt-10 pb-28 md:pb-20 md:pt-28 px-4">
             <div className="max-w-6xl mx-auto">
               <PageHeader singular={false} />
               {errorMsg && (
@@ -441,10 +418,39 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
   return (
     <>
       <div className="min-h-screen bg-[#111111]">
-        <StickyHeader />
-        <div className="pt-10 pb-28 md:pb-20 px-4">
+        <div className="sticky top-0 z-40 flex items-center justify-between bg-[#101010]/95 px-5 py-4 backdrop-blur md:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) window.history.back();
+              else window.location.href = '/app';
+            }}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] text-[#D4AF37] transition-colors hover:text-[#f2ca50]"
+            aria-label="Voltar"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#D4AF37]">Checkout</span>
+          <a
+            href="/app"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] text-gray-400 transition-colors hover:text-gray-200"
+            aria-label="Fechar checkout"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </a>
+        </div>
+        <div className="hidden md:block">
+          <StickyHeader />
+        </div>
+        <div className="px-4 py-6 md:pt-28 md:pb-20">
           <div className="max-w-md mx-auto">
-            <PageHeader singular={true} />
+            <div className="hidden md:block">
+              <PageHeader singular={true} />
+            </div>
             {errorMsg && (
               <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm text-center">
                 {errorMsg}

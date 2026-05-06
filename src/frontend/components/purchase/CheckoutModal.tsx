@@ -26,24 +26,48 @@ interface CouponResult {
   stripePromoCodeId?: string;
 }
 
-const PRODUCT_META: Record<ProductType, { name: string; eyebrow: string; icon: string; summary: string }> = {
+const PRODUCT_META: Record<ProductType, { name: string; eyebrow: string; icon: string; summary: string; highlights: string[] }> = {
   nome_social: {
     name: 'Nome Social',
     eyebrow: 'Dossiê pessoal',
     icon: '✨',
     summary: 'Ranking de nomes, score 0-100, arcanos e PDF premium.',
+    highlights: [
+      'Compare nome de nascimento e variações de nome social.',
+      'Ranking dos candidatos com score 0-100.',
+      'Nome recomendado e sugestões harmonizadas.',
+      '4 triângulos cabalísticos: Vida, Pessoal, Social e Destino.',
+      'Bloqueios, débitos, lições kármicas e tendências ocultas.',
+      'Relatório PDF premium para baixar e consultar.',
+    ],
   },
   nome_bebe: {
     name: 'Nome de Bebê',
     eyebrow: 'Nome do bebê',
     icon: '👶',
     summary: 'Ranking de candidatos com compatibilidade e mapa numerológico.',
+    highlights: [
+      'Compare candidatos de nome com sobrenome e data do bebê.',
+      'Ranking com score 0-100 para cada opção.',
+      'Compatibilidade entre nome, data e frequência familiar.',
+      '4 triângulos cabalísticos para leitura completa.',
+      'Alertas de bloqueios, tendências e pontos de atenção.',
+      'PDF premium para guardar e comparar com calma.',
+    ],
   },
   nome_empresa: {
     name: 'Nome Empresarial',
     eyebrow: 'Branding vibracional',
     icon: '🏢',
     summary: 'Análise do nome da marca com score, riscos ocultos e posicionamento.',
+    highlights: [
+      'Avalie nomes de marca, empresa ou projeto antes de lançar.',
+      'Ranking com score 0-100 e recomendação objetiva.',
+      'Leitura do impacto do nome no posicionamento da marca.',
+      '4 triângulos cabalísticos aplicados ao contexto empresarial.',
+      'Identificação de tensões, bloqueios e tendências ocultas.',
+      'Relatório PDF premium para decisão e consulta.',
+    ],
   },
 };
 
@@ -87,6 +111,30 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   const pollRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const couponValidationRef = useRef(0);
+
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousBodyPosition = document.body.style.position;
+    const previousBodyTop = document.body.style.top;
+    const previousBodyWidth = document.body.style.width;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const scrollY = window.scrollY;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.style.position = previousBodyPosition;
+      document.body.style.top = previousBodyTop;
+      document.body.style.width = previousBodyWidth;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
 
   // Promoção automática do HQ (sem digitar cupom)
   useEffect(() => {
@@ -248,19 +296,19 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-stretch justify-center p-0 md:items-center md:p-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+      className="fixed inset-0 z-[70] flex items-stretch justify-center overflow-hidden p-0 md:items-center md:p-4 lg:px-8 lg:py-8"
+      style={{ background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
       onClick={(e) => { if (e.target === e.currentTarget && canClose) onClose(); }}
     >
       <div
-        className="flex h-full w-full max-w-[33rem] flex-col overflow-hidden md:h-auto md:max-h-[92vh] md:rounded-2xl"
+        className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-[33rem] flex-col overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:h-auto md:max-h-[min(92vh,48rem)] md:rounded-2xl md:[scrollbar-width:auto] md:[-ms-overflow-style:auto] md:[&::-webkit-scrollbar]:block lg:grid lg:h-auto lg:max-h-[calc(100dvh-4rem)] lg:w-full lg:max-w-5xl lg:grid-cols-[0.9fr_1.1fr] lg:overflow-hidden xl:max-w-6xl"
         style={{
-          background: 'rgba(15,15,15,0.98)',
-          border: '1px solid rgba(212,175,55,0.20)',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.8)',
+          background: 'rgba(15,15,15,0.96)',
+          border: '1px solid rgba(212,175,55,0.16)',
+          boxShadow: '0 28px 72px rgba(0,0,0,0.72)',
         }}
       >
-        <div className="md:hidden flex items-center justify-between px-5 py-3 border-b border-white/6">
+        <div className="sticky top-0 z-10 md:hidden flex items-center justify-between px-5 py-3 bg-[#101010]">
           <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#D4AF37]">Checkout</span>
           {canClose && (
             <button
@@ -275,33 +323,41 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
           )}
         </div>
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 px-5 py-5 md:px-6 md:py-6 border-b border-white/6">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/[0.03] text-2xl shadow-[inset_0_0_0_1px_rgba(212,175,55,0.22)]">
+        <div className="flex items-start justify-between gap-4 px-5 py-5 md:px-6 md:py-6 border-b border-white/[0.07] lg:min-h-[34rem] lg:flex-col lg:justify-between lg:border-b-0 lg:border-r lg:border-[#2a2414]/80 lg:p-8 xl:p-10">
+          <div className="flex min-w-0 items-start gap-3 lg:flex-col lg:gap-5">
+            <div className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/[0.03] text-2xl shadow-[inset_0_0_0_1px_rgba(212,175,55,0.22)] lg:h-16 lg:w-16 lg:text-3xl">
               {productMeta.icon}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">{productMeta.eyebrow}</p>
-              <p className="font-cinzel text-lg font-bold text-[#e5e2e1] mt-0.5 leading-tight">{productMeta.name}</p>
-              <p className="text-[11px] text-gray-500 mt-1 leading-snug max-w-[18rem]">{productMeta.summary}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest lg:text-xs">{productMeta.eyebrow}</p>
+              <p className="font-cinzel text-lg font-bold text-[#e5e2e1] mt-0.5 leading-tight lg:mt-2 lg:text-3xl">{productMeta.name}</p>
+              <p className="text-[11px] text-gray-500 mt-1 leading-snug max-w-[18rem] lg:mt-3 lg:max-w-sm lg:text-sm lg:leading-relaxed">{productMeta.summary}</p>
+              <ul className="mt-8 hidden space-y-3 lg:block">
+                {productMeta.highlights.map((highlight) => (
+                  <li key={highlight} className="flex items-start gap-3 text-sm leading-relaxed text-gray-400">
+                    <span className="mt-1 text-[#D4AF37]">✓</span>
+                    <span>{highlight}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <div className="text-right pt-0.5">
+          <div className="flex items-start gap-3 lg:w-full lg:flex-col lg:gap-6">
+            <div className="text-right pt-0.5 lg:text-left">
               {originalPrice && (
-                <p className="text-xs text-gray-600 line-through mb-0.5">{originalPrice}</p>
+                <p className="text-xs text-gray-600 line-through mb-0.5 lg:text-sm">{originalPrice}</p>
               )}
-              <div className="flex items-start justify-end gap-1 text-[#D4AF37]">
-                {priceParts.currency && <span className="font-cinzel text-sm font-bold leading-none pt-1.5">{priceParts.currency}</span>}
-                <span className="font-cinzel text-4xl md:text-5xl font-bold leading-none">{priceParts.amount}</span>
-                {priceParts.cents && <span className="font-cinzel text-sm font-bold leading-none pt-1.5">{priceParts.cents}</span>}
+              <div className="flex items-start justify-end gap-1 text-[#D4AF37] lg:justify-start">
+                {priceParts.currency && <span className="font-cinzel text-sm font-bold leading-none pt-1.5 lg:text-base lg:pt-2">{priceParts.currency}</span>}
+                <span className="font-cinzel text-4xl md:text-5xl font-bold leading-none lg:text-7xl">{priceParts.amount}</span>
+                {priceParts.cents && <span className="font-cinzel text-sm font-bold leading-none pt-1.5 lg:text-base lg:pt-2">{priceParts.cents}</span>}
               </div>
               <p className="text-[10px] text-gray-600 mt-1">pagamento único</p>
             </div>
             {canClose && (
               <button
                 onClick={onClose}
-                className="hidden md:flex text-gray-500 hover:text-gray-300 transition-colors w-7 h-7 items-center justify-center rounded-full hover:bg-white/5"
+                className="hidden md:flex text-gray-500 hover:text-gray-300 transition-colors w-7 h-7 items-center justify-center rounded-full hover:bg-white/5 lg:absolute lg:right-5 lg:top-5 lg:z-20 lg:h-10 lg:w-10 lg:bg-[#151515]/90 lg:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
                 aria-label="Fechar"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -312,12 +368,24 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-6">
+        <div className="min-h-0 flex-1 overflow-visible px-5 py-6 sm:px-6 md:overflow-y-auto lg:overflow-visible lg:px-8 lg:py-8 xl:px-10">
 
           {/* ── Step: method ── */}
           {step === 'method' && (
-            <div className="space-y-4">
-              <p className="text-xs text-gray-500 uppercase tracking-widest text-center mb-5">
+            <div className="space-y-4 lg:space-y-5">
+              <div className="hidden items-center justify-between gap-4 pr-14 lg:flex">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-xs font-medium text-gray-500 transition-colors hover:text-[#D4AF37]"
+                >
+                  Voltar para produtos
+                </button>
+                <span className="rounded-full bg-[#D4AF37]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]/80">
+                  Checkout seguro
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 uppercase tracking-widest text-center mb-5 lg:text-left">
                 Como prefere pagar?
               </p>
 
@@ -330,7 +398,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               {/* Cartão */}
               <button
                 onClick={handleCard}
-                className="w-full group flex items-center gap-4 bg-[#D4AF37] hover:bg-[#f2ca50] text-[#131313] rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-yellow-500/20"
+                className="w-full group flex items-center gap-4 bg-[#D4AF37] hover:bg-[#f2ca50] text-[#131313] rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-yellow-500/20 lg:px-6 lg:py-6"
               >
                 <div className="w-12 h-12 rounded-2xl bg-black/15 flex items-center justify-center flex-shrink-0">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -353,7 +421,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               {/* Logo PIX: Por Banco Central do Brasil (BACEN) — CC BY 3.0 https://www.bcb.gov.br/ */}
               <button
                 onClick={handlePix}
-                className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full group flex items-center gap-4 bg-white/4 hover:bg-white/7 border border-white/10 hover:border-[#D4AF37]/40 rounded-2xl px-5 py-5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] lg:px-6 lg:py-6"
               >
                 <div className="w-16 h-12 rounded-2xl bg-white/8 flex items-center justify-center flex-shrink-0">
                   <img
@@ -375,7 +443,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
               </button>
 
               {/* Cupom promocional */}
-              <div className="rounded-2xl bg-white/[0.035] p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+              <div className="rounded-2xl bg-white/[0.035] p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] lg:p-5">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#D4AF37]/85">Cupom promocional</p>
@@ -440,7 +508,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
                 )}
               </div>
 
-              <div className="rounded-2xl bg-white/[0.03] px-4 py-3 text-center">
+              <div className="rounded-2xl bg-white/[0.03] px-4 py-3 text-center lg:hidden">
                 <p className="text-[11px] leading-relaxed text-gray-500">
                   Compra segura, pagamento único e liberação imediata do produto na sua área do cliente.
                 </p>
@@ -478,7 +546,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
           {/* ── Step: card-loading ── */}
           {step === 'card-loading' && (
-            <div className="flex flex-col items-center py-8 gap-4">
+            <div className="flex flex-col items-center py-8 gap-4 lg:min-h-[28rem] lg:justify-center">
               <div className="w-10 h-10 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin" />
               <p className="font-cinzel text-sm font-bold text-[#e5e2e1]">Redirecionando para o pagamento…</p>
               <p className="text-gray-600 text-xs">Você será levado ao Stripe em instantes.</p>
@@ -487,7 +555,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
           {/* ── Step: pix-loading ── */}
           {step === 'pix-loading' && (
-            <div className="flex flex-col items-center py-8 gap-4">
+            <div className="flex flex-col items-center py-8 gap-4 lg:min-h-[28rem] lg:justify-center">
               <div className="w-10 h-10 border-2 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin" />
               <p className="font-cinzel text-sm font-bold text-[#e5e2e1]">Gerando seu QR Code PIX…</p>
               <p className="text-gray-600 text-xs">Aguarde alguns segundos.</p>
@@ -496,7 +564,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
           {/* ── Step: pix-qr ── */}
           {step === 'pix-qr' && pixData && (
-            <div className="space-y-4">
+            <div className="space-y-4 lg:min-h-[28rem] lg:space-y-5">
               <div className="flex justify-center">
                 <div className="rounded-xl overflow-hidden bg-white p-2.5 shadow-lg shadow-black/30">
                   <img
