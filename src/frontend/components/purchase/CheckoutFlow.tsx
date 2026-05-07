@@ -319,8 +319,6 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
         ) : (
           <a
             href={paymentLinks[type]}
-            target="_blank"
-            rel="noopener noreferrer"
             className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-300 ${
               isHighlighted
                 ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'
@@ -363,9 +361,28 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
     );
   }
 
-  // Não logado — mostrar card sem botão de pagamento (link externo)
+  // Não logado sem produto específico — mostrar todos os produtos.
+  if (!isLoggedIn && !productType) {
+    return (
+      <div className="min-h-screen bg-[#111111]">
+        <StickyHeader />
+        <div className="pt-10 pb-20 px-4 md:pt-28">
+          <div className="max-w-6xl mx-auto">
+            <PageHeader singular={false} />
+            <div className="grid md:grid-cols-3 gap-8">
+              {ALL_PRODUCTS.map(t => (
+                <ProductCard key={t} type={t} showPayButton={false} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Não logado com produto específico — mostrar card escolhido.
   if (!isLoggedIn) {
-    const type = productType ?? 'nome_social';
+    const type = productType;
     return (
       <div className="min-h-screen bg-[#111111]">
         <StickyHeader />
