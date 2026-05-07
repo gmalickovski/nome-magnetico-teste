@@ -30,15 +30,15 @@ const PLANS: Plan[] = [
   {
     id: 'nome_social',
     name: 'Nome Social',
-    subtitle: 'Análise Pessoal',
+    subtitle: 'Harmonização de Assinatura',
     emoji: '✦',
     period: 'pagamento único',
     highlights: [
-      'Ranking de nomes com score 0–100',
-      '5 números, 4 triângulos, arcanos e bloqueios',
-      'Nome recomendado + sugestões harmonizadas',
+      'Harmonize sua assinatura com base no seu nome',
+      'Ranking de assinaturas com score 0–100',
+      'Nome social recomendado + variações harmonizadas',
     ],
-    cta: 'Quero Meu Nome Social',
+    cta: 'Harmonizar Minha Assinatura',
     href: '/nome-social',
     popular: true,
   },
@@ -146,7 +146,7 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
             Escolha Sua Análise
           </h2>
           <p className="text-gray-400 max-w-lg mx-auto text-sm leading-relaxed">
-            Pagamento único. Sem assinatura. Acesso completo à análise mais profunda que você já fez sobre um nome.
+            Pagamento único. Sem recorrência. Acesso completo à análise mais profunda que você já fez sobre um nome, uma assinatura ou uma marca.
           </p>
           {promotion && (
             <div className="inline-flex items-center gap-2 mt-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5">

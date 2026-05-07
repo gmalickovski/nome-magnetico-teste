@@ -37,12 +37,13 @@ const PRODUCT_STATIC: Record<ProductType, {
 }> = {
   nome_social: {
     name: 'Nome Social',
-    subtitle: 'Dossiê completo da sua frequência pessoal',
+    subtitle: 'Harmonização de assinatura',
     period: 'acesso por 30 dias',
-    description: 'Compare seu nome de nascimento e variações de nome social em uma análise cabalística completa, com score, ranking, bloqueios, arcanos e recomendação do nome mais fluido para assinar.',
+    description: 'Sua assinatura tem mais poder do que você imagina. Harmonize sua assinatura comparando seu nome de nascimento com variações de nome social, score, ranking, bloqueios, arcanos e recomendação do nome mais fluido para assinar.',
     features: [
-      'Ranking dos candidatos com score 0–100',
-      'Nome recomendado e sugestões harmonizadas',
+      'Harmonização de assinatura pelo Nome Social',
+      'Ranking das assinaturas candidatas com score 0–100',
+      'Nome social recomendado e variações harmonizadas',
       '5 números principais: Expressão, Destino, Motivação, Missão e Impressão',
       '4 triângulos cabalísticos: Vida, Pessoal, Social e Destino',
       'Arcanos regentes, sequências de passagem e trânsito atual',
@@ -50,7 +51,7 @@ const PRODUCT_STATIC: Record<ProductType, {
       'Compatibilidade Expressão × Destino',
       'Relatório PDF premium para baixar e consultar',
     ],
-    cta: 'Quero Meu Nome Social',
+    cta: 'Harmonizar Minha Assinatura',
     popular: true,
   },
   nome_bebe: {

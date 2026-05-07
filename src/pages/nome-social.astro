@@ -32,8 +32,8 @@ function getPrice(id: string) { return prices[id] ?? FALLBACK_PRICES[id]; }
 const schemaProduct = {
   '@context': 'https://schema.org',
   '@type': 'Product',
-  name: 'Nome Social — Análise Numerológica Cabalística',
-  description: 'Dossiê completo de Nome Social com ranking de candidatos, score 0–100, 5 números fundamentais, 4 triângulos cabalísticos, arcanos, bloqueios, débitos, lições kármicas, tendências ocultas e sugestões harmonizadas.',
+  name: 'Nome Social — Harmonização de Assinatura',
+  description: 'Harmonização de assinatura pelo Nome Social: compare o nome de nascimento com variações de nome social, receba ranking de candidatos, score 0–100, 5 números fundamentais, 4 triângulos cabalísticos, arcanos, bloqueios, débitos, lições kármicas, tendências ocultas e variações harmonizadas para testar.',
   url: 'https://nomemagnetico.com.br/nome-social',
   brand: { '@type': 'Brand', name: 'Nome Magnético' },
   offers: {
@@ -47,9 +47,9 @@ const schemaProduct = {
 ---
 
 <LandingLayout
-  title="Análise de Nome Social — Numerologia Cabalística | Nome Magnético"
-  description="Compare seu nome de nascimento e variações de nome social em um dossiê cabalístico completo: ranking, score 0–100, 5 números, 4 triângulos, arcanos, bloqueios e sugestões harmonizadas."
-  keywords="numerologia do nome social, bloqueio energético no nome, mudar nome numerologia, nome sem bloqueios energéticos, como meu nome afeta minha vida, análise vibracional nome, nome magnético numerologia, numerologia cabalística nome"
+  title="Harmonização de Assinatura e Nome Social | Nome Magnético"
+  description="Compare seu nome de nascimento e variações de nome social para escolher uma assinatura harmonizada: ranking, score 0–100, numerologia cabalística, 4 triângulos, arcanos, bloqueios e PDF."
+  keywords="harmonização de assinatura, assinatura numerológica, numerologia do nome social, numerologia do nome completo, mudar nome numerologia, assinatura harmonizada, nome sem bloqueios energéticos, análise vibracional nome, nome magnético numerologia, numerologia cabalística nome"
   showChatwoot={true}
 >
   <script type="application/ld+json" set:html={JSON.stringify(schemaProduct)} />
@@ -69,19 +69,19 @@ const schemaProduct = {
 
         <div class="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 mb-6">
           <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
-          <span class="text-[#D4AF37] text-sm font-medium">Transformação Pessoal · {getPrice('nome_social').formatted}</span>
+          <span class="text-[#D4AF37] text-sm font-medium">Harmonização de Assinatura · {getPrice('nome_social').formatted}</span>
           <span class="text-[#D4AF37] text-xs" aria-hidden="true">✦</span>
         </div>
 
         <h1 class="font-cinzel text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-          Seu Nome Social Pode Ser<br/>
+          Sua Assinatura Tem Mais Poder<br/>
           <span style="background: linear-gradient(135deg, #D4AF37, #E8C84A, #B8960E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            Sua Assinatura de Ouro
+            Do Que Você Imagina
           </span>
         </h1>
 
         <p class="text-[#e5e2e1]/70 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          A análise de Nome Social compara seu nome de nascimento com variações possíveis e mostra, em um dossiê completo, qual assinatura tem mais fluidez para o seu destino: ranking dos candidatos, score 0–100, 5 números, 4 triângulos, arcanos, bloqueios e sugestões harmonizadas.
+          Harmonize sua assinatura com uma análise de Nome Social que compara seu nome de nascimento com variações possíveis e mostra qual assinatura tem mais fluidez para o seu destino. Você recebe ranking dos candidatos, score 0–100, 5 números, 4 triângulos, arcanos, bloqueios e variações harmonizadas para testar no uso social, profissional e digital.
         </p>
 
         <a
@@ -89,7 +89,7 @@ const schemaProduct = {
           data-umami-event="cta_nome_social_hero"
           class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
         >
-          Analisar Meu Nome Social →
+          Harmonizar Minha Assinatura →
         </a>
 
         <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
@@ -98,6 +98,24 @@ const schemaProduct = {
             <span class="text-[#D4AF37] text-xs">✦</span>
             <p class="text-gray-600 text-sm">PDF completo com ranking e recomendação</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ── CONTEXTO IDENTIDADE ── */}
+    <section class="py-12 bg-[#0d0d0d] animate-on-scroll">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="rounded-2xl bg-white/3 p-7 md:p-8">
+          <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Momento de Identidade</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">
+            O Brasil Está Atualizando a Identidade. E Você?
+          </h2>
+          <p class="text-gray-400 text-sm leading-relaxed mb-4">
+            Com a Carteira de Identidade Nacional, a identificação brasileira entra em uma nova fase: CPF como número único, documento físico e digital, integração com o GOV.BR e dados mais padronizados. O RG antigo segue válido até 2032, então não existe pressa documental.
+          </p>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Mas existe um convite simbólico e prático: antes de usar um nome em assinaturas, cadastros, redes, contratos, crachás ou apresentações, vale saber se essa assinatura trabalha a favor da sua frequência. Harmonização de assinatura é exatamente isso: escolher com consciência o nome que você usa e emite todos os dias. O Nome Social não é um serviço de alteração civil.
+          </p>
         </div>
       </div>
     </section>
@@ -183,7 +201,7 @@ const schemaProduct = {
       <div class="max-w-4xl mx-auto px-4">
         <div class="text-center mb-12">
           <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Transformação</p>
-          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">A Diferença que um Nome Harmonizado Faz</h2>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">A Diferença que a Harmonização de Assinatura Faz</h2>
         </div>
         <div class="grid md:grid-cols-2 gap-6">
           <div class="bg-red-950/20 border border-red-500/15 rounded-2xl p-7">
@@ -235,8 +253,8 @@ const schemaProduct = {
           {[
             { n: '01', t: 'Essência original', d: 'Lemos seu nome de nascimento e sua data para revelar Destino, Expressão, Motivação, Missão e Impressão.' },
             { n: '02', t: 'Geometria completa', d: 'Calculamos os 4 triângulos — Vida, Pessoal, Social e Destino — com bloqueios e arcanos por dimensão.' },
-            { n: '03', t: 'Ranking de nomes', d: 'Comparamos candidatos e sugestões em uma lista ordenada por score, compatibilidade e ausência de bloqueios.' },
-            { n: '04', t: 'Nome recomendado', d: 'Você recebe a opção de maior fluidez e variações harmonizadas para testar na assinatura e no uso social.' },
+            { n: '03', t: 'Ranking de assinaturas', d: 'Comparamos candidatos e sugestões em uma lista ordenada por score, compatibilidade e ausência de bloqueios.' },
+            { n: '04', t: 'Harmonização de assinatura', d: 'Você recebe a assinatura recomendada e variações harmonizadas para testar no uso social, profissional e digital.' },
           ].map(s => (
             <div class="text-center transition-all duration-700 ease-out hover:-translate-y-1 group cursor-default">
               <div class="font-cinzel text-4xl font-bold text-[#D4AF37]/30 mb-3 group-hover:text-[#D4AF37]/60 transition-colors duration-700">{s.n}</div>
@@ -253,12 +271,12 @@ const schemaProduct = {
       <div class="max-w-5xl mx-auto px-4">
         <div class="text-center mb-12">
           <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Incluído na Análise</p>
-          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Dossiê Completo do Seu Nome Social</h2>
-          <p class="text-gray-500 text-sm max-w-xl mx-auto">Você acessa um relatório completo gerado pelo sistema, com leitura do nome de nascimento, comparação de candidatos e recomendação da assinatura mais fluida.</p>
+          <h2 class="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4">O Dossiê Completo da Harmonização de Assinatura</h2>
+          <p class="text-gray-500 text-sm max-w-xl mx-auto">Você acessa um relatório completo gerado pelo sistema, com leitura do nome de nascimento, comparação de candidatos e recomendação da assinatura mais fluida para o seu campo vibracional.</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { icon: '◎', titulo: 'Ranking dos Candidatos', desc: 'Todos os nomes avaliados do maior para o menor potencial de fluidez, com recomendação principal.' },
+            { icon: '◎', titulo: 'Ranking das Assinaturas', desc: 'Todos os nomes avaliados do maior para o menor potencial de fluidez, com recomendação principal.' },
             { icon: '◇', titulo: 'Score 0–100', desc: 'Pontuação objetiva por bloqueios, débitos, tendências, lições kármicas e compatibilidade vibracional.' },
             { icon: '⬠', titulo: '5 Números Principais', desc: 'Expressão, Destino, Motivação, Missão e Impressão com leitura aplicada ao seu caso.' },
             { icon: '△', titulo: '4 Triângulos Cabalísticos', desc: 'Vida, Pessoal, Social e Destino — as quatro dimensões do fluxo do seu nome.' },
@@ -349,14 +367,14 @@ const schemaProduct = {
     <section class="py-20 bg-[#0d0d0d] animate-on-scroll">
       <div class="max-w-xl mx-auto px-4 text-center">
         <p class="text-[#D4AF37] text-xs font-medium tracking-widest uppercase mb-3">Investimento</p>
-        <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Comece Sua Transformação</h2>
+        <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Harmonize Sua Assinatura</h2>
         <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">{getPrice('nome_social').formatted}</div>
         <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Resultados na hora</p>
         <a
           href="/auth/cadastro?produto=nome_social"
           class="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
         >
-          Analisar Meu Nome Social →
+          Harmonizar Minha Assinatura →
         </a>
         <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
           <p class="text-gray-600 text-xs">🔒 Pagamento seguro via Stripe</p>

@@ -20,12 +20,12 @@ export function HeroSection() {
       <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-32 pb-16 md:pt-40">
         {/* Super Headline — keyword SEO + gancho emocional */}
         <p className="text-[#D4AF37] text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-8">
-          Branding Pessoal com Fundamento Vibracional
+          Harmonização de Assinatura com Fundamento Vibracional
         </p>
 
         {/* H1 Headline principal */}
         <h1 className="font-cinzel text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-8 leading-tight">
-          O Seu Nome É Um Ímã.{' '}
+          Sua Assinatura Tem Mais Poder{' '}
           <br />
           <span
             style={{
@@ -35,13 +35,13 @@ export function HeroSection() {
               backgroundClip: 'text',
             }}
           >
-            O Que Ele Tem Atraído?
+            Do Que Você Imagina
           </span>
         </h1>
 
         {/* Subheadline — conciso */}
         <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
-          Cada letra do seu nome carrega uma frequência matemática. O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> transforma seu nome de nascimento em um dossiê completo: ranking de candidatos, score 0–100, 5 números principais, 4 triângulos cabalísticos, arcanos, bloqueios e sugestões harmonizadas para assinar com mais fluidez.
+          Cada letra do seu nome carrega uma frequência matemática. O <strong className="text-[#D4AF37]">Método Nome Magnético</strong> mostra como harmonizar sua assinatura: transforma seu nome de nascimento em um dossiê completo para escolher uma assinatura harmonizada, com ranking de candidatos, score 0–100, 4 triângulos cabalísticos, arcanos, bloqueios e variações prontas para testar.
         </p>
 
         {/* CTA Principal */}
@@ -68,6 +68,10 @@ export function HeroSection() {
           aria-label="Diferenciais do produto"
         >
           <span>✓ Ranking de Nomes com Score</span>
+          <span className="hidden sm:inline" aria-hidden="true">•</span>
+          <span>✓ Assinatura Harmonizada</span>
+          <span className="hidden sm:inline" aria-hidden="true">•</span>
+          <span>✓ Harmonização de Assinatura</span>
           <span className="hidden sm:inline" aria-hidden="true">•</span>
           <span>✓ 4 Triângulos Cabalísticos</span>
           <span className="hidden sm:inline" aria-hidden="true">•</span>

@@ -5,13 +5,13 @@ const products = [
     id: 'nome_social',
     icon: '✨',
     name: 'Nome Social',
-    tagline: 'Dossiê completo da sua frequência pessoal',
-    description: 'Para adultos que querem entender o nome de nascimento, comparar variações de nome social e escolher a assinatura com maior fluidez, compatibilidade e ausência de bloqueios.',
+    tagline: 'Harmonização de assinatura pelo nome social',
+    description: 'Sua assinatura tem mais poder do que você imagina. Harmonize sua assinatura comparando o nome de nascimento com variações de nome social mais fluidas, compatíveis com o Destino e livres dos bloqueios que pesam no campo original.',
     benefits: [
       'Ranking numerológico dos candidatos com score 0–100.',
       '5 números principais, 4 triângulos e arcanos por dimensão.',
       'Bloqueios, débitos, lições kármicas e tendências ocultas.',
-      'Nome recomendado e sugestões harmonizadas prontas para testar.'
+      'Assinatura recomendada e variações harmonizadas prontas para testar.'
     ],
     highlight: true,
   },
@@ -55,11 +55,11 @@ export function ProductsSection() {
             Produtos
           </p>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
-            Três Produtos, Uma Missão: Remover o que Bloqueia Seu Potencial
+            Três Produtos, Uma Missão: Harmonizar o Nome que Abre Caminhos
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Seja para você, para o seu filho ou para sua empresa — cada nome carrega uma vibração única
-            que pode abrir ou fechar caminhos. A análise revela qual é o seu caso.
+            Seja para você, para o seu filho ou para sua empresa — cada nome carrega uma assinatura
+            vibracional própria. A análise mostra qual nome sustenta melhor a identidade que você quer viver.
           </p>
         </div>
 

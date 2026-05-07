@@ -27,11 +27,11 @@ const steps = [
   },
   {
     number: '04',
-    title: 'O Nome Ideal Para Você',
+    title: 'Sua Assinatura Harmonizada',
     description:
-      'Com base em toda a análise, geramos variações do seu nome que eliminam os bloqueios, preservam sua identidade e alcançam harmonia perfeita entre Expressão e Destino. Você recebe um guia prático de implementação para os próximos 30 dias.',
+      'Com base em toda a análise, geramos variações do seu nome para usar como assinatura social, profissional e digital. A recomendação preserva sua identidade e busca maior harmonia entre Expressão e Destino.',
     icon: '✨',
-    keyword: 'Nome Harmonizado',
+    keyword: 'Assinatura Harmonizada',
   },
 ];
 
