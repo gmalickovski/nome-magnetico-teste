@@ -1,5 +1,87 @@
 ---
-// A análise gratuita foi migrada para a página pública /analise-gratuita.
-// Usuários logados são redirecionados para /app com os produtos.
-return Astro.redirect('/app');
+// Rota legada — fluxo migrado para /app?gen_free_pdf=1 via landing page
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/auth/login?redirect=/app');
+return Astro.redirect('/app', 302);
+
+const client = createUserClient(Astro.locals.accessToken ?? '');
+
+// Verifica role do usuário
+let isAdmin = false;
+try {
+  const { data: profile } = await client
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  isAdmin = profile?.role === 'admin';
+} catch {}
+
+// Admins têm acesso ilimitado (para testes). Usuários comuns: apenas uma vez.
+const jaUsou = !isAdmin && await hasUsedFreeAnalysis(user.id);
+
+// Se já usou, redireciona para o painel com modal de aviso
+if (jaUsou) return Astro.redirect('/app?free_used=true');
 ---
+
+<AppLayout title="Análise Gratuita do Nome de Nascimento">
+  <div class="max-w-2xl mx-auto">
+
+    <!-- Cabeçalho -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <a
+          href="/app"
+          class="text-gray-500 hover:text-gray-300 transition-colors text-sm flex items-center gap-1"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Painel
+        </a>
+        <span class="text-gray-700">/</span>
+        <span class="text-gray-400 text-sm">Análise Gratuita</span>
+      </div>
+
+      <div class="flex items-center gap-3 mb-2">
+        <span class="text-3xl">🔮</span>
+        <div>
+          <h1 class="font-cinzel text-2xl md:text-3xl font-bold text-white">
+            Análise do Nome de Nascimento
+          </h1>
+          {isAdmin && (
+            <span class="inline-block mt-1 text-xs bg-purple-500/20 border border-purple-500/30 text-purple-400 px-2 py-0.5 rounded-full">
+              Modo Admin — sem limite de uso
+            </span>
+          )}
+        </div>
+      </div>
+
+      <p class="text-gray-400 leading-relaxed">
+        Descubra os bloqueios energéticos, lições kármicas e tendências ocultas do seu nome de nascimento.
+        Análise completa com os 4 triângulos numerológicos cabalísticos e relatório em PDF.
+      </p>
+    </div>
+
+    <!-- O que você vai descobrir -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+      {[
+        { icon: '🔺', label: '4 Triângulos numerológicos' },
+        { icon: '⚡', label: 'Bloqueios energéticos' },
+        { icon: '🌀', label: 'Lições kármicas' },
+        { icon: '📊', label: 'Tendências ocultas' },
+        { icon: '🔢', label: '5 Números principais' },
+        { icon: '📄', label: 'Relatório em PDF' },
+      ].map(item => (
+        <div class="flex items-center gap-2 bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2.5">
+          <span class="text-base flex-shrink-0">{item.icon}</span>
+          <span class="text-gray-400 text-xs leading-snug">{item.label}</span>
+        </div>
+      ))}
+    </div>
+
+    <!-- Formulário React (island) -->
+    <FreeAnalysisForm client:load />
+
+  </div>
+</AppLayout>

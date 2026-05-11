@@ -31,30 +31,68 @@ interface PDFPyramidGraphicProps {
   primaryColor?: string;
 }
 
-export function PDFPyramidGraphic({ triangulo, bloqueiosEncontrados = [], primaryColor = PDF_COLORS.gold }: PDFPyramidGraphicProps) {
+/** Detecta posições com bloqueio (3+ iguais consecutivos na mesma linha) */
+function buildBloqueioSet(linhas: number[][]): Set<string> {
+  const set = new Set<string>();
+  for (let li = 0; li < linhas.length; li++) {
+    const row = linhas[li];
+    let i = 0;
+    while (i < row.length) {
+      let j = i + 1;
+      while (j < row.length && row[j] === row[i]) j++;
+      if (j - i >= 3) {
+        for (let k = i; k < j; k++) set.add(`${li}:${k}`);
+      }
+      i = j;
+    }
+  }
+  return set;
+}
+
+export function PDFPyramidGraphic({ triangulo, primaryColor = PDF_COLORS.gold }: PDFPyramidGraphicProps) {
   if (!triangulo || !triangulo.linhas || !Array.isArray(triangulo.linhas)) return null;
+
+  const bloqueioSet = buildBloqueioSet(triangulo.linhas);
 
   return (
     <View style={styles.container}>
       {triangulo.linhas.map((linha, rowIndex) => (
         <View key={rowIndex} style={styles.row}>
           {linha.map((num, colIndex) => {
-            // Em PDFs sem interatividade complexa, apenas destacamos as células de forma genérica
-            // idealmente verificaríamos a sequência. Vamos destacar os blocos se a config assim quiser:
-            const isBlocked = false; // simplificado visualmente para manter elegância
+            const isBlocked = bloqueioSet.has(`${rowIndex}:${colIndex}`);
+            const isRegent = rowIndex === triangulo.linhas.length - 1;
 
             return (
-              <View 
-                key={colIndex} 
+              <View
+                key={colIndex}
                 style={[
-                  styles.cellBox, 
-                  { 
-                    borderColor: 'rgba(212, 175, 55, 0.4)',
-                    backgroundColor: isBlocked ? 'rgba(220, 38, 38, 0.1)' : 'rgba(212, 175, 55, 0.05)'
-                  }
+                  styles.cellBox,
+                  {
+                    borderColor: isBlocked
+                      ? '#B91C1C'
+                      : isRegent
+                      ? '#6D28D9'
+                      : `${primaryColor}66`,
+                    backgroundColor: isBlocked
+                      ? 'rgba(220, 38, 38, 0.18)'
+                      : isRegent
+                      ? 'rgba(109, 40, 217, 0.12)'
+                      : `${primaryColor}0D`,
+                  },
                 ]}
               >
-                <Text style={[styles.cellText, { color: isBlocked ? '#DC2626' : '#374151' }]}>
+                <Text
+                  style={[
+                    styles.cellText,
+                    {
+                      color: isBlocked
+                        ? '#DC2626'
+                        : isRegent
+                        ? '#A78BFA'
+                        : '#374151',
+                    },
+                  ]}
+                >
                   {num}
                 </Text>
               </View>

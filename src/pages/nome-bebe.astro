@@ -6,7 +6,10 @@ import { getSupabaseFaqs } from '../backend/faqs/getSupabaseFaqs';
 import type { FaqItemProps } from '../frontend/components/landing/FAQSection';
 import { FAQSection } from '../frontend/components/landing/FAQSection';
 import { getHqPricesAndPromo } from '../backend/payments/prices';
-import type { PriceInfo } from '../backend/payments/prices';
+import type { PriceInfo, ActivePromotion } from '../backend/payments/prices';
+import { LandingCheckout } from '../frontend/components/purchase/LandingCheckout';
+
+const user = Astro.locals.user;
 
 let faqItems: FaqItemProps[] = [];
 try {
@@ -16,9 +19,11 @@ try {
 }
 
 let hqPrices: Record<string, PriceInfo> | undefined;
+let promotion: ActivePromotion | null = null;
 try {
   const result = await getHqPricesAndPromo();
   hqPrices = result.prices;
+  promotion = result.promotion;
 } catch (err) {
   console.warn('[nome-bebe] Falha ao carregar preços do HQ:', err);
 }
@@ -83,13 +88,15 @@ const schemaProduct = {
           O nome que você escolhe hoje vai acompanhar seu filho para sempre. Com a numerologia cabalística, você garante que esse nome esteja em <strong class="text-white">harmonia vibracional</strong> com o Número de Destino da criança — sem bloqueios energéticos.
         </p>
 
-        <a
-          href="/auth/cadastro?produto=nome_bebe"
-          data-umami-event="cta_nome_bebe_hero"
-          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
-        >
-          Escolher o Nome do Meu Bebê →
-        </a>
+        <LandingCheckout
+          client:load
+          product="nome_bebe"
+          isLoggedIn={!!user}
+          priceInfo={getPrice('nome_bebe')}
+          promotion={promotion}
+          label="Escolher o Nome do Meu Bebê →"
+          className="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 cursor-pointer"
+        />
         <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
           <p class="text-gray-600 text-sm">Pagamento único · {getPrice('nome_bebe').formatted} · Acesso imediato</p>
           <div class="flex items-center gap-1.5">
@@ -283,12 +290,15 @@ const schemaProduct = {
         <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Garanta o Melhor Começo</h2>
         <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">{getPrice('nome_bebe').formatted}</div>
         <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Resultados na hora</p>
-        <a
-          href="/auth/cadastro?produto=nome_bebe"
-          class="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
-        >
-          Escolher o Nome do Meu Bebê →
-        </a>
+        <LandingCheckout
+          client:load
+          product="nome_bebe"
+          isLoggedIn={!!user}
+          priceInfo={getPrice('nome_bebe')}
+          promotion={promotion}
+          label="Escolher o Nome do Meu Bebê →"
+          className="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 cursor-pointer"
+        />
         <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
           <p class="text-gray-600 text-xs">🔒 Pagamento seguro via Stripe</p>
           <p class="text-gray-600 text-xs">🛡 Garantia de 7 dias</p>

@@ -40,6 +40,15 @@ export interface TrianguloRecord {
   arcanoRegente: number | null;
   arcanosDoMinantes?: number[];
   sequenciasNegativas: string[];
+  /** Arcanos de passagem (cronologia) — presente no dado calculado */
+  arcanosDePassagem?: number[];
+  /** Arcano de trânsito atual baseado na idade */
+  arcanoAtual?: {
+    numero: number | null;
+    periodo: string;
+    idadeInicio: number;
+    idadeFim: number;
+  };
 }
 
 export interface MagneticName {
@@ -67,6 +76,7 @@ export interface AnalysisRecord {
   licoes_carmicas?: LicaoRecord[] | null;
   tendencias_ocultas?: TendenciaRecord[] | null;
   frequencias_numeros?: any | null;
+  score?: number | null;
   triangulo_vida?: TrianguloRecord | null;
   triangulo_pessoal?: TrianguloRecord | null;
   triangulo_social?: TrianguloRecord | null;

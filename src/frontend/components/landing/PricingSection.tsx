@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { track } from '../../lib/analytics';
-import { promotionAppliesToProduct, type PriceInfo, type ActivePromotion } from '../../../backend/payments/prices';
+import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
+import { CheckoutModal } from '../purchase/CheckoutModal';
 
 export interface StripePrices {
   nome_social: string;
@@ -8,8 +9,10 @@ export interface StripePrices {
   nome_empresa: string;
 }
 
+type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
+
 interface Plan {
-  id: string;
+  id: ProductType;
   name: string;
   subtitle: string;
   emoji: string;
@@ -20,11 +23,20 @@ interface Plan {
   popular: boolean;
 }
 
-const FALLBACK_PRICES: Record<string, PriceInfo> = {
-  nome_social:  { cents: 9700,  formatted: 'R$ 97',  hasDiscount: false },
-  nome_bebe:    { cents: 14700, formatted: 'R$ 147', hasDiscount: false },
-  nome_empresa: { cents: 19700, formatted: 'R$ 197', hasDiscount: false },
-};
+// Preço exibido quando o HQ não retornou dados (botão desabilitado)
+const PRICE_UNAVAILABLE: PriceInfo = { cents: 0, formatted: '—', hasDiscount: false };
+
+// Função pura — não importa do backend para evitar bundle com Stripe SDK
+function promotionAppliesToProduct(
+  promotion: ActivePromotion | null | undefined,
+  productType: ProductType,
+): boolean {
+  const products = String(promotion?.productType ?? '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return products.length === 0 || products.includes(productType);
+}
 
 const PLANS: Plan[] = [
   {
@@ -80,11 +92,21 @@ interface PricingSectionProps {
   stripePrices?: StripePrices;
   hqPrices?: Record<string, PriceInfo>;
   promotion?: ActivePromotion | null;
+  isLoggedIn?: boolean;
 }
 
-function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInfo; promotion?: ActivePromotion | null; productId: string }) {
-  const appliesToThis = promotionAppliesToProduct(promotion, productId as 'nome_social' | 'nome_bebe' | 'nome_empresa');
-  const showDiscount = promotion && appliesToThis && priceInfo.hasDiscount && priceInfo.discountedFormatted;
+function PriceDisplay({
+  priceInfo,
+  promotion,
+  productId,
+}: {
+  priceInfo: PriceInfo;
+  promotion?: ActivePromotion | null;
+  productId: ProductType;
+}) {
+  const appliesToThis = promotionAppliesToProduct(promotion, productId);
+  const showDiscount =
+    promotion && appliesToThis && priceInfo.hasDiscount && priceInfo.discountedFormatted;
 
   if (showDiscount) {
     return (
@@ -98,7 +120,9 @@ function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInf
           </span>
         </div>
         <span className="inline-block bg-[#D4AF37] text-black text-xs font-bold px-2 py-0.5 rounded-full mt-1">
-          {promotion!.discountType === 'percent' ? `−${promotion!.discountValue}%` : `−R$ ${promotion!.discountValue}`}
+          {promotion!.discountType === 'percent'
+            ? `−${promotion!.discountValue}%`
+            : `−R$ ${promotion!.discountValue}`}
         </span>
       </div>
     );
@@ -109,22 +133,52 @@ function PriceDisplay({ priceInfo, promotion, productId }: { priceInfo: PriceInf
   );
 }
 
-export function PricingSection({ highlight, stripePrices, hqPrices, promotion }: PricingSectionProps) {
+export function PricingSection({
+  highlight,
+  stripePrices,
+  hqPrices,
+  promotion,
+  isLoggedIn = false,
+}: PricingSectionProps) {
+  const [checkoutProduct, setCheckoutProduct] = useState<ProductType | null>(null);
+
+  // Analytics: registra quando a seção de preços entra no viewport
   useEffect(() => {
     const el = document.getElementById('precos');
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          track('pricing_view', { produto: (highlight as 'nome_social' | 'nome_bebe' | 'nome_empresa' | undefined) ?? undefined });
+          track('pricing_view', {
+            produto: (highlight as ProductType | undefined) ?? undefined,
+          });
           observer.disconnect();
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, [highlight]);
+
+  // Auto-abre o modal quando o usuário volta do cadastro com ?checkout=PRODUCT
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const params = new URLSearchParams(window.location.search);
+    const product = params.get('checkout') as ProductType | null;
+    if (
+      product &&
+      (product === 'nome_social' || product === 'nome_bebe' || product === 'nome_empresa')
+    ) {
+      setCheckoutProduct(product);
+      params.delete('checkout');
+      window.history.replaceState(
+        {},
+        '',
+        window.location.pathname + (params.toString() ? '?' + params.toString() : ''),
+      );
+    }
+  }, []);
 
   const resolvedPrices: Record<string, PriceInfo> = hqPrices ?? (
     stripePrices
@@ -133,8 +187,33 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
           nome_bebe:    { cents: 0, formatted: stripePrices.nome_bebe,    hasDiscount: false },
           nome_empresa: { cents: 0, formatted: stripePrices.nome_empresa, hasDiscount: false },
         }
-      : FALLBACK_PRICES
+      : {}
   );
+
+  function handleBuy(planId: ProductType) {
+    if (isLoggedIn) {
+      setCheckoutProduct(planId);
+    } else {
+      const returnUrl = `${window.location.pathname}?checkout=${planId}`;
+      window.location.href = `/auth/cadastro?redirect=${encodeURIComponent(returnUrl)}`;
+    }
+  }
+
+  // Chamado pelo CheckoutModal → redireciona para Stripe (cartão)
+  async function handleTriggerCard(type: ProductType, couponCode?: string) {
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_type: type, couponCode }),
+      });
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) throw new Error(data.error ?? 'Erro ao criar checkout');
+      window.location.href = data.url;
+    } catch (err) {
+      console.error('[PricingSection] Erro ao criar checkout:', err);
+    }
+  }
 
   return (
     <section id="precos" className="py-20 md:py-28 bg-[#1a1a1a]">
@@ -146,20 +225,25 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
             Escolha Sua Análise
           </h2>
           <p className="text-gray-400 max-w-lg mx-auto text-sm leading-relaxed">
-            Pagamento único. Sem recorrência. Acesso completo à análise mais profunda que você já fez sobre um nome, uma assinatura ou uma marca.
+            Pagamento único. Sem recorrência. Acesso completo à análise mais profunda que você já
+            fez sobre um nome, uma assinatura ou uma marca.
           </p>
           {promotion && (
             <div className="inline-flex items-center gap-2 mt-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5">
-              <span className="text-[#D4AF37] text-sm font-semibold">🎉 {promotion.name} — desconto ativo!</span>
+              <span className="text-[#D4AF37] text-sm font-semibold">
+                🎉 {promotion.name} — desconto ativo!
+              </span>
             </div>
           )}
         </div>
 
-        {/* Cards compactos */}
+        {/* Cards */}
         <div className="grid md:grid-cols-3 gap-6">
-          {PLANS.map(plan => {
+          {PLANS.map((plan) => {
             const isHighlighted = highlight ? plan.id === highlight : plan.popular;
-            const priceInfo = resolvedPrices[plan.id] ?? FALLBACK_PRICES[plan.id];
+            const priceInfo = resolvedPrices[plan.id] ?? PRICE_UNAVAILABLE;
+            const priceAvailable = !!resolvedPrices[plan.id];
+
             return (
               <div
                 key={plan.id}
@@ -200,10 +284,20 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
 
                 {/* 3 destaques */}
                 <ul className="space-y-2 mb-6 flex-1">
-                  {plan.highlights.map(h => (
+                  {plan.highlights.map((h) => (
                     <li key={h} className="flex items-start gap-2 text-sm text-gray-400">
-                      <svg className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                       {h}
                     </li>
@@ -212,17 +306,20 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
 
                 {/* CTA */}
                 <button
-                  onClick={() => window.location.assign(`/auth/cadastro?produto=${plan.id}`)}
+                  onClick={() => handleBuy(plan.id)}
+                  disabled={!priceAvailable}
                   className={`w-full text-center font-medium px-6 py-3 rounded-xl transition-all duration-300 text-sm mb-3 ${
-                    isHighlighted
-                      ? 'bg-[#D4AF37] text-[#1A1A1A] hover:bg-[#f2ca50] hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20'
-                      : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37] hover:scale-[1.02] active:scale-[0.98]'
+                    !priceAvailable
+                      ? 'opacity-40 cursor-not-allowed bg-white/5 text-gray-500 border border-white/10'
+                      : isHighlighted
+                        ? 'bg-[#D4AF37] text-[#1A1A1A] hover:bg-[#f2ca50] hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#D4AF37]/20'
+                        : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37] hover:scale-[1.02] active:scale-[0.98]'
                   }`}
                 >
                   {plan.cta}
                 </button>
 
-                {/* Garantia — visível dentro do card, mobile-first */}
+                {/* Garantia */}
                 <p className="text-center text-[11px] text-gray-500 mt-2 mb-1 leading-snug">
                   {isHighlighted ? '⚡ Acesso imediato · 🛡 7 dias de garantia' : '🛡 7 dias de garantia'}
                 </p>
@@ -241,12 +338,28 @@ export function PricingSection({ highlight, stripePrices, hqPrices, promotion }:
 
         {/* Rodapé */}
         <div className="text-center mt-10 space-y-2">
-          <p className="text-gray-600 text-xs">🔒 Pagamento seguro via Stripe · Garantia de 7 dias · Suporte incluso</p>
-          <a href="/precos" className="inline-block text-[#D4AF37]/70 hover:text-[#D4AF37] text-xs transition-colors underline underline-offset-2">
+          <p className="text-gray-600 text-xs">
+            🔒 Pagamento seguro via Stripe · Garantia de 7 dias · Suporte incluso
+          </p>
+          <a
+            href="/precos"
+            className="inline-block text-[#D4AF37]/70 hover:text-[#D4AF37] text-xs transition-colors underline underline-offset-2"
+          >
             Comparar planos e ver todos os detalhes →
           </a>
         </div>
       </div>
+
+      {/* CheckoutModal — usa Portal internamente (z-[99999], fora do stacking context) */}
+      {checkoutProduct && (
+        <CheckoutModal
+          productType={checkoutProduct}
+          priceInfo={resolvedPrices[checkoutProduct] ?? PRICE_UNAVAILABLE}
+          promotion={promotion}
+          onClose={() => setCheckoutProduct(null)}
+          onTriggerCard={handleTriggerCard}
+        />
+      )}
     </section>
   );
 }

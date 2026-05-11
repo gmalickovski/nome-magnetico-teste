@@ -29,6 +29,8 @@ try {
 } catch (err) {
   console.warn('[index] Falha ao carregar preços/promoção do HQ — usando fallback:', err);
 }
+
+const user = Astro.locals.user;
 ---
 
 <LandingLayout
@@ -66,7 +68,7 @@ try {
       <p class="text-gray-600 text-sm mt-4">Gratuito · Crie sua conta · Relatório completo com PDF</p>
     </div>
   </section>
-  <PricingSection hqPrices={hqPrices} promotion={promotion} client:visible />
+  <PricingSection hqPrices={hqPrices} promotion={promotion} isLoggedIn={!!user} client:visible />
   <FAQSection items={faqItems} client:visible />
   <LandingFooter client:visible />
 </LandingLayout>

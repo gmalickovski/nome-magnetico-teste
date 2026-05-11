@@ -6,7 +6,10 @@ import { getSupabaseFaqs } from '../backend/faqs/getSupabaseFaqs';
 import type { FaqItemProps } from '../frontend/components/landing/FAQSection';
 import { FAQSection } from '../frontend/components/landing/FAQSection';
 import { getHqPricesAndPromo } from '../backend/payments/prices';
-import type { PriceInfo } from '../backend/payments/prices';
+import type { PriceInfo, ActivePromotion } from '../backend/payments/prices';
+import { LandingCheckout } from '../frontend/components/purchase/LandingCheckout';
+
+const user = Astro.locals.user;
 
 let faqItems: FaqItemProps[] = [];
 try {
@@ -16,9 +19,11 @@ try {
 }
 
 let hqPrices: Record<string, PriceInfo> | undefined;
+let promotion: ActivePromotion | null = null;
 try {
   const result = await getHqPricesAndPromo();
   hqPrices = result.prices;
+  promotion = result.promotion;
 } catch (err) {
   console.warn('[nome-social] Falha ao carregar preços do HQ:', err);
 }
@@ -84,13 +89,15 @@ const schemaProduct = {
           Harmonize sua assinatura com uma análise de Nome Social que compara seu nome de nascimento com variações possíveis e mostra qual assinatura tem mais fluidez para o seu destino. Você recebe ranking dos candidatos, score 0–100, 5 números, 4 triângulos, arcanos, bloqueios e variações harmonizadas para testar no uso social, profissional e digital.
         </p>
 
-        <a
-          href="/auth/cadastro?produto=nome_social"
-          data-umami-event="cta_nome_social_hero"
-          class="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
-        >
-          Harmonizar Minha Assinatura →
-        </a>
+        <LandingCheckout
+          client:load
+          product="nome_social"
+          isLoggedIn={!!user}
+          priceInfo={getPrice('nome_social')}
+          promotion={promotion}
+          label="Harmonizar Minha Assinatura →"
+          className="inline-block bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 cursor-pointer"
+        />
 
         <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
           <p class="text-gray-600 text-sm">Pagamento único · {getPrice('nome_social').formatted} · Acesso imediato</p>
@@ -370,12 +377,15 @@ const schemaProduct = {
         <h2 class="font-cinzel text-3xl font-bold text-white mb-4">Harmonize Sua Assinatura</h2>
         <div class="font-cinzel text-5xl font-bold text-[#D4AF37] mb-2">{getPrice('nome_social').formatted}</div>
         <p class="text-gray-500 text-sm mb-8">Pagamento único · Acesso por 30 dias · Resultados na hora</p>
-        <a
-          href="/auth/cadastro?produto=nome_social"
-          class="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20"
-        >
-          Harmonizar Minha Assinatura →
-        </a>
+        <LandingCheckout
+          client:load
+          product="nome_social"
+          isLoggedIn={!!user}
+          priceInfo={getPrice('nome_social')}
+          promotion={promotion}
+          label="Harmonizar Minha Assinatura →"
+          className="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold text-lg px-10 py-4 rounded-xl hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#D4AF37]/20 cursor-pointer"
+        />
         <div class="flex items-center justify-center gap-6 mt-5 flex-wrap">
           <p class="text-gray-600 text-xs">🔒 Pagamento seguro via Stripe</p>
           <p class="text-gray-600 text-xs">🛡 Garantia de 7 dias</p>

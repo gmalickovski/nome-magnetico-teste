@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
@@ -111,6 +112,10 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   const pollRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const couponValidationRef = useRef(0);
+
+  // SSR safety: garante que createPortal só executa no client
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
@@ -272,6 +277,8 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
   const canClose = step !== 'card-loading' && step !== 'pix-loading' && step !== 'pix-success';
   const productMeta = PRODUCT_META[productType];
 
+  if (!mounted) return null;
+
   // Preço exibido: usa desconto do cupom se válido, senão preço original
   const pixHasDiscount =
     step === 'pix-qr' &&
@@ -294,9 +301,9 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
     : `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   const expired = secondsLeft === 0 && step === 'pix-qr';
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[70] flex items-stretch justify-center overflow-hidden p-0 md:items-center md:p-4 lg:px-8 lg:py-8"
+      className="fixed inset-0 z-[99999] flex items-stretch justify-center overflow-hidden p-0 md:items-center md:p-4 lg:px-8 lg:py-8"
       style={{ background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
       onClick={(e) => { if (e.target === e.currentTarget && canClose) onClose(); }}
     >
@@ -634,6 +641,7 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
 
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

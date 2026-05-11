@@ -299,6 +299,28 @@ const BLOQUEIOS_EXPANDIDOS: Record<string, string> = {
   '999': 'Prolongamento exaustivo de ciclos que já deveriam ter se encerrado. Este bloqueio cria forte apego ao passado, ressentimentos duradouros e dificuldades crônicas em perdoar e soltar o que não serve mais. Pode gerar desilusões frequentes, perdas emocionais e uma sensação de sacrifício contínuo pelos outros. O antídoto kármico definitivo é o desenvolvimento da compaixão universal, a prática ativa do desapego, o perdão incondicional (a si mesmo e aos outros) e a aceitação pacífica das conclusões.'
 };
 
+// ── Descrições compactas (PDF gratuito — 1-2 frases por número) ──────────────
+
+/** Débitos kármicos — versão curta para o dossiê gratuito */
+const DEBITO_DESC_COMPACT: Record<number, string> = {
+  13: 'O 13 indica padrões de preguiça ou fuga de responsabilidades em encarnações passadas. Resultados chegam — mas exigem esforço consistente e disciplina real, sem atalhos.',
+  14: 'O 14 surge de excessos e impulsividade em vidas anteriores. Esta encarnação pede moderação e constância: construir algo duradouro sem se perder em extremos.',
+  16: 'O 16 traz quedas bruscas quando o que foi construído sobre vaidade precisa desmoronar. O recomeço vem — mas exige humildade genuína como base de tudo.',
+  19: 'O 19 surge do uso do poder sem considerar os outros. Nesta vida, liderança precisa ser exercida com generosidade — o isolamento é o retorno natural do egocentrismo.',
+};
+
+/** Lições kármicas — versão curta para o dossiê gratuito */
+const LICAO_DESC_COMPACT: Record<number, string> = {
+  1: 'A ausência do 1 cria dificuldade em tomar iniciativa e afirmar a própria vontade. Protagonismo, autonomia e coragem para começar precisam ser cultivados ativamente.',
+  2: 'A ausência do 2 dificulta a cooperação e o equilíbrio nos relacionamentos. Aprender a receber, ceder e construir parcerias genuínas é o desenvolvimento central desta vida.',
+  3: 'A ausência do 3 trava a expressão criativa e a comunicação. Colocar em palavras o que sente e ser ouvido com clareza exige esforço consciente e prática contínua.',
+  4: 'A ausência do 4 gera instabilidade nas bases — disciplina, organização e constância precisam ser construídas com determinação, não esperadas como dons naturais.',
+  5: 'A ausência do 5 cria resistência às mudanças. Aprender a soltar o controle e navegar o novo sem rigidez é o grande desenvolvimento desta encarnação.',
+  6: 'A ausência do 6 dificulta o equilíbrio entre dar e receber. Responsabilidades afetivas e harmonia nas relações são área de tensão que exige prática deliberada.',
+  7: 'A ausência do 7 cria dificuldade de introspecção e análise profunda. A tendência é agir sem reflexão suficiente — buscar o conhecimento interior é a lição central.',
+  8: 'A ausência do 8 indica dificuldade com gestão de recursos e poder. Sabotar conquistas financeiras ou evitar o sucesso são padrões que precisam ser reconhecidos e revertidos.',
+};
+
 // ── Interfaces de dados ───────────────────────────────────────────────────────
 
 export interface BloqueioData {
@@ -397,7 +419,7 @@ export function BloqueiosBlock({ bloqueios, showAntidoto = true, hideSaude = fal
 }
 
 /** Cards de Débitos Kármicos */
-export function DebitosBlock({ debitos, showSolution = true }: { debitos: DebitoData[]; showSolution?: boolean }) {
+export function DebitosBlock({ debitos, showSolution = true, compact = false }: { debitos: DebitoData[]; showSolution?: boolean; compact?: boolean }) {
   if (debitos.length === 0) {
     return (
       <View style={styles.debitoNoneBox}>
@@ -411,6 +433,9 @@ export function DebitosBlock({ debitos, showSolution = true }: { debitos: Debito
     <View style={styles.sectionBlock}>
       {debitos.map((d, i) => {
         const isFixed = d.fixo === true;
+        const displayDesc = compact
+          ? (DEBITO_DESC_COMPACT[d.numero] ?? d.descricao)
+          : d.descricao;
         return (
           <View key={i} style={isFixed ? styles.debitoRow : styles.debitoRowVariable} wrap={false}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 3 }}>
@@ -423,7 +448,7 @@ export function DebitosBlock({ debitos, showSolution = true }: { debitos: Debito
                 </View>
               ) : null}
             </View>
-            <Text style={styles.debitoDesc}>{d.descricao}</Text>
+            <Text style={styles.debitoDesc}>{displayDesc}</Text>
             {isFixed ? (
               <Text style={{ fontSize: 7, color: '#92400E', marginTop: 3, fontStyle: 'italic' }}>
                 Ligado ao dia natalício / Destino — não pode ser eliminado por mudança de nome.
@@ -445,7 +470,7 @@ export function DebitosBlock({ debitos, showSolution = true }: { debitos: Debito
 }
 
 /** Cards de Lições Kármicas */
-export function LicoesBlock({ licoes, showSolution = true }: { licoes: LicaoData[]; showSolution?: boolean }) {
+export function LicoesBlock({ licoes, showSolution = true, compact = false }: { licoes: LicaoData[]; showSolution?: boolean; compact?: boolean }) {
   if (licoes.length === 0) {
     return (
       <View style={styles.licaoNoneBox}>
@@ -457,12 +482,17 @@ export function LicoesBlock({ licoes, showSolution = true }: { licoes: LicaoData
   }
   return (
     <View style={styles.sectionBlock}>
-      {licoes.map((l, i) => (
+      {licoes.map((l, i) => {
+        const displayDesc = compact
+          ? (LICAO_DESC_COMPACT[l.numero] ?? l.descricao)
+          : l.descricao;
+        return (
         <View key={i} style={styles.licaoRow} wrap={false}>
           <Text style={styles.licaoTitle}>{l.titulo}</Text>
-          <Text style={styles.licaoDesc}>{l.descricao}</Text>
+          <Text style={styles.licaoDesc}>{displayDesc}</Text>
         </View>
-      ))}
+        );
+      })}
       {!showSolution && (
         <View style={styles.licaoHarmonizacaoBox} wrap={false}>
           <Text style={styles.licaoHarmonizacaoTitle}>Como a Harmonização Resolve as Lições Kármicas</Text>

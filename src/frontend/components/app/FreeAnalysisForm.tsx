@@ -3,7 +3,7 @@
  * Disponível uma única vez por usuário. Envia is_free: true para /api/analyze.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DateInput } from '../ui/DateInput';
 
 export default function FreeAnalysisForm() {
@@ -11,6 +11,19 @@ export default function FreeAnalysisForm() {
   const [data, setData] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Pré-preenche os campos se o usuário veio da prévia na landing page
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('pendingFreeAnalysis');
+      if (raw) {
+        const { nome: n, data: d } = JSON.parse(raw);
+        if (n) setNome(n);
+        if (d) setData(d);
+        sessionStorage.removeItem('pendingFreeAnalysis');
+      }
+    } catch {}
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

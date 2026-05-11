@@ -25,74 +25,90 @@ export function LoginForm() {
     setError('');
     setLoading(true);
 
-    const { data: signInData, error: err } = await supabaseBrowser.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data: signInData, error: err } = await supabaseBrowser.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (err) {
-      setError(err.message === 'Invalid login credentials'
-        ? 'Email ou senha incorretos'
-        : err.message);
-      setLoading(false);
-      return;
-    }
+      if (err) {
+        setError(err.message === 'Invalid login credentials'
+          ? 'Email ou senha incorretos'
+          : err.message);
+        setLoading(false);
+        return;
+      }
 
-    // Verificar isolamento de app: usuário deve ter a tag 'nome_magnetico'
-    // em app_metadata.apps (escrito via service role no cadastro).
-    const apps = signInData.user?.app_metadata?.apps as string[] | undefined;
-    if (apps !== undefined && !apps.includes('nome_magnetico')) {
-      await supabaseBrowser.auth.signOut();
-      setError('Este email não está cadastrado no Nome Magnético. Crie uma conta para começar.');
-      setLoading(false);
-      return;
-    }
+      // Verificar isolamento de app: usuário deve ter a tag 'nome_magnetico'
+      // em app_metadata.apps (escrito via service role no cadastro).
+      const apps = signInData.user?.app_metadata?.apps as string[] | undefined;
+      if (apps !== undefined && !apps.includes('nome_magnetico')) {
+        await supabaseBrowser.auth.signOut();
+        setError('Este email não está cadastrado no Nome Magnético. Crie uma conta para começar.');
+        setLoading(false);
+        return;
+      }
 
-    // Garantir que o usuário tem perfil neste app (necessário para usuários
-    // que já existiam em auth.users via outro app, ex: Sincro).
-    // Passa o token no header porque a sessão fica em localStorage (não em cookie).
-    const { data: { session } } = await supabaseBrowser.auth.getSession();
-    console.log('[LoginForm] sessão obtida após login:', session ? `token=${session.access_token.slice(0, 20)}...` : 'null');
+      // Garantir que o usuário tem perfil neste app (necessário para usuários
+      // que já existiam em auth.users via outro app, ex: Sincro).
+      // Passa o token no header porque a sessão fica em localStorage (não em cookie).
+      const { data: { session } } = await supabaseBrowser.auth.getSession();
+      console.log('[LoginForm] sessão obtida após login:', session ? `token=${session.access_token.slice(0, 20)}...` : 'null');
 
-    const epRes = await fetch('/api/auth/ensure-profile', {
-      method: 'POST',
-      headers: session?.access_token
-        ? { Authorization: `Bearer ${session.access_token}` }
-        : {},
-    });
-    const epData = await epRes.json();
-    console.log('[LoginForm] ensure-profile status:', epRes.status, epData);
+      let epData: any = null;
+      try {
+        const epRes = await fetch('/api/auth/ensure-profile', {
+          method: 'POST',
+          headers: session?.access_token
+            ? { Authorization: `Bearer ${session.access_token}` }
+            : {},
+        });
+        const text = await epRes.text();
+        console.log('[LoginForm] ensure-profile status:', epRes.status, text.slice(0, 200));
+        try { epData = JSON.parse(text); } catch { epData = null; }
+        if (!epRes.ok) {
+          console.warn('[LoginForm] ensure-profile retornou erro:', epRes.status, epData);
+          // Não bloqueia o login — apenas loga. O perfil pode já existir.
+        }
+      } catch (fetchErr) {
+        console.warn('[LoginForm] ensure-profile fetch falhou (não crítico):', fetchErr);
+      }
 
-    // Admin bypassa o fluxo de compra
-    if (epData?.profile?.role === 'admin') {
+      // Admin bypassa o fluxo de compra
+      if (epData?.profile?.role === 'admin') {
+        if (session) {
+          document.cookie = `nome-magnetico-auth-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+          document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+        }
+        window.location.href = '/app';
+        return;
+      }
+
+      // Setar cookies para que o middleware SSR encontre o token
       if (session) {
         document.cookie = `nome-magnetico-auth-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax`;
         document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
       }
-      window.location.href = '/app';
-      return;
-    }
 
-    // Setar cookies para que o middleware SSR encontre o token
-    if (session) {
-      document.cookie = `nome-magnetico-auth-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax`;
-      document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
-    }
+      // Redirecionar: produto tem prioridade (vindo do funil landing -> cadastro -> login)
+      const searchParams = new URLSearchParams(window.location.search);
+      let produto = searchParams.get('produto');
 
-    // Redirecionar: produto tem prioridade (vindo do funil landing -> cadastro -> login)
-    const searchParams = new URLSearchParams(window.location.search);
-    let produto = searchParams.get('produto');
-    
-    // Recuperar produto solto durante a confirmação de e-mail (fallback)
-    if (!produto) {
-      produto = localStorage.getItem('nome_magnetico_pending_product');
-    }
-    
-    if (produto) {
-      localStorage.removeItem('nome_magnetico_pending_product');
-      window.location.href = `/comprar?produto=${produto}`;
-    } else {
-      window.location.href = searchParams.get('redirect') ?? '/app';
+      // Recuperar produto solto durante a confirmação de e-mail (fallback)
+      if (!produto) {
+        produto = localStorage.getItem('nome_magnetico_pending_product');
+      }
+
+      if (produto) {
+        localStorage.removeItem('nome_magnetico_pending_product');
+        window.location.href = `/comprar?produto=${produto}`;
+      } else {
+        window.location.href = searchParams.get('redirect') ?? '/app';
+      }
+    } catch (unexpectedErr) {
+      console.error('[LoginForm] erro inesperado no handleSubmit:', unexpectedErr);
+      setError('Erro inesperado ao fazer login. Abra o console do navegador (F12) e tente novamente.');
+      setLoading(false);
     }
   }
 

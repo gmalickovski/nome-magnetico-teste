@@ -7,11 +7,31 @@ interface Props {
   productType: string;
   isFree?: boolean;
   fabOnly?: boolean;
+  /** URL direta do PDF — se fornecida, substitui /api/generate-pdf?id=... */
+  pdfUrl?: string;
+  /** Texto do botão (desktop) */
+  label?: string;
+  /** Classe CSS do botão desktop — sobrescreve o padrão */
+  className?: string;
+  /** Exibe o FAB mobile (padrão: true) */
+  showFab?: boolean;
+  /** Dispara o download automaticamente ao montar o componente */
+  autoDownload?: boolean;
 }
 
 type Status = 'idle' | 'loading' | 'done' | 'error';
 
-export function PDFFeedbackButton({ analysisId, productType, isFree = false, fabOnly = false }: Props) {
+export function PDFFeedbackButton({
+  analysisId,
+  productType,
+  isFree = false,
+  fabOnly = false,
+  pdfUrl,
+  label,
+  className,
+  showFab = true,
+  autoDownload = false,
+}: Props) {
   const [modalOpen, setModalOpen]         = useState(false);
   const [status, setStatus]               = useState<Status>('idle');
   const [elapsed, setElapsed]             = useState(0);
@@ -28,6 +48,15 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
 
   // Garante que o portal só monta no client (SSR safe)
   useEffect(() => { setMounted(true); }, []);
+
+  // Auto-download ao montar quando solicitado (primeiro login via landing page)
+  useEffect(() => {
+    if (autoDownload) {
+      const t = setTimeout(() => handleDownload(), 400);
+      return () => clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Opacidade do FAB ao rolar / interagir (só na instância fabOnly)
   useEffect(() => {
@@ -98,7 +127,10 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
     setFeedbackError(false);
 
     try {
-      const res = await fetch(`/api/generate-pdf?id=${analysisId}&t=${Date.now()}`);
+      // Usa pdfUrl direto se fornecido; senão constrói via analysisId
+      const baseUrl = pdfUrl ?? `/api/generate-pdf?id=${analysisId}`;
+      const resolvedUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      const res = await fetch(resolvedUrl);
       if (!res.ok) throw new Error('pdf_error');
 
       const disposition = res.headers.get('Content-Disposition') ?? '';
@@ -395,26 +427,31 @@ export function PDFFeedbackButton({ analysisId, productType, isFree = false, fab
       {!fabOnly && (
         <button
           onClick={handleDownload}
-          className="hidden md:inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_2px_16px_rgba(212,175,55,0.35)] hover:bg-[#f2ca50] hover:shadow-[0_4px_24px_rgba(212,175,55,0.5)] active:scale-95 transition-all duration-300"
+          className={
+            className ??
+            'hidden md:inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_2px_16px_rgba(212,175,55,0.35)] hover:bg-[#f2ca50] hover:shadow-[0_4px_24px_rgba(212,175,55,0.5)] active:scale-95 transition-all duration-300'
+          }
         >
           {downloadIcon}
-          Baixar Análise Completa
+          {label ?? 'Baixar Análise Completa'}
         </button>
       )}
 
-      {/* ── FAB mobile ── */}
-      <button
-        ref={fabRef}
-        onClick={handleDownload}
-        className="md:hidden fixed bottom-[116px] left-1/2 -translate-x-1/2 z-50 inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(212,175,55,0.4)] hover:bg-[#f2ca50] hover:shadow-[0_4px_32px_rgba(212,175,55,0.55)] active:scale-95 transition-all duration-300"
-        style={{ opacity: 1, transition: 'opacity 0.4s ease, background-color 0.3s, box-shadow 0.3s, transform 0.1s' }}
-        id="pdf-download-btn"
-      >
-        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
-        Baixar Análise Completa
-      </button>
+      {/* ── FAB mobile (condicional via showFab) ── */}
+      {showFab && (
+        <button
+          ref={fabRef}
+          onClick={handleDownload}
+          className="md:hidden fixed bottom-[116px] left-1/2 -translate-x-1/2 z-50 inline-flex items-center gap-2 bg-[#D4AF37] text-[#131313] text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(212,175,55,0.4)] hover:bg-[#f2ca50] hover:shadow-[0_4px_32px_rgba(212,175,55,0.55)] active:scale-95 transition-all duration-300"
+          style={{ opacity: 1, transition: 'opacity 0.4s ease, background-color 0.3s, box-shadow 0.3s, transform 0.1s' }}
+          id="pdf-download-btn"
+        >
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          {label ?? 'Baixar Análise Completa'}
+        </button>
+      )}
 
       {/* ── Modal (Portal → document.body) ── */}
       {modal}

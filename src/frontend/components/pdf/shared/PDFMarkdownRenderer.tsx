@@ -208,6 +208,7 @@ export function TrianguloPiramideInline({
   letras,
   bloqueios,
   triKey,
+  hideValues = false,
 }: {
   data: TrianguloData;
   label: string;
@@ -215,8 +216,12 @@ export function TrianguloPiramideInline({
   letras?: string[];
   bloqueios?: BloqueioData[];
   triKey?: string;
+  /** Quando true: renderiza a grade estrutural com células vazias (sem números, sem marcações
+   *  de bloqueio). Usado nos triângulos bloqueados do PDF gratuito. */
+  hideValues?: boolean;
 }) {
-  const bloqueioPositions = buildBloqueioPositions(data.linhas);
+  // Com hideValues, nenhuma célula é colorida como bloqueio ou arcano regente
+  const bloqueioPositions = hideValues ? new Set<string>() : buildBloqueioPositions(data.linhas);
   const cellFontSize = Math.max(4, Math.floor(cellSize * 0.65));
   const letterFontSize = Math.max(5, Math.floor(cellSize * 0.7));
 
@@ -241,7 +246,7 @@ export function TrianguloPiramideInline({
                 style={{
                   fontSize: letterFontSize,
                   fontFamily: 'Helvetica-Bold',
-                  color: '#4B5563',
+                  color: hideValues ? '#9CA3AF' : '#4B5563',
                 }}
               >
                 {char}
@@ -254,9 +259,9 @@ export function TrianguloPiramideInline({
       {data.linhas.map((linha, li) => (
         <View key={li} wrap={false} style={triStyles.row}>
           {linha.map((num, ni) => {
-            const isBloqueio = bloqueioPositions.has(`${li}:${ni}`);
+            const isBloqueio = !hideValues && bloqueioPositions.has(`${li}:${ni}`);
             const isFirstRow = li === 0;
-            const isRegent = li === data.linhas.length - 1;
+            const isRegent = !hideValues && li === data.linhas.length - 1;
 
             const cellStyle = isBloqueio
               ? triStyles.cellBloqueio
@@ -276,22 +281,25 @@ export function TrianguloPiramideInline({
                   cellStyle,
                 ]}
               >
-                <Text
-                  style={{
-                    fontSize: cellFontSize,
-                    fontFamily: 'Helvetica-Bold',
-                    color: textColor,
-                  }}
-                >
-                  {num}
-                </Text>
+                {/* hideValues: célula vazia — sem número, sem cor de bloqueio */}
+                {!hideValues && (
+                  <Text
+                    style={{
+                      fontSize: cellFontSize,
+                      fontFamily: 'Helvetica-Bold',
+                      color: textColor,
+                    }}
+                  >
+                    {num}
+                  </Text>
+                )}
               </View>
             );
           })}
         </View>
       ))}
 
-      {bloqueios && triKey && (() => {
+      {!hideValues && bloqueios && triKey && (() => {
         const filtrados = bloqueios.filter(b => b.triangulos?.includes(triKey));
         return filtrados.length > 0 ? (
           <BloqueiosBlock bloqueios={filtrados} />
