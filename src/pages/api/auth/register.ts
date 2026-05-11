@@ -9,6 +9,7 @@ const schema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
   produto: z.string().optional(),
+  redirect: z.string().optional(),
 });
 
 const APP_ID = 'nome_magnetico';
@@ -16,11 +17,9 @@ const APP_ID = 'nome_magnetico';
 /**
  * POST /api/auth/register
  *
- * Fluxo em 2 etapas:
- * 1. supabaseAnon.auth.signUp() — única API que aciona o envio do email de
- *    confirmação via SMTP (Amazon SES). admin.createUser() é silenciosa.
- * 2. supabase.auth.admin.updateUserById() — seta app_metadata para isolamento
- *    de app (requer service role, não disponível no cliente anon).
+ * Cria a conta sem disparar email no primeiro acesso. O Auth fica confirmado
+ * para liberar login imediato; a validação comercial do email fica em
+ * profiles.email_verified_at, preenchida pelo banner ou por pagamento aprovado.
  */
 export const POST: APIRoute = async ({ request }) => {
   let body: unknown;
@@ -36,7 +35,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: msg }, 400);
   }
 
-  const { nome, email, password, produto } = parsed.data;
+  const { nome, email, password } = parsed.data;
   const normalizedEmail = email.trim().toLowerCase();
 
   if (isDisposableEmail(normalizedEmail)) {
@@ -71,76 +70,63 @@ export const POST: APIRoute = async ({ request }) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const appUrl = process.env.APP_URL ?? 'http://localhost:4321';
+  const { data: createdData, error: createError } = await supabase.auth.admin.createUser({
+    email: normalizedEmail,
+    password,
+    email_confirm: true,
+    user_metadata: { nome },
+    app_metadata: { apps: [APP_ID] },
+  });
 
-  let data: Awaited<ReturnType<typeof supabaseAnon.auth.signUp>>['data'] | null = null;
-  let error: Awaited<ReturnType<typeof supabaseAnon.auth.signUp>>['error'] | null = null;
-
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    const result = await supabaseAnon.auth.signUp({
-      email: normalizedEmail,
-      password,
-      options: {
-        data: { nome },
-        emailRedirectTo: `${appUrl}/auth/confirmar-email${produto ? `?produto=${produto}` : ''}`,
-      },
-    });
-    data = result.data;
-    error = result.error;
-
-    if (!error) break;
-
-    const isTimeout = !error.message || error.message.includes('timeout') ||
-      error.message.startsWith('{') || error.status === 504;
-
-    if (!isTimeout) break;
-
-    console.warn(`[register] timeout no signUp (tentativa ${attempt}/3):`, error.message);
-    if (attempt < 3) await new Promise(r => setTimeout(r, 1500 * attempt));
-  }
-
-  if (error) {
-    console.error('[register] erro no signUp:', error.message);
-    const isTimeout = !error.message || error.message.includes('timeout') ||
-      error.message.startsWith('{') || error.status === 504;
-    const msg = error.message?.includes('already been registered')
+  if (createError) {
+    console.error('[register] erro ao criar usuario:', createError.message);
+    const msg = createError.message?.includes('already been registered') ||
+      createError.message?.includes('already registered') ||
+      createError.message?.includes('User already registered')
       ? 'already_registered'
-      : isTimeout
-        ? 'Serviço temporariamente indisponível. Tente novamente em alguns segundos.'
-        : error.message;
-    return json({ error: msg }, isTimeout ? 503 : 400);
+      : createError.message;
+    return json({ error: msg }, 400);
   }
 
-  // signUp() com email já cadastrado não retorna erro — retorna identities vazio.
-  // Também ocorre quando o email existe mas ainda não foi confirmado (reenvia o email).
-  if (data.user && (data.user.identities?.length ?? 0) === 0) {
-    const { data: adminData } = await supabase.auth.admin.getUserById(data.user.id);
-    if (adminData?.user?.email_confirmed_at) {
-      return json({ error: 'already_registered' }, 400);
-    }
-    // Pendente de confirmação → signUp() reenviou o email automaticamente
-    return json({ error: 'email_pending_confirmation' }, 400);
+  const createdUser = createdData?.user;
+  if (!createdUser) {
+    return json({ error: 'Não foi possível criar a conta. Tente novamente.' }, 500);
   }
 
   console.log('[register] usuário criado:', {
-    id: data.user?.id,
-    email: data.user?.email,
-    confirmed: data.user?.email_confirmed_at ?? 'pendente — email enviado',
+    id: createdUser.id,
+    email: createdUser.email,
+    confirmed: createdUser.email_confirmed_at ?? 'liberado',
   });
 
-  // Taggear app_metadata via service role para isolamento multi-app.
-  if (data.user?.id) {
-    const { error: tagError } = await supabase.auth.admin.updateUserById(
-      data.user.id,
-      { app_metadata: { apps: [APP_ID] } }
-    );
-    if (tagError) {
-      console.error('[register] falha ao taggear app_metadata:', tagError.message);
-      // Não bloquear o cadastro — a tag pode ser aplicada no próximo login via ensure-profile
-    }
+  const { error: profileError } = await supabase.rpc('ensure_profile', {
+    p_user_id: createdUser.id,
+    p_email: normalizedEmail,
+    p_nome: nome,
+  });
+  if (profileError) {
+    console.error('[register] falha ao garantir profile:', profileError.message);
   }
 
-  return json({ success: true }, 200);
+  const signIn = await supabaseAnon.auth.signInWithPassword({
+    email: normalizedEmail,
+    password,
+  });
+  if (signIn.error) {
+    console.error('[register] falha no login imediato:', signIn.error.message);
+  }
+  const session = signIn.data.session ?? null;
+
+  return json({
+    success: true,
+    session: session
+      ? {
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_in: session.expires_in,
+        }
+      : null,
+  }, 200);
 };
 
 function json(body: object, status: number) {

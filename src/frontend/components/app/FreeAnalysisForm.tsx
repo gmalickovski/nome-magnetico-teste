@@ -29,8 +29,8 @@ export default function FreeAnalysisForm() {
     e.preventDefault();
     setError('');
 
-    if (!nome.trim() || nome.trim().length < 2) {
-      setError('Informe seu nome completo de nascimento.');
+    if (nome.trim().split(/\s+/).filter(Boolean).length < 3) {
+      setError('O diagnóstico exige o nome de registro civil completo, com nome e sobrenomes.');
       return;
     }
 
@@ -63,7 +63,7 @@ export default function FreeAnalysisForm() {
       if (typeof window !== 'undefined' && (window as any).umami) {
         (window as any).umami.track('analise_gratis_submit');
       }
-      window.location.href = `/app/resultado/${json.analysisId}`;
+      window.location.href = '/app?gen_free_pdf=1';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado. Tente novamente.');
     } finally {

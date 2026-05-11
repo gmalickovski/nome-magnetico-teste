@@ -5,11 +5,12 @@ import { Input } from '../ui/Input';
 interface Props {
   produto?: string;
   redirect?: string;
+  prefilledEmail?: string;
 }
 
-export function SignupForm({ produto = '', redirect = '' }: Props) {
+export function SignupForm({ produto = '', redirect = '', prefilledEmail = '' }: Props) {
   const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(prefilledEmail);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,7 +36,7 @@ export function SignupForm({ produto = '', redirect = '' }: Props) {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, email, password, produto }),
+      body: JSON.stringify({ nome, email, password, produto, redirect }),
     });
 
     const data = await res.json();
@@ -62,6 +63,13 @@ export function SignupForm({ produto = '', redirect = '' }: Props) {
       return;
     }
 
+    if (data.session?.access_token && data.session?.refresh_token) {
+      document.cookie = `nome-magnetico-auth-access-token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+      document.cookie = `nome-magnetico-auth-refresh-token=${data.session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+      window.location.href = redirect || (produto ? `/comprar?produto=${produto}` : '/app');
+      return;
+    }
+
     setSuccess(true);
     setLoading(false);
   }
@@ -73,8 +81,7 @@ export function SignupForm({ produto = '', redirect = '' }: Props) {
       ? `/auth/login?produto=${produto}`
       : '/auth/login';
     return (
-      <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 text-center shadow-2xl shadow-black/50">
-        <div className="text-5xl mb-4">✉️</div>
+      <div className="rounded-2xl border border-slate-700/80 bg-slate-900/70 p-8 text-center shadow-2xl shadow-black/50 backdrop-blur">
         <h2 className="font-cinzel text-2xl font-bold text-white mb-3">
           Verifique seu Email
         </h2>
@@ -91,7 +98,7 @@ export function SignupForm({ produto = '', redirect = '' }: Props) {
   }
 
   return (
-    <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 shadow-2xl shadow-black/50">
+    <div className="rounded-2xl border border-slate-700/80 bg-slate-900/70 p-8 shadow-2xl shadow-black/50 backdrop-blur">
       <h2 className="font-cinzel text-2xl font-bold text-white text-center mb-6">
         Criar Conta
       </h2>
@@ -130,26 +137,23 @@ export function SignupForm({ produto = '', redirect = '' }: Props) {
           </div>
         )}
 
-        <Button type="submit" loading={loading} className="w-full">
-          Criar Conta Grátis
+        <Button type="submit" loading={loading} className="w-full bg-[#D4AF37] text-slate-950 hover:bg-[#f2ca50]">
+          Criar Conta
         </Button>
       </form>
 
-      <p className="text-center text-gray-500 text-sm mt-6">
-        Já tem conta?{' '}
-        <a
-          href={
-            redirect
-              ? `/auth/login?redirect=${encodeURIComponent(redirect)}`
-              : produto
-              ? `/auth/login?produto=${produto}`
-              : '/auth/login'
-          }
-          className="text-[#D4AF37] hover:underline"
-        >
-          Entrar
-        </a>
-      </p>
+      <a
+        href={
+          redirect
+            ? `/auth/login?redirect=${encodeURIComponent(redirect)}`
+            : produto
+            ? `/auth/login?produto=${produto}`
+            : '/auth/login'
+        }
+        className="mt-4 flex w-full items-center justify-center rounded-xl border border-[#D4AF37]/60 bg-slate-950/40 px-5 py-3 text-sm font-bold text-[#D4AF37] transition hover:bg-[#D4AF37]/10"
+      >
+        Já tenho uma conta
+      </a>
     </div>
   );
 }

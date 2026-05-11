@@ -83,6 +83,27 @@ export function FreePDFAutoGenerator({ existingAnalysisId, leadNome, leadData, a
   // ── Estados visuais ──────────────────────────────────────────────────────────
 
   if (stage === 'creating') {
+    if (autoRun) {
+      return (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 px-4 backdrop-blur-md">
+          <div className="w-full max-w-md rounded-2xl border border-[#D4AF37]/30 bg-[#111111] p-6 shadow-2xl shadow-black/70">
+            <div className="flex items-center gap-4">
+              <svg className="h-9 w-9 animate-spin text-[#D4AF37]" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+              <div>
+                <p className="text-sm font-bold text-[#e5e2e1]">Preparando sua análise gratuita...</p>
+                <p className="mt-1 text-xs leading-relaxed text-gray-500">
+                  Estamos criando seu relatório. O download começa automaticamente em instantes.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <span className="flex-shrink-0 inline-flex items-center gap-2 bg-[#0F766E]/10 border border-[#0F766E]/30 text-[#2DD4BF] font-medium text-sm px-5 py-2.5 rounded-lg cursor-wait select-none">
         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -115,9 +136,9 @@ export function FreePDFAutoGenerator({ existingAnalysisId, leadNome, leadData, a
         productType="analise_gratuita"
         isFree={true}
         showFab={false}
-        autoDownload={autoRun && !existingAnalysisId}
-        label="Baixar PDF Análise Gratuita"
-        className="flex-shrink-0 inline-flex items-center gap-2 bg-[#0F766E]/10 border border-[#0F766E]/30 text-[#2DD4BF] font-medium text-sm px-5 py-2.5 rounded-lg hover:bg-[#0F766E]/20 transition-all duration-300 cursor-pointer"
+        autoDownload={!!autoRun}
+        label="Baixar Análise Gratuita"
+        className={autoRun ? 'hidden' : 'flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-[#0F766E]/30 bg-[#0F766E]/10 px-5 py-2.5 text-sm font-bold text-[#2DD4BF] transition-all duration-300 hover:bg-[#0F766E]/20 cursor-pointer'}
       />
     );
   }

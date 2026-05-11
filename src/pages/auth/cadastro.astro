@@ -5,6 +5,7 @@ import { SignupForm } from '../../frontend/components/auth/SignupForm';
 const user = Astro.locals.user;
 const produto = Astro.url.searchParams.get('produto') ?? '';
 const redirect = Astro.url.searchParams.get('redirect') ?? '';
+const email = Astro.url.searchParams.get('email') ?? '';
 
 // Usuário já logado → vai direto para o checkout, redirect ou app
 if (user) {
@@ -14,5 +15,5 @@ if (user) {
 ---
 
 <AuthLayout title="Criar Conta">
-  <SignupForm client:load produto={produto} redirect={redirect} />
+  <SignupForm client:load produto={produto} redirect={redirect} prefilledEmail={email} />
 </AuthLayout>

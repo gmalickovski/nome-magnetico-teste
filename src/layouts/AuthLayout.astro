@@ -9,15 +9,12 @@ const { title } = Astro.props;
 ---
 
 <BaseLayout title={title} noIndex={true}>
-  <div class="min-h-screen bg-[#111111] flex relative justify-center">
+  <div class="min-h-screen bg-slate-950 flex relative justify-center">
 
     <!-- Background global contínuo (unificando esquerda e direita) -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      <div class="absolute inset-0 bg-gradient-to-br from-[#1a1400] via-[#111111] to-[#0d0d1a]"></div>
-      <div class="absolute top-1/3 left-[20%] -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4AF37]/8 rounded-full blur-[120px]"></div>
-      <div class="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/6 rounded-full blur-[100px]"></div>
-      <div class="absolute top-1/2 right-[20%] translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-[#D4AF37]/5 rounded-full blur-[100px]"></div>
-      <div class="absolute bottom-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-[80px]"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.10),transparent_34%),linear-gradient(135deg,#020617_0%,#0f172a_48%,#020617_100%)]"></div>
+      <div class="absolute inset-0 opacity-[0.08]" style="background-image: linear-gradient(rgba(229,226,225,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(229,226,225,0.16) 1px, transparent 1px); background-size: 48px 48px;"></div>
     </div>
 
     <!-- Container do Layout Flexível (Espaçamentos perfeitamente iguais) -->
@@ -88,9 +85,7 @@ const { title } = Astro.props;
       <div class="flex-none flex items-center justify-center px-6 lg:px-0 w-full py-2">
         <div class="relative w-full max-w-sm lg:max-w-full">
           <!-- Sombra mais suave e realista atrás do card -->
-          <div class="absolute -inset-5 bg-[#D4AF37]/5 rounded-[3rem] blur-[50px] pointer-events-none"></div>
-          <div class="absolute inset-0 bg-black/50 rounded-2xl blur-[25px] pointer-events-none translate-y-6"></div>
-          <div class="absolute -inset-1 bg-[#D4AF37]/10 rounded-2xl blur-[15px] pointer-events-none"></div>
+          <div class="absolute inset-0 bg-black/40 rounded-2xl blur-[25px] pointer-events-none translate-y-6"></div>
           
           <!-- Card do formulário -->
           <div class="relative z-10">

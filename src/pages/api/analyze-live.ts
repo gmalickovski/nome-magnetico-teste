@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
+import { createHash } from 'node:crypto';
+import { supabase } from '@/backend/db/supabase';
 import { calcularTodosTriangulos, detectarBloqueios } from '@/backend/numerology/triangle';
 import { calcularExpressao, calcularDestino, calcularMotivacao, calcularImpressao, calcularMissao } from '@/backend/numerology/numbers';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '@/backend/numerology/karmic';
@@ -8,41 +10,116 @@ import { calcularScore } from '@/backend/numerology/score';
 
 const RequestSchema = z.object({
   nome_candidato: z.string().min(2),
-  data_nascimento_db: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // formato postgres
+  data_nascimento_db: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
-export const POST: APIRoute = async ({ request }) => {
-  // OBS: Como essa rota batida com frenquência durante digitação,
-  // Podemos mantê-la como endpoint computacional simples sem bater na DB.
-  
-  let body;
+function json(body: object, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function getClientIp(request: Request, clientAddress?: string) {
+  const forwardedFor = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+  return (
+    request.headers.get('cf-connecting-ip') ||
+    request.headers.get('x-real-ip') ||
+    forwardedFor ||
+    clientAddress ||
+    'unknown'
+  );
+}
+
+function hashIp(ip: string) {
+  const salt = process.env.RATE_LIMIT_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY || 'nome-magnetico';
+  return createHash('sha256').update(`${salt}:${ip}`).digest('hex');
+}
+
+function hasFullCivilName(nome: string) {
+  return nome.trim().split(/\s+/).filter(Boolean).length >= 3;
+}
+
+export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
+  let body: z.infer<typeof RequestSchema>;
   try {
     body = RequestSchema.parse(await request.json());
-  } catch (e) {
-    return new Response(JSON.stringify({ error: 'Dados inválidos' }), { status: 400 });
+  } catch {
+    return json({ error: 'Dados invalidos' }, 400);
+  }
+
+  if (!hasFullCivilName(body.nome_candidato)) {
+    return json({
+      error: 'O diagnóstico exige o nome de registro civil completo, com nome e sobrenomes.',
+    }, 400);
+  }
+
+  const user = (locals as any).user;
+
+  if (user) {
+    const { data: freeAnalysis } = await supabase
+      .from('analyses')
+      .select('id, status')
+      .eq('user_id', user.id)
+      .or('is_free.eq.true,product_type.eq.analise_gratuita')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (freeAnalysis) {
+      return json({
+        error: 'Sua análise gratuita de nome de nascimento já foi registrada. Redirecionando para o PDF original.',
+        redirectUrl: freeAnalysis.status === 'complete'
+          ? `/api/generate-pdf?id=${freeAnalysis.id}`
+          : `/app/resultado/${freeAnalysis.id}`,
+      }, 409);
+    }
+  } else {
+    const ipHash = hashIp(getClientIp(request, clientAddress));
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count, error: countError } = await supabase
+      .from('public_analysis_rate_limits')
+      .select('id', { count: 'exact', head: true })
+      .eq('ip_hash', ipHash)
+      .gte('created_at', since);
+
+    if (countError) {
+      console.error('[api/analyze-live] rate limit count failed:', countError.message);
+    } else if ((count ?? 0) >= 3) {
+      return json({
+        error: 'Identificamos múltiplas consultas. Para continuar analisando novos nomes e frequências, adquira o Nome Social.',
+      }, 429);
+    }
+
+    const { error: insertError } = await supabase
+      .from('public_analysis_rate_limits')
+      .insert({
+        ip_hash: ipHash,
+        nome_consultado: body.nome_candidato.trim().slice(0, 150),
+      });
+
+    if (insertError) {
+      console.error('[api/analyze-live] rate limit insert failed:', insertError.message);
+    }
   }
 
   try {
-    // Converter de YYYY-MM-DD para DD/MM/AAAA (o formato que o Triangle espera)
     const partes = body.data_nascimento_db.split('-');
     const bdDataStr = `${partes[2]}/${partes[1]}/${partes[0]}`;
 
     const triangulos = calcularTodosTriangulos(body.nome_candidato, bdDataStr);
     const bloqueios = detectarBloqueios(triangulos);
-    
-    // Números Core
+
     const expressao = calcularExpressao(body.nome_candidato);
     const destino = calcularDestino(bdDataStr);
     const motivacao = calcularMotivacao(body.nome_candidato);
     const impressao = calcularImpressao(body.nome_candidato);
     const missao = calcularMissao(body.nome_candidato, bdDataStr);
 
-    // Kármico
     const licoesCarmicas = detectarLicoesCarmicas(body.nome_candidato);
     const tendenciasOcultas = detectarTendenciasOcultas(body.nome_candidato);
     const debitosCarmicos = calcularDebitosCarmicos(bdDataStr, destino, motivacao, expressao);
 
-    // Compatibilidade e score unificado
     const compatibilidade = avaliarCompatibilidade(expressao, destino);
     const score = calcularScore({
       bloqueios: bloqueios.length,
@@ -53,7 +130,7 @@ export const POST: APIRoute = async ({ request }) => {
       compatibilidade,
     });
 
-    return new Response(JSON.stringify({
+    return json({
       triangulos,
       bloqueios,
       numeros: {
@@ -61,18 +138,16 @@ export const POST: APIRoute = async ({ request }) => {
         destino,
         motivacao,
         impressao,
-        missao
+        missao,
       },
       licoesCarmicas,
       tendenciasOcultas,
       debitosCarmicos,
       compatibilidade,
-      score
-    }), {
-      status: 200,
+      score: { total: score },
     });
   } catch (error) {
     console.error('[api/analyze-live] Erro:', error);
-    return new Response(JSON.stringify({ error: 'Erro de cálculo interno' }), { status: 500 });
+    return json({ error: 'Erro de calculo interno' }, 500);
   }
 };

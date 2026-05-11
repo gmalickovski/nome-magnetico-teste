@@ -9,6 +9,7 @@ import { getProfile } from '../../backend/db/users';
 import { notify } from '../../backend/notifications/notify';
 import { recordHqAccessCouponUse } from '../../backend/payments/prices';
 import type { ProductType } from '../../backend/payments/stripe';
+import { confirmEmailAfterPayment } from '../../backend/auth/confirmEmail';
 
 export const POST: APIRoute = async ({ request }) => {
   const signature = request.headers.get('stripe-signature');
@@ -63,6 +64,8 @@ export const POST: APIRoute = async ({ request }) => {
       amountPaid: session.amount_total ?? undefined,
       currency: session.currency ?? 'brl',
     });
+    await confirmEmailAfterPayment(userId);
+
     await recordHqAccessCouponUse({
       couponCode: session.metadata?.coupon_code,
       userId,

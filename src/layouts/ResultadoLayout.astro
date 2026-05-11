@@ -1,9 +1,6 @@
 ---
-import BaseLayout from './BaseLayout.astro';
-import { supabase } from '../backend/db/supabase';
-import AvatarMenu from '../frontend/components/app/AvatarMenu';
+import AppLayout from './AppLayout.astro';
 import { PDFFeedbackButton } from '../frontend/components/app/PDFFeedbackButton';
-import MobileNavBar from '../frontend/components/app/MobileNavBar.astro';
 
 export interface Props {
   title: string;
@@ -14,73 +11,35 @@ export interface Props {
 }
 
 const { title, analysisId, productType = 'nome_social', isFree = false, showActions = true } = Astro.props;
-
-const user = Astro.locals.user;
-if (!user) {
-  return Astro.redirect('/auth/login?redirect=' + encodeURIComponent(Astro.url.pathname));
-}
-
-
-let userNome = user.email?.split('@')[0] ?? '';
-try {
-  const { data: profile } = await supabase.from('profiles').select('nome').eq('id', user.id).single();
-  if (profile?.nome) userNome = profile.nome;
-} catch { /* silencioso */ }
 ---
 
-<BaseLayout title={title} noIndex={true} hasBottomNav={true}>
-  <div class="min-h-screen bg-[#1a1a1a]">
-    <!-- Header do resultado — sem menu, apenas botões contextuais -->
-    <header class="border-b border-[#D4AF37]/20 bg-[#111111]/80 backdrop-blur-md sticky top-0 z-40">
-      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between relative">
-        <!-- Back Button (Mobile) -->
-        <button onclick="window.history.length > 1 ? window.history.back() : window.location.href='/app/analises'" class="text-[#D4AF37] hover:text-[#f2ca50] transition-colors md:hidden">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        </button>
-
-        <!-- Title -->
-        <a href="/app" class="hover:opacity-80 transition-opacity absolute left-1/2 -translate-x-1/2 md:static md:transform-none">
-          <img src="/logo-nm-header.svg" alt="Nome Magnético" class="h-9 sm:h-10 md:h-11 w-auto" />
+<AppLayout title={title}>
+  <div class="md:-mx-10 md:-mt-10 lg:-mx-14">
+    <div class="sticky top-0 z-40 hidden border-b border-[#D4AF37]/15 bg-[#111111]/92 backdrop-blur-md md:block">
+      <div class="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-3 md:px-6">
+        <a href="/app/analises" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 transition-colors hover:text-[#D4AF37]">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span class="hidden sm:inline">Voltar para minhas análises</span>
+          <span class="sm:hidden">Voltar</span>
         </a>
 
-        <!-- Spacer for mobile flex balance / AvatarMenu -->
-        <div class="md:hidden flex items-center justify-end w-8">
-          <AvatarMenu client:load nome={userNome} />
-        </div>
-
-        <!-- Desktop Nav -->
-          <div class="hidden md:flex items-center gap-3">
-            <a
-              href="/app/analises"
-              class="relative inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#D4AF37] transition-colors pb-0.5 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-[#D4AF37] after:transition-all after:duration-300 after:w-0 hover:after:w-full"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-              Minhas Análises
-            </a>
-            {showActions && (
-              <PDFFeedbackButton client:load analysisId={analysisId} productType={productType} isFree={isFree} />
-            )}
-            <AvatarMenu client:load nome={userNome} />
-          </div>
-
+        {showActions && (
+          <PDFFeedbackButton client:load analysisId={analysisId} productType={productType} isFree={isFree} />
+        )}
       </div>
-    </header>
+    </div>
 
-    <!-- FAB mobile — instância independente fora do div desktop (display:none não esconde fixed) -->
-    {showActions && (
-      <PDFFeedbackButton client:load analysisId={analysisId} productType={productType} isFree={isFree} fabOnly />
-    )}
-
-    <!-- Mobile Bottom Navigation -->
-    <MobileNavBar />
-
-    <!-- Conteúdo principal -->
-    <main class="max-w-4xl mx-auto px-4 py-8 pb-32 md:pb-24">
+    <main class="mx-auto max-w-4xl pb-32 md:px-6 md:py-12 md:pb-24">
       <slot />
     </main>
   </div>
 
-  <!-- Ocultar balão do Chatwoot nas páginas de resultado -->
+  {showActions && (
+    <PDFFeedbackButton client:load analysisId={analysisId} productType={productType} isFree={isFree} fabOnly />
+  )}
+
   <script is:inline>
     function _hideChatwootResultado() {
       if (window.$chatwoot) window.$chatwoot.toggleBubbleVisibility('hide');
@@ -91,5 +50,4 @@ try {
       window.addEventListener('chatwoot:ready', _hideChatwootResultado);
     }
   </script>
-
-</BaseLayout>
+</AppLayout>

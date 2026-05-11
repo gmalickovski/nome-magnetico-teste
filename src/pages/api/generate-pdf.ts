@@ -20,13 +20,25 @@ export const GET: APIRoute = async ({ url, locals }) => {
   const analysisId = url.searchParams.get('id');
   if (!analysisId) return new Response('ID ausente', { status: 400 });
 
-  const analysis = await getAnalysis(analysisId);
+  let analysis = await getAnalysis(analysisId);
   if (!analysis || analysis.user_id !== user.id) {
     return new Response('Análise não encontrada', { status: 404 });
   }
 
   if (analysis.status !== 'complete') {
-    return new Response('Análise ainda não concluída', { status: 400 });
+    const deadline = Date.now() + 45_000;
+    while (Date.now() < deadline && analysis.status !== 'complete') {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const nextAnalysis = await getAnalysis(analysisId);
+      if (!nextAnalysis || nextAnalysis.user_id !== user.id) {
+        return new Response('Análise não encontrada', { status: 404 });
+      }
+      analysis = nextAnalysis;
+    }
+  }
+
+  if (analysis.status !== 'complete') {
+    return new Response('Análise ainda não concluída', { status: 202 });
   }
 
   const magneticNames = await getMagneticNames(analysisId);

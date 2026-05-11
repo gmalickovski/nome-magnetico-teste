@@ -79,6 +79,10 @@ const isNomeBebe    = analysis.product_type === 'nome_bebe';
 const isNomeEmpresa = analysis.product_type === 'nome_empresa';
 const isFree        = isAnaliseGratuita || (analysis as any).is_free === true;
 
+if (isFree) {
+  return Astro.redirect('/app?gen_free_pdf=1');
+}
+
 // ── Arcano regente ───────────────────────────────────────────────────
 const arcanoRawNum = (analysis as any).arcano_regente as number | null;
 const arcanoData = arcanoRawNum ? getArcano(arcanoRawNum) : null;

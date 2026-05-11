@@ -201,10 +201,12 @@ export function analisarNomeSocial(
   const debitos = calcularDebitosCarmicos(dataNascimentoUsuario, destino, motivacao, expressao);
   const compatibilidade = avaliarCompatibilidade(expressao, destino);
   const debitosFixosCount = debitos.filter(d => d.fixo).length;
+  const totalOcorrencias = bloqueios.reduce((sum, b) => sum + b.totalOcorrencias, 0);
+  const ocorrenciasExtras = Math.max(0, totalOcorrencias - bloqueios.length);
   const score = calcularScore({
     bloqueios: bloqueios.length, licoesCarmicas: licoes.length,
     tendenciasOcultas: tendencias.length, debitosCarmicos: debitos.length,
-    debitosCarmicoFixos: debitosFixosCount, compatibilidade,
+    debitosCarmicoFixos: debitosFixosCount, ocorrenciasExtras, compatibilidade,
   });
   const scoreTeto = calcularScoreTeto(debitosFixosCount);
 

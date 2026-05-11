@@ -6,49 +6,103 @@ type State = 'loading' | 'success' | 'error' | 'no-token';
 export function EmailConfirmation() {
   const [state, setState] = useState<State>('loading');
   const [countdown, setCountdown] = useState(3);
-  const [loginUrl, setLoginUrl] = useState('/auth/login');
+  const [nextUrl, setNextUrl] = useState('/app');
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token_hash = params.get('token_hash');
-    const produto = params.get('produto');
-    setLoginUrl(produto ? `/auth/login?produto=${produto}` : '/auth/login');
+    let cancelled = false;
 
-    if (!token_hash) {
-      setState('no-token');
-      return;
+    async function markVerified(accessToken?: string) {
+      await fetch('/api/auth/mark-email-verified', {
+        method: 'POST',
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+      });
     }
 
-    supabaseBrowser.auth
-      .verifyOtp({ token_hash, type: 'email' })
-      .then(({ error }) => {
-        if (error) {
-          console.error('[EmailConfirmation]', error.message);
-          setState('error');
-        } else {
-          setState('success');
+    async function confirmEmail() {
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      const tokenHash = params.get('token_hash');
+      const type = params.get('type');
+      const code = params.get('code');
+      const produto = params.get('produto');
+      const redirect = params.get('redirect');
+
+      setNextUrl(redirect || (produto ? `/comprar?produto=${produto}` : '/app'));
+
+      try {
+        if (tokenHash) {
+          const otpType = type === 'magiclink' || type === 'email' || type === 'signup' ? type : 'magiclink';
+          const { data, error } = await supabaseBrowser.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: otpType,
+          });
+          if (error) throw error;
+          await markVerified(data.session?.access_token);
+          if (!cancelled) setState('success');
+          return;
         }
-      });
+
+        if (code) {
+          const { data, error } = await supabaseBrowser.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          await markVerified(data.session?.access_token);
+          if (!cancelled) setState('success');
+          return;
+        }
+
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        if (accessToken && refreshToken) {
+          const { data, error } = await supabaseBrowser.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) throw error;
+          await markVerified(data.session?.access_token);
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+          if (!cancelled) setState('success');
+          return;
+        }
+
+        const { data } = await supabaseBrowser.auth.getSession();
+        if (data.session?.access_token) {
+          await markVerified(data.session.access_token);
+          if (!cancelled) setState('success');
+          return;
+        }
+
+        if (!cancelled) setState('no-token');
+      } catch (error) {
+        console.error('[EmailConfirmation]', error instanceof Error ? error.message : error);
+        if (!cancelled) setState('error');
+      }
+    }
+
+    confirmEmail();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (state !== 'success') return;
     if (countdown <= 0) {
-      window.location.href = loginUrl;
+      window.location.href = nextUrl;
       return;
     }
     const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
-  }, [state, countdown]);
+  }, [state, countdown, nextUrl]);
 
   if (state === 'loading') {
     return (
       <div className="text-center">
-        <div className="mb-6 text-5xl">⏳</div>
+        <div className="mb-6 text-5xl">...</div>
         <h1 className="font-cinzel text-2xl font-bold text-[#D4AF37] mb-3">
           Confirmando...
         </h1>
-        <p className="text-gray-400">Verificando seu email, aguarde um momento.</p>
+        <p className="text-gray-400">Verificando seu e-mail, aguarde um momento.</p>
       </div>
     );
   }
@@ -56,22 +110,22 @@ export function EmailConfirmation() {
   if (state === 'success') {
     return (
       <div className="text-center">
-        <div className="mb-6 text-5xl">✅</div>
+        <div className="mb-6 text-5xl">OK</div>
         <h1 className="font-cinzel text-2xl font-bold text-[#D4AF37] mb-3">
-          Email confirmado!
+          E-mail verificado!
         </h1>
         <p className="text-gray-300 mb-2">
-          Sua conta está ativa e pronta para uso.
+          Seu e-mail foi confirmado com sucesso. Seus documentos e relatórios estão protegidos.
         </p>
         <p className="text-gray-400 text-sm mb-8">
-          Redirecionando para o login em{' '}
+          Redirecionando para o painel em{' '}
           <span className="text-[#D4AF37] font-semibold">{countdown}s</span>...
         </p>
         <a
-          href={loginUrl}
+          href={nextUrl}
           className="inline-block bg-[#D4AF37] text-[#111111] font-bold text-sm px-8 py-3 rounded-xl hover:opacity-90 transition-opacity duration-300 tracking-wide"
         >
-          FAZER LOGIN AGORA
+          IR PARA O PAINEL
         </a>
       </div>
     );
@@ -80,7 +134,7 @@ export function EmailConfirmation() {
   if (state === 'error') {
     return (
       <div className="text-center">
-        <div className="mb-6 text-5xl">❌</div>
+        <div className="mb-6 text-5xl">!</div>
         <h1 className="font-cinzel text-2xl font-bold text-[#D4AF37] mb-3">
           Link inválido
         </h1>
@@ -88,37 +142,35 @@ export function EmailConfirmation() {
           Este link de confirmação expirou ou já foi utilizado.
         </p>
         <p className="text-gray-500 text-sm mb-8">
-          Crie uma nova conta para receber um novo link de confirmação.
+          Volte ao painel e solicite um novo link pelo banner de verificação.
         </p>
         <a
-          href="/auth/cadastro"
+          href="/app"
           className="inline-block border border-[#D4AF37] text-[#D4AF37] font-bold text-sm px-8 py-3 rounded-xl hover:bg-[#D4AF37] hover:text-[#111111] transition-all duration-300 tracking-wide"
         >
-          CRIAR NOVA CONTA
+          VOLTAR AO PAINEL
         </a>
       </div>
     );
   }
 
-  // no-token: usuário chegou na página sem token (ex: após o cadastro, antes de confirmar)
   return (
     <div className="text-center">
-      <div className="mb-6 text-5xl">📧</div>
+      <div className="mb-6 text-5xl">@</div>
       <h1 className="font-cinzel text-2xl font-bold text-[#D4AF37] mb-3">
-        Verifique seu email
+        Verifique seu e-mail
       </h1>
       <p className="text-gray-300 mb-2">
-        Enviamos um link de confirmação para o seu email.
+        Abra o e-mail de verificação enviado pelo Nome Magnético.
       </p>
       <p className="text-gray-400 text-sm mb-8">
-        Clique no link no email para ativar sua conta. Verifique também a pasta
-        de spam.
+        Clique no botão dentro do e-mail para confirmar sua conta. Verifique também a pasta de spam.
       </p>
       <a
-        href="/auth/login"
+        href="/app"
         className="text-[#D4AF37] hover:underline text-sm"
       >
-        Já confirmei, ir para o login →
+        Voltar ao painel
       </a>
     </div>
   );

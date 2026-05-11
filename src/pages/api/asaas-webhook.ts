@@ -5,6 +5,7 @@ import { getProfile } from '../../backend/db/users';
 import { notify } from '../../backend/notifications/notify';
 import { recordHqAccessCouponUse } from '../../backend/payments/prices';
 import type { ProductType } from '../../backend/payments/stripe';
+import { confirmEmailAfterPayment } from '../../backend/auth/confirmEmail';
 
 const PRODUCT_NAMES: Record<string, string> = {
   nome_social:  'Nome Social',
@@ -71,6 +72,8 @@ export const POST: APIRoute = async ({ request }) => {
       amountPaid: Math.round(payment.value * 100),
       currency: 'brl',
     });
+    await confirmEmailAfterPayment(userId);
+
     await recordHqAccessCouponUse({
       couponCode,
       userId,

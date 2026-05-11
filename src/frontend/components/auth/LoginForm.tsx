@@ -10,9 +10,15 @@ export function LoginForm() {
   const [error, setError] = useState('');
 
   const [infoMsg, setInfoMsg] = useState('');
+  const [redirectParam, setRedirectParam] = useState('');
+  const [produtoParam, setProdutoParam] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+    if (emailParam) setEmail(emailParam);
+    setRedirectParam(params.get('redirect') ?? '');
+    setProdutoParam(params.get('produto') ?? '');
     if (params.get('msg') === 'conta-existente') {
       setInfoMsg('Use seu email e senha para entrar.');
     } else if (params.get('msg') === 'sem-acesso') {
@@ -112,8 +118,14 @@ export function LoginForm() {
     }
   }
 
+  const signupParams = new URLSearchParams();
+  if (email) signupParams.set('email', email);
+  if (redirectParam) signupParams.set('redirect', redirectParam);
+  if (produtoParam) signupParams.set('produto', produtoParam);
+  const signupUrl = `/auth/cadastro${signupParams.toString() ? `?${signupParams.toString()}` : ''}`;
+
   return (
-    <div className="glass border-[#D4AF37]/20 rounded-2xl p-8 shadow-2xl shadow-black/50">
+    <div className="rounded-2xl border border-slate-700/80 bg-slate-900/70 p-8 shadow-2xl shadow-black/50 backdrop-blur">
       <h2 className="font-cinzel text-2xl font-bold text-white text-center mb-6">
         Entrar
       </h2>
@@ -156,17 +168,17 @@ export function LoginForm() {
           </a>
         </div>
 
-        <Button type="submit" loading={loading} className="w-full">
+        <Button type="submit" loading={loading} className="w-full bg-[#D4AF37] text-slate-950 hover:bg-[#f2ca50]">
           Entrar
         </Button>
       </form>
 
-      <p className="text-center text-gray-500 text-sm mt-6">
-        Não tem conta?{' '}
-        <a href="/auth/cadastro" className="text-[#D4AF37] hover:underline">
-          Cadastre-se
-        </a>
-      </p>
+      <a
+        href={signupUrl}
+        className="mt-4 flex w-full items-center justify-center rounded-xl border border-[#D4AF37]/60 bg-slate-950/40 px-5 py-3 text-sm font-bold text-[#D4AF37] transition hover:bg-[#D4AF37]/10"
+      >
+        Criar Conta
+      </a>
     </div>
   );
 }

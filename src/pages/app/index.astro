@@ -1,19 +1,22 @@
----
+﻿---
 import AppLayout from '../../layouts/AppLayout.astro';
 import { hasActiveSubscription, hasAnySubscription } from '../../backend/db/subscriptions';
 import { createUserClient, supabase } from '../../backend/db/supabase';
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/auth/login');
 
-// Desabilitar cache para o botão voltar do navegador não repuxar dados velhos
+// Desabilitar cache para o botÃ£o voltar do navegador nÃ£o repuxar dados velhos
 Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 Astro.response.headers.set('Pragma', 'no-cache');
 Astro.response.headers.set('Expires', '0');
 
 import FreeUsedModal from '../../frontend/components/app/FreeUsedModal';
 import { FreePDFAutoGenerator } from '../../frontend/components/app/FreePDFAutoGenerator';
+import { MailWarning } from '../../frontend/components/app/MailWarning';
+import { DashboardCheckoutButton } from '../../frontend/components/app/DashboardCheckoutButton';
+import { getHqPricesAndPromo, type PriceInfo } from '../../backend/payments/prices';
 
-// Verifica parâmetros de URL
+// Verifica parÃ¢metros de URL
 const showFreeUsedModal   = Astro.url.searchParams.get('free_used') === 'true';
 const showCheckoutSuccess = Astro.url.searchParams.get('checkout') === 'success';
 const checkoutProduct     = Astro.url.searchParams.get('produto') ?? null;
@@ -23,31 +26,36 @@ const genFreePdf          = Astro.url.searchParams.get('gen_free_pdf') === '1';
 let isAdmin     = false;
 let profileData: any = null;
 let freeAnalysisId: string | null = null;
+let freeAnalysis: any = null;
+let bestSocialAnalysis: any = null;
 
 const _client = createUserClient(Astro.locals.accessToken ?? '');
 
 try {
   const { data: profile } = await _client
-    .from('profiles').select('nome, role, birth_name, birth_date').eq('id', user.id).single();
+    .from('profiles').select('nome, role, birth_name, birth_date, email_verified_at').eq('id', user.id).single();
   isAdmin = profile?.role === 'admin';
   profileData = profile;
 } catch {}
 
-// Busca análise gratuita concluída para exibir botão de download
+const needsEmailConfirmation = !profileData?.email_verified_at;
+
+// Busca anÃ¡lise gratuita concluÃ­da para exibir botÃ£o de download
 try {
-  const { data: freeAnalysis } = await _client
+  const { data: foundFreeAnalysis } = await _client
     .from('analyses')
-    .select('id')
+    .select('id, nome_completo, score, bloqueios, status')
     .or('is_free.eq.true,product_type.eq.analise_gratuita')
     .eq('user_id', user.id)
     .eq('status', 'complete')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
-  freeAnalysisId = freeAnalysis?.id ?? null;
+  freeAnalysis = foundFreeAnalysis;
+  freeAnalysisId = foundFreeAnalysis?.id ?? null;
 } catch {}
 
-// Busca lead pelo email do usuário (para auto-geração após primeiro cadastro)
+// Busca lead pelo email do usuÃ¡rio (para auto-geraÃ§Ã£o apÃ³s primeiro cadastro)
 let leadNome: string | null = null;
 let leadData: string | null = null;
 if (genFreePdf && !freeAnalysisId && user.email) {
@@ -83,32 +91,123 @@ const [hasNomeSocial, hasNomeBebe, hasNomeEmpresa] = isAdmin
 
 const hasAnyAccess = hasNomeSocial || hasNomeBebe || hasNomeEmpresa;
 
-// Detectar estado expirado (já comprou antes, mas nenhuma ativa)
+if (hasNomeSocial) {
+  try {
+    const { data: foundBestSocial } = await _client
+      .from('analyses')
+      .select('id, nome_completo, score, bloqueios, status, frequencias_numeros, created_at')
+      .eq('user_id', user.id)
+      .eq('product_type', 'nome_social')
+      .eq('status', 'complete')
+      .order('score', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    bestSocialAnalysis = foundBestSocial;
+  } catch {}
+}
+
+// Detectar estado expirado (jÃ¡ comprou antes, mas nenhuma ativa)
 const isExpired = !isAdmin && !hasAnyAccess && await hasAnySubscription(user.id);
+
+const PRICE_UNAVAILABLE: PriceInfo = { cents: 0, formatted: 'IndisponÃ­vel', hasDiscount: false };
+const { prices, promotion } = await getHqPricesAndPromo().catch(() => ({ prices: {}, promotion: null }));
+const priceMap = prices as Record<string, PriceInfo>;
+
+function getScoreTheme(scoreValue: number | null | undefined) {
+  const score = Math.max(0, Math.min(100, scoreValue ?? 0));
+  if (score >= 90) {
+    return {
+      label: 'Excelente',
+      color: '#34d399',
+      border: 'rgba(16,185,129,0.34)',
+      bg: 'rgba(16,185,129,0.06)',
+      shadow: '0 0 42px rgba(16,185,129,0.12)',
+      pillBg: 'rgba(16,185,129,0.12)',
+      pillColor: '#6ee7b7',
+    };
+  }
+  if (score >= 70) {
+    return {
+      label: 'Bom',
+      color: '#34d399',
+      border: 'rgba(16,185,129,0.30)',
+      bg: 'rgba(16,185,129,0.05)',
+      shadow: '0 0 42px rgba(16,185,129,0.10)',
+      pillBg: 'rgba(16,185,129,0.10)',
+      pillColor: '#6ee7b7',
+    };
+  }
+  if (score >= 40) {
+    return {
+      label: 'Aceitável',
+      color: '#f59e0b',
+      border: 'rgba(245,158,11,0.36)',
+      bg: 'rgba(245,158,11,0.07)',
+      shadow: '0 0 42px rgba(245,158,11,0.12)',
+      pillBg: 'rgba(245,158,11,0.13)',
+      pillColor: '#fbbf24',
+    };
+  }
+  if (score >= 20) {
+    return {
+      label: 'Não recomendado',
+      color: '#f87171',
+      border: 'rgba(248,113,113,0.38)',
+      bg: 'rgba(248,113,113,0.07)',
+      shadow: '0 0 42px rgba(248,113,113,0.14)',
+      pillBg: 'rgba(248,113,113,0.14)',
+      pillColor: '#fecaca',
+    };
+  }
+  return {
+    label: 'Crítico',
+    color: '#ef4444',
+    border: 'rgba(239,68,68,0.38)',
+    bg: 'rgba(239,68,68,0.07)',
+    shadow: '0 0 42px rgba(239,68,68,0.14)',
+    pillBg: 'rgba(239,68,68,0.14)',
+    pillColor: '#fca5a5',
+  };
+}
+
+const featuredAnalysis = bestSocialAnalysis ?? freeAnalysis;
+const featuredAnalysisId = featuredAnalysis?.id ?? null;
+const featuredIsSocial = !!bestSocialAnalysis;
+const featuredName =
+  bestSocialAnalysis?.frequencias_numeros?.ranking?.melhorNome?.nomeCompleto
+    ?? bestSocialAnalysis?.nome_completo
+    ?? freeAnalysis?.nome_completo
+    ?? '';
+const featuredTheme = getScoreTheme(featuredAnalysis?.score);
+const featuredBlockCount = featuredAnalysis?.bloqueios?.length ?? 0;
 
 const products = [
   {
     id: 'nome_social',
-    icon: '✨',
+    iconSvg: `<svg viewBox="0 0 24 24" aria-hidden="true" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.9L18.5 9.5l-4.9 1.6L12 16l-1.6-4.9-4.9-1.6 4.9-1.6L12 3Z"/><path d="M5 14l.8 2.2L8 17l-2.2.8L5 20l-.8-2.2L2 17l2.2-.8L5 14Z"/><path d="M19 13l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6L19 13Z"/></svg>`,
     name: 'Nome Social',
-    description: 'Harmonize sua assinatura: descubra por que sua assinatura tem mais poder do que você imagina e qual Nome Social flui melhor.',
+    description: 'Harmonize sua assinatura: descubra por que sua assinatura tem mais poder do que voce imagina e qual Nome Social flui melhor.',
     href: '/app/analise/nome-social',
+    infoHref: '/nome-social',
     hasAccess: hasNomeSocial,
   },
   {
     id: 'nome_bebe',
-    icon: '👶',
-    name: 'Nome de Bebê',
+    iconSvg: `<svg viewBox="0 0 24 24" aria-hidden="true" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10.5h.01"/><path d="M15 10.5h.01"/><path d="M9.5 15c1.5 1.2 3.5 1.2 5 0"/><path d="M12 21a8 8 0 0 0 8-8c0-4.2-3.1-7.7-7.2-8"/><path d="M12 21a8 8 0 0 1-8-8c0-4.2 3.1-7.7 7.2-8"/><path d="M12 5c1.8 0 3-1 3-2.5C13.2 2.3 12 3.3 12 5Z"/></svg>`,
+    name: 'Nome de Bebe',
     description: 'Encontre o nome ideal para seu filho com compatibilidade familiar.',
     href: '/app/analise/nome-bebe',
+    infoHref: '/nome-bebe',
     hasAccess: hasNomeBebe,
   },
   {
     id: 'nome_empresa',
-    icon: '🏢',
+    iconSvg: `<svg viewBox="0 0 24 24" aria-hidden="true" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M9 7h1"/><path d="M14 7h1"/><path d="M9 11h1"/><path d="M14 11h1"/><path d="M9 15h1"/><path d="M14 15h1"/></svg>`,
     name: 'Nome Empresarial',
     description: 'Avalie nomes de empresa alinhados ao destino do fundador.',
     href: '/app/analise/nome-empresa',
+    infoHref: '/nome-empresarial',
     hasAccess: hasNomeEmpresa,
   },
 ];
@@ -116,6 +215,10 @@ const products = [
 
 <AppLayout title="Meu Painel">
   <div class="space-y-8">
+    {needsEmailConfirmation && user.email && (
+      <MailWarning client:load email={user.email} />
+    )}
+
     <!-- Banner: Pagamento confirmado -->
     {showCheckoutSuccess && (
       <div
@@ -124,11 +227,11 @@ const products = [
       >
         <div class="absolute inset-0 bg-gradient-to-b from-[#D4AF37]/5 to-transparent pointer-events-none rounded-2xl"></div>
         <div class="relative flex items-start gap-3 flex-1">
-          <span class="text-2xl flex-shrink-0 mt-0.5">🎉</span>
+          <span class="text-2xl flex-shrink-0 mt-0.5">ðŸŽ‰</span>
           <div>
             <h3 class="font-cinzel text-base font-bold text-[#D4AF37] mb-0.5">Pagamento confirmado!</h3>
             <p class="text-[#e5e2e1] text-sm leading-relaxed">
-              Bem-vindo ao Nome Magnético. Seu acesso está liberado — escolha seu produto abaixo para começar.
+              Bem-vindo ao Nome MagnÃ©tico. Seu acesso estÃ¡ liberado â€” escolha seu produto abaixo para comeÃ§ar.
             </p>
           </div>
         </div>
@@ -173,14 +276,6 @@ const products = [
       </script>
     )}
 
-    <!-- Boas-vindas -->
-    <div>
-      <h1 class="font-cinzel text-3xl font-bold text-white mb-1">
-        Bem-vindo, {profileData?.nome ? profileData.nome.split(' ')[0] : 'Iniciante'}!
-      </h1>
-      <p class="text-gray-400">{isAdmin ? 'Acesso Administrativo Habilitado' : 'Acesse seus produtos e siga a sua jornada.'}</p>
-    </div>
-
     <!-- Banner: Expirado -->
     {isExpired && (
       <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -188,7 +283,7 @@ const products = [
           <h3 class="font-cinzel text-lg font-bold text-red-400 mb-1">
             Seu acesso expirou
           </h3>
-          <p class="text-gray-400 text-sm">Renove para continuar realizando análises numerológicas completas.</p>
+          <p class="text-gray-400 text-sm">Renove para continuar realizando anÃ¡lises numerolÃ³gicas completas.</p>
         </div>
         <a
           href="/comprar"
@@ -199,14 +294,14 @@ const products = [
       </div>
     )}
 
-    <!-- Banner: Novo usuário (nunca comprou) -->
-    {!isAdmin && !hasAnyAccess && !isExpired && (
+    <!-- Banner: Novo usuÃ¡rio (nunca comprou) -->
+    {false && !isAdmin && !hasAnyAccess && !isExpired && (
       <div class="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
           <h3 class="font-cinzel text-lg font-bold text-[#D4AF37] mb-1">
-            Comece sua jornada numerológica
+            Comece sua jornada numerolÃ³gica
           </h3>
-          <p class="text-gray-400 text-sm">Adquira um dos produtos para realizar sua análise cabalística completa.</p>
+          <p class="text-gray-400 text-sm">Adquira um dos produtos para realizar sua anÃ¡lise cabalÃ­stica completa.</p>
         </div>
         <a
           href="/comprar"
@@ -217,20 +312,120 @@ const products = [
       </div>
     )}
 
-    <!-- Análise Gratuita — sempre visível -->
-    <div class="bg-white/[0.03] border border-[#d7c6ff]/20 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    {featuredAnalysis && (
+      <section
+        class="rounded-3xl border bg-white/[0.03] p-5 md:p-7"
+        style={`border-color:${featuredTheme.border}; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), ${featuredTheme.shadow};`}
+      >
+        <div class="grid gap-6 md:grid-cols-[1.2fr_0.8fr] md:items-center">
+          <div class="order-2 md:order-1">
+            <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#D4AF37]">
+              {featuredIsSocial ? 'Melhor harmonização do Nome Social' : 'Análise gratuita de nascimento'}
+            </p>
+            <h2 class="font-cinzel text-2xl font-bold leading-tight text-[#e5e2e1] md:text-3xl">
+              {featuredName}
+            </h2>
+            <p class="mt-2 text-sm leading-relaxed text-gray-500">
+              {featuredIsSocial
+                ? 'Este é o melhor resultado salvo nas suas harmonizações. Acesse o relatório completo, baixe a análise gratuita ou gere uma nova análise do Nome Social.'
+                : 'Seu diagnóstico inicial está salvo. Baixe novamente o PDF ou avance para harmonizar seu nome.'}
+            </p>
+            <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+              {featuredIsSocial ? (
+                <>
+                  <a
+                    href={`/app/resultado/${featuredAnalysisId}`}
+                    class="inline-flex items-center justify-center rounded-xl border border-teal-400/25 bg-teal-400/10 px-5 py-2.5 text-sm font-bold text-teal-300 transition hover:bg-teal-400/15"
+                  >
+                    Ver análise
+                  </a>
+                  <FreePDFAutoGenerator
+                    client:load
+                    existingAnalysisId={freeAnalysisId}
+                    autoRun={false}
+                  />
+                  <a
+                    href="/app/analise/nome-social"
+                    class="inline-flex items-center justify-center rounded-xl bg-[#D4AF37] px-5 py-2.5 text-sm font-bold text-[#131313] transition hover:bg-[#f2ca50]"
+                  >
+                    Nova harmonização
+                  </a>
+                </>
+              ) : (
+                <>
+                  <FreePDFAutoGenerator
+                    client:load
+                    existingAnalysisId={freeAnalysisId}
+                    autoRun={false}
+                  />
+                  {hasNomeSocial ? (
+                    <a
+                      href="/app/analise/nome-social"
+                      class="inline-flex items-center justify-center rounded-xl bg-[#D4AF37] px-5 py-2.5 text-sm font-bold text-[#131313] transition hover:bg-[#f2ca50]"
+                    >
+                      Harmonizar meu Nome
+                    </a>
+                  ) : (
+                    <DashboardCheckoutButton
+                      client:load
+                      product="nome_social"
+                      priceInfo={priceMap.nome_social ?? PRICE_UNAVAILABLE}
+                      promotion={promotion}
+                      label="Harmonizar meu Nome"
+                      className="inline-flex items-center justify-center rounded-xl bg-[#D4AF37] px-5 py-2.5 text-sm font-bold text-[#131313] transition hover:bg-[#f2ca50]"
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {(() => {
+            const theme = getScoreTheme(featuredAnalysis.score);
+            return (
+              <div
+                class="order-1 mx-auto flex aspect-square w-44 flex-col items-center justify-center rounded-full border bg-[#111111] md:order-2 md:w-56"
+                style={`border-color:${theme.border}; background:radial-gradient(circle at 50% 30%, ${theme.bg}, #111111 58%); box-shadow:${theme.shadow};`}
+              >
+                <span class="font-cinzel text-6xl font-bold md:text-7xl" style={`color:${theme.color};`}>
+                  {featuredAnalysis.score ?? 0}
+                </span>
+                <span class="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">
+                  {featuredIsSocial ? 'Melhor score' : 'Score atual'}
+                </span>
+                <span
+                  class="mt-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+                  style={`background-color:${theme.pillBg}; color:${theme.pillColor};`}
+                >
+                  {theme.label} · {featuredBlockCount} bloqueios
+                </span>
+              </div>
+            );
+          })()}
+        </div>
+      </section>
+    )}
+
+    {genFreePdf && !freeAnalysisId && !!leadNome && !!leadData && (
       <div>
-        <p class="font-cinzel text-base font-bold text-[#d7c6ff] mb-0.5">Análise do Nome de Nascimento</p>
-        <p class="text-gray-400 text-sm">Dossiê gratuito: 5 números vibracionais, Triângulo da Vida e Arcano Regente em PDF.</p>
+        <FreePDFAutoGenerator
+          client:load
+          existingAnalysisId={freeAnalysisId}
+          leadNome={leadNome}
+          leadData={leadData}
+          autoRun={true}
+        />
       </div>
+    )}
+    {genFreePdf && freeAnalysisId && (
+      <div>
       <FreePDFAutoGenerator
         client:load
         existingAnalysisId={freeAnalysisId}
-        leadNome={leadNome}
-        leadData={leadData}
-        autoRun={genFreePdf && !freeAnalysisId && !!leadNome && !!leadData}
+        autoRun={true}
       />
-    </div>
+      </div>
+    )}
 
     <!-- Produtos -->
     <div>
@@ -243,43 +438,54 @@ const products = [
               href={product.href}
               class="product-card block group bg-white/5 border border-[#D4AF37]/20 rounded-2xl p-6 hover:border-[#D4AF37]/40 hover:bg-white/8 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
             >
-              <div class="text-4xl mb-4">{product.icon}</div>
+              <div class="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] transition-colors group-hover:bg-[#D4AF37]/15" set:html={product.iconSvg}></div>
               <h3 class="font-cinzel text-xl font-bold text-white mb-2 group-hover:text-[#D4AF37] transition-colors">
                 {product.name}
               </h3>
               <p class="text-gray-400 text-sm">{product.description}</p>
               <div class="mt-4 flex items-center justify-between">
-                <span class="text-[#D4AF37] text-sm font-medium">Iniciar análise →</span>
-                {isAdmin && (
-                  <span class="text-xs bg-purple-500/20 border border-purple-500/30 text-purple-400 px-2 py-0.5 rounded-full">Admin</span>
-                )}
+                <span class="text-[#D4AF37] text-sm font-medium">Iniciar analise -></span>
+                <span class:list={[
+                  'rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em]',
+                  isAdmin
+                    ? 'bg-purple-500/15 text-purple-300 ring-1 ring-purple-500/30'
+                    : 'bg-emerald-500/12 text-emerald-300 ring-1 ring-emerald-500/25'
+                ]}>
+                  {isAdmin ? 'Admin' : 'Ativo'}
+                </span>
               </div>
             </a>
           ) : isExpired ? (
-            <a href={'/comprar?produto=' + product.id} class="block group bg-white/3 border border-red-500/10 hover:border-red-500/30 rounded-2xl p-6 relative transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-              <div class="absolute top-3 right-3 text-gray-600 text-lg">🔒</div>
-              <div class="text-4xl mb-4 opacity-40 group-hover:opacity-60 transition-opacity">{product.icon}</div>
+            <div class="block group bg-white/3 border border-red-500/10 hover:border-red-500/30 rounded-2xl p-6 relative transition-all duration-300 hover:scale-[1.02]">
+              <div class="absolute top-3 right-3 text-gray-600" aria-hidden="true">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              </div>
+              <div class="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-gray-500 opacity-70 transition-opacity group-hover:opacity-90" set:html={product.iconSvg}></div>
               <h3 class="font-cinzel text-xl font-bold text-gray-500 mb-2 group-hover:text-red-400 transition-colors">
                 {product.name}
               </h3>
               <p class="text-gray-600 text-sm">{product.description}</p>
-              <div class="mt-4 inline-block bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-bold px-4 py-2 rounded-lg group-hover:bg-red-500/20 transition-all duration-300">
-                Renovar
+              <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+                <DashboardCheckoutButton client:load product={product.id as any} priceInfo={priceMap[product.id] ?? PRICE_UNAVAILABLE} promotion={promotion} label="Renovar" className="inline-flex items-center justify-center rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm font-bold px-4 py-2.5 hover:bg-red-500/20 transition-all" />
+                <a href={product.infoHref} class="inline-flex items-center justify-center rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]">Mais informaÃ§Ãµes</a>
               </div>
-            </a>
+            </div>
           ) : (
-            <a href={'/comprar?produto=' + product.id} class="block group bg-white/3 border border-white/10 hover:border-[#D4AF37]/30 rounded-2xl p-6 relative transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-              <div class="absolute top-3 right-3 text-gray-600 text-lg">🔒</div>
-              <div class="text-4xl mb-4 opacity-50 group-hover:opacity-80 transition-opacity">{product.icon}</div>
+            <div class="block group bg-white/3 border border-white/10 hover:border-[#D4AF37]/30 rounded-2xl p-6 relative transition-all duration-300 hover:scale-[1.02]">
+              <div class="absolute top-3 right-3 text-gray-600" aria-hidden="true">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              </div>
+              <div class="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-gray-500 opacity-70 transition-opacity group-hover:text-[#D4AF37] group-hover:opacity-90" set:html={product.iconSvg}></div>
               <h3 class="font-cinzel text-xl font-bold text-gray-500 mb-2 group-hover:text-[#D4AF37] transition-colors">
                 {product.name}
               </h3>
               <p class="text-gray-600 text-sm">{product.description}</p>
-              <p class="text-gray-500 text-xs mt-2 group-hover:text-gray-400 transition-colors">Ainda não adquirido</p>
-              <div class="mt-4 inline-block bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-sm font-bold px-4 py-2 rounded-lg group-hover:bg-[#D4AF37]/20 transition-all duration-300">
-                Adquirir
+              <p class="text-gray-500 text-xs mt-2 group-hover:text-gray-400 transition-colors">Ainda nÃ£o adquirido</p>
+              <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+                <DashboardCheckoutButton client:load product={product.id as any} priceInfo={priceMap[product.id] ?? PRICE_UNAVAILABLE} promotion={promotion} label="Adquirir" className="inline-flex items-center justify-center rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-sm font-bold px-4 py-2.5 hover:bg-[#D4AF37]/20 transition-all" />
+                <a href={product.infoHref} class="inline-flex items-center justify-center rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]">Mais informaÃ§Ãµes</a>
               </div>
-            </a>
+            </div>
           )
         })}
       </div>

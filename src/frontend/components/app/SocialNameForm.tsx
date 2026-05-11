@@ -1,5 +1,5 @@
 /**
- * SocialNameForm — formulário para análise de Nome Social (novo fluxo).
+ * Formulário para análise de Nome Social.
  * Envia para /api/analyze com product_type: 'nome_social'.
  */
 
@@ -23,19 +23,72 @@ interface Props {
   onSuccess?: (analysisId: string) => void;
 }
 
-
 const CONTEXTOS = [
-  { value: 'profissional', label: '💼 Profissional' },
-  { value: 'espiritual', label: '🕊 Espiritual' },
-  { value: 'criativo', label: '🎨 Criativo' },
-  { value: 'redes_sociais', label: '📱 Redes Sociais' },
-  { value: 'pessoal', label: '👤 Pessoal' },
+  { value: 'profissional', label: 'Profissional' },
+  { value: 'espiritual', label: 'Espiritual' },
+  { value: 'criativo', label: 'Criativo' },
+  { value: 'redes_sociais', label: 'Redes sociais' },
+  { value: 'pessoal', label: 'Pessoal' },
 ];
 
 const VIBRACOES_SUGESTOES = [
-  'Autoridade', 'Leveza', 'Criatividade', 'Espiritualidade',
-  'Prosperidade', 'Cura', 'Liderança', 'Conexão', 'Intuição', 'Expansão',
+  'Autoridade',
+  'Leveza',
+  'Criatividade',
+  'Espiritualidade',
+  'Prosperidade',
+  'Cura',
+  'Liderança',
+  'Conexão',
+  'Intuição',
+  'Expansão',
 ];
+
+const GENEROS = [
+  { value: 'masculino', label: 'Masculino' },
+  { value: 'feminino', label: 'Feminino' },
+  { value: 'neutro', label: 'Neutro' },
+];
+
+function InfoHint({ text }: { text: string }) {
+  return (
+    <span className="relative inline-flex group/info">
+      <button
+        type="button"
+        aria-label="Ver explicação"
+        className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[11px] font-bold text-[#D4AF37] ring-1 ring-[#D4AF37]/25 transition hover:bg-[#D4AF37]/20 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40"
+      >
+        !
+      </button>
+      <span className="pointer-events-none absolute left-1/2 top-7 z-30 w-72 -translate-x-1/2 rounded-2xl bg-[#111111] p-4 text-xs leading-relaxed text-gray-300 opacity-0 shadow-2xl shadow-black/50 ring-1 ring-[#D4AF37]/20 transition group-hover/info:opacity-100 group-focus-within/info:opacity-100">
+        {text}
+      </span>
+    </span>
+  );
+}
+
+function SectionTitle({
+  number,
+  title,
+  info,
+  optional = false,
+}: {
+  number: string;
+  title: string;
+  info: string;
+  optional?: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#D4AF37]/12 text-xs font-bold text-[#D4AF37] ring-1 ring-[#D4AF37]/25">
+        {number}
+      </span>
+      <h3 className="font-cinzel text-lg font-bold text-[#D4AF37]">{title}</h3>
+      <InfoHint text={info} />
+      {optional && <span className="text-xs font-medium text-gray-500">Opcional</span>}
+    </div>
+  );
+}
 
 export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onSuccess }: Props) {
   const [form, setForm] = useState<FormState>({
@@ -75,8 +128,9 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
     e.preventDefault();
     setError('');
 
-    if (!form.nome_completo.trim() || form.nome_completo.trim().length < 2) {
-      setError('Informe seu nome completo de nascimento.');
+    const nomeLimpo = form.nome_completo.trim();
+    if (!nomeLimpo || nomeLimpo.split(/\s+/).length < 3) {
+      setError('Informe seu nome completo de nascimento, com pelo menos 3 palavras.');
       return;
     }
 
@@ -102,7 +156,7 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           product_type: 'nome_social',
-          nome_completo: form.nome_completo.trim(),
+          nome_completo: nomeLimpo,
           data_nascimento: form.data_nascimento,
           objetivo_apresentacao: form.objetivo_apresentacao.trim() || undefined,
           vibracoes_desejadas: form.vibracoes_desejadas.trim() || undefined,
@@ -129,20 +183,29 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmitCriar} className="space-y-6">
-          {/* ── SEÇÃO 1: Dados de Nascimento (âncora) ── */}
-          <div className="glass rounded-xl p-5 space-y-4">
-            <h3 className="text-gold font-semibold flex items-center gap-2">
-              <span>🌟</span> Dados de Nascimento
-            </h3>
-            <p className="text-sm text-gray-400">
-              Seu nome completo de nascimento e data são a âncora numerológica imutável da análise.
-            </p>
+  const chipClass = (selected: boolean) =>
+    `rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+      selected
+        ? 'bg-[#D4AF37] text-black shadow-[0_8px_24px_rgba(212,175,55,0.18)]'
+        : 'bg-white/[0.04] text-gray-300 ring-1 ring-white/10 hover:bg-white/[0.07] hover:text-[#e5e2e1]'
+    }`;
 
+  return (
+    <form onSubmit={handleSubmitCriar} className="space-y-5">
+      <div className="rounded-2xl bg-[#202020]/80 p-5 ring-1 ring-[#D4AF37]/15 md:p-6">
+        <div className="space-y-6">
+          <SectionTitle
+            number="01"
+            title="Dados de nascimento"
+            info="Use o nome civil completo de registro e a data correta. Eles são a base fixa do cálculo numerológico."
+          />
+
+          <div className="grid items-start gap-6 md:grid-cols-[1fr_0.72fr]">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Nome completo de nascimento *</label>
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-300">
+                Nome completo de nascimento *
+                <InfoHint text="O diagnóstico exige o nome de registro civil completo, com nome e sobrenomes." />
+              </label>
               <input
                 type="text"
                 value={form.nome_completo}
@@ -154,163 +217,159 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Data de nascimento *</label>
-              <div className="w-full sm:w-1/2">
-                <DateInput
-                  value={form.data_nascimento}
-                  onChangeValue={v => set('data_nascimento', v)}
-                  className="input-dark w-full"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* ── SEÇÃO 2: Intenção e Contexto ── */}
-          <div className="glass rounded-xl p-5 space-y-4">
-            <h3 className="text-gold font-semibold flex items-center gap-2">
-              <span>🎯</span> Intenção e Contexto <span className="text-gray-500 text-xs font-normal">(opcional)</span>
-            </h3>
-
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Como você quer se apresentar ao mundo neste momento?</label>
-              <textarea
-                value={form.objetivo_apresentacao}
-                onChange={e => set('objetivo_apresentacao', e.target.value)}
-                placeholder="Ex: Quero ser reconhecida como uma profissional de saúde com presença espiritual e autoridade..."
-                rows={3}
-                maxLength={500}
-                className="input-dark w-full resize-none"
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-300">
+                Data de nascimento *
+                <InfoHint text="A data define o número de Destino, usado para medir a compatibilidade dos nomes candidatos." />
+              </label>
+              <DateInput
+                value={form.data_nascimento}
+                onChangeValue={v => set('data_nascimento', v)}
+                className="input-dark w-full"
+                required
               />
-              <p className="text-xs text-gray-600 mt-1">{form.objetivo_apresentacao.length}/500 caracteres</p>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Contexto principal de uso</label>
-              <div className="flex flex-wrap gap-2">
-                {CONTEXTOS.map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => set('contexto_uso', form.contexto_uso === opt.value ? '' : opt.value)}
-                    className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
-                      form.contexto_uso === opt.value
-                        ? 'bg-gold text-black font-medium'
-                        : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+      <div className="rounded-2xl bg-[#202020]/80 p-5 ring-1 ring-[#D4AF37]/15 md:p-6">
+        <div className="space-y-5">
+          <SectionTitle
+            number="02"
+            title="Intenção e contexto"
+            optional
+            info="Essas respostas orientam o texto do relatório e ajudam a interpretar o uso prático do nome."
+          />
 
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-300">
+              Como você quer se apresentar neste momento?
+            </label>
+            <textarea
+              value={form.objetivo_apresentacao}
+              onChange={e => set('objetivo_apresentacao', e.target.value)}
+              placeholder="Ex: Quero um nome com presença profissional, clareza e autoridade."
+              rows={3}
+              maxLength={500}
+              className="input-dark w-full resize-none"
+            />
+            <p className="mt-1 text-xs text-gray-600">{form.objetivo_apresentacao.length}/500 caracteres</p>
           </div>
 
-          {/* ── SEÇÃO 3: Vibrações Desejadas ── */}
-          <div className="glass rounded-xl p-5 space-y-4">
-            <h3 className="text-gold font-semibold flex items-center gap-2">
-              <span>✨</span> Vibrações Desejadas <span className="text-gray-500 text-xs font-normal">(opcional)</span>
-            </h3>
-            <p className="text-sm text-gray-400">
-              Que características e energias você quer atrair para este momento da sua vida?
-            </p>
-
+          <div>
+            <label className="mb-3 block text-sm font-medium text-gray-300">Contexto principal de uso</label>
             <div className="flex flex-wrap gap-2">
-              {VIBRACOES_SUGESTOES.map(v => (
+              {CONTEXTOS.map(opt => (
                 <button
-                  key={v}
+                  key={opt.value}
                   type="button"
-                  onClick={() => toggleVibracao(v)}
-                  className={`px-3 py-1.5 rounded-lg text-xs transition-all duration-200 ${
-                    form.vibracoes_desejadas.toLowerCase().includes(v.toLowerCase())
-                      ? 'bg-gold text-black font-medium'
-                      : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10'
-                  }`}
+                  onClick={() => set('contexto_uso', form.contexto_uso === opt.value ? '' : opt.value)}
+                  className={chipClass(form.contexto_uso === opt.value)}
                 >
-                  {v}
+                  {opt.label}
                 </button>
               ))}
             </div>
-            <textarea
-              value={form.vibracoes_desejadas}
-              onChange={e => set('vibracoes_desejadas', e.target.value)}
-              placeholder="Ex: autoridade, expansão, cura, liderança espiritual..."
-              rows={2}
-              maxLength={300}
-              className="input-dark w-full resize-none"
-            />
+          </div>
+        </div>
+      </div>
 
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Gênero do nome</label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { value: 'masculino', label: '♂ Masculino' },
-                  { value: 'feminino', label: '♀ Feminino' },
-                  { value: 'neutro', label: '⚧ Neutro' },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => set('genero', form.genero === opt.value ? '' : opt.value)}
-                    className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
-                      form.genero === opt.value
-                        ? 'bg-gold text-black font-medium'
-                        : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+      <div className="rounded-2xl bg-[#202020]/80 p-5 ring-1 ring-[#D4AF37]/15 md:p-6">
+        <div className="space-y-5">
+          <SectionTitle
+            number="03"
+            title="Vibrações desejadas"
+            optional
+            info="Essas palavras ajudam a personalizar a narrativa do relatório. O ranking continua sendo calculado pelos critérios numerológicos."
+          />
+
+          <div className="flex flex-wrap gap-2">
+            {VIBRACOES_SUGESTOES.map(v => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => toggleVibracao(v)}
+                className={chipClass(form.vibracoes_desejadas.toLowerCase().includes(v.toLowerCase()))}
+              >
+                {v}
+              </button>
+            ))}
           </div>
 
-          {/* ── SEÇÃO 4: Nomes Candidatos ── */}
-          <div className="glass rounded-xl p-5 space-y-3">
-            <h3 className="text-gold font-semibold flex items-center gap-2">
-              <span>📝</span> Nomes que você gostaria de considerar <span className="text-gray-500 text-xs font-normal">(opcional)</span>
-            </h3>
-            <p className="text-sm text-gray-400">
-              Informe nomes ou variações que você já pensa em usar. Separe por vírgula, ponto e vírgula ou enter.
-            </p>
-            <textarea
-              value={form.nomes_candidatos}
-              onChange={e => set('nomes_candidatos', e.target.value)}
-              placeholder="Ex: Mari, Maria, Mariana, Mari Santos..."
-              rows={4}
-              className="input-dark w-full resize-none"
-            />
-            {candidatosCount > 0 ? (
-              <p className="text-xs text-gray-500">{candidatosCount} nome(s) informado(s)</p>
-            ) : (
-              <p className="text-xs text-amber-500/70">
-                Nenhum nome informado — a IA gerará sugestões numerologicamente compatíveis com seu Destino.
-              </p>
-            )}
-          </div>
+          <textarea
+            value={form.vibracoes_desejadas}
+            onChange={e => set('vibracoes_desejadas', e.target.value)}
+            placeholder="Ex: autoridade, expansão, cura, liderança..."
+            rows={2}
+            maxLength={300}
+            className="input-dark w-full resize-none"
+          />
 
-          {error && (
-            <div className="rounded-xl p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {error}
+          <div>
+            <label className="mb-3 block text-sm font-medium text-gray-300">Preferência de gênero do nome</label>
+            <div className="flex flex-wrap gap-2">
+              {GENEROS.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => set('genero', form.genero === opt.value ? '' : opt.value)}
+                  className={chipClass(form.genero === opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-[#202020]/80 p-5 ring-1 ring-[#D4AF37]/15 md:p-6">
+        <div className="space-y-5">
+          <SectionTitle
+            number="04"
+            title="Nomes candidatos"
+            optional
+            info="Se você informar nomes, eles entram no ranking. Se deixar vazio, o sistema gera variações próprias com menor descaracterização possível."
+          />
+
+          <textarea
+            value={form.nomes_candidatos}
+            onChange={e => set('nomes_candidatos', e.target.value)}
+            placeholder="Ex: Mari, Maria Santos, Mariana Santos..."
+            rows={4}
+            className="input-dark w-full resize-none"
+          />
+
+          {candidatosCount > 0 ? (
+            <p className="text-xs text-gray-500">{candidatosCount} nome(s) informado(s)</p>
+          ) : (
+            <p className="text-xs text-[#D4AF37]/80">Sem candidatos informados: o sistema gera sugestões.</p>
           )}
+        </div>
+      </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full py-4 text-base font-semibold disabled:opacity-60"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                Gerando Nome Social...
-              </span>
-            ) : (
-              'Gerar Novo Nome Social'
-            )}
-          </button>
-      </form>
-    </div>
+      {error && (
+        <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-300 ring-1 ring-red-500/25">
+          {error}
+        </div>
+      )}
+
+      <div className="sticky bottom-4 z-10 rounded-2xl bg-[#131313]/90 p-3 shadow-2xl ring-1 ring-white/10 backdrop-blur md:static md:bg-transparent md:p-0 md:shadow-none md:ring-0">
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-primary w-full py-4 text-base font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="h-5 w-5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+              Gerando análise...
+            </span>
+          ) : (
+            'Gerar análise de Nome Social'
+          )}
+        </button>
+      </div>
+    </form>
   );
 }

@@ -13,35 +13,47 @@ interface ScoreLevel {
 }
 
 function getScoreLevel(clamped: number): ScoreLevel {
-  if (clamped >= 80) return {
-    bar: 'from-emerald-500 to-emerald-400',
-    text: 'text-emerald-400',
-    label: '✦ Excelente',
-    description: 'Vibração altamente favorável. Nome com excelente alinhamento energético e numerológico.',
-  };
-  if (clamped >= 60) return {
-    bar: 'from-[#D4AF37] to-[#f2ca50]',
-    text: 'text-[#D4AF37]',
-    label: '◐ Bom',
-    description: 'Boa vibração geral. Pontos positivos superam eventuais tensões menores.',
-  };
-  if (clamped >= 40) return {
-    bar: 'from-amber-500 to-amber-400',
-    text: 'text-amber-400',
-    label: '◎ Aceitável',
-    description: 'Vibração mediana. Funcional, mas há oportunidades de melhora energética.',
-  };
-  if (clamped >= 20) return {
-    bar: 'from-red-600 to-red-500',
-    text: 'text-red-400',
-    label: '⚠ Não Recomendado',
-    description: 'Vibração desfavorável. Este nome carrega tensões que podem impactar negativamente.',
-  };
+  if (clamped >= 90) {
+    return {
+      bar: 'from-emerald-500 to-emerald-400',
+      text: 'text-emerald-400',
+      label: 'Excelente',
+      description: 'Vibração altamente favorável. Nome com excelente alinhamento energético e numerológico.',
+    };
+  }
+
+  if (clamped >= 70) {
+    return {
+      bar: 'from-emerald-600 to-emerald-400',
+      text: 'text-emerald-400',
+      label: 'Bom',
+      description: 'Boa vibração geral. Pontos positivos superam eventuais tensões menores.',
+    };
+  }
+
+  if (clamped >= 40) {
+    return {
+      bar: 'from-amber-500 to-amber-400',
+      text: 'text-amber-400',
+      label: 'Aceitável',
+      description: 'Vibração mediana. Funcional, mas há oportunidades de melhora energética.',
+    };
+  }
+
+  if (clamped >= 20) {
+    return {
+      bar: 'from-red-500 to-red-400',
+      text: 'text-red-400',
+      label: 'Não recomendado',
+      description: 'Vibração desfavorável. Este nome carrega tensões que podem impactar negativamente.',
+    };
+  }
+
   return {
-    bar: 'from-red-800 to-red-700',
+    bar: 'from-red-700 to-red-600',
     text: 'text-red-500',
-    label: '✗ Crítico',
-    description: 'Vibração muito desfavorável. Bloqueios ou incompatibilidades significativas detectados.',
+    label: 'Crítico',
+    description: 'Vibração muito desfavorável. Bloqueios ou tensões significativas detectados.',
   };
 }
 
@@ -54,9 +66,9 @@ export default function ScoreDisplay({
   const clamped = Math.max(0, Math.min(100, score));
   const level = getScoreLevel(clamped);
 
-  const heights   = { sm: 'h-1.5', md: 'h-2',    lg: 'h-3'     };
+  const heights = { sm: 'h-1.5', md: 'h-2', lg: 'h-3' };
   const textSizes = { sm: 'text-xs', md: 'text-sm', lg: 'text-base' };
-  const numSizes  = { sm: 'text-lg', md: 'text-2xl', lg: 'text-3xl' };
+  const numSizes = { sm: 'text-lg', md: 'text-2xl', lg: 'text-3xl' };
 
   return (
     <div className="w-full">
@@ -67,10 +79,9 @@ export default function ScoreDisplay({
         </span>
         {showLabel && (
           showTooltip ? (
-            /* Tooltip via CSS hover — sem <button> aninhado */
             <span className={`relative group/score ${textSizes[size]} font-medium ${level.text} cursor-default select-none`}>
               {level.label}
-              <span className="ml-1 text-gray-500 text-[10px]">ⓘ</span>
+              <span className="ml-1 text-gray-500 text-[10px]">i</span>
               <span className="
                 pointer-events-none absolute right-0 top-full mt-2 z-50
                 w-64 rounded-xl bg-[#1e1c1a] border border-white/10
@@ -81,11 +92,11 @@ export default function ScoreDisplay({
                 <span className={`block font-semibold ${level.text} mb-1`}>{level.label}</span>
                 <span className="block text-gray-400 mb-2">{level.description}</span>
                 <span className="block border-t border-white/10 pt-2 space-y-0.5 text-gray-500">
-                  <span className="block"><span className="text-emerald-400">✦ Excelente</span> ≥ 80</span>
-                  <span className="block"><span className="text-[#D4AF37]">◐ Bom</span> 60–79</span>
-                  <span className="block"><span className="text-amber-400">◎ Aceitável</span> 40–59</span>
-                  <span className="block"><span className="text-red-400">⚠ Não Recomendado</span> 20–39</span>
-                  <span className="block"><span className="text-red-500">✗ Crítico</span> 0–19</span>
+                  <span className="block"><span className="text-emerald-400">Excelente</span> 90-100</span>
+                  <span className="block"><span className="text-emerald-400">Bom</span> 70-89</span>
+                  <span className="block"><span className="text-amber-400">Aceitável</span> 40-69</span>
+                  <span className="block"><span className="text-red-400">Não recomendado</span> 20-39</span>
+                  <span className="block"><span className="text-red-500">Crítico</span> 0-19</span>
                 </span>
               </span>
             </span>

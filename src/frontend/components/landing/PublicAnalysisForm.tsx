@@ -8,6 +8,7 @@
  */
 
 import { useState } from 'react';
+import { RegistrationModal } from './RegistrationModal';
 
 // ── Tipos ──────────────────────────────────────────────────────────────────────
 
@@ -37,6 +38,10 @@ interface LiveResult {
 
 interface Props {
   isLoggedIn?: boolean;
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
 // ── Mapas de dados estáticos ───────────────────────────────────────────────────
@@ -272,11 +277,15 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<LiveResult | null>(null);
+  const [registrationOpen, setRegistrationOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (nome.trim().length < 2) { setError('Informe seu nome completo de nascimento.'); return; }
+    if (nome.trim().split(/\s+/).filter(Boolean).length < 3) {
+      setError('O diagnóstico exige o nome de registro civil completo, com nome e sobrenomes.');
+      return;
+    }
     if (!/^\d{2}\/\d{2}\/\d{4}$/.test(data)) { setError('Informe a data no formato DD/MM/AAAA.'); return; }
     setLoading(true);
     try {
@@ -286,7 +295,13 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
         body: JSON.stringify({ nome_candidato: nome.trim(), data_nascimento_db: toDbDate(data) }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Erro na análise.');
+      if (!res.ok) {
+        if (json.redirectUrl) {
+          window.location.href = json.redirectUrl;
+          return;
+        }
+        throw new Error(json.error ?? 'Erro na análise.');
+      }
       setResult(json as LiveResult);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado.');
@@ -295,7 +310,7 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
     }
   }
 
-  async function handleCTA(e?: React.FormEvent) {
+  function handleCTA(e?: React.FormEvent) {
     if (e) e.preventDefault();
 
     const redirectUrl = '/app?gen_free_pdf=1';
@@ -306,25 +321,12 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
       return;
     }
 
-    // Salva lead (fire and forget — não bloqueia o redirecionamento)
-    if (email.trim() && nome.trim() && data) {
-      fetch('/api/save-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email:           email.trim(),
-          nome_completo:   nome.trim(),
-          data_nascimento: data,
-        }),
-      }).catch(() => {});
+    if (!isValidEmail(email)) {
+      setError('Informe um e-mail válido para baixar sua análise gratuita.');
+      return;
     }
 
-    // Redireciona para cadastro com email pré-preenchido e redirect para o painel
-    const params = new URLSearchParams({
-      redirect: redirectUrl,
-      ...(email.trim() ? { email: email.trim() } : {}),
-    });
-    window.location.href = `/auth/cadastro?${params.toString()}`;
+    setRegistrationOpen(true);
   }
 
   // ── RESULTADO ──────────────────────────────────────────────────────────────
@@ -634,21 +636,28 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
             ))}
           </div>
           {!isLoggedIn ? (
-            <form onSubmit={handleCTA} className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Seu melhor e-mail..."
-                className="flex-1 bg-white text-gray-800 placeholder-gray-400 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
-              />
-              <button
-                type="submit"
-                className="bg-white text-[#0F766E] font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-[#CCFBF1] transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
-              >
-                BAIXAR PDF GRATUITO <span className="text-base">›</span>
-              </button>
-            </form>
+            <div>
+              <p className="mb-2 text-center text-xs font-medium text-white/70 sm:text-left">
+                Adicione seu e-mail para liberar o download da análise gratuita.
+              </p>
+              <form onSubmit={handleCTA} className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => { setEmail(e.target.value); setError(''); }}
+                  placeholder="Seu melhor e-mail..."
+                  className="flex-1 bg-white text-gray-800 placeholder-gray-400 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={!isValidEmail(email)}
+                  className="bg-white text-[#0F766E] font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-[#CCFBF1] transition-colors flex items-center justify-center gap-2 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  BAIXAR ANÁLISE GRATUITA <span className="text-base">›</span>
+                </button>
+              </form>
+            </div>
           ) : (
             <div className="text-center">
               <button
@@ -664,12 +673,23 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
           </p>
         </div>
 
-        <button
-          onClick={() => { setResult(null); setError(''); setNome(''); setData(''); setEmail(''); }}
-          className="w-full text-center text-gray-600 text-xs hover:text-gray-400 transition-colors py-1"
-        >
-          ← Analisar outro nome
-        </button>
+        {!isLoggedIn && (
+          <button
+            onClick={() => { setResult(null); setError(''); setNome(''); setData(''); setEmail(''); }}
+            className="w-full text-center text-gray-600 text-xs hover:text-gray-400 transition-colors py-1"
+          >
+            ← Analisar outro nome
+          </button>
+        )}
+
+        <RegistrationModal
+          open={registrationOpen}
+          nomeCompleto={nome}
+          dataNascimento={data}
+          prefilledEmail={email}
+          redirectUrl="/app?gen_free_pdf=1"
+          onClose={() => setRegistrationOpen(false)}
+        />
 
       </div>
     );

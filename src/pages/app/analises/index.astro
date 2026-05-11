@@ -2,6 +2,7 @@
 import AppLayout from '../../../layouts/AppLayout.astro';
 import { getUserAnalyses } from '../../../backend/db/analyses';
 import { getProfile } from '../../../backend/db/users';
+import { hasActiveSubscription } from '../../../backend/db/subscriptions';
 import { calcularScore } from '../../../backend/numerology/score';
 import { avaliarCompatibilidade } from '../../../backend/numerology/harmonization';
 
@@ -13,6 +14,14 @@ const profileName = profile?.nome?.trim().toLowerCase() || '';
 const isAdmin = profile?.role === 'admin';
 
 const analyses = await getUserAnalyses(user.id);
+const paidAnalyses = analyses.filter(a => a.product_type !== 'analise_gratuita' && !(a as any).is_free);
+const hasPaidAnalysisHistory = paidAnalyses.length > 0;
+const hasAnyPaidAccess = isAdmin || await Promise.all([
+  hasActiveSubscription(user.id, 'nome_social'),
+  hasActiveSubscription(user.id, 'nome_bebe'),
+  hasActiveSubscription(user.id, 'nome_empresa'),
+]).then(results => results.some(Boolean));
+const isLocked = !hasAnyPaidAccess && !hasPaidAnalysisHistory;
 
 const productIcon: Record<string, string> = {
   analise_gratuita: '✦',
@@ -29,7 +38,7 @@ const productLabel: Record<string, string> = {
 
 // Removido statusClass e statusLabel conforme solicitado pelo usuário
 
-const analysesWithMeta = analyses.map(a => {
+const analysesWithMeta = paidAnalyses.map(a => {
   const freqData = (a as any).frequencias_numeros as any;
   const rankingBebe    = freqData?.ranking ?? null;
   const rankingEmpresa = (a.product_type === 'nome_empresa' ? freqData : null) as any;
@@ -76,10 +85,29 @@ const hasMultipleProducts = uniqueProducts.length > 1;
 
 <AppLayout title="Minhas Análises">
   <div class="space-y-6">
+    {isLocked ? (
+      <section class="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-center opacity-75 md:p-12">
+        <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#D4AF37]/20 bg-[#D4AF37]/10 text-[#D4AF37]">
+          <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        </div>
+        <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">Área bloqueada</p>
+        <h1 class="font-cinzel text-2xl font-bold text-[#e5e2e1] md:text-3xl">Minhas Análises</h1>
+        <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-gray-500">
+          Suas análises pagas aparecerão aqui depois que você adquirir um produto ou acessar uma análise já comprada.
+        </p>
+        <a
+          href="/app"
+          class="mt-6 inline-flex items-center justify-center rounded-xl bg-[#D4AF37] px-6 py-3 text-sm font-bold text-[#131313] transition hover:bg-[#f2ca50]"
+        >
+          Ver produtos
+        </a>
+      </section>
+    ) : (
+    <>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between items-start gap-5">
       <div>
         <h1 class="font-cinzel text-3xl md:text-4xl font-bold text-white mb-1 leading-tight">Minhas Análises</h1>
-        <p class="text-gray-400 text-sm">{analyses.length} análise{analyses.length !== 1 ? 's' : ''} no total</p>
+        <p class="text-gray-400 text-sm">{analysesWithMeta.length} análise{analysesWithMeta.length !== 1 ? 's' : ''} no total</p>
       </div>
       <a
         href="/app"
@@ -182,6 +210,8 @@ const hasMultipleProducts = uniqueProducts.length > 1;
           </div>
         ))}
       </div>
+    )}
+    </>
     )}
   </div>
 

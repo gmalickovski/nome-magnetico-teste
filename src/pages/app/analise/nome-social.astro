@@ -18,7 +18,6 @@ const isAdmin = profile?.role === 'admin';
 const hasAccess = isAdmin || await hasActiveSubscription(user.id, 'nome_social');
 if (!hasAccess) return Astro.redirect('/comprar?produto=nome_social');
 
-// Converter data do banco (YYYY-MM-DD) para o formato do formulário (DD/MM/YYYY)
 function dbDateToInput(dbDate: string | null): string {
   if (!dbDate) return '';
   const parts = dbDate.split('-');
@@ -31,25 +30,53 @@ const dataInicial = dbDateToInput(profile?.birth_date ?? '');
 ---
 
 <AppLayout title="Análise — Nome Social">
-  <div class="max-w-4xl mx-auto space-y-8 pb-16">
+  <div class="mx-auto max-w-5xl space-y-10 pb-16">
+    <a
+      href="/app"
+      class="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 transition-colors hover:text-[#D4AF37]"
+    >
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Voltar para meus produtos
+    </a>
 
-    <div>
-      <h1 class="font-cinzel justify-between flex flex-col md:flex-row md:items-center text-3xl font-bold text-white mb-4 pb-2 border-b border-white/10">
-        <span>Análise de Nome Social</span>
-        <span class="mt-2 md:mt-0 text-sm bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30 font-inter self-start md:self-auto">Novo Fluxo</span>
-      </h1>
-      <p class="text-gray-400 text-lg leading-relaxed mb-8">
-        Informe seus dados de nascimento, sua intenção e os nomes que você deseja considerar.
-        A numerologia cabalística analisará a compatibilidade com o seu Destino e entregará
-        a melhor opção com 3 alternativas de alta vibração.
+    <header class="space-y-5">
+      <p class="font-inter text-xs font-bold uppercase tracking-[0.28em] text-[#D4AF37]">
+        Harmonização de assinatura
       </p>
+      <div class="max-w-4xl">
+        <h1 class="font-cinzel text-3xl font-bold leading-tight text-[#e5e2e1] md:text-5xl">
+          Análise de Nome Social
+        </h1>
+        <p class="mt-5 text-base leading-relaxed text-gray-400 md:text-lg">
+          Informe seu nome civil completo, data de nascimento e o contexto em que deseja se apresentar.
+          O sistema compara nomes candidatos, calcula os 4 triângulos cabalísticos, identifica bloqueios,
+          avalia a compatibilidade com seu Destino e ordena as opções por score.
+        </p>
+      </div>
+      <div class="grid gap-4 text-sm text-gray-400 sm:grid-cols-3">
+        <div class="rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10">
+          <span class="block font-bold text-[#D4AF37]">1. Base fixa</span>
+          Nome de nascimento e data definem o mapa original.
+        </div>
+        <div class="rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10">
+          <span class="block font-bold text-[#D4AF37]">2. Candidatos</span>
+          Você informa opções ou deixa o sistema sugerir variações.
+        </div>
+        <div class="rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10">
+          <span class="block font-bold text-[#D4AF37]">3. Ranking</span>
+          O melhor nome prioriza score alto e baixa descaracterização.
+        </div>
+      </div>
+    </header>
+
+    <div class="pt-4 md:pt-6">
+      <SocialNameForm
+        client:load
+        nomeInicial={nomeInicial}
+        dataInicial={dataInicial}
+      />
     </div>
-
-    <SocialNameForm
-      client:load
-      nomeInicial={nomeInicial}
-      dataInicial={dataInicial}
-    />
-
   </div>
 </AppLayout>

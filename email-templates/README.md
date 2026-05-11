@@ -26,6 +26,7 @@ Código (notify.ts) → n8n webhook → n8n workflow → Amazon SES → usuário
 | Arquivo | Evento | Placeholders |
 |---------|--------|-------------|
 | `welcome.html` | `user.welcome` | `{{firstName}}` |
+| `supabase-email-verification.html` | Supabase Auth `Magic Link` | `{{ .SiteURL }}`, `{{ .TokenHash }}` |
 | `password-reset.html` | `user.password_reset` | `{{resetUrl}}` |
 | `payment-confirmed.html` | `payment.confirmed` | `{{firstName}}`, `{{productName}}`, `{{accessUrl}}` |
 | `payment-failed.html` | `payment.failed` | `{{firstName}}` |
@@ -38,6 +39,20 @@ Código (notify.ts) → n8n webhook → n8n workflow → Amazon SES → usuário
 | `support-confirmation.html` | `support.ticket_created` | `{{nome}}`, `{{assunto}}` |
 
 ## Como usar no n8n
+
+## Template de verificação posterior no Supabase
+
+O botão "Verificar E-mail" do app usa o fluxo de Magic Link do Supabase para confirmar `profiles.email_verified_at`.
+Por isso, o HTML em `supabase-email-verification.html` deve ser colado no painel do Supabase em:
+
+`Authentication` -> `Email Templates` -> `Magic Link`
+
+Assunto sugerido:
+
+`Confirme seu e-mail - Nome Magnético`
+
+O template monta o link direto para `/auth/confirmar-email?token_hash={{ .TokenHash }}&type=magiclink&redirect=/app`.
+Esse caminho evita exibir o usuário em uma página intermediária do Supabase: a página do app valida o token com `verifyOtp`, marca `profiles.email_verified_at` e redireciona para `/app`.
 
 ### Workflow transacional (events-nm)
 
