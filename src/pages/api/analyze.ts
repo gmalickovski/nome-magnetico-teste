@@ -52,8 +52,22 @@ const schema = z.object({
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const user = (locals as any).user;
-  const accessToken = (locals as any).accessToken;
+  let user = (locals as any).user;
+  let accessToken = (locals as any).accessToken;
+
+  if (!user || !accessToken) {
+    const authHeader = request.headers.get('authorization') ?? '';
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+
+    if (bearerToken) {
+      const { data, error } = await supabase.auth.getUser(bearerToken);
+      const apps = data.user?.app_metadata?.apps as string[] | undefined;
+      if (!error && data.user && (apps === undefined || apps.includes('nome_magnetico'))) {
+        user = data.user;
+        accessToken = bearerToken;
+      }
+    }
+  }
 
   if (!user || !accessToken) {
     return new Response(JSON.stringify({ error: 'Autenticação necessária' }), {
@@ -94,7 +108,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { data: profile } = await supabase
     
     .from('profiles')
-    .select('gender, role, email, nome')
+    .select('gender, role, email, nome, birth_name, birth_date')
     .eq('id', user.id)
     .single();
 
@@ -128,6 +142,29 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return new Response(JSON.stringify({ error: 'Subscription inativa para este produto' }), {
         status: 403, headers: { 'Content-Type': 'application/json' },
       });
+    }
+  }
+
+  if (product_type === 'nome_social' || isGratuita) {
+    const parts = data_nascimento.split('/');
+    const birthDateDb = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : data_nascimento;
+    const shouldUpdateBirthProfile =
+      profile?.birth_name !== nome_completo.trim() ||
+      profile?.birth_date !== birthDateDb;
+
+    if (shouldUpdateBirthProfile) {
+      const { error: birthProfileError } = await supabase
+        .from('profiles')
+        .update({
+          birth_name: nome_completo.trim(),
+          birth_date: birthDateDb,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (birthProfileError) {
+        console.warn('[analyze] falha ao salvar dados base do perfil:', birthProfileError.message);
+      }
     }
   }
 

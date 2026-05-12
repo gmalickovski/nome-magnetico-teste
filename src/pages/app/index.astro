@@ -74,6 +74,13 @@ if (genFreePdf && !freeAnalysisId && user.email) {
     if (lead) {
       leadNome = lead.nome_completo;
       leadData = lead.data_nascimento;
+      const parts = lead.data_nascimento.split('/');
+      const leadBirthDateDb = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : lead.data_nascimento;
+      supabase.from('profiles').update({
+        birth_name: lead.nome_completo,
+        birth_date: leadBirthDateDb,
+        updated_at: new Date().toISOString(),
+      }).eq('id', user.id).then(() => {});
       // Marca o lead como convertido (fire and forget)
       supabase.from('analise_leads').update({
         converted_user_id: user.id,

@@ -788,9 +788,20 @@ const dimSublabels: Record<TipKey, string> = {
         (card as HTMLElement).style.pointerEvents = 'none';
 
         try {
+          let authHeader = {};
+          try {
+            const storedSession = window.localStorage.getItem('nome-magnetico-auth');
+            const session = storedSession ? JSON.parse(storedSession) : null;
+            const token = session?.access_token ?? session?.currentSession?.access_token ?? null;
+            if (token) {
+              authHeader = { Authorization: 'Bearer ' + token };
+            }
+          } catch {}
+
           const res = await fetch('/api/analyze', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', ...authHeader },
             body: JSON.stringify({
               product_type: 'nome_social',
               nome_completo: nomeNasc,

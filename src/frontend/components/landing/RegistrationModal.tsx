@@ -66,6 +66,8 @@ export function RegistrationModal({
           nome: firstName(nomeCompleto),
           email: email.trim(),
           password,
+          birth_name: nomeCompleto.trim(),
+          birth_date: dataNascimento,
           redirect: redirectUrl,
         }),
       });

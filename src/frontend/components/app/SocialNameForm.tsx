@@ -91,6 +91,7 @@ function SectionTitle({
 }
 
 export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onSuccess }: Props) {
+  const hasSavedBirthData = Boolean(nomeInicial && dataInicial);
   const [form, setForm] = useState<FormState>({
     nome_completo: nomeInicial,
     data_nascimento: dataInicial,
@@ -102,6 +103,7 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
     nomes_candidatos: '',
   });
 
+  const [editingBirthData, setEditingBirthData] = useState(!hasSavedBirthData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -171,6 +173,8 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Erro ao iniciar análise');
 
+      setEditingBirthData(false);
+
       if (onSuccess) {
         onSuccess(data.analysisId);
       } else {
@@ -200,6 +204,32 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
             info="Use o nome civil completo de registro e a data correta. Eles são a base fixa do cálculo numerológico."
           />
 
+          {hasSavedBirthData && !editingBirthData ? (
+            <div className="rounded-2xl bg-[#131313]/80 p-4 ring-1 ring-[#D4AF37]/20">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Nome de nascimento</p>
+                    <p className="mt-1 font-cinzel text-xl font-bold text-[#e5e2e1]">{form.nome_completo}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Data de nascimento</p>
+                    <p className="mt-1 text-lg font-semibold text-[#D4AF37]">{form.data_nascimento}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingBirthData(true)}
+                  className="rounded-full border border-[#D4AF37]/40 px-5 py-2 text-sm font-bold text-[#D4AF37] transition hover:bg-[#D4AF37]/10"
+                >
+                  Editar dados
+                </button>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-gray-500">
+                Estes dados foram salvos na sua conta e serao usados como base fixa das suas harmonizacoes.
+              </p>
+            </div>
+          ) : (
           <div className="grid items-start gap-6 md:grid-cols-[1fr_0.72fr]">
             <div>
               <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-300">
@@ -229,6 +259,7 @@ export default function SocialNameForm({ nomeInicial = '', dataInicial = '', onS
               />
             </div>
           </div>
+          )}
         </div>
       </div>
 

@@ -10,6 +10,8 @@ const schema = z.object({
   password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
   produto: z.string().optional(),
   redirect: z.string().optional(),
+  birth_name: z.string().min(2).max(150).optional(),
+  birth_date: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/).optional(),
 });
 
 const APP_ID = 'nome_magnetico';
@@ -35,7 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: msg }, 400);
   }
 
-  const { nome, email, password } = parsed.data;
+  const { nome, email, password, birth_name, birth_date } = parsed.data;
   const normalizedEmail = email.trim().toLowerCase();
 
   if (isDisposableEmail(normalizedEmail)) {
@@ -106,6 +108,23 @@ export const POST: APIRoute = async ({ request }) => {
   });
   if (profileError) {
     console.error('[register] falha ao garantir profile:', profileError.message);
+  }
+
+  if (birth_name && birth_date) {
+    const parts = birth_date.split('/');
+    const birthDateDb = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : birth_date;
+    const { error: birthProfileError } = await supabase
+      .from('profiles')
+      .update({
+        birth_name: birth_name.trim(),
+        birth_date: birthDateDb,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', createdUser.id);
+
+    if (birthProfileError) {
+      console.error('[register] falha ao salvar dados de nascimento:', birthProfileError.message);
+    }
   }
 
   const signIn = await supabaseAnon.auth.signInWithPassword({
