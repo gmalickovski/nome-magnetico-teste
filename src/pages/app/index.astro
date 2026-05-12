@@ -91,26 +91,24 @@ const [hasNomeSocial, hasNomeBebe, hasNomeEmpresa] = isAdmin
 
 const hasAnyAccess = hasNomeSocial || hasNomeBebe || hasNomeEmpresa;
 
-if (hasNomeSocial) {
-  try {
-    const { data: foundBestSocial } = await _client
-      .from('analyses')
-      .select('id, nome_completo, score, bloqueios, status, frequencias_numeros, created_at')
-      .eq('user_id', user.id)
-      .eq('product_type', 'nome_social')
-      .eq('status', 'complete')
-      .order('score', { ascending: false, nullsFirst: false })
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    bestSocialAnalysis = foundBestSocial;
-  } catch {}
-}
+try {
+  const { data: foundBestSocial } = await _client
+    .from('analyses')
+    .select('id, nome_completo, score, bloqueios, status, frequencias_numeros, created_at')
+    .eq('user_id', user.id)
+    .eq('product_type', 'nome_social')
+    .eq('status', 'complete')
+    .order('score', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  bestSocialAnalysis = foundBestSocial;
+} catch {}
 
 // Detectar estado expirado (jÃ¡ comprou antes, mas nenhuma ativa)
 const isExpired = !isAdmin && !hasAnyAccess && await hasAnySubscription(user.id);
 
-const PRICE_UNAVAILABLE: PriceInfo = { cents: 0, formatted: 'IndisponÃ­vel', hasDiscount: false };
+const PRICE_UNAVAILABLE: PriceInfo = { cents: 0, formatted: 'Indisponível', hasDiscount: false };
 const { prices, promotion } = await getHqPricesAndPromo().catch(() => ({ prices: {}, promotion: null }));
 const priceMap = prices as Record<string, PriceInfo>;
 
@@ -187,7 +185,7 @@ const products = [
     id: 'nome_social',
     iconSvg: `<svg viewBox="0 0 24 24" aria-hidden="true" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.9L18.5 9.5l-4.9 1.6L12 16l-1.6-4.9-4.9-1.6 4.9-1.6L12 3Z"/><path d="M5 14l.8 2.2L8 17l-2.2.8L5 20l-.8-2.2L2 17l2.2-.8L5 14Z"/><path d="M19 13l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6L19 13Z"/></svg>`,
     name: 'Nome Social',
-    description: 'Harmonize sua assinatura: descubra por que sua assinatura tem mais poder do que voce imagina e qual Nome Social flui melhor.',
+    description: 'Harmonize sua assinatura: descubra por que sua assinatura tem mais poder do que você imagina e qual Nome Social flui melhor.',
     href: '/app/analise/nome-social',
     infoHref: '/nome-social',
     hasAccess: hasNomeSocial,
@@ -195,7 +193,7 @@ const products = [
   {
     id: 'nome_bebe',
     iconSvg: `<svg viewBox="0 0 24 24" aria-hidden="true" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10.5h.01"/><path d="M15 10.5h.01"/><path d="M9.5 15c1.5 1.2 3.5 1.2 5 0"/><path d="M12 21a8 8 0 0 0 8-8c0-4.2-3.1-7.7-7.2-8"/><path d="M12 21a8 8 0 0 1-8-8c0-4.2 3.1-7.7 7.2-8"/><path d="M12 5c1.8 0 3-1 3-2.5C13.2 2.3 12 3.3 12 5Z"/></svg>`,
-    name: 'Nome de Bebe',
+    name: 'Nome de Bebê',
     description: 'Encontre o nome ideal para seu filho com compatibilidade familiar.',
     href: '/app/analise/nome-bebe',
     infoHref: '/nome-bebe',
@@ -231,7 +229,7 @@ const products = [
           <div>
             <h3 class="font-cinzel text-base font-bold text-[#D4AF37] mb-0.5">Pagamento confirmado!</h3>
             <p class="text-[#e5e2e1] text-sm leading-relaxed">
-              Bem-vindo ao Nome MagnÃ©tico. Seu acesso estÃ¡ liberado â€” escolha seu produto abaixo para comeÃ§ar.
+              Bem-vindo ao Nome Magnético. Seu acesso está liberado - escolha seu produto abaixo para começar.
             </p>
           </div>
         </div>
@@ -283,7 +281,7 @@ const products = [
           <h3 class="font-cinzel text-lg font-bold text-red-400 mb-1">
             Seu acesso expirou
           </h3>
-          <p class="text-gray-400 text-sm">Renove para continuar realizando anÃ¡lises numerolÃ³gicas completas.</p>
+          <p class="text-gray-400 text-sm">Renove para continuar realizando análises numerológicas completas.</p>
         </div>
         <a
           href="/comprar"
@@ -299,9 +297,9 @@ const products = [
       <div class="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
           <h3 class="font-cinzel text-lg font-bold text-[#D4AF37] mb-1">
-            Comece sua jornada numerolÃ³gica
+            Comece sua jornada numerológica
           </h3>
-          <p class="text-gray-400 text-sm">Adquira um dos produtos para realizar sua anÃ¡lise cabalÃ­stica completa.</p>
+          <p class="text-gray-400 text-sm">Adquira um dos produtos para realizar sua análise cabalística completa.</p>
         </div>
         <a
           href="/comprar"
@@ -444,7 +442,7 @@ const products = [
               </h3>
               <p class="text-gray-400 text-sm">{product.description}</p>
               <div class="mt-4 flex items-center justify-between">
-                <span class="text-[#D4AF37] text-sm font-medium">Iniciar analise -></span>
+                <span class="text-[#D4AF37] text-sm font-medium">Iniciar análise -></span>
                 <span class:list={[
                   'rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em]',
                   isAdmin
@@ -467,7 +465,7 @@ const products = [
               <p class="text-gray-600 text-sm">{product.description}</p>
               <div class="mt-5 flex flex-col gap-3 sm:flex-row">
                 <DashboardCheckoutButton client:load product={product.id as any} priceInfo={priceMap[product.id] ?? PRICE_UNAVAILABLE} promotion={promotion} label="Renovar" className="inline-flex items-center justify-center rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm font-bold px-4 py-2.5 hover:bg-red-500/20 transition-all" />
-                <a href={product.infoHref} class="inline-flex items-center justify-center rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]">Mais informaÃ§Ãµes</a>
+                <a href={product.infoHref} class="inline-flex items-center justify-center rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]">Mais informações</a>
               </div>
             </div>
           ) : (
@@ -480,10 +478,10 @@ const products = [
                 {product.name}
               </h3>
               <p class="text-gray-600 text-sm">{product.description}</p>
-              <p class="text-gray-500 text-xs mt-2 group-hover:text-gray-400 transition-colors">Ainda nÃ£o adquirido</p>
+              <p class="text-gray-500 text-xs mt-2 group-hover:text-gray-400 transition-colors">Ainda não adquirido</p>
               <div class="mt-5 flex flex-col gap-3 sm:flex-row">
                 <DashboardCheckoutButton client:load product={product.id as any} priceInfo={priceMap[product.id] ?? PRICE_UNAVAILABLE} promotion={promotion} label="Adquirir" className="inline-flex items-center justify-center rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-sm font-bold px-4 py-2.5 hover:bg-[#D4AF37]/20 transition-all" />
-                <a href={product.infoHref} class="inline-flex items-center justify-center rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]">Mais informaÃ§Ãµes</a>
+                <a href={product.infoHref} class="inline-flex items-center justify-center rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]">Mais informações</a>
               </div>
             </div>
           )

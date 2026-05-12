@@ -278,6 +278,7 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
   const [error, setError] = useState('');
   const [result, setResult] = useState<LiveResult | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [limitModal, setLimitModal] = useState<{ message: string; redirectUrl: string } | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -296,8 +297,11 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
       });
       const json = await res.json();
       if (!res.ok) {
-        if (json.redirectUrl) {
-          window.location.href = json.redirectUrl;
+        if (json.code === 'free_analysis_already_used' || json.code === 'public_rate_limit') {
+          setLimitModal({
+            message: json.error ?? 'Você atingiu o limite da análise gratuita.',
+            redirectUrl: json.redirectUrl ?? '/app',
+          });
           return;
         }
         throw new Error(json.error ?? 'Erro na análise.');
@@ -698,6 +702,35 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
   // ── FORMULÁRIO ─────────────────────────────────────────────────────────────
   return (
     <div className="w-full">
+      {limitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-[#D4AF37]/25 bg-[#111111] p-6 shadow-2xl shadow-black/60">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
+              <IconAlert />
+            </div>
+            <h2 className="font-cinzel text-2xl font-bold text-[#e5e2e1]">Limite atingido</h2>
+            <p className="mt-3 text-sm leading-relaxed text-gray-400">
+              {limitModal.message}
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <a
+                href={limitModal.redirectUrl}
+                className="inline-flex flex-1 items-center justify-center rounded-xl bg-[#D4AF37] px-5 py-3 text-sm font-bold text-[#131313] transition hover:bg-[#f2ca50]"
+              >
+                Ir para minha conta
+              </a>
+              <button
+                type="button"
+                onClick={() => setLimitModal(null)}
+                className="inline-flex flex-1 items-center justify-center rounded-xl border border-white/10 px-5 py-3 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         {/* Campos + botão em linha no desktop, empilhados no mobile */}
         <div className="flex flex-col sm:flex-row items-stretch gap-3">

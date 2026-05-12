@@ -57,6 +57,13 @@ export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
   const user = (locals as any).user;
 
   if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+    const isAdmin = profile?.role === 'admin';
+
     const { data: freeAnalysis } = await supabase
       .from('analyses')
       .select('id, status')
@@ -66,12 +73,11 @@ export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
       .limit(1)
       .maybeSingle();
 
-    if (freeAnalysis) {
+    if (!isAdmin && freeAnalysis) {
       return json({
-        error: 'Sua análise gratuita de nome de nascimento já foi registrada. Redirecionando para o PDF original.',
-        redirectUrl: freeAnalysis.status === 'complete'
-          ? `/api/generate-pdf?id=${freeAnalysis.id}`
-          : `/app/resultado/${freeAnalysis.id}`,
+        code: 'free_analysis_already_used',
+        error: 'Você atingiu o limite da análise gratuita. Já existe uma análise de nascimento registrada nesta conta.',
+        redirectUrl: '/app',
       }, 409);
     }
   } else {
@@ -87,7 +93,9 @@ export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
       console.error('[api/analyze-live] rate limit count failed:', countError.message);
     } else if ((count ?? 0) >= 3) {
       return json({
+        code: 'public_rate_limit',
         error: 'Identificamos múltiplas consultas. Para continuar analisando novos nomes e frequências, adquira o Nome Social.',
+        redirectUrl: '/app',
       }, 429);
     }
 
