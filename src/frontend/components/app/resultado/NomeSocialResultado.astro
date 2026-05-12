@@ -775,6 +775,103 @@ const dimSublabels: Record<TipKey, string> = {
 {/* ── SCRIPT: handler dos cards clicáveis de nome social ──────────────────── */}
 {rankingSocial && (
   <script>
+    let activeCandidateAbort = null;
+    let activeCandidatePoll = null;
+
+    function ensureCandidateModal() {
+      let modal = document.getElementById('candidate-analysis-modal');
+      if (modal) return modal;
+
+      modal = document.createElement('div');
+      modal.id = 'candidate-analysis-modal';
+      modal.className = 'fixed inset-0 z-[9999] hidden items-center justify-center bg-black/70 px-4 backdrop-blur-md';
+      modal.innerHTML = `
+        <div class="w-full max-w-md rounded-2xl bg-[#131313] p-6 shadow-2xl ring-1 ring-[#D4AF37]/25">
+          <div class="flex items-start gap-4">
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
+              <span class="candidate-spinner h-7 w-7 animate-spin rounded-full border-2 border-[#D4AF37]/25 border-t-[#D4AF37]"></span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="candidate-title font-cinzel text-lg font-bold text-[#e5e2e1]">Gerando nova analise</h3>
+              <p class="candidate-message mt-2 text-sm leading-relaxed text-gray-400">Estamos recalculando o relatorio com o nome selecionado.</p>
+            </div>
+          </div>
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button type="button" data-cancel-candidate class="rounded-full border border-[#D4AF37]/35 px-5 py-2.5 text-sm font-semibold text-[#D4AF37] transition hover:bg-[#D4AF37]/10">Cancelar</button>
+            <button type="button" data-retry-candidate class="hidden rounded-full bg-[#D4AF37] px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-[#f2ca50]">Tentar novamente</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.querySelector('[data-cancel-candidate]')?.addEventListener('click', closeCandidateModal);
+      modal.querySelector('[data-retry-candidate]')?.addEventListener('click', closeCandidateModal);
+      return modal;
+    }
+
+    function openCandidateModal(message) {
+      const modal = ensureCandidateModal();
+      modal.querySelector('.candidate-title').textContent = 'Gerando nova analise';
+      modal.querySelector('.candidate-message').textContent = message || 'Estamos recalculando o relatorio com o nome selecionado.';
+      modal.querySelector('.candidate-spinner')?.classList.add('animate-spin');
+      modal.querySelector('[data-retry-candidate]')?.classList.add('hidden');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.documentElement.classList.add('overflow-hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function showCandidateError(message) {
+      const modal = ensureCandidateModal();
+      modal.querySelector('.candidate-title').textContent = 'Nao foi possivel gerar agora';
+      modal.querySelector('.candidate-message').textContent = message || 'Tente novamente em alguns instantes.';
+      modal.querySelector('.candidate-spinner')?.classList.remove('animate-spin');
+      modal.querySelector('[data-retry-candidate]')?.classList.remove('hidden');
+    }
+
+    function closeCandidateModal() {
+      if (activeCandidateAbort) activeCandidateAbort.abort();
+      if (activeCandidatePoll) window.clearTimeout(activeCandidatePoll);
+      activeCandidateAbort = null;
+      activeCandidatePoll = null;
+      const modal = document.getElementById('candidate-analysis-modal');
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+      document.documentElement.classList.remove('overflow-hidden');
+      document.body.classList.remove('overflow-hidden');
+      document.querySelectorAll('.analisar-nome-card').forEach(function(card) {
+        const loadingEl = card.querySelector('.card-loading');
+        if (loadingEl) loadingEl.classList.add('hidden');
+        card.style.pointerEvents = '';
+      });
+    }
+
+    async function waitCandidateAnalysis(analysisId, attempts) {
+      if (attempts > 36) {
+        showCandidateError('A analise esta demorando mais que o esperado. Cancele e tente novamente em alguns minutos.');
+        return;
+      }
+
+      const res = await fetch('/api/analysis-status?id=' + encodeURIComponent(analysisId), { credentials: 'include' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao verificar a analise');
+
+      if (data.status === 'complete') {
+        window.location.href = '/app/resultado/' + analysisId;
+        return;
+      }
+
+      if (data.status === 'error') {
+        showCandidateError(data.error || 'Nao foi possivel concluir a analise agora.');
+        return;
+      }
+
+      activeCandidatePoll = window.setTimeout(function() {
+        waitCandidateAnalysis(analysisId, attempts + 1).catch(function(error) {
+          showCandidateError(error instanceof Error ? error.message : String(error));
+        });
+      }, 2500);
+    }
+
     document.querySelectorAll('.analisar-nome-card').forEach(function(card) {
       card.addEventListener('click', async function() {
         const nome = card.getAttribute('data-nome');
@@ -789,7 +886,9 @@ const dimSublabels: Record<TipKey, string> = {
 
         const loadingEl = card.querySelector('.card-loading');
         if (loadingEl) loadingEl.classList.remove('hidden');
-        (card as HTMLElement).style.pointerEvents = 'none';
+        card.style.pointerEvents = 'none';
+        openCandidateModal('Recalculando o relatorio para "' + nome + '".');
+        activeCandidateAbort = new AbortController();
 
         try {
           let authHeader = {};
@@ -805,6 +904,7 @@ const dimSublabels: Record<TipKey, string> = {
           const res = await fetch('/api/analyze', {
             method: 'POST',
             credentials: 'include',
+            signal: activeCandidateAbort.signal,
             headers: { 'Content-Type': 'application/json', ...authHeader },
             body: JSON.stringify({
               product_type: 'nome_social',
@@ -816,11 +916,12 @@ const dimSublabels: Record<TipKey, string> = {
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error ?? 'Erro ao iniciar análise');
-          window.location.href = '/app/resultado/' + data.analysisId;
+          await waitCandidateAnalysis(data.analysisId, 0);
         } catch (err) {
+          if (err instanceof DOMException && err.name === 'AbortError') return;
           if (loadingEl) loadingEl.classList.add('hidden');
-          (card as HTMLElement).style.pointerEvents = '';
-          alert('Erro ao gerar análise: ' + (err instanceof Error ? err.message : String(err)));
+          card.style.pointerEvents = '';
+          showCandidateError(err instanceof Error ? err.message : String(err));
         }
       });
     });

@@ -52,6 +52,53 @@ const schema = z.object({
   is_free: z.boolean().optional(),
 });
 
+const AI_TIMEOUT_MS = 75_000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs = AI_TIMEOUT_MS): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('AI_TIMEOUT')), timeoutMs);
+    promise
+      .then((value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      })
+      .catch((error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+  });
+}
+
+function buildSelectedSocialSummary({
+  nomeNascimento,
+  nomeSocial,
+  score,
+  bloqueios,
+  compatibilidade,
+}: {
+  nomeNascimento: string;
+  nomeSocial: string;
+  score?: number | null;
+  bloqueios: number;
+  compatibilidade?: string | null;
+}): string {
+  const scoreText = score == null ? 'em calculo' : `${score}/100`;
+  const bloqueioText = bloqueios === 1 ? '1 bloqueio ativo' : `${bloqueios} bloqueios ativos`;
+  const compatText = compatibilidade ? `Compatibilidade: ${compatibilidade}.` : '';
+
+  return [
+    `# Relatorio do Nome Social: ${nomeSocial}`,
+    '',
+    `Esta analise foi recalculada a partir dos mesmos dados de nascimento de ${nomeNascimento}, usando ${nomeSocial} como nome principal avaliado.`,
+    '',
+    `Score numerologico: ${scoreText}.`,
+    `Diagnostico de bloqueios: ${bloqueioText}.`,
+    compatText,
+    '',
+    'O relatorio usa os quatro triangulos cabalisticos, os cinco numeros principais e os criterios formais de compatibilidade para comparar o nome social escolhido com a base de nascimento.',
+  ].filter(Boolean).join('\n');
+}
+
 export const POST: APIRoute = async ({ request, locals }) => {
   let user = (locals as any).user;
   let accessToken = (locals as any).accessToken;
@@ -245,7 +292,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           triangulo_destino: todosTriangulosEmpresa?.destino as unknown ?? null,
         });
 
-        analiseTexto = await generateCompanyAnalysis(
+        analiseTexto = await withTimeout(generateCompanyAnalysis(
           {
             resultado,
             ramoAtividade: ramo_atividade,
@@ -253,7 +300,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           },
           user.id,
           analysis.id
-        );
+        ));
       } else if (product_type === 'nome_bebe') {
         // ── Produto: Nome do Bebê ──
         const candidatos = nomes_candidatos ?? [];
@@ -306,7 +353,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           score: melhorNome?.score ?? null,
         });
 
-        analiseTexto = await generateBabyAnalysis(
+        analiseTexto = await withTimeout(generateBabyAnalysis(
           {
             resultado,
             nomePai: nome_pai,
@@ -318,7 +365,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           },
           user.id,
           analysis.id
-        );
+        ));
       } else if (product_type === 'nome_social' && !nome_ja_escolhido) {
         // ── Produto: Nome Social (novo fluxo) ──
         const candidatos = nomes_candidatos ?? [];
@@ -391,19 +438,29 @@ export const POST: APIRoute = async ({ request, locals }) => {
           nomes_candidatos: candidatos,
         });
 
-        analiseTexto = await generateSocialAnalysis(
-          {
-            resultado,
+        if (nome_social_principal) {
+          analiseTexto = buildSelectedSocialSummary({
             nomeNascimento: nome_completo,
-            objetivoApresentacao: objetivo_apresentacao,
-            vibracoesDesejadas: vibracoes_desejadas,
-            contextoUso: contexto_uso,
-            estiloPreferido: estilo_preferido,
-            genero: genero_preferido,
-          },
-          user.id,
-          analysis.id
-        );
+            nomeSocial: melhor?.nomeCompleto ?? nome_social_principal,
+            score: melhor?.score,
+            bloqueios: melhor?.bloqueios?.length ?? 0,
+            compatibilidade: melhor?.compatibilidade,
+          });
+        } else {
+          analiseTexto = await withTimeout(generateSocialAnalysis(
+            {
+              resultado,
+              nomeNascimento: nome_completo,
+              objetivoApresentacao: objetivo_apresentacao,
+              vibracoesDesejadas: vibracoes_desejadas,
+              contextoUso: contexto_uso,
+              estiloPreferido: estilo_preferido,
+              genero: genero_preferido,
+            },
+            user.id,
+            analysis.id
+          ));
+        }
       } else {
         // ── Produto: fallback genérico (não deve ocorrer com os 3 produtos definidos) ──
         const todosTriangulos = calcularTodosTriangulos(nome_completo, data_nascimento);
@@ -459,7 +516,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           score,
         });
 
-        analiseTexto = await generateAnalysis(
+        analiseTexto = await withTimeout(generateAnalysis(
           {
             nomeCompleto: nome_completo,
             dataNascimento: data_nascimento,
@@ -476,7 +533,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           },
           user.id,
           analysis.id
-        );
+        ));
         void sequenciasNegativas;
       }
 
@@ -511,12 +568,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);
       const isQuota = errMsg.includes('QUOTA_EXCEEDED');
+      const isTimeout = errMsg.includes('AI_TIMEOUT');
       console.error('[analyze] Erro ao processar:', isQuota ? 'QUOTA_EXCEEDED (Groq + OpenAI)' : err);
       await updateAnalysis(analysis.id, {
         status: 'error',
-        error_message: isQuota
+        error_message: isQuota || isTimeout
           ? 'Nosso sistema de análise está com alta demanda agora. Por favor, tente novamente em alguns minutos. 🙏'
-          : errMsg,
+          : 'Nao foi possivel concluir a analise agora. Tente novamente em alguns instantes.',
       });
     }
   })();

@@ -105,7 +105,16 @@ export const GET: APIRoute = async ({ url, locals }) => {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${filename}"`,
-      'Cache-Control': 'no-store',
+      'Cache-Control': 'private, no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'X-PDF-Template': productType === 'nome_bebe'
+        ? 'nome-bebe'
+        : productType === 'nome_empresa'
+          ? 'nome-empresa'
+          : isGratuita
+            ? 'nome-atual'
+            : 'nome-social',
     },
   });
 };

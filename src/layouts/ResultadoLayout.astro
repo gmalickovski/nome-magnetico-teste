@@ -26,7 +26,7 @@ const { title, analysisId, productType = 'nome_social', isFree = false, showActi
         </a>
 
         {showActions && (
-          <PDFFeedbackButton client:load analysisId={analysisId} productType={productType} isFree={isFree} />
+          <PDFFeedbackButton client:load analysisId={analysisId} productType={productType} isFree={isFree} showFab={false} />
         )}
       </div>
     </div>

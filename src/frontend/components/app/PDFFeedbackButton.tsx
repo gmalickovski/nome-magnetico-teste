@@ -130,7 +130,14 @@ export function PDFFeedbackButton({
       // Usa pdfUrl direto se fornecido; senão constrói via analysisId
       const baseUrl = pdfUrl ?? `/api/generate-pdf?id=${analysisId}`;
       const resolvedUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-      const res = await fetch(resolvedUrl);
+      const res = await fetch(resolvedUrl, {
+        cache: 'no-store',
+        credentials: 'same-origin',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
       if (!res.ok) throw new Error('pdf_error');
 
       const disposition = res.headers.get('Content-Disposition') ?? '';
