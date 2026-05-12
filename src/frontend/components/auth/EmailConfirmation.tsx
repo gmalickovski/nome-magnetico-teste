@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase-browser';
 
 type State = 'loading' | 'success' | 'error' | 'no-token';
+type BrowserSession = {
+  access_token: string;
+  refresh_token: string;
+  expires_in?: number;
+} | null | undefined;
 
 export function EmailConfirmation() {
   const [state, setState] = useState<State>('loading');
@@ -11,11 +16,33 @@ export function EmailConfirmation() {
   useEffect(() => {
     let cancelled = false;
 
+    function syncSessionCookies(session: BrowserSession) {
+      if (!session?.access_token || !session?.refresh_token) return;
+      const accessMaxAge = session.expires_in ?? 3600;
+      document.cookie = `nome-magnetico-auth-access-token=${session.access_token}; path=/; max-age=${accessMaxAge}; SameSite=Lax`;
+      document.cookie = `nome-magnetico-auth-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+    }
+
+    async function getActiveAccessToken(session?: BrowserSession) {
+      if (session?.access_token) return session.access_token;
+      const { data } = await supabaseBrowser.auth.getSession();
+      syncSessionCookies(data.session);
+      return data.session?.access_token;
+    }
+
     async function markVerified(accessToken?: string) {
-      await fetch('/api/auth/mark-email-verified', {
+      if (!accessToken) {
+        throw new Error('Sessão de confirmação não encontrada.');
+      }
+
+      const res = await fetch('/api/auth/mark-email-verified', {
         method: 'POST',
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error ?? 'Não foi possível gravar a confirmação.');
+      }
     }
 
     async function confirmEmail() {
@@ -37,7 +64,8 @@ export function EmailConfirmation() {
             type: otpType,
           });
           if (error) throw error;
-          await markVerified(data.session?.access_token);
+          syncSessionCookies(data.session);
+          await markVerified(await getActiveAccessToken(data.session));
           if (!cancelled) setState('success');
           return;
         }
@@ -45,7 +73,8 @@ export function EmailConfirmation() {
         if (code) {
           const { data, error } = await supabaseBrowser.auth.exchangeCodeForSession(code);
           if (error) throw error;
-          await markVerified(data.session?.access_token);
+          syncSessionCookies(data.session);
+          await markVerified(await getActiveAccessToken(data.session));
           if (!cancelled) setState('success');
           return;
         }
@@ -58,7 +87,8 @@ export function EmailConfirmation() {
             refresh_token: refreshToken,
           });
           if (error) throw error;
-          await markVerified(data.session?.access_token);
+          syncSessionCookies(data.session);
+          await markVerified(await getActiveAccessToken(data.session));
           window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           if (!cancelled) setState('success');
           return;
@@ -66,6 +96,7 @@ export function EmailConfirmation() {
 
         const { data } = await supabaseBrowser.auth.getSession();
         if (data.session?.access_token) {
+          syncSessionCookies(data.session);
           await markVerified(data.session.access_token);
           if (!cancelled) setState('success');
           return;

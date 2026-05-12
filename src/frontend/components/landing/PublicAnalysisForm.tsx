@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import { RegistrationModal } from './RegistrationModal';
+import { PDFFeedbackButton } from '../app/PDFFeedbackButton';
 
 // ── Tipos ──────────────────────────────────────────────────────────────────────
 
@@ -279,6 +280,9 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
   const [result, setResult] = useState<LiveResult | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [limitModal, setLimitModal] = useState<{ message: string; redirectUrl: string } | null>(null);
+  const [ctaLoading, setCtaLoading] = useState(false);
+  const [downloadAnalysisId, setDownloadAnalysisId] = useState<string | null>(null);
+  const [existingAccountEmail, setExistingAccountEmail] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -314,14 +318,48 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
     }
   }
 
-  function handleCTA(e?: React.FormEvent) {
+  async function handleCTA(e?: React.FormEvent) {
     if (e) e.preventDefault();
 
-    const redirectUrl = '/app?gen_free_pdf=1';
-
     if (isLoggedIn) {
-      // Usuário já logado: vai direto para o painel gerar o PDF
-      window.location.href = redirectUrl;
+      // Usuário já logado: gera e baixa a análise atual, sem reaproveitar PDF salvo.
+      setError('');
+      setCtaLoading(true);
+      setDownloadAnalysisId(null);
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_type: 'analise_gratuita',
+            nome_completo: nome.trim(),
+            data_nascimento: data,
+            nome_ja_escolhido: true,
+          }),
+        });
+
+        const json = await res.json();
+        if (!res.ok) {
+          if (res.status === 403 || json.code === 'free_analysis_already_used') {
+            setLimitModal({
+              message: json.error ?? 'VocÃª atingiu o limite da anÃ¡lise gratuita.',
+              redirectUrl: json.redirectUrl ?? '/app',
+            });
+            return;
+          }
+          throw new Error(json.error ?? 'Erro ao gerar o PDF da anÃ¡lise gratuita.');
+        }
+
+        const id = json.analysisId ?? json.id;
+        if (!id) throw new Error('ID de anÃ¡lise nÃ£o retornado.');
+
+        setDownloadAnalysisId(id);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro inesperado ao gerar o PDF.');
+      } finally {
+        setCtaLoading(false);
+      }
       return;
     }
 
@@ -330,7 +368,27 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
       return;
     }
 
-    setRegistrationOpen(true);
+    setCtaLoading(true);
+    try {
+      const res = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Erro ao validar e-mail.');
+
+      if (json.exists) {
+        setExistingAccountEmail(email.trim());
+        return;
+      }
+
+      setRegistrationOpen(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado ao validar e-mail.');
+    } finally {
+      setCtaLoading(false);
+    }
   }
 
   // ── RESULTADO ──────────────────────────────────────────────────────────────
@@ -655,7 +713,7 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
                 />
                 <button
                   type="submit"
-                  disabled={!isValidEmail(email)}
+                  disabled={ctaLoading || !isValidEmail(email)}
                   className="bg-white text-[#0F766E] font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-[#CCFBF1] transition-colors flex items-center justify-center gap-2 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   BAIXAR ANÁLISE GRATUITA <span className="text-base">›</span>
@@ -666,7 +724,8 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
             <div className="text-center">
               <button
                 onClick={() => handleCTA()}
-                className="bg-white text-[#0F766E] font-bold text-sm px-10 py-3.5 rounded-xl hover:bg-[#CCFBF1] transition-colors"
+                disabled={ctaLoading}
+                className="bg-white text-[#0F766E] font-bold text-sm px-10 py-3.5 rounded-xl hover:bg-[#CCFBF1] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
               >
                 GERAR MEU PDF GRATUITO ›
               </button>
@@ -694,6 +753,73 @@ export function PublicAnalysisForm({ isLoggedIn }: Props) {
           redirectUrl="/app?gen_free_pdf=1"
           onClose={() => setRegistrationOpen(false)}
         />
+
+        {limitModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl border border-[#D4AF37]/25 bg-[#111111] p-6 shadow-2xl shadow-black/60">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
+                <IconAlert />
+              </div>
+              <h2 className="font-cinzel text-2xl font-bold text-[#e5e2e1]">Limite atingido</h2>
+              <p className="mt-3 text-sm leading-relaxed text-gray-400">
+                {limitModal.message}
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={limitModal.redirectUrl}
+                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-[#D4AF37] px-5 py-3 text-sm font-bold text-[#131313] transition hover:bg-[#f2ca50]"
+                >
+                  Ir para minha conta
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setLimitModal(null)}
+                  className="inline-flex flex-1 items-center justify-center rounded-xl border border-white/10 px-5 py-3 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {existingAccountEmail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl border border-[#D4AF37]/25 bg-[#111111] p-6 shadow-2xl shadow-black/60">
+              <h2 className="font-cinzel text-2xl font-bold text-[#e5e2e1]">E-mail já cadastrado</h2>
+              <p className="mt-3 text-sm leading-relaxed text-gray-400">
+                Esse e-mail já possui uma conta. Faça login para acessar seu PDF gratuito no painel.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={`/auth/login?email=${encodeURIComponent(existingAccountEmail)}&redirect=${encodeURIComponent('/app')}&msg=conta-existente`}
+                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-[#D4AF37] px-5 py-3 text-sm font-bold text-[#131313] transition hover:bg-[#f2ca50]"
+                >
+                  Fazer login
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setExistingAccountEmail(null)}
+                  className="inline-flex flex-1 items-center justify-center rounded-xl border border-white/10 px-5 py-3 text-sm font-bold text-gray-400 transition hover:border-[#D4AF37]/40 hover:text-[#D4AF37]"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {downloadAnalysisId && (
+          <PDFFeedbackButton
+            analysisId={downloadAnalysisId}
+            productType="analise_gratuita"
+            isFree={true}
+            showFab={false}
+            autoDownload={true}
+            label="Baixar AnÃ¡lise Gratuita"
+            className="hidden"
+          />
+        )}
 
       </div>
     );

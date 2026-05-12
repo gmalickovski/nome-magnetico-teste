@@ -73,7 +73,7 @@ export function RegistrationModal({
 
       if (!res.ok) {
         if (data.error === 'already_registered') {
-          window.location.href = `/auth/login?email=${encodeURIComponent(email.trim())}&redirect=${encodeURIComponent(redirectUrl)}&msg=conta-existente`;
+          window.location.href = `/auth/login?email=${encodeURIComponent(email.trim())}&redirect=${encodeURIComponent('/app')}&msg=conta-existente`;
           return;
         }
         if (data.error === 'email_pending_confirmation') {
@@ -122,7 +122,7 @@ export function RegistrationModal({
         {needsConfirmation ? (
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
             Sua conta foi criada. Enviamos um link de confirmação para <strong>{email}</strong>. Se a sessão imediata estiver ativa no Supabase, basta acessar o painel; caso contrário, confirme o e-mail para ativar a conta.
-            <a href={`/auth/login?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirectUrl)}`} className="mt-4 block font-bold text-[#D4AF37] hover:underline">
+            <a href={`/auth/login?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent('/app')}`} className="mt-4 block font-bold text-[#D4AF37] hover:underline">
               Já confirmei, entrar aqui
             </a>
           </div>
@@ -170,7 +170,7 @@ export function RegistrationModal({
         )}
 
         <a
-          href={`/auth/login?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirectUrl)}`}
+          href={`/auth/login?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent('/app')}`}
           className="mt-4 flex w-full items-center justify-center rounded-xl border border-[#D4AF37]/60 bg-slate-950/40 px-5 py-3 text-sm font-bold text-[#D4AF37] transition hover:bg-[#D4AF37]/10"
         >
           Já tenho uma conta

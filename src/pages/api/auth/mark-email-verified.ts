@@ -17,15 +17,28 @@ export const POST: APIRoute = async ({ locals, request }) => {
     return json({ error: 'Autenticação necessária' }, 401);
   }
 
-  const { error } = await supabase
+  const verifiedAt = new Date().toISOString();
+
+  const { error: authError } = await supabase.auth.admin.updateUserById(user.id, {
+    user_metadata: {
+      ...(user.user_metadata ?? {}),
+      email_verified_at: verifiedAt,
+    },
+  });
+
+  if (authError) {
+    console.error('[mark-email-verified] auth metadata:', authError.message);
+    return json({ error: 'Não foi possível confirmar agora.' }, 500);
+  }
+
+  const { error: profileError } = await supabase
     .from('profiles')
-    .update({ email_verified_at: new Date().toISOString() })
+    .update({ email_verified_at: verifiedAt })
     .eq('id', user.id)
     .is('email_verified_at', null);
 
-  if (error) {
-    console.error('[mark-email-verified]', error.message);
-    return json({ error: 'Não foi possível confirmar agora.' }, 500);
+  if (profileError) {
+    console.warn('[mark-email-verified] profile marker skipped:', profileError.message);
   }
 
   return json({ success: true });

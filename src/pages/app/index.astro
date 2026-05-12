@@ -33,12 +33,15 @@ const _client = createUserClient(Astro.locals.accessToken ?? '');
 
 try {
   const { data: profile } = await _client
-    .from('profiles').select('nome, role, birth_name, birth_date, email_verified_at').eq('id', user.id).single();
+    .from('profiles').select('*').eq('id', user.id).single();
   isAdmin = profile?.role === 'admin';
   profileData = profile;
 } catch {}
 
-const needsEmailConfirmation = !profileData?.email_verified_at;
+const needsEmailConfirmation = !(
+  profileData?.email_verified_at ||
+  user.user_metadata?.email_verified_at
+);
 
 // Busca anÃ¡lise gratuita concluÃ­da para exibir botÃ£o de download
 try {
@@ -333,9 +336,9 @@ const products = [
                 <>
                   <a
                     href={`/app/resultado/${featuredAnalysisId}`}
-                    class="inline-flex items-center justify-center rounded-xl border border-teal-400/25 bg-teal-400/10 px-5 py-2.5 text-sm font-bold text-teal-300 transition hover:bg-teal-400/15"
+                    class="inline-flex items-center justify-center rounded-xl border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-5 py-2.5 text-sm font-bold text-[#D4AF37] transition hover:bg-[#D4AF37]/15"
                   >
-                    Ver análise
+                    Ver Harmonização
                   </a>
                   <FreePDFAutoGenerator
                     client:load
