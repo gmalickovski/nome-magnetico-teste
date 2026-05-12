@@ -13,7 +13,7 @@ import { avaliarCompatibilidade } from '../../backend/numerology/harmonization';
 import { analisarNomesBebe } from '../../backend/numerology/products/nome-bebe';
 import { analisarNomesEmpresa } from '../../backend/numerology/products/nome-empresa';
 import { verificarDisponibilidadeNomes } from '../../backend/utils/availability';
-import { analisarNomesSocial } from '../../backend/numerology/products/nome-social';
+import { analisarNomeSocial, analisarNomesSocial } from '../../backend/numerology/products/nome-social';
 import type { ProductType } from '../../backend/payments/stripe';
 import type { AnalysisProductType } from '../../backend/db/analyses';
 import { notify } from '../../backend/notifications/notify';
@@ -218,10 +218,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   // Criar análise no banco
+  const analysisDisplayName =
+    product_type === 'nome_social' && nome_social_principal
+      ? nome_social_principal.trim()
+      : nome_completo;
+
   const analysis = await createAnalysis({
     userId: user.id,
     productType: product_type as AnalysisProductType,
-    nomeCompleto: nome_completo,
+    nomeCompleto: analysisDisplayName,
     dataNascimento: data_nascimento,
     isFree: isGratuita,
   });
@@ -379,16 +384,21 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
         if (nome_social_principal) {
           const principalNormalizado = nome_social_principal.trim().toLowerCase();
-          const nomeEscolhido = resultado.nomesCandidatos.find(
-            candidato => candidato.nomeCompleto.trim().toLowerCase() === principalNormalizado
-          );
+          const nomeEscolhido =
+            resultado.nomesCandidatos.find(
+              candidato => candidato.nomeCompleto.trim().toLowerCase() === principalNormalizado
+            ) ?? analisarNomeSocial(nome_social_principal, data_nascimento, 'usuario');
 
-          if (nomeEscolhido) {
-            resultado.melhorNome = nomeEscolhido;
-            resultado.top3 = resultado.nomesCandidatos
-              .filter(candidato => candidato.nomeCompleto.trim().toLowerCase() !== principalNormalizado)
-              .slice(0, 3);
-          }
+          resultado.melhorNome = nomeEscolhido;
+          resultado.nomesCandidatos = [
+            nomeEscolhido,
+            ...resultado.nomesCandidatos.filter(
+              candidato => candidato.nomeCompleto.trim().toLowerCase() !== principalNormalizado
+            ),
+          ];
+          resultado.top3 = resultado.nomesCandidatos
+            .filter(candidato => candidato.nomeCompleto.trim().toLowerCase() !== principalNormalizado)
+            .slice(0, 3);
         }
 
         const melhor = resultado.melhorNome;
@@ -405,7 +415,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const freqMapSocial = melhor ? mapearFrequencias(melhor.nomeCompleto) : {};
 
         await updateAnalysis(analysis.id, {
-          frequencias_numeros: { ranking: resultado, frequencias: freqMapSocial } as unknown,
+          frequencias_numeros: {
+            ranking: resultado,
+            frequencias: freqMapSocial,
+            selectedNomeSocial: nome_social_principal ? melhor?.nomeCompleto ?? nome_social_principal : null,
+          } as unknown,
           numero_expressao:    melhor?.expressao    ?? null,
           numero_destino:      resultado.destino,
           numero_motivacao:    melhor?.motivacao    ?? null,

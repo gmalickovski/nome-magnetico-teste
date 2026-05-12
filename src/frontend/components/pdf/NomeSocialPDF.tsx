@@ -226,12 +226,21 @@ function compatLabel(c: string): string {
   return c === 'total' ? 'Total' : c === 'complementar' ? 'Complementar' : c === 'aceitavel' ? 'Aceitável' : 'Incompatível';
 }
 
+function extractSelectedSocialName(text?: string | null): string | null {
+  if (!text) return null;
+  const match = text.match(/^#\s*Relatorio do Nome Social:\s*(.+)$/im);
+  return match?.[1]?.trim() || null;
+}
+
 export function NomeSocialPDF({ analysis, magneticNames, userName }: ProductPDFProps) {
   const logoSrc = loadLogoSrc();
   const freqData = analysis.frequencias_numeros as any;
+  const selectedNomeSocial =
+    freqData?.selectedNomeSocial ??
+    extractSelectedSocialName(analysis.analise_texto);
   // Para o novo fluxo, exibir o nome social escolhido (não o nome de nascimento)
-  const nomeParaExibir = freqData?.ranking?.melhorNome?.nomeCompleto ?? analysis.nome_completo;
-  const nomeNascimento = analysis.nome_completo;
+  const nomeParaExibir = selectedNomeSocial ?? freqData?.ranking?.melhorNome?.nomeCompleto ?? analysis.nome_completo;
+  const nomeNascimento = freqData?.ranking?.nomeNascimento ?? analysis.nome_completo;
   const dataNascimento = formatDate(
     freqData?.ranking?.dataNascimento ?? analysis.data_nascimento
   );
