@@ -63,8 +63,12 @@ const {
   canGenerateCandidateReports = false,
 } = Astro.props;
 
-const nossasSugestoes = ((rankingSocial?.nomesCandidatos ?? []) as any[]).filter((c: any) => c.origemSugerida === 'ia');
-const suasSugestoes   = ((rankingSocial?.nomesCandidatos ?? []) as any[]).filter((c: any) => c.origemSugerida === 'usuario');
+const nomeOuroNormalizado = (rankingSocial?.melhorNome?.nomeCompleto ?? '').trim().toLowerCase();
+const candidatosSemNomeOuro = ((rankingSocial?.nomesCandidatos ?? []) as any[]).filter((c: any) => (
+  c.nomeCompleto?.trim().toLowerCase() !== nomeOuroNormalizado
+));
+const nossasSugestoes = candidatosSemNomeOuro.filter((c: any) => c.origemSugerida === 'ia');
+const suasSugestoes   = candidatosSemNomeOuro.filter((c: any) => c.origemSugerida === 'usuario');
 
 function formatDateForAnalyze(value?: string | null): string {
   if (!value) return '';
@@ -807,6 +811,7 @@ const dimSublabels: Record<TipKey, string> = {
               nome_completo: nomeNasc,
               data_nascimento: dataNasc,
               nomes_candidatos: [nome],
+              nome_social_principal: nome,
             }),
           });
           const data = await res.json();

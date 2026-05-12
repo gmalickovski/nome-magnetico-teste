@@ -45,6 +45,7 @@ const schema = z.object({
   objetivo_apresentacao: z.string().max(500).optional(),
   vibracoes_desejadas: z.string().max(300).optional(),
   contexto_uso: z.string().optional(),
+  nome_social_principal: z.string().min(2).max(150).optional(),
   // flag de modo nome_bebe: indica que o nome já foi registrado em cartório
   nome_ja_escolhido: z.boolean().optional(),
   // análise gratuita (uma por usuário, sem subscription)
@@ -101,6 +102,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     data_fundacao, ramo_atividade, descricao_negocio,
     nome_socio2, data_nascimento_socio2,
     objetivo_apresentacao, vibracoes_desejadas, contexto_uso,
+    nome_social_principal,
     nome_ja_escolhido,
     is_free,
   } = parsed.data;
@@ -327,6 +329,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
           data_nascimento,
           genero_preferido
         );
+
+        if (nome_social_principal) {
+          const principalNormalizado = nome_social_principal.trim().toLowerCase();
+          const nomeEscolhido = resultado.nomesCandidatos.find(
+            candidato => candidato.nomeCompleto.trim().toLowerCase() === principalNormalizado
+          );
+
+          if (nomeEscolhido) {
+            resultado.melhorNome = nomeEscolhido;
+            resultado.top3 = resultado.nomesCandidatos
+              .filter(candidato => candidato.nomeCompleto.trim().toLowerCase() !== principalNormalizado)
+              .slice(0, 3);
+          }
+        }
 
         const melhor = resultado.melhorNome;
         marketingStats = {
