@@ -257,8 +257,8 @@ const products = [
     {showCheckoutSuccess && (
       <script define:vars={{ _checkoutProduct: checkoutProduct }}>
         (function () {
-          if (window.umami) {
-            window.umami.track('purchase_complete', _checkoutProduct ? { produto: _checkoutProduct } : undefined);
+          if (typeof window.gtag === 'function') {
+            window.gtag('event', 'purchase_complete', _checkoutProduct ? { produto: _checkoutProduct } : undefined);
           }
           var banner = document.getElementById('checkout-success-banner');
           var dismissBtn = document.getElementById('dismiss-success-banner');

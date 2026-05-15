@@ -8,6 +8,7 @@ const SUBJECT_OPTIONS = [
   'Primeiros Passos',
   'Assinatura e Planos',
   'Conta e Segurança',
+  'Privacidade e Exclusão de Conta',
   'Solução de Problemas',
 ];
 

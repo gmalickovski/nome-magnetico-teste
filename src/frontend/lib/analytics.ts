@@ -1,9 +1,8 @@
 /**
- * Wrapper tipado para umami.track — eventos customizados do Nome Magnético.
- * O script do Umami é carregado via BaseLayout.astro.
+ * Wrapper tipado para eventos customizados do Nome Magnetico no GA4.
  */
 
-type UmamiEvent =
+type AnalyticsEvent =
   | 'cta_hero_click'
   | 'cta_produto_click'
   | 'cta_nome_social_hero'
@@ -24,6 +23,10 @@ type UmamiEvent =
   | 'upsell_view'
   | 'cta_pdf_download_upsell_nome_social'
   | 'cta_resultado_gratis_upsell_contextual'
+  | 'cta_resultado_gratis_upsell_excelente'
+  | 'cta_resultado_gratis_upsell_excelente_melhorias'
+  | 'cta_resultado_gratis_upsell_aceitavel'
+  | 'cta_resultado_gratis_upsell'
   | 'analise_gratis_submit'
   | 'analise_resultado_cta_click'
   | 'calculadora_submit'
@@ -42,10 +45,18 @@ interface EventData {
   tempo_segundos?: number;
   origem?: string;
   erro?: string;
+  [key: string]: unknown;
 }
 
-export function track(event: UmamiEvent, data?: EventData): void {
-  if (typeof window !== 'undefined' && (window as unknown as { umami?: { track: (e: string, d?: unknown) => void } }).umami) {
-    (window as unknown as { umami: { track: (e: string, d?: unknown) => void } }).umami.track(event, data);
+export function track(event: AnalyticsEvent, data?: EventData): void {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', event, data);
+  }
+}
+
+declare global {
+  interface Window {
+    gtag?: (command: string, action: string | Date, params?: Record<string, unknown>) => void;
+    dataLayer?: unknown[];
   }
 }

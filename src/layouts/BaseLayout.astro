@@ -99,7 +99,7 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
     <!-- Performance: Preconnect + DNS prefetch (Core Web Vitals 2026) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://analytics.studiomlk.com.br" />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
     <!-- DNS prefetch para serviços externos — reduz latência de lookup -->
     <link rel="dns-prefetch" href="https://js.stripe.com" />
     <link rel="dns-prefetch" href="https://bhxneaeuhybtucmbmpvg.supabase.co" />
@@ -117,8 +117,32 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
         rel="stylesheet"
       />
     </noscript>
-    <!-- Analytics (Umami) — defer para não bloquear INP -->
-    <script defer src="https://analytics.studiomlk.com.br/script.js" data-website-id="15b0df31-1cc8-4464-a3f7-89fd82c25bcf"></script>
+    <!-- Google Analytics 4: carregado somente apos consentimento explicito. -->
+    <script is:inline>
+      function loadGA4() {
+        try {
+          if (localStorage.getItem('nm-cookie-consent') !== 'all') return;
+          if (document.getElementById('ga4-script')) return;
+
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
+
+          const script = document.createElement('script');
+          script.id = 'ga4-script';
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-HKWP55XDYY';
+          document.head.appendChild(script);
+
+          window.gtag('js', new Date());
+          window.gtag('config', 'G-HKWP55XDYY');
+        } catch {
+          // Falha de storage nao deve quebrar a pagina.
+        }
+      }
+
+      loadGA4();
+      window.addEventListener('consentGranted', loadGA4);
+    </script>
     <slot name="head" />
   </head>
   <body class:list={['bg-[#1a1a1a] text-gray-200 min-h-screen font-inter antialiased', { 'has-bottom-nav': hasBottomNav }]}>

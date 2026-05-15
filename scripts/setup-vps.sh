@@ -18,8 +18,8 @@ echo "-> Atualizando pacotes do sistema..."
 apt-get update && apt-get upgrade -y
 
 # 2. Instalar dependências básicas
-echo "-> Instalando dependências (curl, git, build-essential)..."
-apt-get install -y curl git build-essential rsync nginx
+echo "-> Instalando dependências (curl, git, build-essential, ufw)..."
+apt-get install -y curl git build-essential rsync nginx ufw
 
 # 3. Instalar Node.js
 echo "-> Instalando Node.js v${NODE_VERSION}..."
@@ -49,4 +49,5 @@ echo "2. Inicialize o repositório Git na sua máquina, se ainda não o fez, e s
 echo "   (Siga as instruções do arquivo DEPLOY.md)"
 echo "3. Crie os actions secrets no GitHub (HOST, USERNAME, SSH_PRIVATE_KEY)."
 echo "4. Rode a pipeline do GitHub Actions para fazer o primeiro deploy!"
+echo "5. Depois de ativar o proxy do Cloudflare, rode scripts/configure-cloudflare-origin.sh como root."
 echo "================================================="

@@ -14,6 +14,10 @@ export function CookieBanner() {
   function accept(type: 'all' | 'essential') {
     localStorage.setItem(CONSENT_KEY, type);
     setVisible(false);
+
+    if (type === 'all') {
+      window.dispatchEvent(new Event('consentGranted'));
+    }
   }
 
   if (!visible) return null;
@@ -34,7 +38,7 @@ export function CookieBanner() {
       >
         <div className="flex-1 min-w-0">
           <p className="text-[#e5e2e1] text-sm leading-relaxed">
-            Usamos cookies essenciais para o funcionamento do site e cookies analíticos (Umami, auto-hospedado) para entender como ele é usado — sem rastrear dados pessoais.{' '}
+            Usamos cookies essenciais para o funcionamento do site e cookies do Google Analytics para entender nosso tráfego e melhorar campanhas. O GA4 não registra nem armazena IPs individuais, e os scripts analíticos só rodam com sua permissão.{' '}
             <a href="/privacidade" className="text-[#D4AF37] hover:text-[#f2ca50] underline underline-offset-2 transition-colors">
               Política de Privacidade
             </a>

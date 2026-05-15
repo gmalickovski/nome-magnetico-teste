@@ -224,7 +224,7 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
     </div>
     <a
       href="/nome-social"
-      data-umami-event="cta_resultado_gratis_upsell_contextual"
+      data-ga4-event="cta_resultado_gratis_upsell_contextual"
       class="inline-flex items-center justify-center rounded-full bg-[#D4AF37] px-7 py-3 text-sm font-bold text-[#131313] transition-all duration-300 hover:bg-[#f2ca50] hover:scale-[1.02] active:scale-[0.98]"
     >
       Ver Nome Social Completo
@@ -242,8 +242,9 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
         if (!entry.isIntersecting || fired) return;
         fired = true;
         observer.disconnect();
-        const umami = (window as unknown as { umami?: { track: (event: string, data?: unknown) => void } }).umami;
-        umami?.track('upsell_view', { produto: 'nome_social', origem: 'resultado_gratis_contextual' });
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'upsell_view', { produto: 'nome_social', origem: 'resultado_gratis_contextual' });
+        }
       });
     }, { threshold: 0.45 });
     observer.observe(section);
@@ -474,7 +475,7 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
         </p>
         <a
           href="/nome-social"
-          data-umami-event="cta_resultado_gratis_upsell_excelente"
+          data-ga4-event="cta_resultado_gratis_upsell_excelente"
           class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold px-10 py-4 rounded-full text-base hover:bg-[#f2ca50] transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/20"
         >
           ✦ Potencializar Ainda Mais Meu Nome
@@ -543,7 +544,7 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
         </p>
         <a
           href="/nome-social"
-          data-umami-event="cta_resultado_gratis_upsell_excelente_melhorias"
+          data-ga4-event="cta_resultado_gratis_upsell_excelente_melhorias"
           class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold px-10 py-4 rounded-full text-base hover:bg-[#f2ca50] transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/20"
         >
           ✦ Refinar o Que Ainda Pode Melhorar
@@ -612,7 +613,7 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
         </p>
         <a
           href="/nome-social"
-          data-umami-event="cta_resultado_gratis_upsell_aceitavel"
+          data-ga4-event="cta_resultado_gratis_upsell_aceitavel"
           class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold px-10 py-4 rounded-full text-base hover:bg-[#f2ca50] transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/20"
         >
           ✦ Elevar Meu Nome ao Nível Excelente
@@ -672,7 +673,7 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
         )}
         <a
           href="/nome-social"
-          data-umami-event="cta_resultado_gratis_upsell"
+          data-ga4-event="cta_resultado_gratis_upsell"
           class="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold px-10 py-4 rounded-full text-base hover:bg-[#f2ca50] transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/20"
         >
           ✦ Quero meu Nome Social Harmonizado
@@ -683,3 +684,15 @@ const temProblemas = bloqueios.length > 0 || (debitosRaw && debitosRaw.length > 
   )}
 
 </section>
+
+<script>
+  (() => {
+    document.querySelectorAll<HTMLElement>('[data-ga4-event]').forEach((element) => {
+      element.addEventListener('click', () => {
+        const eventName = element.dataset.ga4Event;
+        if (!eventName || typeof window.gtag !== 'function') return;
+        window.gtag('event', eventName, { produto: 'nome_social', origem: 'resultado_gratis' });
+      });
+    });
+  })();
+</script>
