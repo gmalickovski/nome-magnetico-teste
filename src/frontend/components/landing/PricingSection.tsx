@@ -170,6 +170,13 @@ export function PricingSection({
       product &&
       (product === 'nome_social' || product === 'nome_bebe' || product === 'nome_empresa')
     ) {
+      const priceInfo = resolvedPrices[product] ?? PRICE_UNAVAILABLE;
+      track('checkout_start', {
+        produto: product,
+        preco: priceInfo.cents / 100,
+        promocao: promotion?.name ?? null,
+        origem: 'pricing_section_auto_open',
+      });
       setCheckoutProduct(product);
       params.delete('checkout');
       window.history.replaceState(
@@ -192,6 +199,13 @@ export function PricingSection({
 
   function handleBuy(planId: ProductType) {
     if (isLoggedIn) {
+      const priceInfo = resolvedPrices[planId] ?? PRICE_UNAVAILABLE;
+      track('checkout_start', {
+        produto: planId,
+        preco: priceInfo.cents / 100,
+        promocao: promotion?.name ?? null,
+        origem: 'pricing_section',
+      });
       setCheckoutProduct(planId);
     } else {
       const returnUrl = `${window.location.pathname}?checkout=${planId}`;
@@ -202,6 +216,14 @@ export function PricingSection({
   // Chamado pelo CheckoutModal → redireciona para Stripe (cartão)
   async function handleTriggerCard(type: ProductType, couponCode?: string) {
     try {
+      const priceInfo = resolvedPrices[type] ?? PRICE_UNAVAILABLE;
+      track('checkout_redirect_start', {
+        produto: type,
+        preco: priceInfo.cents / 100,
+        promocao: promotion?.name ?? null,
+        codigo_cupom: couponCode,
+        origem: 'pricing_section',
+      });
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -211,6 +233,11 @@ export function PricingSection({
       if (!res.ok || !data.url) throw new Error(data.error ?? 'Erro ao criar checkout');
       window.location.href = data.url;
     } catch (err) {
+      track('checkout_failed', {
+        produto: type,
+        erro: err instanceof Error ? err.message : 'Erro ao criar checkout',
+        origem: 'pricing_section',
+      });
       console.error('[PricingSection] Erro ao criar checkout:', err);
     }
   }

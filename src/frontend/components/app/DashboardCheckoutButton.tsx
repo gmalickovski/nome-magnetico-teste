@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ActivePromotion, PriceInfo } from '../../../backend/payments/prices';
 import { CheckoutModal } from '../purchase/CheckoutModal';
+import { track } from '../../lib/analytics';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
@@ -24,13 +25,29 @@ export function DashboardCheckoutButton({
   const [open, setOpen] = useState(false);
 
   async function handleTriggerCard(type: ProductType, couponCode?: string) {
+    track('checkout_redirect_start', {
+      produto: type,
+      preco: priceInfo.cents / 100,
+      promocao: promotion?.name ?? null,
+      codigo_cupom: couponCode,
+      origem: 'dashboard',
+    });
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ product_type: type, couponCode }),
     });
     const data = await res.json();
-    if (res.ok && data.url) window.location.href = data.url;
+    if (res.ok && data.url) {
+      window.location.href = data.url;
+      return;
+    }
+
+    track('checkout_failed', {
+      produto: type,
+      erro: data.error ?? 'Erro ao criar checkout',
+      origem: 'dashboard',
+    });
   }
 
   const defaultClass = variant === 'primary'
@@ -39,7 +56,19 @@ export function DashboardCheckoutButton({
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className ?? defaultClass}>
+      <button
+        type="button"
+        onClick={() => {
+          track('checkout_start', {
+            produto: product,
+            preco: priceInfo.cents / 100,
+            promocao: promotion?.name ?? null,
+            origem: 'dashboard',
+          });
+          setOpen(true);
+        }}
+        className={className ?? defaultClass}
+      >
         {label}
       </button>
 

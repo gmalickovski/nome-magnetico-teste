@@ -1,4 +1,5 @@
 import React from 'react';
+import { track } from '../../lib/analytics';
 
 const products = [
   {
@@ -76,6 +77,10 @@ export function ProductsSection() {
             <a
               key={product.id}
               href={product.href}
+              onClick={() => track('cta_produto_click', {
+                produto: product.id as 'nome_social' | 'nome_bebe' | 'nome_empresa',
+                posicao: 'products_section',
+              })}
               className={`relative rounded-2xl p-8 flex flex-col cursor-pointer group transition-all duration-500 hover:-translate-y-2 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[#D4AF37]/20 ${
                 product.highlight
                   ? 'bg-white/5 border-2 border-[#D4AF37]/50'

@@ -147,10 +147,11 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
       const effectiveCoupon = couponCode || (promotion && appliesToThis ? promotion.stripePromoCode : null) || undefined;
 
       const priceInfo = prices[type] ?? FALLBACK_PRICES[type];
-      track('checkout_start', {
+      track('checkout_redirect_start', {
         produto: type,
         preco: priceInfo.cents / 100,
         promocao: promotion?.name ?? null,
+        origem: 'comprar',
       });
 
       const res = await fetch('/api/create-checkout', {
@@ -306,7 +307,15 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
             aria-disabled={isLoadingThis}
             onClick={(event) => {
               event.preventDefault();
-              if (!isLoadingThis) setModalProduct(type);
+              if (!isLoadingThis) {
+                track('checkout_start', {
+                  produto: type,
+                  preco: priceInfo.cents / 100,
+                  promocao: promotion?.name ?? null,
+                  origem: 'comprar',
+                });
+                setModalProduct(type);
+              }
             }}
             className={`block text-center w-full font-bold py-3.5 rounded-xl transition-all duration-300 ${
               isHighlighted
@@ -319,6 +328,12 @@ export function CheckoutFlow({ productType, isLoggedIn, isOwned, paymentLinks, h
         ) : (
           <a
             href={paymentLinks[type]}
+            onClick={() => track('checkout_redirect_start', {
+              produto: type,
+              preco: priceInfo.cents / 100,
+              promocao: promotion?.name ?? null,
+              origem: 'comprar_publico',
+            })}
             className={`block text-center font-bold py-3.5 rounded-xl transition-all duration-300 ${
               isHighlighted
                 ? 'bg-[#D4AF37] text-black hover:bg-yellow-300 hover:scale-105 shadow-lg shadow-yellow-500/20'

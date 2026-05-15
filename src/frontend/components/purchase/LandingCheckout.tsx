@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
 import { CheckoutModal } from './CheckoutModal';
+import { track } from '../../lib/analytics';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 
@@ -30,6 +31,12 @@ export function LandingCheckout({
     if (!isLoggedIn) return;
     const params = new URLSearchParams(window.location.search);
     if (params.get('checkout') === product) {
+      track('checkout_start', {
+        produto: product,
+        preco: priceInfo.cents / 100,
+        promocao: promotion?.name ?? null,
+        origem: 'landing_auto_open',
+      });
       setModalOpen(true);
       params.delete('checkout');
       window.history.replaceState(
@@ -42,6 +49,12 @@ export function LandingCheckout({
 
   function handleClick() {
     if (isLoggedIn) {
+      track('checkout_start', {
+        produto: product,
+        preco: priceInfo.cents / 100,
+        promocao: promotion?.name ?? null,
+        origem: 'landing',
+      });
       setModalOpen(true);
     } else {
       // Redireciona para cadastro com URL de retorno codificada
@@ -53,6 +66,13 @@ export function LandingCheckout({
   // Chamado pelo CheckoutModal quando o usuário escolhe Cartão de Crédito
   async function handleTriggerCard(type: ProductType, couponCode?: string) {
     try {
+      track('checkout_redirect_start', {
+        produto: type,
+        preco: priceInfo.cents / 100,
+        promocao: promotion?.name ?? null,
+        codigo_cupom: couponCode,
+        origem: 'landing',
+      });
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,6 +82,11 @@ export function LandingCheckout({
       if (!res.ok || !data.url) throw new Error(data.error ?? 'Erro ao criar checkout');
       window.location.href = data.url;
     } catch (err) {
+      track('checkout_failed', {
+        produto: type,
+        erro: err instanceof Error ? err.message : 'Erro ao criar checkout',
+        origem: 'landing',
+      });
       console.error('[LandingCheckout] Erro ao criar checkout:', err);
     }
   }

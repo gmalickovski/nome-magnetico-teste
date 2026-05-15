@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { PriceInfo, ActivePromotion } from '../../../backend/payments/prices';
+import { track } from '../../lib/analytics';
 
 type ProductType = 'nome_social' | 'nome_bebe' | 'nome_empresa';
 type Step = 'method' | 'card-loading' | 'pix-loading' | 'pix-qr' | 'pix-success';
@@ -196,6 +197,11 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
       if (data.valid) {
         const result = data as CouponResult;
         setCouponResult(result);
+        track('coupon_applied', {
+          produto: productType,
+          codigo_cupom: code,
+          desconto: (result.originalCents - result.discountedCents) / 100,
+        });
         return { valid: true, data: result };
       } else {
         setCouponError((data as { valid: false; error: string }).error);
@@ -217,6 +223,11 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
     }
     setStep('pix-loading');
     setPixError('');
+    track('pix_start', {
+      produto: productType,
+      preco: priceInfo.cents / 100,
+      codigo_cupom: couponCode.trim() || undefined,
+    });
     try {
       const res = await fetch('/api/create-pix', {
         method: 'POST',
@@ -251,7 +262,12 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
       });
       setStep('pix-qr');
     } catch (err) {
-      setPixError(err instanceof Error ? err.message : 'Erro ao gerar PIX');
+      const message = err instanceof Error ? err.message : 'Erro ao gerar PIX';
+      track('pix_failed', {
+        produto: productType,
+        erro: message,
+      });
+      setPixError(message);
       setStep('method');
     }
   }
@@ -263,6 +279,11 @@ export function CheckoutModal({ productType, priceInfo, promotion, onClose, onTr
     }
     setStep('card-loading');
     const effectiveCoupon = couponCode.trim() || undefined;
+    track('checkout_redirect_start', {
+      produto: productType,
+      preco: priceInfo.cents / 100,
+      codigo_cupom: effectiveCoupon,
+    });
     onTriggerCard(productType, effectiveCoupon);
   }
 

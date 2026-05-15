@@ -163,6 +163,10 @@ export function CalculadoraGratis() {
         <div className="rounded-2xl overflow-hidden">
           <a
             href={result.cta_url}
+            onClick={() => track('analise_resultado_cta_click', {
+              produto: 'nome_social',
+              origem: 'calculadora_gratis',
+            })}
             className="block w-full text-center bg-[#D4AF37] text-[#1A1A1A] font-bold py-4 hover:bg-[#f2ca50] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-[#D4AF37]/25 text-base"
           >
             {temBloqueios
