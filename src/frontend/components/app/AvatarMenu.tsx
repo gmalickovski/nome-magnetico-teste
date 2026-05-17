@@ -1,20 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { supabaseBrowser } from '../../lib/supabase-browser';
-import { DateInput } from '../ui/DateInput';
+import { SettingsModal, type ProfileForm } from './SettingsModal';
 
 interface AvatarMenuProps {
   nome: string;
 }
-
-type ProfileForm = {
-  nome: string;
-  email: string;
-  phone: string;
-  birth_name: string;
-  birth_date: string;
-  gender: string;
-};
 
 const EMPTY_PROFILE: ProfileForm = {
   nome: '',
@@ -29,8 +20,6 @@ export default function AvatarMenu({ nome }: AvatarMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profile, setProfile] = useState<ProfileForm>(EMPTY_PROFILE);
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -153,31 +142,6 @@ export default function AvatarMenu({ nome }: AvatarMenuProps) {
     }
   }
 
-  async function savePassword(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
-    setError('');
-    try {
-      if (!emailConfirmed) {
-        throw new Error('Confirme seu e-mail antes de alterar a senha.');
-      }
-      if (password.length < 8) throw new Error('A senha deve ter pelo menos 8 caracteres.');
-      if (password !== passwordConfirm) throw new Error('As senhas nao coincidem.');
-
-      const { error: updateError } = await supabaseBrowser.auth.updateUser({ password });
-      if (updateError) throw updateError;
-
-      setPassword('');
-      setPasswordConfirm('');
-      setMessage('Senha atualizada.');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar senha.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   function toggleMenu() {
     if (isOpen) {
       setIsOpen(false);
@@ -203,127 +167,22 @@ export default function AvatarMenu({ nome }: AvatarMenuProps) {
     }
   }
 
-  const settingsModal = mounted && settingsOpen ? createPortal(
-    <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
-      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-[#D4AF37]/20 bg-[#151515] p-5 shadow-2xl shadow-black/60 sm:p-6">
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#D4AF37]">Conta</p>
-            <h2 className="mt-1 font-cinzel text-2xl font-bold text-[#e5e2e1]">Configuracoes</h2>
-          </div>
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(false)}
-            className="rounded-full p-2 text-gray-500 transition hover:bg-white/5 hover:text-[#e5e2e1]"
-            aria-label="Fechar configuracoes"
-          >
-            x
-          </button>
-        </div>
-
-        {(message || error) && (
-          <div className={`mb-5 rounded-2xl p-3 text-sm ring-1 ${error ? 'bg-red-500/10 text-red-300 ring-red-500/25' : 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/25'}`}>
-            {error || message}
-          </div>
-        )}
-
-        <div className="grid gap-4 lg:grid-cols-2">
-          <form onSubmit={saveAccount} className="rounded-2xl bg-[#202020]/80 p-4 ring-1 ring-white/10">
-            <h3 className="mb-4 font-cinzel text-lg font-bold text-[#D4AF37]">Dados de cadastro</h3>
-            <label className="mb-2 block text-sm font-medium text-gray-300">Nome</label>
-            <input
-              value={profile.nome}
-              onChange={e => setProfile(prev => ({ ...prev, nome: e.target.value }))}
-              className="input-dark mb-4 w-full"
-              required
-            />
-            <label className="mb-2 block text-sm font-medium text-gray-300">Telefone</label>
-            <input
-              value={profile.phone}
-              onChange={e => setProfile(prev => ({ ...prev, phone: e.target.value }))}
-              className="input-dark mb-4 w-full"
-              placeholder="Opcional"
-            />
-            <label className="mb-2 block text-sm font-medium text-gray-500">E-mail</label>
-            <input value={profile.email} className="input-dark mb-5 w-full opacity-70" disabled />
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3 disabled:opacity-60">
-              Salvar cadastro
-            </button>
-          </form>
-
-          <form onSubmit={saveBirthData} className="rounded-2xl bg-[#202020]/80 p-4 ring-1 ring-[#D4AF37]/15">
-            <h3 className="mb-4 font-cinzel text-lg font-bold text-[#D4AF37]">Dados de analise</h3>
-            <label className="mb-2 block text-sm font-medium text-gray-300">Nome completo de nascimento</label>
-            <input
-              value={profile.birth_name}
-              onChange={e => setProfile(prev => ({ ...prev, birth_name: e.target.value }))}
-              className="input-dark mb-4 w-full"
-              required
-            />
-            <label className="mb-2 block text-sm font-medium text-gray-300">Data de nascimento</label>
-            <DateInput
-              value={profile.birth_date}
-              onChangeValue={value => setProfile(prev => ({ ...prev, birth_date: value }))}
-              className="input-dark mb-4 w-full"
-              required
-            />
-            <label className="mb-2 block text-sm font-medium text-gray-300">Genero</label>
-            <select
-              value={profile.gender}
-              onChange={e => setProfile(prev => ({ ...prev, gender: e.target.value }))}
-              className="input-dark mb-5 w-full"
-            >
-              <option value="">Nao informar</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Feminino">Feminino</option>
-              <option value="Neutro">Neutro</option>
-            </select>
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3 disabled:opacity-60">
-              Salvar dados de analise
-            </button>
-          </form>
-        </div>
-
-        <form onSubmit={savePassword} className="mt-4 rounded-2xl bg-[#202020]/80 p-4 ring-1 ring-white/10">
-          <h3 className="mb-4 font-cinzel text-lg font-bold text-[#D4AF37]">Alterar senha</h3>
-          {!emailConfirmed && (
-            <div className="mb-4 rounded-2xl bg-[#D4AF37]/10 p-3 text-sm leading-relaxed text-[#D4AF37] ring-1 ring-[#D4AF37]/25">
-              Confirme seu e-mail para liberar a alteracao de senha.
-            </div>
-          )}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">Nova senha</label>
-              <input
-                type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="input-dark w-full"
-                  placeholder="Minimo 8 caracteres"
-                  autoComplete="new-password"
-                  disabled={!emailConfirmed}
-                />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">Confirmar senha</label>
-              <input
-                type="password"
-                  value={passwordConfirm}
-                  onChange={e => setPasswordConfirm(e.target.value)}
-                  className="input-dark w-full"
-                  placeholder="Repita a nova senha"
-                  autoComplete="new-password"
-                  disabled={!emailConfirmed}
-                />
-            </div>
-          </div>
-          <button type="submit" disabled={loading || !emailConfirmed} className="mt-5 rounded-full border border-[#D4AF37]/50 px-5 py-3 text-sm font-bold text-[#D4AF37] transition hover:bg-[#D4AF37]/10 disabled:opacity-60">
-            Atualizar senha
-          </button>
-        </form>
-      </div>
-    </div>,
-    document.body
+  const settingsModal = mounted && settingsOpen ? (
+    <SettingsModal
+      open={settingsOpen}
+      onClose={() => setSettingsOpen(false)}
+      profile={profile}
+      setProfile={setProfile}
+      emailConfirmed={emailConfirmed}
+      message={message}
+      error={error}
+      setMessage={setMessage}
+      setError={setError}
+      loading={loading}
+      setLoading={setLoading}
+      saveAccount={saveAccount}
+      saveBirthData={saveBirthData}
+    />
   ) : null;
 
   const accountMenu = mounted && isOpen ? createPortal(
