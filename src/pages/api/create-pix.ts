@@ -9,6 +9,7 @@ import {
   validateHqAccessCoupon,
 } from '../../backend/payments/prices';
 import type { ProductType } from '../../backend/payments/stripe';
+import { logError } from '../../backend/utils/error-logger';
 
 const schema = z.object({
   product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']),
@@ -190,6 +191,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
     console.error('[create-pix] Erro:', detail);
+
+    // Registra erro crítico de checkout PIX no monitor
+    await logError({
+      type: 'checkout_pix',
+      severity: 'critical',
+      userId: user?.id,
+      message: detail,
+      details: { provider: 'asaas' },
+    });
+
     return new Response(
       JSON.stringify({ error: 'Erro ao gerar cobrança PIX. Tente novamente.', detail }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

@@ -17,6 +17,7 @@ import { getArquetipo } from '../numerology/archetypes';
 import { calcularTodosTriangulos, detectarBloqueios } from '../numerology/triangle';
 import { detectarLicoesCarmicas, detectarTendenciasOcultas, calcularDebitosCarmicos } from '../numerology/karmic';
 import { calcularCincoNumeros } from '../numerology/numbers';
+import { logError } from '../utils/error-logger';
 
 // ================================================================
 // HELPER INTERNO
@@ -88,9 +89,29 @@ async function runWithGuard(
         }
       }
 
-      if (message.includes('Loop Guard')) throw err;
+      if (message.includes('Loop Guard')) {
+        await logError({
+          type: 'ai_loop',
+          severity: 'error',
+          userId,
+          analysisId,
+          message,
+          details: { task, provider, model, attempt },
+        });
+        throw err;
+      }
       console.warn(`[Brain] Tentativa ${attempt} falhou: ${message}`);
-      if (attempt === 3) throw new Error(`${task} falhou após 3 tentativas: ${message}`);
+      if (attempt === 3) {
+        await logError({
+          type: 'ai_timeout',
+          severity: 'critical',
+          userId,
+          analysisId,
+          message: `${task} falhou após 3 tentativas: ${message}`,
+          details: { task, provider, model },
+        });
+        throw new Error(`${task} falhou após 3 tentativas: ${message}`);
+      }
     }
   }
 

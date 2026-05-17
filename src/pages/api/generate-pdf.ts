@@ -6,6 +6,7 @@ import { NomeSocialPDF } from '../../frontend/components/pdf/NomeSocialPDF';
 import { NomeAtualPDF } from '../../frontend/components/pdf/NomeAtualPDF';
 import { NomeBebePDF } from '../../frontend/components/pdf/NomeBebePDF';
 import { NomeEmpresaPDF } from '../../frontend/components/pdf/NomeEmpresaPDF';
+import { logError } from '../../backend/utils/error-logger';
 
 export const GET: APIRoute = async ({ url, locals }) => {
   const user = locals.user;
@@ -38,6 +39,14 @@ export const GET: APIRoute = async ({ url, locals }) => {
   }
 
   if (analysis.status !== 'complete') {
+    await logError({
+      type: 'pdf_generation',
+      severity: 'warning',
+      userId: user.id,
+      analysisId,
+      message: `Análise ${analysisId} ainda não concluída após 45s ao tentar gerar PDF`,
+      details: { status: analysis.status, productType: analysis.product_type },
+    });
     return new Response('Análise ainda não concluída', { status: 202 });
   }
 
@@ -100,6 +109,17 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const msg = err?.message ?? String(err);
     const stack = err?.stack ?? '';
     console.error('[generate-pdf] renderToBuffer FAILED:', msg, stack);
+
+    // Registra falha de PDF no monitor do HQ
+    await logError({
+      type: 'pdf_generation',
+      severity: 'error',
+      userId: user.id,
+      analysisId: analysisId ?? undefined,
+      message: msg,
+      details: { productType, stack: stack.slice(0, 500) },
+    });
+
     return new Response(
       JSON.stringify({ error: 'Erro ao gerar PDF', detail: msg, stack }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

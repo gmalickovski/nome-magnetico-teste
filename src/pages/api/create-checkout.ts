@@ -8,6 +8,7 @@ import {
   resolveHqCouponDiscount,
   validateHqAccessCoupon,
 } from '../../backend/payments/prices';
+import { logError } from '../../backend/utils/error-logger';
 
 const schema = z.object({
   product_type: z.enum(['nome_social', 'nome_bebe', 'nome_empresa']),
@@ -193,6 +194,20 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
         );
       }
     }
+
+    // Registra erro crítico de checkout Stripe no monitor
+    await logError({
+      type: 'checkout_stripe',
+      severity: 'critical',
+      userId: user.id,
+      message: stripeErr.message ?? 'Erro desconhecido ao criar sessão Stripe',
+      details: {
+        statusCode: stripeErr.statusCode,
+        stripeType: stripeErr.type,
+        stripeCode: stripeErr.code,
+        param: stripeErr.param,
+      },
+    });
 
     return new Response(
       JSON.stringify({ error: 'Erro ao criar sessão de pagamento' }),
