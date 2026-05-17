@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { DateInput } from '../ui/DateInput';
+import { Select } from '../ui/Select';
 import { supabaseBrowser } from '../../lib/supabase-browser';
 
 export type ProfileForm = {
@@ -283,16 +284,16 @@ export function SettingsModal({
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-300">Gênero</label>
-                  <select
+                  <Select
                     value={profile.gender}
-                    onChange={e => setProfile(prev => ({ ...prev, gender: e.target.value }))}
-                    className="input-dark w-full"
-                  >
-                    <option value="">Não informar</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Feminino">Feminino</option>
-                    <option value="Neutro">Neutro</option>
-                  </select>
+                    onChange={value => setProfile(prev => ({ ...prev, gender: value }))}
+                    options={[
+                      { value: '', label: 'Não informar' },
+                      { value: 'Masculino', label: 'Masculino' },
+                      { value: 'Feminino', label: 'Feminino' },
+                      { value: 'Neutro', label: 'Neutro' },
+                    ]}
+                  />
                 </div>
                 <button type="submit" disabled={loading} className="btn-primary w-full py-3 mt-2 disabled:opacity-60">
                   {loading ? 'Salvando...' : 'Salvar Dados de Análise'}
