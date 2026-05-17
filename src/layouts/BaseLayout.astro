@@ -134,7 +134,7 @@ const chatwootToken = process.env.CHATWOOT_WEBSITE_TOKEN ?? '';
           document.head.appendChild(script);
 
           window.gtag('js', new Date());
-          window.gtag('config', 'G-HKWP55XDYY');
+          window.gtag('config', 'G-HKWP55XDYY', { 'anonymize_ip': true });
         } catch {
           // Falha de storage nao deve quebrar a pagina.
         }
