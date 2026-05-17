@@ -5,6 +5,7 @@ import { SettingsModal, type ProfileForm } from './SettingsModal';
 
 interface AvatarMenuProps {
   nome: string;
+  isAdmin?: boolean;
 }
 
 const EMPTY_PROFILE: ProfileForm = {
@@ -16,7 +17,7 @@ const EMPTY_PROFILE: ProfileForm = {
   gender: '',
 };
 
-export default function AvatarMenu({ nome }: AvatarMenuProps) {
+export default function AvatarMenu({ nome, isAdmin }: AvatarMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profile, setProfile] = useState<ProfileForm>(EMPTY_PROFILE);
@@ -182,6 +183,7 @@ export default function AvatarMenu({ nome }: AvatarMenuProps) {
       setLoading={setLoading}
       saveAccount={saveAccount}
       saveBirthData={saveBirthData}
+      isAdmin={isAdmin}
     />
   ) : null;
 
